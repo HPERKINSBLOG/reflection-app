@@ -1,0 +1,54 @@
+{
+  "version": 1,
+  "scope": "Synthetic parser fixtures; no legacy account data or provider calls",
+  "adapters": [
+    {
+      "format": "tarot-json",
+      "source": "tarot/shared/journal/exportFormats.js:183-221",
+      "fixture": "tarot-nested.json",
+      "units": ["base reading", "entry reflection", "card userReflection", "follow-up turn"],
+      "excludedFromBase": [
+        "reflections",
+        "cards[].userReflection",
+        "followUps",
+        "context",
+        "themes"
+      ],
+      "excludedFromTurn": ["journalContext"],
+      "rawScope": "selected-fields.v1"
+    },
+    {
+      "format": "patternlike-export",
+      "versions": ["0.7.0", "0.8.0"],
+      "source": "patternlike-app/apps/api/src/services/account-export.ts:425-510",
+      "fixtures": ["patternlike-0.7.0.json", "patternlike-0.8.0.json"],
+      "root": "readings.items",
+      "proseAllowlist": [],
+      "excludedRoot": ["profiles", "payments", "location", "entitlements", "credentials"]
+    },
+    {
+      "format": "reflection-import.v1",
+      "version": 1,
+      "encoding": "UTF-8 JSON",
+      "root": "records",
+      "unsafeNestedTarot": "explicit per-item rejection; use bounded raw adapter"
+    },
+    {
+      "format": "reflection-export.v1",
+      "version": 1,
+      "encoding": "UTF-8 NDJSON",
+      "root": "ExportPage per line",
+      "accountMetadata": "excluded; never imported as authority"
+    },
+    {
+      "format": "reflection-portable-chunk.v1",
+      "version": 1,
+      "purpose": "selected-unit transport only; exact manifest completeness required"
+    },
+    {
+      "format": "pixel-json",
+      "supported": false,
+      "fixture": "pixel-unsupported.json"
+    }
+  ]
+}

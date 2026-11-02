@@ -118,6 +118,8 @@ test.each(['reading-v2-development-fast-xhigh', 'reading-v2-editorial-fast-xhigh
     );
     expect(again).toEqual(summary);
   },
+  // Multiple real NTFS ACL validations per attempt; retain the ordinary non-Windows bound.
+  process.platform === 'win32' ? 90_000 : 10_000,
 );
 async function fixture(
   patch: Partial<EvaluationPermit> = {},

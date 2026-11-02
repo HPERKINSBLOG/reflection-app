@@ -4,6 +4,7 @@
  */
 import { z } from 'zod';
 import { REVISIT_LIMITS, revisitTextLength } from './revisit-policy.ts';
+import { CONTEXT_LIMITS, codePointLength } from './context-policy.ts';
 
 export const Id = z.uuid();
 export const Hash = z.string().regex(/^[a-f0-9]{64}$/);
@@ -286,16 +287,26 @@ export const Selection = z.strictObject({
   end: z.number().int().positive(),
   previewHash: Hash,
 }); // Unicode code point offsets into exact plain text, not JS UTF-16 units. max 1200 each, 3000 total.
+const ContextExcerptText = z
+  .string()
+  .refine(
+    (text) => codePointLength(text) <= CONTEXT_LIMITS.perSource,
+    'Excerpt exceeds code-point limit',
+  )
+  .meta({
+    maxLength: CONTEXT_LIMITS.perSource,
+    description: 'At most 1,200 Unicode code points. Exact text is preserved.',
+  });
 export const SelectedFragment = z.strictObject({
   ordinal: z.number().int().min(0).max(2),
   grantId: Id,
   grantRevision: Revision,
-  sourceKind: z.enum(['edition', 'reflection_revision']),
+  sourceKind: z.enum(['edition', 'reflection_revision', 'revisit_revision']),
   sourceId: Id,
   sourceRevision: Revision,
   start: z.number().int().min(0),
   end: z.number().int().positive(),
-  text: z.string().max(1200).nullable(),
+  text: ContextExcerptText.nullable(),
   textHash: Hash.nullable(),
   availability: z.enum(['retained', 'erased']),
   authorship: z.enum(['generated', 'user', 'legacy_unknown']),
@@ -684,20 +695,27 @@ export const RequestStatus = z.strictObject({
   errorCode: ErrorCode.nullable(),
   expiresAt: Instant,
 });
-export const StartRequest = z.strictObject({
-  clientIntentId: Id,
-  question: z
-    .string()
-    .min(1)
-    .max(500)
-    .refine((value) => value.trim().length > 0),
-  languageConfirmed: z.literal('en'),
-  reversals: z.boolean(),
-  permissionRevision: Revision,
-  parentEditionId: Id.nullable(),
-  selection: z.array(Selection).max(3),
-  spreadPhoto: SpreadPhoto.optional(),
-});
+export const StartRequest = z
+  .strictObject({
+    clientIntentId: Id,
+    question: z
+      .string()
+      .min(1)
+      .max(500)
+      .refine((value) => value.trim().length > 0),
+    languageConfirmed: z.literal('en'),
+    reversals: z.boolean(),
+    permissionRevision: Revision,
+    parentEditionId: Id.nullable(),
+    selection: z.array(Selection).max(3),
+    spreadPhoto: SpreadPhoto.optional(),
+    // Optional without a default: old parsed inputs keep their exact idempotency HMAC shape.
+    contextAcknowledgement: Hash.optional(),
+  })
+  .refine(
+    (value) => value.selection.length === 0 || value.contextAcknowledgement !== undefined,
+    'Context acknowledgement required',
+  );
 export const StartResponse = z.strictObject({
   requestId: Id,
   sessionId: Id,
@@ -720,6 +738,7 @@ export const Grant = z.strictObject({
       reflectionId: Id,
       revision: Revision,
     }),
+    z.strictObject({ kind: z.literal('revisit_revision'), revisitId: Id, revision: Revision }),
   ]),
 });
 
@@ -929,6 +948,68 @@ export const ExportPage = z.strictObject({
     })
     .nullable(),
 });
+export const LegacyAuthoredRecord = z.strictObject({
+  identity: ImportRecordIdentity,
+  parentIdentity: ImportRecordIdentity,
+  label: z.string().max(200),
+  text: z.string().min(1).max(10000),
+  originalTimestamp: z.string().max(200).nullable(),
+  occurredAt: Instant.nullable(),
+  originalJsonText: JsonText,
+  originalSha256: Hash,
+});
+const ImportUnitCommon = {
+  key: z.string().min(1).max(2000),
+  identity: ImportRecordIdentity,
+  parentIdentity: ImportRecordIdentity.nullable(),
+  dependencies: z
+    .array(ImportRecordIdentity.extend({ recordRevision: Revision.nullable() }))
+    .max(20480),
+  groupKey: z.string().min(1).max(2000),
+  sourcePointer: z.string().max(2000),
+};
+export const ImportUnit = z.discriminatedUnion('kind', [
+  z.strictObject({
+    ...ImportUnitCommon,
+    kind: z.literal('legacy-reading'),
+    rawScope: z.literal('selected-fields.v1'),
+    record: LegacyRecord,
+  }),
+  z.strictObject({
+    ...ImportUnitCommon,
+    kind: z.literal('legacy-authored'),
+    rawScope: z.literal('selected-fields.v1'),
+    record: LegacyAuthoredRecord,
+  }),
+  z.strictObject({
+    ...ImportUnitCommon,
+    kind: z.literal('portable'),
+    rawScope: z.literal('whole-record.v1'),
+    record: PortableRecord,
+    originalJsonText: JsonText,
+    originalSha256: Hash,
+  }),
+]);
+export const ImportChunkDocument = z.strictObject({
+  format: z.literal('reflection-portable-chunk.v1'),
+  groupId: Id,
+  manifestHash: Hash,
+  unitCount: z.number().int().min(1).max(20480),
+  items: z
+    .array(z.strictObject({ ordinal: z.number().int().min(0).max(20479), unit: ImportUnit }))
+    .min(1)
+    .max(100),
+});
+export const ImportGroupStatus = z.strictObject({
+  groupId: Id,
+  state: z.enum(['staged', 'committing', 'complete', 'failed', 'expired']),
+  manifestHash: Hash,
+  // Keyed preview acknowledgement is available only after complete server-side validation.
+  previewHash: Hash.nullable(),
+  totalItems: z.number().int().min(1).max(20480),
+  completedItems: z.number().int().min(0).max(20480),
+  nextCursor: z.string().nullable(),
+});
 export const ImportPreview = z.strictObject({
   id: Id,
   expiresAt: Instant,
@@ -961,6 +1042,11 @@ export const ImportResult = z.strictObject({
     )
     .max(100),
 });
+export const ImportGroupResultPage = z.strictObject({
+  groupId: Id,
+  items: ImportResult.shape.items,
+  nextCursor: z.string().nullable(),
+});
 export const DeletionReceipt = z.strictObject({
   receiptId: Id,
   receiptToken: Base64url,
@@ -984,6 +1070,9 @@ export const apiSchemas = {
   ExportPage,
   ImportPreview,
   ImportResult,
+  ImportGroupStatus,
+  ImportGroupResultPage,
+  ImportChunkDocument,
   DeletionReceipt,
   SessionView,
   Empty: z.strictObject({}),
@@ -1012,6 +1101,10 @@ export const apiSchemas = {
   GrantWrite: z.strictObject({ source: Grant.shape.source }),
   GrantPage: z.strictObject({ items: z.array(Grant).max(50), nextCursor: z.string().nullable() }),
   ContextPreviewWrite: z.strictObject({
+    clientIntentId: Id,
+    question: StartRequest.shape.question,
+    parentEditionId: Id.nullable(),
+    permissionRevision: Revision,
     items: z
       .array(
         z.strictObject({
@@ -1024,11 +1117,12 @@ export const apiSchemas = {
       .max(3),
   }),
   ContextPreview: z.strictObject({
+    acknowledgementHash: Hash,
     items: z
       .array(
         z.strictObject({
           selection: Selection,
-          text: z.string().max(1200),
+          text: ContextExcerptText,
           authorship: z.enum(['generated', 'user', 'legacy_unknown']),
         }),
       )
@@ -1054,6 +1148,7 @@ export const apiSchemas = {
       'tarot-json',
       'patternlike-export',
       'pixel-json',
+      'reflection-portable-chunk.v1',
     ]),
     source: ImportSource,
     recovery: ImportRecovery,
@@ -1061,6 +1156,12 @@ export const apiSchemas = {
   }),
   ImportCommit: z.strictObject({
     indices: z.array(z.number().int().min(0).max(99)).min(1).max(100),
+    previewHash: Hash,
+    confirmedRecovery: ImportRecovery,
+  }),
+  ImportGroupCommit: z.strictObject({
+    version: z.literal('import-group.v1'),
+    manifestHash: Hash,
     previewHash: Hash,
     confirmedRecovery: ImportRecovery,
   }),

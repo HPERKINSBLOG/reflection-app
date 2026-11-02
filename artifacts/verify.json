@@ -1,60 +1,85 @@
 {
   "version": 1,
-  "status": "failed",
-  "sourceDigest": "0f1851252aeec7e7ae592f1469fb3db00ff5ac6bf1981e05cf13f0f92743f8c0",
+  "status": "passed",
+  "sourceDigest": "e1afabcb66f5a95aa94be6c74824b4bd0bc998f140c520df311b03f6876872a4",
   "node": "v26.12.1",
   "platform": "win32",
-  "finishedAt": "2026-11-02T16:27:24.645Z",
-  "durationMs": 459789,
+  "finishedAt": "2026-11-02T16:55:32.724Z",
+  "durationMs": 941702,
   "deadlineMs": 1200000,
   "stages": [
     {
       "name": "format and lint",
-      "durationMs": 764,
+      "durationMs": 479,
       "status": "passed"
     },
     {
       "name": "strict TypeScript",
-      "durationMs": 16255,
+      "durationMs": 7468,
       "status": "passed"
     },
     {
       "name": "generated schema drift",
-      "durationMs": 486,
+      "durationMs": 452,
       "status": "passed"
     },
     {
       "name": "publication guard drift",
-      "durationMs": 190,
+      "durationMs": 125,
       "status": "passed"
     },
     {
       "name": "contract and reference checks",
-      "durationMs": 416,
+      "durationMs": 325,
       "status": "passed"
     },
     {
       "name": "private field coverage",
-      "durationMs": 333,
+      "durationMs": 326,
       "status": "passed"
     },
     {
       "name": "SQLite constraints",
-      "durationMs": 1813,
+      "durationMs": 1792,
       "status": "passed"
     },
     {
       "name": "OpenAPI",
-      "durationMs": 3013,
+      "durationMs": 722,
       "status": "passed"
     },
     {
       "name": "domain and verification behavior",
-      "durationMs": 436244,
-      "status": "failed"
+      "durationMs": 355696,
+      "status": "passed"
+    },
+    {
+      "name": "workerd D1 batches",
+      "durationMs": 70809,
+      "status": "passed"
+    },
+    {
+      "name": "client production build",
+      "durationMs": 505,
+      "status": "passed"
+    },
+    {
+      "name": "Worker dry-run build",
+      "durationMs": 1703,
+      "status": "passed"
+    },
+    {
+      "name": "identity and saved-reading browser journeys",
+      "durationMs": 500833,
+      "status": "passed"
+    },
+    {
+      "name": "specification package links",
+      "durationMs": 208,
+      "status": "passed"
     }
   ],
   "scope": "synthetic-local-only",
-  "applicationBrowserAcceptance": "not-passed",
+  "applicationBrowserAcceptance": "local-identity-and-saved-reading-only",
   "hostedQualification": "not-run"
 }

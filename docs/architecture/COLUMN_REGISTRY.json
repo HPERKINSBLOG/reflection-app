@@ -597,6 +597,22 @@
           "nullable": false,
           "default": null,
           "export": "current grant and captured historical metadata"
+        },
+        "revisit_id": {
+          "aadRule": null,
+          "class": "M",
+          "sqlType": "TEXT",
+          "nullable": true,
+          "default": null,
+          "export": "current grant and captured historical metadata"
+        },
+        "revisit_revision": {
+          "aadRule": null,
+          "class": "M",
+          "sqlType": "INTEGER",
+          "nullable": true,
+          "default": null,
+          "export": "current grant and captured historical metadata"
         }
       }
     },
