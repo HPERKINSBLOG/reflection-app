@@ -1,0 +1,92 @@
+{
+  "version": 1,
+  "status": "passed",
+  "scope": "C1/P1 synthetic-local foundations",
+  "finishedAt": "2026-11-02T16:55:32.724Z",
+  "node": "v26.12.1",
+  "platform": "win32",
+  "sourceDigest": "e1afabcb66f5a95aa94be6c74824b4bd0bc998f140c520df311b03f6876872a4",
+  "fullGate": {
+    "stages": 14,
+    "durationMs": 941702,
+    "deadlineMs": 1200000
+  },
+  "domain": {
+    "passed": 437,
+    "files": 54
+  },
+  "database": {
+    "passed": 527,
+    "files": 48
+  },
+  "browser": {
+    "passed": 134,
+    "files": 15
+  },
+  "nativeZoom": [
+    {
+      "theme": "light",
+      "states": 56,
+      "faults": 0,
+      "path": "artifacts/m3-foundations/accessibility-pass/screens/chromium-native-200-light.json",
+      "sha256": "50c81628ba4be4baf63b18a639b52768183f36056bc7e863697d3af20967dcdd"
+    },
+    {
+      "theme": "dark",
+      "states": 56,
+      "faults": 0,
+      "path": "artifacts/m3-foundations/accessibility-pass/screens/chromium-native-200-dark.json",
+      "sha256": "45aa91baf2ef1cf43de158cacc2ea31eb70e220cfe3a1c055994fe368d34eea4"
+    }
+  ],
+  "skipped": 0,
+  "flaky": 0,
+  "sourceChanges": 35,
+  "reports": [
+    {
+      "name": "verification",
+      "path": "artifacts/m3-foundations/verification.json",
+      "sha256": "023c14ac22004fd66e01937385dd99efbd59f3678bed6354d9ababe7d1cf7110"
+    },
+    {
+      "name": "domain",
+      "path": "artifacts/m3-foundations/domain.json",
+      "sha256": "d6042190d2016c1c92e6a0a38d40c2884f7eba2a924d23abfce4ecfc5b18bf07"
+    },
+    {
+      "name": "database",
+      "path": "artifacts/m3-foundations/database.json",
+      "sha256": "29bf470f0071b20aa942a493bf2539bd7a3baf113a19878726feecac6ea406ab"
+    },
+    {
+      "name": "browser",
+      "path": "artifacts/m3-foundations/browser.json",
+      "sha256": "fc8bde3d66ba2212a3cdf2537bec570c012ebccb7299c4d9d8d771e7fdf23992"
+    }
+  ],
+  "phaseGates": {
+    "D1": "open before C4 retention behavior",
+    "D8": "local transport proof passed; actual encrypted D1 publication/erasure proof pending before P2 freeze"
+  },
+  "review": {
+    "importantFindings": 2,
+    "fixedWithRegressionTests": 2,
+    "remainingFindings": 0
+  },
+  "limitations": [
+    "No new import/context runtime creation enabled",
+    "Encrypted import-copy erasure and group publication remain P2 requirements",
+    "No new Firefox/WebKit cross-engine run, hosted deployment or live provider calls",
+    "Changes remain uncommitted; baseline design/Windows work was preserved"
+  ],
+  "evidenceNote": "The initial failed run and the five filtered Windows-journal regression cases are preserved separately. Zero-skipped/flaky counts refer to the final complete gate.",
+  "integration": {
+    "target": "C:/Users/htper/reflection-app",
+    "paths": 35,
+    "sourceDigest": "e1afabcb66f5a95aa94be6c74824b4bd0bc998f140c520df311b03f6876872a4",
+    "unrelatedPublicSource": "preserved",
+    "committed": false,
+    "reviewedAt": "2026-11-02T16:58:14.047Z"
+  },
+  "sourceWorktree": "C:\\Users\\htper\\.codex\\worktrees\\reflection-m3-foundations"
+}
