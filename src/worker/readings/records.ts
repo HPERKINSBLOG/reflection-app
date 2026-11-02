@@ -4,7 +4,7 @@ import type { Session } from '../identity/types.ts';
 import { assertion } from '../identity/checkpoint.ts';
 import { statement as q, DB_NOW } from '../db/core.ts';
 import { availableSession, iso, type RecordBase, RecordError, type SessionRow } from './base.ts';
-export const Question = z.strictObject({ v: z.literal(1), text: z.string().max(10000) });
+export const Question = z.strictObject({ v: z.literal(1), text: z.string().max(10000).nullable() });
 export class ReadingRecords {
   constructor(readonly base: RecordBase) {}
   async question(owner: string, row: SessionRow) {

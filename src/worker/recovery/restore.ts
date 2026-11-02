@@ -406,6 +406,14 @@ export class OfflineRestore {
       q(this.env.DB, 'DELETE FROM idempotency_keys'),
       q(
         this.env.DB,
+        "UPDATE import_items SET body_enc=NULL,result_enc=NULL WHERE group_id IN(SELECT id FROM import_groups WHERE state IN('staged','committing'))",
+      ),
+      q(
+        this.env.DB,
+        "UPDATE import_groups SET state='expired',header_enc=NULL WHERE state IN('staged','committing')",
+      ),
+      q(
+        this.env.DB,
         `UPDATE context_grants SET state='revoked',revision=revision+1,updated_at=${DB_NOW} WHERE state='allowed'`,
       ),
       q(

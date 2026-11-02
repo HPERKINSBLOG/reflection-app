@@ -2020,11 +2020,10 @@ paths:
     post:
       operationId: commitImportGroup
       summary: commitImportGroup
-      description: PROPOSED P2 handler, disabled today. Submit exactly one complete
-        owner-scoped manifest with keyed preview acknowledgement and confirmed
-        recovery. No server queue of later groups. Cancellation stops future
-        client submissions; reconcile an already submitted group instead of
-        claiming rollback.
+      description: Submit exactly one complete owner-scoped manifest with keyed
+        preview acknowledgement and confirmed recovery. No server queue of later
+        groups. Cancellation stops future client submissions; reconcile an
+        already submitted group instead of claiming rollback.
       security:
         - sessionCookie: []
       parameters:
@@ -2206,9 +2205,8 @@ paths:
     get:
       operationId: importGroupStatus
       summary: importGroupStatus
-      description: PROPOSED P2 handler, disabled today. Owned durable group state;
-        supports reconciliation after lost acknowledgement. No private source
-        document in the status response.
+      description: Owned durable group state; supports reconciliation after lost
+        acknowledgement. No private source document in the status response.
       security:
         - sessionCookie: []
       parameters:
@@ -2370,9 +2368,9 @@ paths:
     get:
       operationId: importGroupResults
       summary: importGroupResults
-      description: PROPOSED P2 handler, disabled today. Owned bounded result pages, at
-        most100 items. Cursor is authenticated and group-scoped. Does not create
-        a second group or retry a committed one.
+      description: Owned bounded result pages, at most100 items. Cursor is
+        authenticated and group-scoped. Does not create a second group or retry
+        a committed one.
       security:
         - sessionCookie: []
       parameters:
@@ -6887,17 +6885,20 @@ paths:
               schema:
                 type: integer
                 minimum: 1
-  /imports:
+  /imports/preview:
     post:
       operationId: previewImport
       summary: previewImport
-      description: 10/day/account,2MiB HTTP cap,200k-character document cap,<=100
-        records. Bind stable source namespace/revision and explicit recovery
-        action on every chunk. Canonical embedded source matches source for
-        none, previousSource for recovery. new_revision preserves namespace with
-        a new label and existing live prior identity; reimport_erased requires a
-        different namespace and existing prior tombstone. Encrypt preview24h;
-        return effective identities, previewHash and
+      description: 30 writes/minute/account shared record limit; 2MiB HTTP
+        cap,200k-character document cap,<=100 records per preview. Complete
+        selected groups publish atomically; raw previews expire after24h and
+        encrypted outcomes after the latest seven-day commit retry window. Bind
+        stable source namespace/revision and explicit recovery action on every
+        chunk. Canonical embedded source matches source for none, previousSource
+        for recovery. new_revision preserves namespace with a new label and
+        existing live prior identity; reimport_erased requires a different
+        namespace and existing prior tombstone. Encrypt preview24h; return
+        effective identities, previewHash and
         ready/duplicate/conflict/erased/invalid statuses. No model egress.
       security:
         - sessionCookie: []
@@ -7074,14 +7075,8 @@ paths:
     post:
       operationId: commitImport
       summary: commitImport
-      description: Require previewHash and confirmedRecovery exactly matching
-        displayed preview; recheck aliases/tombstones atomically, stale
-        preview409. Commit selected ready groups in dependency order; partial
-        results explicit. Same identity/content is a duplicate; changed content
-        requires confirmed new source revision. Erased entity cannot be revived
-        by a revision-label change; confirmed new namespace is required.
-        Imported facts/review remain unverified. Provider eligibility defaults
-        absent.
+      description: Legacy multi-group commit remains disabled (503). Use the explicit
+        single-group commit endpoint; the server never queues later groups.
       security:
         - sessionCookie: []
       parameters:
@@ -15387,6 +15382,36 @@ components:
                       - stance
                       - updatedAt
                     additionalProperties: false
+                  legacyAuthored:
+                    type: object
+                    properties:
+                      label:
+                        type: string
+                        maxLength: 200
+                      originalTimestamp:
+                        anyOf:
+                          - type: string
+                            maxLength: 200
+                          - type: "null"
+                      occurredAt:
+                        anyOf:
+                          - type: string
+                            format: date-time
+                            pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?(?:Z))$
+                          - type: "null"
+                      originalJsonText:
+                        type: string
+                        maxLength: 200000
+                      originalSha256:
+                        type: string
+                        pattern: ^[a-f0-9]{64}$
+                    required:
+                      - label
+                      - originalTimestamp
+                      - occurredAt
+                      - originalJsonText
+                      - originalSha256
+                    additionalProperties: false
                 required:
                   - kind
                   - identity
@@ -21162,6 +21187,36 @@ components:
                                   - text
                                   - stance
                                   - updatedAt
+                                additionalProperties: false
+                              legacyAuthored:
+                                type: object
+                                properties:
+                                  label:
+                                    type: string
+                                    maxLength: 200
+                                  originalTimestamp:
+                                    anyOf:
+                                      - type: string
+                                        maxLength: 200
+                                      - type: "null"
+                                  occurredAt:
+                                    anyOf:
+                                      - type: string
+                                        format: date-time
+                                        pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?(?:Z))$
+                                      - type: "null"
+                                  originalJsonText:
+                                    type: string
+                                    maxLength: 200000
+                                  originalSha256:
+                                    type: string
+                                    pattern: ^[a-f0-9]{64}$
+                                required:
+                                  - label
+                                  - originalTimestamp
+                                  - occurredAt
+                                  - originalJsonText
+                                  - originalSha256
                                 additionalProperties: false
                             required:
                               - kind

@@ -100,6 +100,26 @@ export async function parseImportFile(input: FileInput): Promise<NormalizedImpor
 
 export async function validateUnit(unit: Unit): Promise<void> {
   ImportUnit.parse(unit);
+  const kind =
+    unit.kind === 'legacy-reading'
+      ? 'reading'
+      : unit.kind === 'legacy-authored'
+        ? 'reflection'
+        : unit.record.kind;
+  if (unit.identity.kind !== kind) throw new Error('IMPORT_INVALID');
+  if (
+    unit.kind === 'portable' &&
+    unit.record.kind === 'reflection' &&
+    unit.record.value.revision !== unit.identity.recordRevision
+  )
+    throw new Error('IMPORT_INVALID');
+  if (
+    unit.kind === 'portable' &&
+    unit.record.kind === 'revisit' &&
+    ('revision' in unit.record.value ? unit.record.value.revision : 1) !==
+      unit.identity.recordRevision
+  )
+    throw new Error('IMPORT_INVALID');
   if (
     unit.key !== identityKey(unit.identity) ||
     canonicalJson(unit.identity) !== canonicalJson(unit.record.identity)
@@ -131,6 +151,14 @@ export async function validateUnit(unit: Unit): Promise<void> {
     throw new Error('IMPORT_INVALID');
   if (unit.kind === 'portable' && canonicalJson(originalNode.value) !== canonicalJson(unit.record))
     throw new Error('IMPORT_INVALID');
+  if (unit.kind === 'portable' && unit.record.kind === 'reflection' && unit.record.legacyAuthored) {
+    const original = unit.record.legacyAuthored;
+    if (
+      (await rawHash(original.originalJsonText)) !== original.originalSha256 ||
+      readJson(original.originalJsonText).value !== unit.record.value.text
+    )
+      throw new Error('IMPORT_INVALID');
+  }
   if (
     unit.kind === 'portable' &&
     unit.record.kind === 'reading' &&
@@ -302,6 +330,8 @@ async function normalizePortable(document: string, result: NormalizedImport) {
   if (exportId === undefined) throw new Error('IMPORT_INVALID');
   const editions = new Map<string, string>(),
     identities = new Map<string, Identity>();
+  const globalReferences = new Map<string, Identity | null>();
+  const globalKey = (kind: string, id: string) => canonicalJson([kind, id]);
   const referenceKey = (source: Identity['source'], kind: string, id: string) =>
     canonicalJson([source, kind, id]);
   for (const { node } of records) {
@@ -317,6 +347,20 @@ async function normalizePortable(document: string, result: NormalizedImport) {
         record.value.id ?? record.value.editionId ?? record.identity.recordId,
       ),
       record.identity,
+    );
+    const global = globalKey(
+      record.kind,
+      record.value.id ?? record.value.editionId ?? record.identity.recordId,
+    );
+    const prior = globalReferences.get(global);
+    globalReferences.set(
+      global,
+      prior === undefined ||
+        (prior !== null &&
+          sameSource(prior.source, record.identity.source) &&
+          prior.recordId === record.identity.recordId)
+        ? record.identity
+        : null,
     );
     if (record.kind === 'reading' && record.value.sessionId && record.value.editionId)
       editions.set(
@@ -341,9 +385,12 @@ async function normalizePortable(document: string, result: NormalizedImport) {
           (value.editionId
             ? editions.get(canonicalJson([id.source, value.editionId]))
             : undefined));
-    const parentIdentity = value.parentEditionId
-      ? (identities.get(referenceKey(id.source, 'reading', value.parentEditionId)) ?? null)
-      : null;
+    const parentIdentity =
+      record.kind === 'reading' && record.value.kind === 'legacy.imported.v1'
+        ? record.value.record.parentIdentity
+        : value.parentEditionId
+          ? (identities.get(referenceKey(id.source, 'reading', value.parentEditionId)) ?? null)
+          : null;
     const originalJsonText = raw(line, node);
     if (
       record.kind === 'reading' &&
@@ -368,7 +415,9 @@ async function normalizePortable(document: string, result: NormalizedImport) {
       originalSha256: await rawHash(originalJsonText),
     });
     const add = (kind: Identity['kind'], recordId: string) => {
-      const exact = identities.get(referenceKey(id.source, kind, recordId));
+      const exact =
+        identities.get(referenceKey(id.source, kind, recordId)) ??
+        globalReferences.get(globalKey(kind, recordId));
       const dependency = exact ?? { source: id.source, kind, recordId, recordRevision: null };
       if (!unit.dependencies.some((d) => canonicalJson(d) === canonicalJson(dependency)))
         unit.dependencies.push(dependency);

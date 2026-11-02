@@ -51,6 +51,41 @@ export class RetentionMaintenance {
     );
     await remove('rate_buckets', `expires_at<=${DB_NOW}`, 'expires_at');
     await remove('export_tickets', `expires_at<=${DB_NOW}`, 'expires_at');
+    const previewItems = this.ids(
+      'import_items',
+      `body_enc IS NOT NULL AND batch_id IN(SELECT id FROM import_batches WHERE expires_at<=${DB_NOW})`,
+      'batch_id,item_index',
+    );
+    await batch('import_previews', [
+      this.invalidate('import_items', previewItems),
+      q(this.db, `UPDATE import_items SET body_enc=NULL WHERE rowid IN(${previewItems})`),
+    ]);
+    const rawGroups = this.ids(
+      'import_groups',
+      `expires_at<=${DB_NOW} AND (header_enc IS NOT NULL OR state IN('staged','committing'))`,
+      'expires_at',
+    );
+    await batch('import_groups', [
+      this.invalidate('import_groups', rawGroups),
+      q(
+        this.db,
+        `UPDATE import_groups SET header_enc=NULL,state=CASE WHEN state IN('staged','committing') THEN 'expired' ELSE state END WHERE rowid IN(${rawGroups})`,
+      ),
+    ]);
+    const results = this.ids(
+      'import_items',
+      `result_enc IS NOT NULL AND group_id IN(SELECT id FROM import_groups WHERE outcome_expires_at<=${DB_NOW})`,
+      'batch_id,item_index',
+    );
+    await batch('import_outcomes', [
+      this.invalidate('import_items', results),
+      q(this.db, `UPDATE import_items SET result_enc=NULL WHERE rowid IN(${results})`),
+    ]);
+    await remove(
+      'import_copy_sources',
+      `copy_kind='item' AND NOT EXISTS(SELECT 1 FROM import_items i WHERE i.owner_id=import_copy_sources.owner_id AND i.batch_id || ':' || i.item_index=import_copy_sources.copy_id AND (i.body_enc IS NOT NULL OR i.result_enc IS NOT NULL))`,
+      'copy_id',
+    );
     await remove('idempotency_keys', `expires_at<=${DB_NOW}`, 'expires_at');
     await remove(
       'security_operations',

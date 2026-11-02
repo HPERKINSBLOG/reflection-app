@@ -13,6 +13,7 @@ import {
 import { DAY, erasureJobIds, type Chain, type Target } from './ledger.ts';
 import { OfflineRestore, type OfflineRestoreOptions } from './restore.ts';
 import { contextCopyViolations, targetSelector } from '../readings/context-lifecycle.ts';
+import { importCopyViolations } from '../readings/import-lifecycle.ts';
 
 export interface CleanupBackup {
   /** Capture actual offline D1 state in separate trusted local storage and return its SHA-256. */
@@ -405,6 +406,8 @@ export class OfflineCleanup {
         'import_batches',
         'import_identities',
         'import_items',
+        'import_groups',
+        'import_copy_sources',
         'permission_revisions',
         'provider_dispatches',
         'quota_buckets',
@@ -427,11 +430,16 @@ export class OfflineCleanup {
           throw new Error('Account family is not erased');
       return;
     }
-    // Imports remain unsupported; context copy checks follow durable source identities,
-    // independently of whether the original authored row still exists.
-    for (const table of ['import_batches', 'import_items', 'import_identities'])
-      if (await q(db, `SELECT 1 FROM ${table} WHERE owner_id=? LIMIT 1`, owner).first())
-        throw new Error('Unsupported erasure copy family');
+    if (
+      await q(
+        db,
+        'SELECT 1 FROM import_items WHERE owner_id=? AND group_id IS NULL AND body_enc IS NOT NULL LIMIT 1',
+        owner,
+      ).first()
+    )
+      throw new Error('Unsupported dormant import preview');
+    for (const check of importCopyViolations({ db }, target))
+      if (await check.first()) throw new Error('Import copies are not erased');
     for (const check of contextCopyViolations(db, owner, targetSelector(target)))
       if (await check.first()) throw new Error('Context copies are not erased');
     if (target.scope === 'context_copy') return;

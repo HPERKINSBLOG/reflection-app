@@ -136,9 +136,13 @@ export class RecordCrypto {
       owner,
     ).first<number>('key_version');
     if (current === null) throw new Error('Unavailable account key');
+    return (await this.indexHasher(owner, purpose, current))(value);
+  }
+  /** A bounded bulk operation pins its account version and rechecks the write fence at commit. */
+  async indexHasher(owner: string, purpose: string, version: number) {
     const base = await crypto.subtle.importKey(
       'raw',
-      await this.key(owner, 'index', current),
+      await this.key(owner, 'index', version),
       'HKDF',
       false,
       ['deriveKey'],
@@ -155,10 +159,11 @@ export class RecordCrypto {
       false,
       ['sign'],
     );
-    return Array.from(
-      new Uint8Array(await crypto.subtle.sign('HMAC', key, utf8.encode(canonicalJson(value)))),
-      (b) => b.toString(16).padStart(2, '0'),
-    ).join('');
+    return async (value: unknown) =>
+      Array.from(
+        new Uint8Array(await crypto.subtle.sign('HMAC', key, utf8.encode(canonicalJson(value)))),
+        (b) => b.toString(16).padStart(2, '0'),
+      ).join('');
   }
 }
 export const encryptedBytes = (...values: Array<string | null>) =>

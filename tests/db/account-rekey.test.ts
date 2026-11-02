@@ -20,6 +20,7 @@ import { runtimeManifest, runtimeSecrets } from '../fixtures/runtime.ts';
 import { readingAccount, ReadingClient } from '../fixtures/reading-client.ts';
 import { clearDatabase } from '../fixtures/database.ts';
 import { backupInventoryFixture, attestRecoveryFixture } from '../fixtures/backup-inventory.ts';
+import { importGroup, commitGroup } from '../fixtures/import-workflows.ts';
 beforeAll(() => applyD1Migrations(env.DB, env.TEST_MIGRATIONS));
 beforeEach(async () => {
   await clearDatabase(env.DB);
@@ -223,6 +224,9 @@ async function deferredFields(f: Awaited<ReturnType<typeof fixture>>) {
   const candidateResponse = await f.client.start('Synthetic durable candidate before publication.');
   expect(candidateResponse.status, await candidateResponse.clone().text()).toBe(202);
   f.b.DB = env.DB;
+  // The fixture has deliberately exhausted a minute's writes while creating 25 revisions.
+  await env.DB.prepare('DELETE FROM rate_buckets').run();
+  await commitGroup(f.client, await importGroup());
 }
 
 test('bounded replacement resumes in fresh instances, preserves exact values and stable index, and retains both wrapped versions', async () => {

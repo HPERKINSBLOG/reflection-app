@@ -6,7 +6,7 @@ import { decode, encode } from '../identity/crypto.ts';
 import type { IdentityService } from '../identity/service.ts';
 import type { Session } from '../identity/types.ts';
 import { statement as q, DB_NOW } from '../db/core.ts';
-import { RecordCrypto } from './crypto.ts';
+import { RecordCrypto, type RecordFieldIdentity } from './crypto.ts';
 import { stoppedEvents, type StopState } from './request-state.ts';
 
 export class RecordError extends Error {
@@ -126,9 +126,9 @@ export class RecordBase {
       ...(revision === undefined ? [] : [revision]),
     );
   }
-  async opened<T>(...args: Parameters<RecordCrypto['open']>): Promise<T> {
+  async opened<T>(field: RecordFieldIdentity, value: string, schema: z.ZodType<T>): Promise<T> {
     try {
-      return (await this.crypt.open(...args)) as T;
+      return await this.crypt.open(field, value, schema);
     } catch {
       throw new RecordError(503, 'KEY_UNAVAILABLE');
     }

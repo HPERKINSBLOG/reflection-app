@@ -12,6 +12,8 @@ import { Reflections } from './reflections.ts';
 import { ReadingExports } from './export.ts';
 import { SessionErasure } from './erasure.ts';
 import { ContextRecords } from './context.ts';
+import { ReadingImports } from './imports.ts';
+import { IMPORT_LIMITS } from '../../contracts/import-policy.ts';
 import type { ApplicationRuntime } from '../runtime/application.ts';
 
 export interface ReadingBindings extends IdentityBindings {
@@ -52,7 +54,7 @@ export function recordResponse(body: unknown, status = 200, revision?: number) {
     },
   });
 }
-async function readBody(request: Request) {
+async function readBody(request: Request, maximum = 256 * 1024) {
   const reader = request.body?.getReader();
   if (!reader) throw new RecordError(400, 'BAD_INPUT');
   const chunks: Uint8Array[] = [];
@@ -61,7 +63,7 @@ async function readBody(request: Request) {
     const { done, value } = await reader.read();
     if (done) break;
     total += value.length;
-    if (total > 256 * 1024) {
+    if (total > maximum) {
       await reader.cancel();
       throw new RecordError(413, 'INPUT_TOO_LARGE');
     }
@@ -137,7 +139,9 @@ export async function readingRoute(
       mutate ? 30 : 120,
       60_000,
     );
-    const body = mutate ? await readBody(request) : undefined;
+    const body = mutate
+      ? await readBody(request, path === '/imports/preview' ? IMPORT_LIMITS.bodyBytes : undefined)
+      : undefined;
     const key = () => Id.parse(request.headers.get('Idempotency-Key'));
     const revision = () => {
       const value = request.headers.get('If-Match');
@@ -151,6 +155,26 @@ export async function readingRoute(
         .parse(Number(value.slice(1, -1)));
     };
     const match = (pattern: RegExp) => path.match(pattern);
+    const imports = new ReadingImports(base);
+    if (method === 'POST' && path === '/imports/preview')
+      return recordResponse(
+        await imports.preview(session, key(), apiSchemas.ImportWrite.parse(body)),
+        201,
+      );
+    const importGroup = match(/^\/imports\/groups\/([^/]+)(?:\/(commit|results))?$/);
+    if (importGroup) {
+      const id = Id.parse(importGroup[1]);
+      if (method === 'POST' && importGroup[2] === 'commit')
+        return recordResponse(
+          await imports.commitGroup(session, id, key(), apiSchemas.ImportGroupCommit.parse(body)),
+        );
+      if (method === 'GET' && importGroup[2] === 'results')
+        return recordResponse(
+          await imports.groupResults(session, id, url.searchParams.get('cursor')),
+        );
+      if (method === 'GET' && !importGroup[2])
+        return recordResponse(await imports.groupStatus(session, id));
+    }
     const context = new ContextRecords(base);
     if (method === 'POST' && path === '/context-grants') {
       const value = await context.grant(session, key(), apiSchemas.GrantWrite.parse(body).source);

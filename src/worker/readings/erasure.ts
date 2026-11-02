@@ -1,4 +1,5 @@
 import { contextErasureFence, targetSelector } from './context-lifecycle.ts';
+import { importFence } from './import-lifecycle.ts';
 import { recoveryWrite, type RecoveryLease } from '../recovery/coordination.ts';
 import type { z } from 'zod';
 import { apiSchemas } from '../../contracts/index.ts';
@@ -272,6 +273,12 @@ export class SessionErasure {
   }
   /** Idempotent privacy fence used both at live admission and offline replay. */
   fence(target: Target, jobId: string): D1PreparedStatement[] {
+    return [
+      ...this.nativeFence(target, jobId),
+      ...(target.scope === 'account' ? [] : importFence(this.base, target)),
+    ];
+  }
+  private nativeFence(target: Target, jobId: string): D1PreparedStatement[] {
     const owner = target.subjectId;
     if (target.scope === 'context_copy')
       return contextErasureFence(this.base, owner, targetSelector(target));

@@ -992,6 +992,16 @@ export const PortableRecord = z.discriminatedUnion('kind', [
     identity: ImportRecordIdentity,
     originalId: z.string(),
     value: Reflection,
+    // Exact selected legacy value, without an enclosing journal or recursive export wrapper.
+    legacyAuthored: z
+      .strictObject({
+        label: z.string().max(200),
+        originalTimestamp: z.string().max(200).nullable(),
+        occurredAt: Instant.nullable(),
+        originalJsonText: JsonText,
+        originalSha256: Hash,
+      })
+      .optional(),
   }),
   z.strictObject({
     kind: z.literal('revisit'),

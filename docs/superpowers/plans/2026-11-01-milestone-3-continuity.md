@@ -8,7 +8,7 @@
 
 **Tech Stack:** Node 26, TypeScript, React, Hono, Zod, Cloudflare D1/R2, Vitest/workerd and Playwright; existing dependencies only.
 
-**Spec:** [Milestone 3 preparation](../../MILESTONE_3_PREPARATION.md), [selected context](../../design/selected-context.md), [generation](../../architecture/GENERATION.md). The preparation's decision register identifies unresolved older proposals; it does not convert recommendations into owner approvals. Reviewed 2026-11-02. C1 foundations are implemented locally; C2–C5 remain unimplemented. See [foundation evidence](../../MILESTONE_3_FOUNDATIONS.md).
+**Spec:** [Milestone 3 preparation](../../MILESTONE_3_PREPARATION.md), [selected context](../../design/selected-context.md), [generation](../../architecture/GENERATION.md). The preparation's decision register identifies unresolved older proposals; it does not convert recommendations into owner approvals. Reviewed 2026-11-02. C1 foundations are published; C2/C3 are implemented locally; C4/C5 remain outstanding. See [foundation evidence](../../MILESTONE_3_FOUNDATIONS.md).
 
 ## Global Constraints
 
