@@ -1,0 +1,64 @@
+{
+  "version": 1,
+  "status": "passed",
+  "scope": "C2/C3 context lifecycle and selection; P2 encrypted atomic imports",
+  "lane": "synthetic-local",
+  "verifiedSourceHead": "471f98b2a47b00a41e64297d08846bc5e54ce870",
+  "foundationHead": "c56ebcd801b4abf4e645825f25e07550d6b18eeb",
+  "sourceDigest": "6784805796cb5e2909406bd0d73436e27ce0da85dc7a84973152b34be9264717",
+  "node": "v26.12.1",
+  "platform": "win32",
+  "finishedAt": "2026-11-02T22:16:47.472Z",
+  "fullGate": {
+    "stages": 14,
+    "durationMs": 975891,
+    "deadlineMs": 1200000
+  },
+  "domain": {
+    "passed": 582,
+    "files": 56
+  },
+  "database": {
+    "passed": 616,
+    "files": 56
+  },
+  "browser": {
+    "passed": 142,
+    "files": 16
+  },
+  "skipped": 0,
+  "flaky": 0,
+  "review": {
+    "reviewer": "independent gpt-6-astra",
+    "reviewedHead": "6e1d44f4e90e57159755a33c807f8ff5bb9851bd",
+    "fixHead": "cb9c41de6866352792d57850afe623214b0d544d",
+    "critical": 0,
+    "important": 5,
+    "fixedWithRegressions": 5,
+    "deferredMinor": 0,
+    "fixes": [
+      "native alias withdrawal and current-state exports",
+      "foreign staged-copy erasure provenance",
+      "incremental authored and session history",
+      "exact portable raw-content identity",
+      "expired staging metadata capacity reclamation"
+    ]
+  },
+  "integrationRegressions": [
+    "updated obsolete unsupported-import export assertion while retaining erasure checks",
+    "D1 expression-depth overflow in local photo recognition: existing SQL conjunctions regrouped, no predicates removed"
+  ],
+  "receipt": {
+    "path": "artifacts/verify.json",
+    "sha256": "27fd7eaec497b2cffc4d4dbf1a70c9016eb3d9ec9fb9374290dd426180dd313b"
+  },
+  "remaining": [
+    "C4/C5 continuity dispatch, publication and final journeys",
+    "P3/P4 import review, selection, cancellation/resume UI and migration qualification",
+    "hosted migration, latency and resource-limit qualification",
+    "live-provider and classifier-corpus qualification"
+  ],
+  "hosted": "not-run",
+  "liveProviders": "not-run",
+  "evidenceNote": "Full gate ran on the verified source. Earlier focused and failed run logs remain local under artifacts/m3-takeover. This summary and the canonical receipt are published; raw run reports are local evidence."
+}
