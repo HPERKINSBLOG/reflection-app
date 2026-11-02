@@ -2381,3 +2381,50 @@ div.reading-closing {
     color: var(--reflection-ink);
   }
 }
+
+.context-selection {
+  border-block: 1px solid var(--border-subtle);
+  padding-block: 1.25rem;
+  margin-block: 1.25rem;
+}
+.context-selection h3,
+.context-selection h4,
+.context-selection h5 {
+  margin-block: 0.75rem;
+}
+.context-selection button {
+  margin: 0.3rem 0.4rem 0.3rem 0;
+}
+.context-source-list,
+.context-source-review,
+.context-complete-review {
+  margin-block: 1rem;
+}
+.context-range {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(5rem, 7rem);
+  gap: 0.65rem;
+  align-items: center;
+}
+.context-excerpt {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  margin: 0.75rem 0;
+  padding: 0.9rem;
+  border-inline-start: 3px solid var(--primary);
+  background: var(--card);
+  color: var(--card-foreground);
+}
+.context-complete-review {
+  border: 1px solid var(--primary);
+  padding: 1rem;
+  border-radius: 0.6rem;
+}
+.context-selection textarea {
+  width: 100%;
+  resize: vertical;
+  min-height: 10rem;
+}
+.context-chosen {
+  padding-inline-start: 1.2rem;
+}

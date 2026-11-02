@@ -56,6 +56,109 @@ async function validating(context = false) {
   return f;
 }
 
+test('complete publication batch admits three distinct source kinds with a parent under the D1 expression limit', async () => {
+  const f = await validating(),
+    parent = await f.service.publish(f.lease);
+  const reflection = crypto.randomUUID(),
+    revisit = crypto.randomUUID();
+  await env.DB.prepare('INSERT INTO reflections(id,owner_id,session_id,edition_id) VALUES(?,?,?,?)')
+    .bind(reflection, OWNER, f.plan.sessionId, parent)
+    .run();
+  await env.DB.prepare('INSERT INTO reflection_revisions VALUES(?,?,1,?,1,1,NULL)')
+    .bind(reflection, OWNER, SYNTHETIC)
+    .run();
+  await env.DB.prepare(
+    'INSERT INTO revisits(id,owner_id,session_id,edition_id,note_enc,key_version,created_at,updated_at) VALUES(?,?,?,?,?,1,1,1)',
+  )
+    .bind(revisit, OWNER, f.plan.sessionId, parent, SYNTHETIC)
+    .run();
+  const grants = [crypto.randomUUID(), crypto.randomUUID(), crypto.randomUUID()];
+  await env.DB.prepare(
+    "INSERT INTO context_grants(id,owner_id,edition_id,state,created_at,updated_at) VALUES(?,?,?,'allowed',1,1)",
+  )
+    .bind(grants[0], OWNER, parent)
+    .run();
+  await env.DB.prepare(
+    "INSERT INTO context_grants(id,owner_id,reflection_id,reflection_revision,state,created_at,updated_at) VALUES(?,?,?,1,'allowed',1,1)",
+  )
+    .bind(grants[1], OWNER, reflection)
+    .run();
+  await env.DB.prepare(
+    "INSERT INTO context_grants(id,owner_id,revisit_id,revisit_revision,state,created_at,updated_at) VALUES(?,?,?,1,'allowed',1,1)",
+  )
+    .bind(grants[2], OWNER, revisit)
+    .run();
+  const plan = {
+    ...f.plan,
+    parentEditionId: parent,
+    clientIntentId: crypto.randomUUID(),
+    idempotencyKey: crypto.randomUUID(),
+    context: grants.map((grantId) => ({
+      grantId,
+      grantRevision: 1,
+      fragmentHmac: f.plan.planHmac,
+    })),
+  };
+  const id = await f.service.start(plan),
+    lease = (await f.service.claim(OWNER, id))!;
+  await f.service.dispatch(lease, new Uint8Array([1]));
+  const edition = await f.service.publish(lease);
+  expect(
+    await env.DB.prepare('SELECT edition_number,parent_edition_id FROM reading_editions WHERE id=?')
+      .bind(edition)
+      .first(),
+  ).toEqual({ edition_number: 2, parent_edition_id: parent });
+});
+
+test.each(['dispatch', 'publication'] as const)(
+  'context erasure fence independently blocks %s',
+  async (stage) => {
+    const f = await prepared(true);
+    if (stage === 'publication') await f.service.dispatch(f.lease, new Uint8Array([1]));
+    await env.DB.prepare('UPDATE generation_requests SET context_withdrawn_at=1 WHERE id=?')
+      .bind(f.requestId)
+      .run();
+    if (stage === 'dispatch')
+      await expect(f.service.dispatch(f.lease, new Uint8Array([1]))).rejects.toThrow();
+    else await expect(f.service.publish(f.lease)).rejects.toThrow();
+    expect(await count('reading_editions')).toBe(1);
+  },
+);
+
+test.each(['superseded', 'erased', 'expired source family'] as const)(
+  'publication refuses a %s selected revisit source',
+  async (change) => {
+    const f = await validating(true),
+      grant = f.plan.context[0]!.grantId;
+    const edition = await env.DB.prepare('SELECT edition_id FROM context_grants WHERE id=?')
+      .bind(grant)
+      .first('edition_id');
+    const id = crypto.randomUUID();
+    await env.DB.prepare(
+      'INSERT INTO revisits(id,owner_id,edition_id,session_id,note_enc,key_version,created_at,updated_at) VALUES(?,?,?,?,?,1,1,1)',
+    )
+      .bind(id, OWNER, edition, f.plan.sessionId, SYNTHETIC)
+      .run();
+    await env.DB.prepare(
+      'UPDATE context_grants SET edition_id=NULL,revisit_id=?,revisit_revision=1 WHERE id=?',
+    )
+      .bind(id, grant)
+      .run();
+    if (change === 'superseded')
+      await env.DB.prepare('UPDATE revisits SET current_revision=2 WHERE id=?').bind(id).run();
+    if (change === 'erased')
+      await env.DB.prepare('UPDATE revisits SET note_enc=NULL,deleted_at=1 WHERE id=?')
+        .bind(id)
+        .run();
+    if (change === 'expired source family')
+      await env.DB.prepare('UPDATE reading_sessions SET retention_expires_at=1 WHERE id=?')
+        .bind(f.plan.sessionId)
+        .run();
+    await expect(f.service.publish(f.lease)).rejects.toThrow();
+    expect(await count('reading_editions')).toBe(1);
+  },
+);
+
 test('concurrent duplicate intents and keys reserve quota once and changed payload conflicts', async () => {
   const plan = await seedDatabase(env.DB),
     service = new SyntheticGenerationPrototype(env.DB, writer);

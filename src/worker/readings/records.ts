@@ -100,7 +100,9 @@ export class ReadingRecords {
       result.editionId !== id ||
       result.sessionId !== row.session_id ||
       result.editionNumber !== row.edition_number ||
-      ((result.kind === 'tarot.accepted.v1' || result.kind === 'tarot.accepted.v2') &&
+      ((result.kind === 'tarot.accepted.v1' ||
+        result.kind === 'tarot.accepted.v2' ||
+        result.kind === 'tarot.accepted.v3') &&
         result.parentEditionId !== row.parent_edition_id)
     )
       throw new RecordError(503, 'KEY_UNAVAILABLE');

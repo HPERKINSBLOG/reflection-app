@@ -12,6 +12,7 @@ import {
 } from './cleanup-state.ts';
 import { DAY, erasureJobIds, type Chain, type Target } from './ledger.ts';
 import { OfflineRestore, type OfflineRestoreOptions } from './restore.ts';
+import { contextCopyViolations, targetSelector } from '../readings/context-lifecycle.ts';
 
 export interface CleanupBackup {
   /** Capture actual offline D1 state in separate trusted local storage and return its SHA-256. */
@@ -426,17 +427,14 @@ export class OfflineCleanup {
           throw new Error('Account family is not erased');
       return;
     }
-    // Milestone 3 copies are not supported by this local cleanup. Absence of the source is
-    // insufficient proof: independently reject any unqualified copy family for its owner.
-    for (const table of [
-      'import_batches',
-      'import_items',
-      'import_identities',
-      'generation_context',
-      'context_grants',
-    ])
+    // Imports remain unsupported; context copy checks follow durable source identities,
+    // independently of whether the original authored row still exists.
+    for (const table of ['import_batches', 'import_items', 'import_identities'])
       if (await q(db, `SELECT 1 FROM ${table} WHERE owner_id=? LIMIT 1`, owner).first())
         throw new Error('Unsupported erasure copy family');
+    for (const check of contextCopyViolations(db, owner, targetSelector(target)))
+      if (await check.first()) throw new Error('Context copies are not erased');
+    if (target.scope === 'context_copy') return;
     if (target.scope === 'revisit') {
       if (
         (await q(
@@ -471,6 +469,10 @@ export class OfflineCleanup {
     if (target.scope !== 'session') throw new Error('Unsupported erasure target');
     const id = target.sessionId;
     const checks: Array<[string, (string | number)[]]> = [
+      [
+        'SELECT 1 FROM generation_context x JOIN generation_requests r ON r.id=x.request_id AND r.owner_id=x.owner_id WHERE r.owner_id=? AND r.session_id=? AND x.fragment_enc IS NOT NULL',
+        [owner, id],
+      ],
       [
         'SELECT 1 FROM revisits WHERE owner_id=? AND session_id=? AND (note_enc IS NOT NULL OR deleted_at IS NULL)',
         [owner, id],

@@ -1,0 +1,37 @@
+{
+  "exportedAt": "2026-10-26T00:00:00Z",
+  "entryCount": 1,
+  "entries": [
+    {
+      "id": "parent",
+      "ts": 1792972800000,
+      "question": " parent question 😀 ",
+      "personalReading": "PARENT_PROSE",
+      "reflections": {
+        "feelings": "DESELECTED_REFLECTION"
+      },
+      "cards": [
+        {
+          "name": "The Fool",
+          "orientation": "upright",
+          "userReflection": "DESELECTED_CARD_NOTE"
+        }
+      ],
+      "followUps": [
+        {
+          "turnNumber": 1,
+          "question": "child question",
+          "answer": "DESELECTED_CHILD",
+          "canonicalAnswer": "canonical child",
+          "journalContext": {
+            "patterns": [
+              {
+                "narrative": "UNSELECTED_HISTORY"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

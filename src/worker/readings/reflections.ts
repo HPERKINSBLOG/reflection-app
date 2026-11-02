@@ -1,3 +1,4 @@
+import { contextFence, sourceSelector } from './context-lifecycle.ts';
 import type { z } from 'zod';
 import { type apiSchemas, Reflection } from '../../contracts/index.ts';
 import { assertion } from '../identity/checkpoint.ts';
@@ -130,18 +131,14 @@ export class Reflections {
                 input.editionId,
                 edit.revision,
               ),
-              // No context APIs are exposed in this slice. Still refuse an edit that would leave an active dependent request unfenced.
-              assertion(
-                this.base.db,
-                "NOT EXISTS(SELECT 1 FROM context_grants g JOIN generation_context gc ON gc.grant_id=g.id AND gc.owner_id=g.owner_id JOIN generation_requests r ON r.id=gc.request_id AND r.owner_id=gc.owner_id WHERE g.owner_id=? AND g.reflection_id=? AND r.state NOT IN ('published','blocked','failed','expired','cancelled'))",
+              ...contextFence(
+                this.base,
                 session.subjectId,
-                id,
-              ),
-              q(
-                this.base.db,
-                `UPDATE context_grants SET state='revoked',revision=revision+1,updated_at=${DB_NOW} WHERE owner_id=? AND reflection_id=? AND state='allowed'`,
-                session.subjectId,
-                id,
+                sourceSelector({
+                  kind: 'reflection_revision',
+                  reflectionId: id,
+                  revision: edit.revision,
+                }),
               ),
               q(
                 this.base.db,

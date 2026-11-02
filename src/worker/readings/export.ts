@@ -1,3 +1,4 @@
+import { decodeGrant, type GrantRow } from './context.ts';
 import { z } from 'zod';
 import {
   apiSchemas,
@@ -5,6 +6,8 @@ import {
   Reflection,
   Id,
   WriterReceiptV2,
+  WriterReceiptV3,
+  SelectedFragment,
   type PortableRecord,
 } from '../../contracts/index.ts';
 import { statement as q, DB_NOW } from '../db/core.ts';
@@ -15,7 +18,15 @@ import { decodeRevisit } from './revisit-codec.ts';
 import { Question } from './records.ts';
 
 const Point = z.strictObject({
-  kind: z.enum(['session', 'reading', 'reflection', 'generation_receipt', 'permission', 'revisit']),
+  kind: z.enum([
+    'session',
+    'reading',
+    'reflection',
+    'generation_receipt',
+    'permission',
+    'revisit',
+    'grant',
+  ]),
   id: Id,
   revision: z.number().int().positive(),
 });
@@ -107,10 +118,10 @@ export class ReadingExports {
     const ticket = await this.ticket(session, id),
       scope = ['export', id, ticket.snapshot_revision];
     const point = cursor ? await this.base.parseCursor(session, scope, cursor, Point) : null;
-    // Avoid silently omitting later feature families if someone bypasses the disabled import/context routes.
+    // Imports remain disabled until their own complete lifecycle is supported.
     const unsupported = await q(
       this.base.db,
-      'SELECT 1 WHERE EXISTS(SELECT 1 FROM context_grants WHERE owner_id=?) OR EXISTS(SELECT 1 FROM import_identities WHERE owner_id=?)',
+      'SELECT 1 WHERE EXISTS(SELECT 1 FROM import_identities WHERE owner_id=?) OR EXISTS(SELECT 1 FROM import_items WHERE owner_id=?)',
       session.subjectId,
       session.subjectId,
     ).first();
@@ -129,6 +140,9 @@ export class ReadingExports {
         json_object('editionId',n.edition_id,'createdAt',n.created_at,'updatedAt',r.created_at,'historical',1)
       FROM revisit_revisions r JOIN revisits n ON n.owner_id=r.owner_id AND n.id=r.revisit_id JOIN reading_sessions s ON s.owner_id=n.owner_id AND s.id=n.session_id WHERE n.owner_id=? AND n.deleted_at IS NULL AND r.erased_at IS NULL AND r.body_enc IS NOT NULL AND ${availableSession}
 
+      UNION ALL
+      SELECT 'grant',g.id,g.revision,NULL,NULL,1,json_object('id',g.id,'revision',g.revision,'state',g.state,'edition_id',g.edition_id,'reflection_id',g.reflection_id,'reflection_revision',g.reflection_revision,'revisit_id',g.revisit_id,'revisit_revision',g.revisit_revision) FROM context_grants g WHERE g.owner_id=?
+
     ) WHERE ${point ? '(kind,id,revision)>(?,?,?)' : '1'} ORDER BY kind,id,revision LIMIT 101) SELECT * FROM (
       SELECT 'session' AS kind,s.id,s.revision,s.id AS session_id,s.question_enc AS value_enc,1 AS key_version,
         json_object('status',s.status,'savedAt',s.saved_at,'createdAt',s.created_at,
@@ -143,8 +157,8 @@ export class ReadingExports {
       UNION ALL
       SELECT * FROM authored
       UNION ALL
-      SELECT 'generation_receipt',r.id,r.revision,r.session_id,d.transmission_enc,r.key_version,
-        json_object('state',r.state,'createdAt',r.created_at,'dispatchId',d.id,'inputTokens',coalesce(cost.input_tokens,d.input_tokens),'outputTokens',coalesce(cost.output_tokens,d.output_tokens),'cachedInputTokens',coalesce(cost.cached_input_tokens,d.cached_input_tokens),'cacheWriteTokens',coalesce(cost.cache_write_tokens,d.cache_write_tokens),'reasoningTokens',coalesce(cost.reasoning_tokens,d.reasoning_tokens),'serviceTier',coalesce(cost.service_tier,d.service_tier),'costState',coalesce(cost.state,CASE WHEN d.cost_expired_at IS NOT NULL THEN 'expired' ELSE 'none' END),'actualCost',cost.actual_microusd)
+      SELECT 'generation_receipt',r.id,r.revision,r.session_id,CASE WHEN r.context_withdrawn_at IS NULL THEN d.transmission_enc ELSE NULL END,r.key_version,
+        json_object('contextWithdrawn',r.context_withdrawn_at,'state',r.state,'createdAt',r.created_at,'dispatchId',d.id,'inputTokens',coalesce(cost.input_tokens,d.input_tokens),'outputTokens',coalesce(cost.output_tokens,d.output_tokens),'cachedInputTokens',coalesce(cost.cached_input_tokens,d.cached_input_tokens),'cacheWriteTokens',coalesce(cost.cache_write_tokens,d.cache_write_tokens),'reasoningTokens',coalesce(cost.reasoning_tokens,d.reasoning_tokens),'serviceTier',coalesce(cost.service_tier,d.service_tier),'costState',coalesce(cost.state,CASE WHEN d.cost_expired_at IS NOT NULL THEN 'expired' ELSE 'none' END),'actualCost',cost.actual_microusd)
       FROM generation_requests r JOIN reading_sessions s ON s.id=r.session_id AND s.owner_id=r.owner_id LEFT JOIN provider_dispatches d ON d.request_id=r.id AND d.owner_id=r.owner_id LEFT JOIN cost_reservations cost ON cost.dispatch_id=d.id AND cost.owner_id=r.owner_id WHERE r.owner_id=? AND ${availableSession}
       UNION ALL
       SELECT 'permission',p.owner_id,p.revision,NULL,NULL,1,json_object('allowed',p.model_allowed)
@@ -156,7 +170,7 @@ export class ReadingExports {
       q(
         this.base.db,
         sql,
-        ...Array<string>(3).fill(session.subjectId),
+        ...Array<string>(4).fill(session.subjectId),
         ...(point ? [point.kind, point.id, point.revision] : []),
         ...Array<string>(4).fill(session.subjectId),
         ...(point ? [point.kind, point.id, point.revision] : []),
@@ -260,6 +274,7 @@ export class ReadingExports {
   private async value(session: Session, row: Row): Promise<unknown> {
     const metadata = JSON.parse(row.metadata) as Record<string, unknown>;
     const owner = session.subjectId;
+    if (row.kind === 'grant') return decodeGrant(metadata as unknown as GrantRow);
     if (row.kind === 'permission')
       return {
         revision: row.revision,
@@ -372,7 +387,7 @@ export class ReadingExports {
           v: 1;
           syntheticOnly: boolean;
           payload: string;
-          contextReceipt?: z.infer<typeof WriterReceiptV2> | null;
+          contextReceipt?: z.infer<typeof WriterReceiptV2> | z.infer<typeof WriterReceiptV3> | null;
         }>(
           {
             ownerId: owner,
@@ -386,11 +401,40 @@ export class ReadingExports {
             v: z.literal(1),
             syntheticOnly: z.boolean(),
             payload: z.string().max(200000),
-            contextReceipt: WriterReceiptV2.nullable().optional(),
+            contextReceipt: z.union([WriterReceiptV2, WriterReceiptV3]).nullable().optional(),
           }),
         )
       : null;
+    const copies = await q(
+      this.base.db,
+      'SELECT ordinal,CASE WHEN ? THEN NULL ELSE fragment_enc END AS fragment_enc FROM generation_context WHERE owner_id=? AND request_id=? ORDER BY ordinal',
+      metadata.contextWithdrawn !== null ? 1 : 0,
+      owner,
+      row.id,
+    ).all<{ ordinal: number; fragment_enc: string | null }>();
+    const selected = [];
+    for (const copy of copies.results) {
+      // An erased immutable snapshot has no invented replacement text or provenance.
+      if (copy.fragment_enc)
+        selected.push(
+          await this.base.opened(
+            {
+              ownerId: owner,
+              table: 'generation_context',
+              column: 'fragment_enc',
+              recordId: `${row.id}:${copy.ordinal}`,
+              aadRevision: 1,
+            },
+            copy.fragment_enc,
+            SelectedFragment,
+          ),
+        );
+    }
+    const redactedSelectionCount = copies.results.filter(
+      (copy) => copy.fragment_enc === null,
+    ).length;
     return {
+      ...(copies.results.length ? { selected, redactedSelectionCount } : {}),
       requestId: row.id,
       state: metadata.state,
       createdAt: iso(Number(metadata.createdAt)),
@@ -404,7 +448,7 @@ export class ReadingExports {
       costState: metadata.costState,
       transmission: transmission?.payload ?? null,
       ...(transmission?.contextReceipt ? { contextReceipt: transmission.contextReceipt } : {}),
-      reproduction: transmission ? 'complete' : 'redacted',
+      reproduction: transmission && redactedSelectionCount === 0 ? 'complete' : 'redacted',
     };
   }
 }

@@ -1,3 +1,4 @@
+import { contextFence, sourceSelector } from './context-lifecycle.ts';
 import { z } from 'zod';
 import { apiSchemas, Id, RevisitV2, type RevisitNote } from '../../contracts/index.ts';
 import { decodeRevisit, revisitField } from './revisit-codec.ts';
@@ -382,6 +383,11 @@ export class Revisits {
           revision,
         ),
         assertion(this.base.db, 'changes()=1'),
+        ...contextFence(
+          this.base,
+          session.subjectId,
+          sourceSelector({ kind: 'revisit_revision', revisitId: id, revision }),
+        ),
         mutation.insert(`${id}:${revision + 1}`),
       ]);
     } catch (error) {

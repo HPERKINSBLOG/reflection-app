@@ -1,26 +1,25 @@
 import { env } from 'cloudflare:workers';
 import { applyD1Migrations } from 'cloudflare:test';
 import { expect, test } from 'vitest';
-import { seedDatabase, OWNER, HASH, CONTENT } from '../fixtures/database.ts';
-import { SyntheticGenerationPrototype } from '../../src/worker/db/prototype.ts';
+import {
+  seedDatabase,
+  OWNER,
+  HASH,
+  CONTENT,
+  historicalPreparedRequest,
+} from '../fixtures/database.ts';
 test('0011 preserves populated financial and content rows, FKs and triggers and rolls back a failed rebuild', async () => {
   await applyD1Migrations(
     env.DB,
     env.TEST_MIGRATIONS.filter((m) => m.name < '0011'),
   );
-  const plan = await seedDatabase(env.DB),
-    service = new SyntheticGenerationPrototype(env.DB, {
-      write: async () => {
-        throw new Error();
-      },
-    });
-  const id = await service.start(plan),
-    lease = (await service.claim(OWNER, id))!,
+  const plan = await seedDatabase(env.DB);
+  const { id, attemptId } = await historicalPreparedRequest(env.DB, plan),
     dispatch = crypto.randomUUID();
   await env.DB.batch([
     env.DB.prepare(
       "INSERT INTO provider_dispatches(id,owner_id,request_id,attempt_id,state,provider,requested_model,transmission_hmac,key_version,prompt_hash,validator_hash,content_hash,parameters_json,authorized_at) VALUES (?,?,?,?,'unknown','openai','gpt-6.1-terra',?,1,?,?,?,'{}',1)",
-    ).bind(dispatch, OWNER, id, lease.attemptId, HASH, HASH, HASH, CONTENT),
+    ).bind(dispatch, OWNER, id, attemptId, HASH, HASH, HASH, CONTENT),
     env.DB.prepare(
       "INSERT INTO spend_buckets VALUES ('day:history',1000,800),('month:history',1000,800)",
     ),

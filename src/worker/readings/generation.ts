@@ -38,7 +38,7 @@ import { renderFacts } from '../../domain/tarot/facts.ts';
 import { assertion, onlineGuard } from '../identity/checkpoint.ts';
 import type { Session } from '../identity/types.ts';
 import { statement as q, DB_NOW, DAY, MONTH } from '../db/core.ts';
-import { iso, type RecordBase, RecordError, terminalStates } from './base.ts';
+import { availableSession, iso, type RecordBase, RecordError, terminalStates } from './base.ts';
 import {
   buildWriterPlan,
   validateWriterPlan,
@@ -421,16 +421,27 @@ export class ReadingGeneration extends RequestState {
   }
 
   private async reconcileStopped() {
+    // Context revocation stops future use but retains already-sent provenance. Erasure
+    // and retention fences still win; re-evaluate them in the cleanup transaction.
+    const retainContextEvidence = `r.state='blocked' AND r.error_code IS 'CONFLICT' AND r.context_withdrawn_at IS NULL
+      AND EXISTS(SELECT 1 FROM accounts a WHERE a.id=r.owner_id AND a.status='active')
+      AND EXISTS(SELECT 1 FROM reading_sessions s WHERE s.id=r.session_id AND s.owner_id=r.owner_id AND ${availableSession})`;
     const rows = await q(
       this.base.db,
-      `SELECT d.request_id FROM provider_dispatches d JOIN generation_requests r ON r.id=d.request_id WHERE r.state IN (${terminalStates}) AND (d.state='authorized' OR (r.state!='published' AND (d.transmission_enc IS NOT NULL OR d.candidate_enc IS NOT NULL OR d.provider_response_id_enc IS NOT NULL))) ORDER BY d.authorized_at LIMIT 20`,
+      `SELECT d.request_id FROM provider_dispatches d JOIN generation_requests r ON r.id=d.request_id WHERE r.state IN (${terminalStates}) AND (d.state='authorized' OR EXISTS(SELECT 1 FROM cost_reservations c WHERE c.dispatch_id=d.id AND c.state='reserved') OR (r.state!='published' AND NOT (${retainContextEvidence}) AND (d.transmission_enc IS NOT NULL OR d.candidate_enc IS NOT NULL OR d.provider_response_id_enc IS NOT NULL))) ORDER BY d.authorized_at LIMIT 20`,
     ).all<{ request_id: string }>();
     for (const row of rows.results)
       await this.base.db.batch([
         onlineGuard(this.base.db),
         q(
           this.base.db,
-          `UPDATE provider_dispatches SET state=CASE WHEN state='authorized' THEN 'unknown' ELSE state END,transmission_enc=NULL,candidate_enc=NULL,provider_response_id_enc=NULL WHERE request_id=? AND EXISTS(SELECT 1 FROM generation_requests WHERE id=? AND state IN (${terminalStates}))`,
+          `UPDATE provider_dispatches SET transmission_enc=NULL,candidate_enc=NULL,provider_response_id_enc=NULL WHERE request_id=? AND EXISTS(SELECT 1 FROM generation_requests r WHERE r.id=? AND r.state IN (${terminalStates}) AND (r.state!='published' OR provider_dispatches.state='authorized') AND NOT (${retainContextEvidence}))`,
+          row.request_id,
+          row.request_id,
+        ),
+        q(
+          this.base.db,
+          `UPDATE provider_dispatches SET state='unknown' WHERE request_id=? AND state='authorized' AND EXISTS(SELECT 1 FROM generation_requests WHERE id=? AND state IN (${terminalStates}))`,
           row.request_id,
           row.request_id,
         ),

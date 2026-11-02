@@ -597,6 +597,30 @@
           "nullable": false,
           "default": null,
           "export": "current grant and captured historical metadata"
+        },
+        "revisit_id": {
+          "aadRule": null,
+          "class": "M",
+          "sqlType": "TEXT",
+          "nullable": true,
+          "default": null,
+          "export": "current grant and captured historical metadata"
+        },
+        "revisit_revision": {
+          "aadRule": null,
+          "class": "M",
+          "sqlType": "INTEGER",
+          "nullable": true,
+          "default": null,
+          "export": "current grant and captured historical metadata"
+        },
+        "source_session_id": {
+          "aadRule": null,
+          "class": "M",
+          "sqlType": "TEXT",
+          "nullable": true,
+          "default": null,
+          "export": "owner-scoped source family identity; source identity exported in grant"
         }
       }
     },
@@ -1469,6 +1493,14 @@
           "nullable": true,
           "default": null,
           "export": "internal recognition dispatch identity; no image bytes"
+        },
+        "context_withdrawn_at": {
+          "aadRule": null,
+          "class": "M",
+          "sqlType": "INTEGER",
+          "nullable": true,
+          "default": null,
+          "export": "context copy erasure fence; exported as redaction metadata without private text"
         }
       }
     },

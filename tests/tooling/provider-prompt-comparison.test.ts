@@ -263,4 +263,6 @@ test.each([false, true])(
     expect(await runEvaluationCli([...args, '--resume'], f.env)).toEqual(result);
     expect(calls).toEqual([]);
   },
+  // Twelve protected journal/archive writes plus complete resume validation on Windows.
+  process.platform === 'win32' ? 180_000 : 10_000,
 );

@@ -197,89 +197,93 @@ test('diagnostic rejects missing, misbound, duplicate, oversized, or falsely hum
   await expect(prepareEvaluation('human-review-fast-xhigh', bundle())).rejects.toThrow();
 });
 
-test('diagnostic binds a new capped permit and crash recovery never repeats an uncertain attempt', async () => {
-  const prepared = await prepareEvaluation(profile, bundle());
-  const location = directory(),
-    key = new Uint8Array(32).fill(7);
-  const permit: EvaluationPermit = {
-    version: 'reflection-evaluation-permit.v1',
-    scope: 'evaluation',
-    purpose: profile,
-    runId: crypto.randomUUID(),
-    authorizedBy: 'synthetic diagnostic operator',
-    authorizedAt: new Date(Date.now() - 1000).toISOString(),
-    expiresAt: new Date(Date.now() + 3600000).toISOString(),
-    projectId: 'proj_synthetic',
-    credentialHash: digest('synthetic-key'),
-    encryptionKeyHash: digest(key),
-    model: 'gpt-6.1-terra',
-    policyHash: prepared.manifest.policyHash,
-    contentHash: prepared.manifest.contentHash,
-    corpusHash: prepared.manifest.corpusHash,
-    manifestHash: prepared.manifestHash,
-    maxCalls: 12,
-    maxConcurrency: 2,
-    maxCostMicrousd: 1440000,
-    outputDirectory: join(location, 'archives'),
-    sourceBundlePath: join(location, 'sources.json'),
-  };
-  expect(validatePermit(permit, prepared)).toEqual(permit);
-  for (const patch of [
-    { maxCalls: 13 },
-    { maxCostMicrousd: 1440001 },
-    { purpose: 'human-review-fast-xhigh' },
-    { sourceBundlePath: undefined },
-  ])
-    expect(() => validatePermit({ ...permit, ...patch }, prepared)).toThrow();
-  const changed = bundle();
-  changed.sources[4]!.text += ' Different.';
-  expect(() => validatePermit(permit, { ...prepared, manifestHash: '0'.repeat(64) })).toThrow();
-  const changedPrepared = await prepareEvaluation(profile, changed);
-  expect(() => validatePermit(permit, changedPrepared)).toThrow();
-  const options = {
-    stateDirectory: join(location, 'state'),
-    checkoutRoot: process.cwd(),
-    key,
-    prepared,
-  };
-  const open = (resume = false) => {
-    const journal = new EvaluationJournal(permit, options, resume);
-    journals.push(journal);
-    return journal;
-  };
-  const first = open();
-  first.reserve(prepared.requests[0]!.id);
-  first.close();
-  const dispatched: string[] = [];
-  const summary = await runEvaluation(
-    permit,
-    {
-      write: async (input) => {
-        dispatched.push(input.dispatchId);
-        return { kind: 'uncertain', reason: 'network', receipt: null };
+test(
+  'diagnostic binds a new capped permit and crash recovery never repeats an uncertain attempt',
+  async () => {
+    const prepared = await prepareEvaluation(profile, bundle());
+    const location = directory(),
+      key = new Uint8Array(32).fill(7);
+    const permit: EvaluationPermit = {
+      version: 'reflection-evaluation-permit.v1',
+      scope: 'evaluation',
+      purpose: profile,
+      runId: crypto.randomUUID(),
+      authorizedBy: 'synthetic diagnostic operator',
+      authorizedAt: new Date(Date.now() - 1000).toISOString(),
+      expiresAt: new Date(Date.now() + 3600000).toISOString(),
+      projectId: 'proj_synthetic',
+      credentialHash: digest('synthetic-key'),
+      encryptionKeyHash: digest(key),
+      model: 'gpt-6.1-terra',
+      policyHash: prepared.manifest.policyHash,
+      contentHash: prepared.manifest.contentHash,
+      corpusHash: prepared.manifest.corpusHash,
+      manifestHash: prepared.manifestHash,
+      maxCalls: 12,
+      maxConcurrency: 2,
+      maxCostMicrousd: 1440000,
+      outputDirectory: join(location, 'archives'),
+      sourceBundlePath: join(location, 'sources.json'),
+    };
+    expect(validatePermit(permit, prepared)).toEqual(permit);
+    for (const patch of [
+      { maxCalls: 13 },
+      { maxCostMicrousd: 1440001 },
+      { purpose: 'human-review-fast-xhigh' },
+      { sourceBundlePath: undefined },
+    ])
+      expect(() => validatePermit({ ...permit, ...patch }, prepared)).toThrow();
+    const changed = bundle();
+    changed.sources[4]!.text += ' Different.';
+    expect(() => validatePermit(permit, { ...prepared, manifestHash: '0'.repeat(64) })).toThrow();
+    const changedPrepared = await prepareEvaluation(profile, changed);
+    expect(() => validatePermit(permit, changedPrepared)).toThrow();
+    const options = {
+      stateDirectory: join(location, 'state'),
+      checkoutRoot: process.cwd(),
+      key,
+      prepared,
+    };
+    const open = (resume = false) => {
+      const journal = new EvaluationJournal(permit, options, resume);
+      journals.push(journal);
+      return journal;
+    };
+    const first = open();
+    first.reserve(prepared.requests[0]!.id);
+    first.close();
+    const dispatched: string[] = [];
+    const summary = await runEvaluation(
+      permit,
+      {
+        write: async (input) => {
+          dispatched.push(input.dispatchId);
+          return { kind: 'uncertain', reason: 'network', receipt: null };
+        },
       },
-    },
-    open(true),
-  );
-  expect(dispatched).toHaveLength(11);
-  expect(dispatched).not.toContain(prepared.requests[0]!.id);
-  expect(summary).toMatchObject({
-    attempts: 12,
-    unknown: 12,
-    chargedMicrousd: 1440000,
-    qualificationEligible: false,
-  });
-  let resumedCalls = 0;
-  await runEvaluation(
-    permit,
-    {
-      write: async () => {
-        resumedCalls++;
-        throw new Error('Must not redispatch');
+      open(true),
+    );
+    expect(dispatched).toHaveLength(11);
+    expect(dispatched).not.toContain(prepared.requests[0]!.id);
+    expect(summary).toMatchObject({
+      attempts: 12,
+      unknown: 12,
+      chargedMicrousd: 1440000,
+      qualificationEligible: false,
+    });
+    let resumedCalls = 0;
+    await runEvaluation(
+      permit,
+      {
+        write: async () => {
+          resumedCalls++;
+          throw new Error('Must not redispatch');
+        },
       },
-    },
-    open(true),
-  );
-  expect(resumedCalls).toBe(0);
-  expect(readFileSync(join(location, 'state', 'journal.sqlite')).byteLength).toBeGreaterThan(0);
-});
+      open(true),
+    );
+    expect(resumedCalls).toBe(0);
+    expect(readFileSync(join(location, 'state', 'journal.sqlite')).byteLength).toBeGreaterThan(0);
+  },
+  process.platform === 'win32' ? 120_000 : 10_000,
+);

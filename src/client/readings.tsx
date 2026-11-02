@@ -1,3 +1,4 @@
+import { ContextSelection } from './context-selection.tsx';
 import {
   Button,
   Input,
@@ -18,6 +19,7 @@ import {
 import type { z } from 'zod';
 import {
   apiSchemas,
+  type CanonSourceV2,
   SpreadPhoto,
   type AnyAcceptedReading,
   type Reflection,
@@ -190,6 +192,8 @@ export function ReadingWorkspace({
   } | null>(null);
   const [draft, setDraft] = useState(''),
     [stance, setStance] = useState<Thought['stance']>('unspecified');
+  const contextIntent = useRef(crypto.randomUUID());
+  const [contextCount, setContextCount] = useState(0);
   const [question, setQuestion] = useState(''),
     [questionSubmitted, setQuestionSubmitted] = useState(false),
     [english, setEnglish] = useState(false),
@@ -410,7 +414,10 @@ export function ReadingWorkspace({
     if (!current()) return;
     if (content && (content.sessionId !== id || content.editionId !== editionId))
       throw new Error('The reading response did not match this edition.');
-    const accepted = content?.kind === 'tarot.accepted.v1' || content?.kind === 'tarot.accepted.v2';
+    const accepted =
+      content?.kind === 'tarot.accepted.v1' ||
+      content?.kind === 'tarot.accepted.v2' ||
+      content?.kind === 'tarot.accepted.v3';
     if (content && !accepted && content.kind !== 'reading.unavailable.v1')
       throw new Error('This reading format cannot be opened here.');
     setRecord(session);
@@ -860,6 +867,22 @@ export function ReadingWorkspace({
           )}
         </section>
       )}
+      {mode === 'history' && (
+        <ContextSelection
+          request={{
+            clientIntentId: contextIntent.current,
+            question: '',
+            parentEditionId: null,
+            permissionRevision: user.permission.revision,
+          }}
+          csrfToken={user.csrfToken}
+          recipient={live === null ? 'unavailable' : live ? 'openai' : 'synthetic'}
+          onChange={() => {}}
+          onSelectionCount={() => {}}
+          onExpired={onExpired}
+          disabled={busy}
+        />
+      )}
       {mode === 'history' && request && (
         <Button
           type="button"
@@ -905,7 +928,8 @@ export function ReadingWorkspace({
           className="card new-reading"
           onSubmit={(event) => {
             event.preventDefault();
-            if (inFlight.current || requestPending || photoPreparing.current) return;
+            if (inFlight.current || requestPending || photoPreparing.current || contextCount > 0)
+              return;
             const values = {
               question,
               languageConfirmed: 'en' as const,
@@ -950,6 +974,28 @@ export function ReadingWorkspace({
                 }}
                 disabled={busy}
               />
+              <ContextSelection
+                key={user.subjectId}
+                reviewScope={`${english}:${reversals}:${photoSelection.current}:${Boolean(spreadPhoto)}`}
+                request={{
+                  clientIntentId: contextIntent.current,
+                  question,
+                  parentEditionId: null,
+                  permissionRevision: user.permission.revision,
+                }}
+                csrfToken={user.csrfToken}
+                recipient={live === null ? 'unavailable' : live ? 'openai' : 'synthetic'}
+                onChange={() => {}}
+                onSelectionCount={setContextCount}
+                onExpired={onExpired}
+                disabled={busy}
+              />
+              {contextCount > 0 && (
+                <p className="notice">
+                  Context can be reviewed here. Starting a reading with selected context is not
+                  available in this build.
+                </p>
+              )}
               <div className="spread-upload-field">
                 <label htmlFor="reading-spread-photo">Photo of your spread (optional)</label>
                 <p id="reading-spread-photo-help" className="muted">
@@ -1094,6 +1140,7 @@ export function ReadingWorkspace({
                   disabled={
                     busy ||
                     preparingPhoto ||
+                    contextCount > 0 ||
                     !english ||
                     !question.trim() ||
                     !user.permission.modelAllowed ||
@@ -1156,7 +1203,7 @@ export function ReadingWorkspace({
               {reading.units.map((unit, index) => {
                 const card = reading.basis.cards.find((item) => item.position === unit.position);
                 const name =
-                  reading.kind === 'tarot.accepted.v2'
+                  reading.kind !== 'tarot.accepted.v1'
                     ? reading.draw.find((item) => item.position === unit.position)?.name
                     : card && cardName(reading.basis.deckEdition, card.cardId);
                 return (
@@ -1194,7 +1241,7 @@ export function ReadingWorkspace({
                   </section>
                 );
               })}
-              {reading.kind === 'tarot.accepted.v2' ? (
+              {reading.kind !== 'tarot.accepted.v1' ? (
                 <div className="card reading-closing">
                   <section>
                     <h3>Putting it together</h3>
@@ -1224,7 +1271,7 @@ export function ReadingWorkspace({
                 </p>
                 {reading.basis.cards.map((card, index) => {
                   const name =
-                    reading.kind === 'tarot.accepted.v2'
+                    reading.kind !== 'tarot.accepted.v1'
                       ? reading.draw[index]!.name
                       : cardName(reading.basis.deckEdition, card.cardId);
                   const position = card.position[0]!.toUpperCase() + card.position.slice(1);
@@ -1236,20 +1283,44 @@ export function ReadingWorkspace({
                           {position}: {name ? `${name} (${card.cardId})` : card.cardId} ·{' '}
                           {card.orientation}
                         </h3>
-                        {reading.kind === 'tarot.accepted.v2' ? (
+                        {'meaning' in reading.sources[index]! ? (
                           <>
-                            <p>{reading.sources[index]!.meaning.core}</p>
+                            <p>
+                              {
+                                (reading.sources[index] as z.infer<typeof CanonSourceV2>).meaning
+                                  .core
+                              }
+                            </p>
                             <ul>
-                              {reading.sources[index]!.meaning.distinctions.map((text) => (
+                              {(
+                                reading.sources[index] as z.infer<typeof CanonSourceV2>
+                              ).meaning.distinctions.map((text) => (
                                 <li key={text}>{text}</li>
                               ))}
                             </ul>
-                            <p>{reading.sources[index]!.meaning.positive}</p>
-                            <p>{reading.sources[index]!.meaning.limits.join(' ')}</p>
-                            {reading.sources[index]!.meaning.imagery && (
+                            <p>
+                              {
+                                (reading.sources[index] as z.infer<typeof CanonSourceV2>).meaning
+                                  .positive
+                              }
+                            </p>
+                            <p>
+                              {(
+                                reading.sources[index] as z.infer<typeof CanonSourceV2>
+                              ).meaning.limits.join(' ')}
+                            </p>
+                            {(reading.sources[index] as z.infer<typeof CanonSourceV2>).meaning
+                              .imagery && (
                               <p>
-                                {reading.sources[index]!.meaning.imagery!.text} —{' '}
-                                {reading.sources[index]!.meaning.imagery!.reference}
+                                {
+                                  (reading.sources[index] as z.infer<typeof CanonSourceV2>).meaning
+                                    .imagery!.text
+                                }{' '}
+                                —{' '}
+                                {
+                                  (reading.sources[index] as z.infer<typeof CanonSourceV2>).meaning
+                                    .imagery!.reference
+                                }
                               </p>
                             )}
                           </>

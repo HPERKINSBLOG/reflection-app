@@ -9,6 +9,7 @@ export const erasedRevisitEligible = `revisits.deleted_at<=${DB_NOW}-${30 * DAY}
   AND EXISTS(SELECT 1 FROM deletion_jobs j WHERE j.id=revisits.deletion_job_id AND j.owner_id=revisits.owner_id AND j.scope='revisit' AND j.state='complete' AND j.completed_at<=${DB_NOW}-${30 * DAY} AND j.backup_expires_by<=${DB_NOW})
   AND NOT EXISTS(SELECT 1 FROM deletion_jobs j WHERE j.owner_id=revisits.owner_id AND j.state!='complete')
   AND NOT EXISTS(SELECT 1 FROM revisit_revisions r WHERE r.owner_id=revisits.owner_id AND r.revisit_id=revisits.id AND (r.body_enc IS NOT NULL OR r.erased_at IS NULL))
+  AND NOT EXISTS(SELECT 1 FROM context_grants g WHERE g.owner_id=revisits.owner_id AND g.revisit_id=revisits.id)
   AND NOT EXISTS(SELECT 1 FROM import_identities i WHERE i.owner_id=revisits.owner_id AND i.revisit_id=revisits.id)
   AND NOT EXISTS(SELECT 1 FROM idempotency_keys i WHERE i.owner_id=revisits.owner_id AND i.resource_id LIKE revisits.id||':%' AND i.expires_at>${DB_NOW})`;
 /** Routine D1 retention only. Independent recovery objects require the offline cleanup service. */

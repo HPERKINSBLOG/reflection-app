@@ -11,6 +11,7 @@ import { Revisits } from './revisits.ts';
 import { Reflections } from './reflections.ts';
 import { ReadingExports } from './export.ts';
 import { SessionErasure } from './erasure.ts';
+import { ContextRecords } from './context.ts';
 import type { ApplicationRuntime } from '../runtime/application.ts';
 
 export interface ReadingBindings extends IdentityBindings {
@@ -150,6 +151,30 @@ export async function readingRoute(
         .parse(Number(value.slice(1, -1)));
     };
     const match = (pattern: RegExp) => path.match(pattern);
+    const context = new ContextRecords(base);
+    if (method === 'POST' && path === '/context-grants') {
+      const value = await context.grant(session, key(), apiSchemas.GrantWrite.parse(body).source);
+      return recordResponse(value, 201, value.revision);
+    }
+    if (method === 'GET' && path === '/context-grants')
+      return recordResponse(
+        await context.list(
+          session,
+          url.searchParams.get('cursor'),
+          Number(url.searchParams.get('limit') ?? 20),
+          url.searchParams.has('editionId') ? Id.parse(url.searchParams.get('editionId')) : null,
+        ),
+      );
+    const grantMatch = match(/^\/context-grants\/([^/]+)$/);
+    if (method === 'DELETE' && grantMatch) {
+      apiSchemas.Empty.parse(body);
+      const value = await context.revoke(session, Id.parse(grantMatch[1]), revision(), key());
+      return recordResponse(value, 200, value.revision);
+    }
+    if (method === 'POST' && path === '/context-preview')
+      return recordResponse(
+        await context.preview(session, apiSchemas.ContextPreviewWrite.parse(body)),
+      );
     if (method === 'PUT' && path === '/permissions/model') {
       const input = apiSchemas.PermissionWrite.parse(body),
         value = await records.permission(session, input.modelAllowed, revision(), key());

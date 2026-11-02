@@ -1,3 +1,4 @@
+import { contextErasureFence, targetSelector } from './context-lifecycle.ts';
 import { recoveryWrite, type RecoveryLease } from '../recovery/coordination.ts';
 import type { z } from 'zod';
 import { apiSchemas } from '../../contracts/index.ts';
@@ -272,6 +273,8 @@ export class SessionErasure {
   /** Idempotent privacy fence used both at live admission and offline replay. */
   fence(target: Target, jobId: string): D1PreparedStatement[] {
     const owner = target.subjectId;
+    if (target.scope === 'context_copy')
+      return contextErasureFence(this.base, owner, targetSelector(target));
     if (target.scope === 'account')
       return [
         ...this.base.stopStatements(owner),
@@ -286,6 +289,7 @@ export class SessionErasure {
     if (target.scope === 'session')
       return [
         ...this.base.stopStatements(owner, target.sessionId),
+        ...contextErasureFence(this.base, owner, targetSelector(target)),
         q(
           this.base.db,
           `UPDATE reading_sessions SET status='deleted',saved_at=NULL,deleted_at=coalesce(deleted_at,${DB_NOW}),retention_expires_at=NULL,revision=revision+1 WHERE owner_id=? AND id=? AND status!='deleted'`,
@@ -295,6 +299,7 @@ export class SessionErasure {
       ];
     if (target.scope === 'revisit')
       return [
+        ...contextErasureFence(this.base, owner, targetSelector(target)),
         q(
           this.base.db,
           `UPDATE revisits SET deleted_at=coalesce(deleted_at,${DB_NOW}),deletion_job_id=? WHERE owner_id=? AND id=?`,
@@ -305,7 +310,7 @@ export class SessionErasure {
       ];
     if (target.scope === 'reflection_revision')
       return [
-        ...this.base.stopStatements(owner),
+        ...contextErasureFence(this.base, owner, targetSelector(target)),
         q(
           this.base.db,
           `UPDATE reflection_revisions SET erased_at=coalesce(erased_at,${DB_NOW}) WHERE owner_id=? AND reflection_id=? AND revision=?`,
@@ -328,6 +333,7 @@ export class SessionErasure {
     if (target.scope === 'session') await data.session({ id }, target);
     else if (target.scope === 'reflection_revision') await data.reflection({ id }, target);
     else if (target.scope === 'revisit') await data.revisit({ id }, target);
+    else if (target.scope === 'context_copy') await data.context({ id }, target);
     else if (target.scope === 'account') {
       await this.retireCheckpoints(target.subjectId);
       await data.account(target);

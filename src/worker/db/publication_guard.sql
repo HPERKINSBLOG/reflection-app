@@ -14,10 +14,10 @@ WHERE NOT EXISTS (
   JOIN content_editions c ON c.hash=r.content_hash
   JOIN system_state sys ON sys.id=1
   WHERE r.id=:request_id AND r.owner_id=:owner_id
-    AND a.status='active' AND a.write_fence IS NULL
+    AND (a.status='active' AND a.write_fence IS NULL
     AND a.recovery_ack_at IS NOT NULL
     AND a.key_version=:key_version AND r.key_version=:key_version
-    AND a.permission_revision=r.permission_revision AND p.model_allowed=1
+    AND a.permission_revision=r.permission_revision AND p.model_allowed=1)
     AND s.status IN('open','saved') AND b.body_enc IS NOT NULL
     AND r.run_epoch=:run_epoch AND r.lease_token=:lease_token
     AND r.lease_expires_at>CAST(unixepoch('subsec') * 1000 AS INTEGER)
@@ -25,6 +25,7 @@ WHERE NOT EXISTS (
     AND r.state=:expected_state AND r.state IN('validating','fallback_pending')
     AND r.plan_hmac=:plan_hmac AND r.plan_enc IS NOT NULL
     AND r.context_count=:context_count
+    AND r.context_withdrawn_at IS NULL
     AND (SELECT count(*) FROM generation_context xc WHERE xc.request_id=r.id)=r.context_count
     AND r.content_policy_revision=c.policy_revision
     AND c.state IN('approved','superseded') AND c.rights_status='cleared'
@@ -42,13 +43,17 @@ WHERE NOT EXISTS (
       LEFT JOIN reading_editions e ON e.owner_id=g.owner_id AND e.id=g.edition_id
       LEFT JOIN reflections f ON f.owner_id=g.owner_id AND f.id=g.reflection_id
       LEFT JOIN reflection_revisions v ON v.owner_id=g.owner_id AND v.reflection_id=g.reflection_id AND v.revision=g.reflection_revision
+      LEFT JOIN revisits n ON n.owner_id=g.owner_id AND n.id=g.revisit_id
+      LEFT JOIN reading_sessions source_session ON source_session.owner_id=g.owner_id AND source_session.id=coalesce(e.session_id,f.session_id,n.session_id)
       WHERE x.request_id=r.id AND (
         g.id IS NULL OR g.state!='allowed' OR g.revision!=x.grant_revision OR x.fragment_enc IS NULL
+        OR source_session.id IS NULL OR NOT (source_session.status='saved' OR (source_session.status='open' AND source_session.retention_expires_at>CAST(unixepoch('subsec') * 1000 AS INTEGER)))
         OR (g.edition_id IS NOT NULL AND (e.id IS NULL OR e.status NOT IN('accepted','imported') OR e.body_enc IS NULL
           OR (e.mode!='legacy' AND NOT EXISTS (SELECT 1 FROM content_editions ec
             WHERE ec.hash=e.content_hash AND ec.state IN('approved','superseded') AND ec.rights_status='cleared'))))
         OR (g.reflection_id IS NOT NULL AND (f.id IS NULL OR f.deleted_at IS NOT NULL
           OR f.current_revision!=g.reflection_revision OR v.body_enc IS NULL OR v.erased_at IS NOT NULL))
+        OR (g.revisit_id IS NOT NULL AND (n.id IS NULL OR n.deleted_at IS NOT NULL OR n.note_enc IS NULL OR n.current_revision!=g.revisit_revision))
       )
     )
 );

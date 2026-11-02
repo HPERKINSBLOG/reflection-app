@@ -1,3 +1,4 @@
+import { eraseContextCopies, targetSelector } from './context-lifecycle.ts';
 import type { Target } from '../recovery/ledger.ts';
 import { statement as q, DB_NOW } from '../db/core.ts';
 import { assertion } from '../identity/checkpoint.ts';
@@ -5,6 +6,32 @@ import type { RecordBase } from './base.ts';
 
 export class EraseData {
   constructor(readonly base: RecordBase) {}
+  async context(job: { id: string }, target: Extract<Target, { scope: 'context_copy' }>) {
+    await this.base.db.batch([
+      assertion(
+        this.base.db,
+        "EXISTS(SELECT 1 FROM deletion_jobs WHERE id=? AND state!='complete' AND target_enc IS NOT NULL)",
+        job.id,
+      ),
+      assertion(
+        this.base.db,
+        'NOT EXISTS(SELECT 1 FROM import_items WHERE owner_id=?) AND NOT EXISTS(SELECT 1 FROM import_identities WHERE owner_id=?)',
+        target.subjectId,
+        target.subjectId,
+      ),
+      ...eraseContextCopies(this.base, target.subjectId, targetSelector(target)),
+      q(
+        this.base.db,
+        'UPDATE accounts SET data_revision=data_revision+1 WHERE id=?',
+        target.subjectId,
+      ),
+      q(
+        this.base.db,
+        `UPDATE deletion_jobs SET state='erasing',completed_at=coalesce(completed_at,${DB_NOW}) WHERE id=?`,
+        job.id,
+      ),
+    ]);
+  }
   async account(target: Extract<Target, { scope: 'account' }>) {
     // Defer cyclic owned references; detached cost aggregates retain no account/dispatch association.
     await this.base.db.batch([
@@ -27,12 +54,8 @@ export class EraseData {
         job.id,
       ),
       // Unsupported raw imports remain closed. An exact source alias can be detached safely.
-      assertion(
-        this.base.db,
-        'NOT EXISTS(SELECT 1 FROM import_items WHERE owner_id=?) AND NOT EXISTS(SELECT 1 FROM context_grants WHERE owner_id=?)',
-        owner,
-        owner,
-      ),
+      assertion(this.base.db, 'NOT EXISTS(SELECT 1 FROM import_items WHERE owner_id=?)', owner),
+      ...eraseContextCopies(this.base, owner, targetSelector(target)),
       q(this.base.db, 'UPDATE accounts SET data_revision=data_revision+1 WHERE id=?', owner),
       q(
         this.base.db,
@@ -72,13 +95,11 @@ export class EraseData {
       ),
       assertion(
         this.base.db,
-        'NOT EXISTS(SELECT 1 FROM import_items WHERE owner_id=?) AND NOT EXISTS(SELECT 1 FROM import_identities WHERE owner_id=?) AND NOT EXISTS(SELECT 1 FROM context_grants WHERE owner_id=? AND reflection_id=? AND reflection_revision=?)',
+        'NOT EXISTS(SELECT 1 FROM import_items WHERE owner_id=?) AND NOT EXISTS(SELECT 1 FROM import_identities WHERE owner_id=?)',
         owner,
         owner,
-        owner,
-        id,
-        revision,
       ),
+      ...eraseContextCopies(this.base, owner, targetSelector(target)),
       q(this.base.db, `UPDATE accounts SET data_revision=data_revision+1 WHERE id=?`, owner),
       q(
         this.base.db,
@@ -107,8 +128,8 @@ export class EraseData {
     const requests = 'SELECT id FROM generation_requests WHERE owner_id=? AND session_id=?';
     const reflections = 'SELECT id FROM reflections WHERE owner_id=? AND session_id=?';
     const editions = 'SELECT id FROM reading_editions WHERE owner_id=? AND session_id=?';
-    // This integration creates no selected context/imports. Refuse completion if future unsupported copies exist.
-    const unsupported = `NOT EXISTS(SELECT 1 FROM generation_context gc JOIN context_grants g ON g.id=gc.grant_id AND g.owner_id=gc.owner_id JOIN generation_requests r ON r.id=gc.request_id AND r.owner_id=gc.owner_id WHERE g.owner_id=? AND (g.edition_id IN (${editions}) OR g.reflection_id IN (${reflections})) AND r.session_id!=?) AND NOT EXISTS(SELECT 1 FROM import_identities WHERE owner_id=?) AND NOT EXISTS(SELECT 1 FROM import_items WHERE owner_id=?)`;
+    const unsupported =
+      'NOT EXISTS(SELECT 1 FROM import_identities WHERE owner_id=?) AND NOT EXISTS(SELECT 1 FROM import_items WHERE owner_id=?)';
     await this.base.db.batch([
       // Completion is terminal. Check inside the atomic batch, not only at resume entry.
       assertion(
@@ -122,8 +143,9 @@ export class EraseData {
         owner,
         id,
       ),
-      assertion(this.base.db, unsupported, owner, owner, id, owner, id, id, owner, owner),
+      assertion(this.base.db, unsupported, owner, owner),
       // Trigger accounting releases only ciphertext that this transaction actually nulls.
+      ...eraseContextCopies(this.base, owner, targetSelector(target)),
       q(this.base.db, `UPDATE accounts SET data_revision=data_revision+1 WHERE id=?`, owner),
       q(
         this.base.db,
@@ -199,8 +221,14 @@ export class EraseData {
       ),
       q(
         this.base.db,
-        `DELETE FROM revisits WHERE owner_id=? AND edition_id IN (${editions})`,
+        `UPDATE revisits SET note_enc=NULL,deleted_at=coalesce(deleted_at,${DB_NOW}) WHERE owner_id=? AND edition_id IN (${editions})`,
         owner,
+        owner,
+        id,
+      ),
+      q(
+        this.base.db,
+        `DELETE FROM revisits WHERE owner_id=? AND session_id=? AND NOT EXISTS(SELECT 1 FROM context_grants g WHERE g.owner_id=revisits.owner_id AND g.revisit_id=revisits.id)`,
         owner,
         id,
       ),

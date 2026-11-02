@@ -22,6 +22,7 @@ import {
 // Keep historical v1 presentation coverage while the local generator now produces v2.
 function legacyReading(value: ReturnType<typeof AnyAcceptedReading.parse>) {
   if (value.kind === 'tarot.accepted.v1') return value;
+  if (value.kind !== 'tarot.accepted.v2') throw new Error('Historical fixture requires native v2');
   const {
     draw: _draw,
     spread: _spread,

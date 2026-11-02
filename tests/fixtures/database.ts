@@ -8,6 +8,36 @@ export const POLICY = 'b'.repeat(64);
 export const HASH = 'c'.repeat(64);
 export const sql = (db: D1Database, query: string, ...values: (string | number | null)[]) =>
   db.prepare(query).bind(...values);
+/** Historical migration fixture, independent of the current runtime guard's required columns. */
+export async function historicalPreparedRequest(db: D1Database, plan: SyntheticPlan) {
+  const id = crypto.randomUUID(),
+    attemptId = crypto.randomUUID();
+  await db.batch([
+    sql(
+      db,
+      `INSERT INTO generation_requests(id,owner_id,session_id,client_intent_id,basis_id,operation,payload_hmac,state,next_run_at,permission_revision,key_version,content_hash,content_policy_revision,policy_hash,input_enc,plan_enc,plan_hmac,created_at,expires_at) VALUES(?,?,?,?,?,'initial',?,'prepared',1,1,1,?,1,?,?,?, ?,1,9999999999999)`,
+      id,
+      plan.ownerId,
+      plan.sessionId,
+      plan.clientIntentId,
+      plan.basisId,
+      plan.payloadHmac,
+      plan.contentHash,
+      plan.policyHash,
+      SYNTHETIC,
+      SYNTHETIC,
+      plan.planHmac,
+    ),
+    sql(
+      db,
+      "INSERT INTO generation_attempts(id,owner_id,request_id,run_epoch,lease_token,started_at) VALUES(?,?,?,1,'historical-lease',1)",
+      attemptId,
+      plan.ownerId,
+      id,
+    ),
+  ]);
+  return { id, attemptId };
+}
 export async function seedDatabase(db: D1Database): Promise<SyntheticPlan> {
   await db.batch([
     sql(

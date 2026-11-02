@@ -66,7 +66,9 @@ export async function runEvaluation(
                 outcome.candidate,
                 request.contextReceipt ?? null,
               );
-            else validateCandidate(request.plan, outcome.candidate);
+            else if (request.plan.version === 'tarot-plan.v1')
+              validateCandidate(request.plan, outcome.candidate);
+            else throw new Error('Continuity requires its separate evaluation corpus');
             assessment = 'accepted';
           } catch {
             assessment = 'validation-rejected';

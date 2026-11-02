@@ -15,7 +15,7 @@ def seed():
   d.execute("insert into permission_revisions values(?,1,1,'egress.v1',0)",(owner,))
  d.execute("insert into content_editions(hash,state,bundle_json,reviewed_hash,reviewer_kind,reviewer_id,rights_status,created_at,approved_at) values(?,'approved','{}',?,'human_approved','synthetic','cleared',0,0)",(H,H))
  d.execute('insert into system_state(id,active_content_hash,generation_enabled,provider_policy_hash,updated_at) values(1,?,1,?,0)',(H,POL))
- d.execute("insert into reading_sessions(id,owner_id,question_enc,created_at,retention_expires_at) values('session',?,'cipher',0,86400000)",(A,))
+ d.execute("insert into reading_sessions(id,owner_id,question_enc,created_at,retention_expires_at) values('session',?,'cipher',0,CAST(unixepoch('subsec')*1000 AS INTEGER)+86400000)",(A,))
  d.execute("insert into basis_snapshots values('basis',?,'session','tarot.v1',1,'cipher',1,0)",(A,))
  d.execute("""insert into generation_requests(id,owner_id,session_id,client_intent_id,basis_id,operation,payload_hmac,state,run_epoch,lease_token,lease_expires_at,next_run_at,permission_revision,key_version,content_hash,content_policy_revision,policy_hash,input_enc,plan_enc,plan_hmac,created_at,expires_at)
  values('request',?,'session','intent','basis','initial','payload','validating',1,'lease',5000,0,1,1,?,1,?,'cipher','cipher','plan',0,99999)""",(A,H,POL))
@@ -64,7 +64,19 @@ assert d.execute('select count(*) from reading_editions').fetchone()[0]==0
 checks.append('execution-time expiry rolls back a preceding edition insert')
 d=seed();rejects(d,"insert into content_editions(hash,state,bundle_json,reviewed_hash,reviewer_kind,reviewer_id,rights_status,created_at,approved_at) values(?,'approved','{}',NULL,'human_approved','synthetic','cleared',0,0)",(H2,));checks.append('null reviewed hash rejected')
 d=seed();rejects(d,"insert into basis_snapshots values('bad',?,'session','tarot.v1',1,'cipher',1,0)",(B,));checks.append('cross-owner basis FK rejected')
-d=seed();rejects(d,"insert into generation_requests select 'other',owner_id,session_id,client_intent_id,parent_edition_id,basis_id,operation,payload_hmac,state,revision,run_epoch,lease_token,lease_expires_at,next_run_at,permission_revision,key_version,content_hash,content_policy_revision,policy_hash,input_enc,plan_enc,plan_hmac,context_count,next_event,error_code,fallback_reason,created_at,expires_at,finished_at,spread_dispatch_id from generation_requests");checks.append('duplicate intent rejected')
+d=seed()
+# Name both sides explicitly so appended migration columns cannot shift this fixture.
+copy_columns='owner_id,session_id,parent_edition_id,basis_id,operation,payload_hmac,state,revision,run_epoch,lease_token,lease_expires_at,next_run_at,permission_revision,key_version,content_hash,content_policy_revision,policy_hash,input_enc,plan_enc,plan_hmac,context_count,next_event,error_code,fallback_reason,created_at,expires_at,finished_at,spread_dispatch_id,context_withdrawn_at'
+copy_request=f"insert into generation_requests(id,client_intent_id,{copy_columns}) select ?,?,{copy_columns} from generation_requests where id='request'"
+try:d.execute(copy_request,('other','intent'))
+except sqlite3.IntegrityError as error:
+ assert error.sqlite_errorname=='SQLITE_CONSTRAINT_UNIQUE',error
+ assert str(error)=='UNIQUE constraint failed: generation_requests.owner_id, generation_requests.client_intent_id',error
+else:raise AssertionError('expected duplicate owner/client intent rejection')
+# The same clone succeeds with a distinct intent: no unrelated constraint causes rejection.
+d.execute(copy_request,('other','different-intent'))
+assert d.execute('select count(*) from generation_requests').fetchone()[0]==2
+checks.append('duplicate intent rejected')
 d=seed();d.execute('begin')
 try:
  d.execute("insert into reading_editions values('edition',?,'session',1,'request','basis',NULL,'accepted','model','cipher',1,?,0,NULL)",(A,H))
