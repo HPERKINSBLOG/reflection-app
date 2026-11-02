@@ -55,7 +55,9 @@ test('a signed-in person adds a passkey, removes the old one, and signs out ever
   await expect(page.getByRole('status').filter({ hasText: 'Passkey added.' })).toBeVisible();
   expect(addChallengeSeen).toBe(true);
   expect((await elsewhere.request.get('http://localhost:8787/api/v1/me')).status()).toBe(401);
-  await expect(anotherTab.getByRole('heading', { name: 'A place to return to.' })).toBeVisible();
+  await expect(
+    anotherTab.getByRole('heading', { name: 'A little space to reflect.' }),
+  ).toBeVisible();
   await expect(
     anotherTab
       .getByRole('status')
@@ -75,7 +77,7 @@ test('a signed-in person adds a passkey, removes the old one, and signs out ever
     await cache.put('/api/v1/me', new Response('private-cache-marker'));
   });
   await page.getByRole('button', { name: 'Sign out of all devices', exact: true }).click();
-  await expect(page.getByRole('heading', { name: 'A place to return to.' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'A little space to reflect.' })).toBeVisible();
   expect((await page.request.get('/api/v1/me')).status()).toBe(401);
   expect(await page.evaluate(() => ({ ...sessionStorage }))).toEqual({});
   await expect
@@ -101,7 +103,7 @@ test('an ended session clears the workspace and announces signing in again as a 
     }),
   );
   await page.getByRole('button', { name: 'Saved readings', exact: true }).click();
-  await expect(page.getByRole('heading', { name: 'A place to return to.' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'A little space to reflect.' })).toBeVisible();
   await expect(page.getByRole('region', { name: 'Your readings' })).toHaveCount(0);
   await expect(
     page.getByRole('status').filter({ hasText: 'Your session ended. Please sign in again.' }),
@@ -406,7 +408,7 @@ test('cancelling the passkey prompt leaves credentials unchanged and account con
   await expect(page.getByRole('list', { name: 'Passkeys' }).getByRole('listitem')).toHaveCount(1);
   await expect(page.getByRole('button', { name: 'Add a passkey', exact: true })).toBeEnabled();
   await page.getByRole('button', { name: 'Sign out', exact: true }).click();
-  await expect(page.getByRole('heading', { name: 'A place to return to.' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'A little space to reflect.' })).toBeVisible();
 });
 
 test('a failed recovery-kit replacement keeps the freshly authenticated account controls usable', async ({
@@ -420,5 +422,5 @@ test('a failed recovery-kit replacement keeps the freshly authenticated account 
   await page.getByRole('button', { name: 'Replace recovery kit', exact: true }).click();
   await expect(page.getByRole('alert')).toBeVisible();
   await page.getByRole('button', { name: 'Sign out', exact: true }).click();
-  await expect(page.getByRole('heading', { name: 'A place to return to.' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'A little space to reflect.' })).toBeVisible();
 });

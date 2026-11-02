@@ -1,4 +1,12 @@
 import {
+  Button,
+  Input,
+  ReflectionCard,
+  ReflectionField,
+  TextLink,
+  TopicChip,
+} from './design/components.tsx';
+import {
   type MouseEvent,
   type Ref,
   useEffect,
@@ -753,17 +761,17 @@ export function ReadingWorkspace({
           <span>
             AI readings are off. Saved readings and reflections remain available. To start a new
             reading,{' '}
-            <a href="/account" onClick={onAccount}>
+            <TextLink href="/account" onClick={onAccount}>
               turn on AI readings in your account
-            </a>
+            </TextLink>
             .
           </span>
         </p>
       )}
       <nav className="reading-navigation" aria-label="Reading actions">
-        <button
+        <Button
           type="button"
-          className="secondary"
+          variant="secondary"
           aria-current={mode === 'history' ? 'page' : undefined}
           disabled={busy}
           onClick={() => {
@@ -779,8 +787,8 @@ export function ReadingWorkspace({
           }}
         >
           Saved readings
-        </button>
-        <button
+        </Button>
+        <Button
           type="button"
           aria-current={mode === 'new' ? 'page' : undefined}
           disabled={busy || !user.permission.modelAllowed || requestPending || live === null}
@@ -798,7 +806,7 @@ export function ReadingWorkspace({
           }}
         >
           New reading
-        </button>
+        </Button>
       </nav>
       <Notice message={message} />
       {busy && (
@@ -824,7 +832,7 @@ export function ReadingWorkspace({
                 <li key={item.id}>
                   <div className="history-copy">
                     <time dateTime={item.createdAt}>{date(item.createdAt)}</time>
-                    <button
+                    <Button
                       type="button"
                       className="history-link"
                       disabled={busy}
@@ -834,28 +842,28 @@ export function ReadingWorkspace({
                     >
                       <span>{item.questionPreview ?? 'Saved reading'}</span>
                       <Icon name="chevron" />
-                    </button>
+                    </Button>
                   </div>
                 </li>
               ))}
             </ol>
           )}
           {history.nextCursor && (
-            <button
+            <Button
               type="button"
-              className="secondary"
+              variant="secondary"
               disabled={busy}
               onClick={() => void run((current) => loadHistory(current, history.nextCursor))}
             >
               Load more readings
-            </button>
+            </Button>
           )}
         </section>
       )}
       {mode === 'history' && request && (
-        <button
+        <Button
           type="button"
-          className="secondary"
+          variant="secondary"
           onClick={() => {
             const target = resumeTarget.current ?? request.target;
             setRequest({ target, focus: false });
@@ -864,7 +872,7 @@ export function ReadingWorkspace({
           }}
         >
           Resume reading request
-        </button>
+        </Button>
       )}
       {mode === 'request' && request && (
         <RequestProgress
@@ -928,14 +936,10 @@ export function ReadingWorkspace({
           </div>
           <div className="new-reading-layout">
             <div className="new-reading-content">
-              <label htmlFor="reading-question">Your question</label>
-              <p id="reading-question-help">
-                Include what you are considering, what already works, and anything you want the
-                reading to take into account.
-              </p>
-              <textarea
+              <ReflectionField
                 id="reading-question"
-                aria-describedby="reading-question-help"
+                label="Your question"
+                hint="Include what you are considering, what already works, and anything you want the reading to take into account."
                 rows={3}
                 maxLength={500}
                 required
@@ -953,7 +957,7 @@ export function ReadingWorkspace({
                   you have already drawn to recognize your cards and orientations instead of drawing
                   new ones.
                 </p>
-                <input
+                <Input
                   ref={spreadInputRef}
                   id="reading-spread-photo"
                   aria-describedby="reading-spread-photo-help reading-photo-processing"
@@ -1029,7 +1033,7 @@ export function ReadingWorkspace({
                       <p className="muted">JPEG, PNG or WebP · up to 10 MB</p>
                     </div>
                     <div className="spread-photo-actions">
-                      <button
+                      <Button
                         ref={choosePhotoRef}
                         type="button"
                         className="secondary choose-photo"
@@ -1038,11 +1042,11 @@ export function ReadingWorkspace({
                         onClick={() => spreadInputRef.current?.click()}
                       >
                         Choose photo
-                      </button>
+                      </Button>
                       {(spreadPhoto || preparingPhoto) && (
-                        <button
+                        <Button
                           type="button"
-                          className="secondary"
+                          variant="secondary"
                           disabled={busy}
                           onClick={() => {
                             clearPhoto();
@@ -1051,14 +1055,15 @@ export function ReadingWorkspace({
                           }}
                         >
                           Remove photo
-                        </button>
+                        </Button>
                       )}
                     </div>
                   </div>
                 </div>
               </div>
-              <label className="check">
-                <input
+              <label className="check" htmlFor="check-english">
+                <Input
+                  id="check-english"
                   type="checkbox"
                   checked={english}
                   onChange={(event) => setEnglish(event.target.checked)}
@@ -1066,8 +1071,9 @@ export function ReadingWorkspace({
                 />
                 Use English for this reading
               </label>
-              <label className="check">
-                <input
+              <label className="check" htmlFor="check-reversals">
+                <Input
+                  id="check-reversals"
                   type="checkbox"
                   checked={reversals}
                   onChange={(event) => setReversals(event.target.checked)}
@@ -1082,7 +1088,7 @@ export function ReadingWorkspace({
               {submitNotice && <p>{submitNotice}</p>}
               <p>{READING_PRODUCT_COPY.startProcessing}</p>
               <div className="new-reading-footer">
-                <button
+                <Button
                   type="submit"
                   className="large"
                   disabled={
@@ -1096,7 +1102,7 @@ export function ReadingWorkspace({
                 >
                   Start reading
                   <Icon name="chevron" />
-                </button>
+                </Button>
                 <p className="muted">
                   Readings left: {user.remainingDay} today · {user.remainingMonth} this month.
                 </p>
@@ -1115,12 +1121,14 @@ export function ReadingWorkspace({
               <div className="reading-header">
                 <div className="reading-title">
                   <p className="test-notice">
-                    {reading.provenance.provider === 'openai'
-                      ? 'AI reading'
-                      : localRuntime
-                        ? 'Local simulated reading'
-                        : 'Simulated reading'}
-                    {reading.mode === 'template' ? ' · Prepared reflection template' : ''}
+                    <TopicChip tone="sage">
+                      {reading.provenance.provider === 'openai'
+                        ? 'AI reading'
+                        : localRuntime
+                          ? 'Local simulated reading'
+                          : 'Simulated reading'}
+                      {reading.mode === 'template' ? ' · Prepared reflection template' : ''}
+                    </TopicChip>
                   </p>
                   <time dateTime={record.createdAt}>{date(record.createdAt)}</time>
                   <h2 ref={resultHeading} tabIndex={-1}>
@@ -1274,12 +1282,12 @@ export function ReadingWorkspace({
               </details>
             </article>
           ) : (
-            <div className="card">
+            <ReflectionCard>
               <h2 ref={resultHeading} tabIndex={-1}>
                 Saved reading
               </h2>
               <p>This reading is unavailable. Your saved notes remain available.</p>
-            </div>
+            </ReflectionCard>
           )}
           <div className={`save-reading ${record.status === 'saved' ? 'is-saved' : ''}`}>
             {record.status === 'saved' ? (
@@ -1298,14 +1306,14 @@ export function ReadingWorkspace({
                     <p className="muted">{READING_PRODUCT_COPY.saveReading}</p>
                   </div>
                 </div>
-                <button type="button" onClick={save} disabled={busy}>
+                <Button type="button" onClick={save} disabled={busy}>
                   <Icon name="bookmark" />
                   Save reading
-                </button>
+                </Button>
               </>
             )}
           </div>
-          <section className="card reflection-editor" aria-label="Personal reflection">
+          <ReflectionCard className="reflection-editor" aria-label="Personal reflection">
             <h2>{reflection ? 'Edit reflection' : 'Add reflection'}</h2>
             <p>
               This is your own writing. It does not change the reading or request AI generation.
@@ -1328,7 +1336,7 @@ export function ReadingWorkspace({
                 <blockquote>{latestReflection?.text ?? 'No saved reflection.'}</blockquote>
                 <p>Saved response: {stanceLabels[latestReflection?.stance ?? 'unspecified']}</p>
                 <div className="actions">
-                  <button
+                  <Button
                     type="button"
                     disabled={busy}
                     onClick={() => {
@@ -1342,10 +1350,10 @@ export function ReadingWorkspace({
                     }}
                   >
                     Keep my draft for the next save
-                  </button>
-                  <button
+                  </Button>
+                  <Button
                     type="button"
-                    className="secondary"
+                    variant="secondary"
                     disabled={busy}
                     onClick={() => {
                       setReflection(latestReflection);
@@ -1360,13 +1368,13 @@ export function ReadingWorkspace({
                     }}
                   >
                     Use the saved reflection
-                  </button>
+                  </Button>
                 </div>
               </div>
             )}
-            <label htmlFor="reflection-text">Your reflection</label>
-            <textarea
+            <ReflectionField
               id="reflection-text"
+              label="Your reflection"
               rows={4}
               maxLength={10000}
               value={draft}
@@ -1394,14 +1402,14 @@ export function ReadingWorkspace({
             {record.status !== 'saved' && (
               <p>Saving a reflection also saves this reading until deletion.</p>
             )}
-            <button
+            <Button
               type="button"
               onClick={saveReflection}
               disabled={busy || conflict || !reading || !draft.trim()}
             >
               Save reflection
-            </button>
-          </section>
+            </Button>
+          </ReflectionCard>
           <RevisitNotes
             key={`${user.subjectId}:${record.id}:${selectedEditionId}`}
             ref={revisitNotes}
@@ -1445,10 +1453,10 @@ export function ReadingWorkspace({
                     </select>
                   </div>
                 </div>
-                <button type="button" className="secondary" onClick={viewRevision} disabled={busy}>
+                <Button type="button" variant="secondary" onClick={viewRevision} disabled={busy}>
                   <Icon name="eye" />
                   View revision
-                </button>
+                </Button>
               </div>
               {revisionNote && (
                 <div className="notice revision-note">
@@ -1461,8 +1469,9 @@ export function ReadingWorkspace({
                     the current revision removes it from the editor; older revisions remain
                     available in export.
                   </p>
-                  <label className="check">
-                    <input
+                  <label className="check" htmlFor="check-eraseRevisionChecked">
+                    <Input
+                      id="check-eraseRevisionChecked"
                       type="checkbox"
                       checked={eraseRevisionChecked}
                       onChange={(event) => setEraseRevisionChecked(event.target.checked)}
@@ -1470,14 +1479,14 @@ export function ReadingWorkspace({
                     />
                     Permanently erase this reflection revision
                   </label>
-                  <button
+                  <Button
                     type="button"
-                    className="danger"
+                    variant="danger"
                     disabled={busy || !eraseRevisionChecked}
                     onClick={eraseRevision}
                   >
                     Erase revision {revisionNote.revision}
-                  </button>
+                  </Button>
                 </div>
               )}
             </details>
@@ -1491,24 +1500,25 @@ export function ReadingWorkspace({
           )}
           <div className="deletion-actions reading-deletion">
             {!confirmDelete ? (
-              <button
+              <Button
                 ref={deleteTrigger}
                 type="button"
-                className="text-button"
+                variant="text-button"
                 onClick={() => setConfirmDelete(true)}
                 disabled={busy}
               >
                 <Icon name="delete" />
                 Delete reading
-              </button>
+              </Button>
             ) : (
               <div className="notice delete-confirmation">
                 <p>
                   This deletes the reading and its reflections. Downloaded files cannot be removed.
                   Backups are deleted on their own schedule.
                 </p>
-                <label className="check">
-                  <input
+                <label className="check" htmlFor="check-deleteChecked">
+                  <Input
+                    id="check-deleteChecked"
                     ref={deleteConfirmation}
                     type="checkbox"
                     checked={deleteChecked}
@@ -1518,17 +1528,17 @@ export function ReadingWorkspace({
                   Delete this reading and its reflections permanently
                 </label>
                 <div className="actions">
-                  <button
+                  <Button
                     type="button"
-                    className="danger"
+                    variant="danger"
                     onClick={remove}
                     disabled={busy || !deleteChecked}
                   >
                     Confirm deletion
-                  </button>
-                  <button
+                  </Button>
+                  <Button
                     type="button"
-                    className="secondary"
+                    variant="secondary"
                     disabled={busy}
                     onClick={() => {
                       restoreDeleteFocus.current = true;
@@ -1537,7 +1547,7 @@ export function ReadingWorkspace({
                     }}
                   >
                     Cancel
-                  </button>
+                  </Button>
                 </div>
               </div>
             )}

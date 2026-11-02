@@ -36,3 +36,22 @@ test('local dotenv files stop verification without reading their contents', () =
     rmSync(root, { recursive: true, force: true });
   }
 });
+
+test('Windows execution paths survive mixed-case environment names without admitting credentials', () => {
+  const env = verificationEnvironment(
+    {
+      Path: 'C:\\synthetic\\bin',
+      SystemRoot: 'C:\\Windows',
+      LOCALAPPDATA: 'C:\\synthetic\\cache',
+      UserProfile: 'C:\\synthetic',
+      OpenAi_Api_Key: 'SYNTHETIC_CANARY',
+      Vite_Private_Text: 'SYNTHETIC_CANARY',
+    },
+    'win32',
+  );
+  expect(env.Path).toBe('C:\\synthetic\\bin');
+  expect(env.SystemRoot).toBe('C:\\Windows');
+  expect(env.LOCALAPPDATA).toBe('C:\\synthetic\\cache');
+  expect(env.UserProfile).toBe('C:\\synthetic');
+  expect(JSON.stringify(env)).not.toContain('SYNTHETIC_CANARY');
+});

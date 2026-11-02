@@ -54,6 +54,27 @@ test('a complete local gate permits only the isolated synthetic qualification ar
     productionActivationAllowed: false,
   });
 });
+
+test('Windows receipts have a bounded platform budget and cannot extend legacy or Linux gates', () => {
+  const f = fixture();
+  const verification = {
+    ...f.verification,
+    platform: 'win32',
+    durationMs: 600000,
+    deadlineMs: 1200000,
+  };
+  expect(checkHostedCandidate({ ...f.input, verification })).toMatchObject({
+    syntheticQualificationAllowed: true,
+  });
+  for (const invalid of [
+    { ...verification, durationMs: 1200001 },
+    { ...verification, platform: 'linux' },
+    { ...verification, platform: undefined },
+    { ...verification, deadlineMs: 1800000 },
+    { ...f.verification, durationMs: 540001 },
+  ])
+    expect(() => checkHostedCandidate({ ...f.input, verification: invalid })).toThrow();
+});
 test.each(['stale', 'failed', 'partial', 'artifact', 'config', 'account', 'resources'] as const)(
   'hosted gate rejects %s input',
   (failure) => {

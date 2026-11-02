@@ -1,3 +1,4 @@
+import { Button, Input, TextLink } from './design/components.tsx';
 import { type MouseEvent, useCallback, useEffect, useRef, useState } from 'react';
 import type { z } from 'zod';
 import { apiSchemas, type AuthResult } from '../contracts/index.ts';
@@ -11,6 +12,8 @@ import { date } from './date.ts';
 import { Notice, type NoticeMessage } from './notice.tsx';
 import { Art } from './art.tsx';
 import { Icon } from './icon.tsx';
+import { Brand } from './design/components.tsx';
+import { ThemeSelect } from './design/theme.tsx';
 
 type View = z.infer<typeof apiSchemas.SessionView>;
 type Kit = z.infer<typeof apiSchemas.RecoveryCodes>;
@@ -408,31 +411,27 @@ export function IdentityApp() {
           : 'Your readings'
         : route === '/recover'
           ? 'Recover your account'
-          : 'A place to return to.';
+          : 'A little space to reflect.';
   const authPage = !kit && (Boolean(grant) || !session);
   const landing = authPage && !grant && route !== '/recover';
   return (
     <div className={`app-shell${accountPage ? ' account-shell' : ''}`}>
       <header className="site-header">
         <div className="shell-width">
-          <a className="brand" href="/">
-            <span className="brand-mark">
-              <Icon name="brand" />
-            </span>
-            Reflection
-          </a>
-          {session && !kit && !grant && (
-            <div className="header-tools">
-              <a
+          <Brand />
+          <div className="header-tools">
+            <ThemeSelect />
+            {session && !kit && !grant && (
+              <TextLink
                 className="header-link"
                 href="/account"
                 aria-current={accountPage ? 'page' : undefined}
                 onClick={openAccount}
               >
                 Account
-              </a>
-            </div>
-          )}
+              </TextLink>
+            )}
+          </div>
         </div>
       </header>
       <main
@@ -444,7 +443,7 @@ export function IdentityApp() {
       >
         {authPage && (
           <Art
-            name={landing ? 'study-return' : 'study-inquiry'}
+            name={landing ? 'spiral-bloom' : 'study-inquiry'}
             className="auth-art"
             fetchPriority={landing ? 'high' : 'auto'}
           />
@@ -458,7 +457,7 @@ export function IdentityApp() {
             }
           >
             {accountPage && (
-              <a
+              <TextLink
                 className="back-link"
                 href={readingsPath}
                 aria-disabled={busy || undefined}
@@ -466,13 +465,18 @@ export function IdentityApp() {
               >
                 <Icon name="chevron" />
                 Back to readings
-              </a>
+              </TextLink>
             )}
             <div className="page-title">
               <div className="title-copy">
                 <h1 ref={heading} tabIndex={-1}>
                   {title}
                 </h1>
+                {landing && (
+                  <p className="brand-promise">
+                    Bring a question. Make room for another perspective.
+                  </p>
+                )}
                 {(!session || kit || grant) && (
                   <p className="test-notice">{environmentNotice(runtimeMode, live)}</p>
                 )}
@@ -526,13 +530,13 @@ export function IdentityApp() {
                       </ol>
                     </details>
                     <div className="actions">
-                      <button type="button" onClick={download} disabled={busy}>
+                      <Button type="button" onClick={download} disabled={busy}>
                         <Icon name="download" />
                         Download recovery kit
-                      </button>
-                      <button
+                      </Button>
+                      <Button
                         type="button"
-                        className="secondary"
+                        variant="secondary"
                         disabled={busy}
                         onClick={() =>
                           void run(async (isCurrent) => {
@@ -548,18 +552,19 @@ export function IdentityApp() {
                       >
                         <Icon name="copy" />
                         Copy complete kit
-                      </button>
+                      </Button>
                     </div>
                   </div>
-                  <label className="check">
-                    <input
+                  <label className="check" htmlFor="check-acknowledged">
+                    <Input
+                      id="check-acknowledged"
                       type="checkbox"
                       checked={acknowledged}
                       onChange={(event) => setAcknowledged(event.target.checked)}
                     />
                     I have saved the complete kit with the handle and codes.
                   </label>
-                  <button
+                  <Button
                     type="button"
                     className="large"
                     disabled={!downloaded || !acknowledged || busy || !session}
@@ -576,7 +581,7 @@ export function IdentityApp() {
                     }
                   >
                     Continue
-                  </button>
+                  </Button>
                   <p className="muted">
                     The kit stays in memory here until you leave and is never saved automatically in
                     this browser.
@@ -595,7 +600,7 @@ export function IdentityApp() {
                       account stays the same.
                     </span>
                   </p>
-                  <button
+                  <Button
                     type="button"
                     disabled={busy}
                     onClick={() =>
@@ -606,10 +611,10 @@ export function IdentityApp() {
                   >
                     <Icon name="key" />
                     Create replacement passkey
-                  </button>
-                  <button
+                  </Button>
+                  <Button
                     type="button"
-                    className="text-button"
+                    variant="text-button"
                     disabled={busy}
                     onClick={() => {
                       setGrant(null);
@@ -620,7 +625,7 @@ export function IdentityApp() {
                     }}
                   >
                     Cancel recovery
-                  </button>
+                  </Button>
                 </section>
               ) : session && accountPage ? (
                 <section className="account-content">
@@ -632,9 +637,9 @@ export function IdentityApp() {
                           History, reopening, reflections, export and deletion remain available.
                         </p>
                       </div>
-                      <button
+                      <Button
                         type="button"
-                        className="secondary"
+                        variant="secondary"
                         disabled={
                           busy || checking || (live === null && !session.permission.modelAllowed)
                         }
@@ -643,7 +648,7 @@ export function IdentityApp() {
                         {session.permission.modelAllowed
                           ? 'Turn off AI readings'
                           : 'Enable AI readings'}
-                      </button>
+                      </Button>
                     </div>
                     <div className="consent-disclosures">
                       <p>{READING_PRODUCT_COPY.aiPermission}</p>
@@ -680,7 +685,7 @@ export function IdentityApp() {
                                   : 'Not reported as backed up'}
                               </span>
                             </p>
-                            <button
+                            <Button
                               type="button"
                               className="text-button remove-passkey"
                               disabled={busy || checking || credentials.items.length <= 1}
@@ -709,7 +714,7 @@ export function IdentityApp() {
                               }
                             >
                               Remove
-                            </button>
+                            </Button>
                           </li>
                         ))}
                       </ul>
@@ -722,7 +727,7 @@ export function IdentityApp() {
                     {credentials?.items.length === 1 && (
                       <p>Keep at least one passkey on your account.</p>
                     )}
-                    <button
+                    <Button
                       type="button"
                       className="add-passkey"
                       disabled={busy || checking || !credentials || credentials.items.length >= 10}
@@ -749,7 +754,7 @@ export function IdentityApp() {
                     >
                       <Icon name="add" />
                       Add a passkey
-                    </button>
+                    </Button>
                     {credentials?.items.length === 10 && (
                       <p>You have ten passkeys. Remove one before adding another.</p>
                     )}
@@ -757,19 +762,19 @@ export function IdentityApp() {
                   <section className="account-tool-group" aria-labelledby="account-tools-title">
                     <h2 id="account-tools-title">Account tools</h2>
                     <div className="account-tools">
-                      <button
+                      <Button
                         type="button"
-                        className="secondary"
+                        variant="secondary"
                         disabled={busy}
                         onClick={exportRecords}
                       >
                         <Icon name="download" />
                         Export my records
                         <Icon name="chevron" className="account-tool-chevron" />
-                      </button>
-                      <button
+                      </Button>
+                      <Button
                         type="button"
-                        className="secondary"
+                        variant="secondary"
                         disabled={busy}
                         onClick={() =>
                           void run(async (isCurrent) => {
@@ -793,7 +798,7 @@ export function IdentityApp() {
                         <Icon name="lock" />
                         Replace recovery kit
                         <Icon name="chevron" className="account-tool-chevron" />
-                      </button>
+                      </Button>
                     </div>
                   </section>
                   <section
@@ -802,9 +807,9 @@ export function IdentityApp() {
                   >
                     <h2 id="account-signout-title">Sign out</h2>
                     <div className="account-session-actions">
-                      <button
+                      <Button
                         type="button"
-                        className="secondary"
+                        variant="secondary"
                         disabled={busy}
                         onClick={() =>
                           void run(async (isCurrent) => {
@@ -818,10 +823,10 @@ export function IdentityApp() {
                       >
                         Sign out
                         <Icon name="chevron" />
-                      </button>
-                      <button
+                      </Button>
+                      <Button
                         type="button"
-                        className="secondary"
+                        variant="secondary"
                         disabled={busy}
                         onClick={() =>
                           void run(async (isCurrent) => {
@@ -835,7 +840,7 @@ export function IdentityApp() {
                       >
                         Sign out of all devices
                         <Icon name="chevron" />
-                      </button>
+                      </Button>
                     </div>
                   </section>
                   <details className="deletion-actions">
@@ -850,8 +855,9 @@ export function IdentityApp() {
                       Your recovery kit will no longer restore this account. Downloaded copies are
                       unchanged.
                     </p>
-                    <label className="check">
-                      <input
+                    <label className="check" htmlFor="check-accountDeleteChecked">
+                      <Input
+                        id="check-accountDeleteChecked"
                         type="checkbox"
                         checked={accountDeleteChecked}
                         onChange={(event) => setAccountDeleteChecked(event.target.checked)}
@@ -859,9 +865,9 @@ export function IdentityApp() {
                       />
                       Permanently delete my account, readings and reflections
                     </label>
-                    <button
+                    <Button
                       type="button"
-                      className="danger"
+                      variant="danger"
                       disabled={busy || !accountDeleteChecked}
                       onClick={() =>
                         void run(async (isCurrent) => {
@@ -902,7 +908,7 @@ export function IdentityApp() {
                       }
                     >
                       Delete account permanently
-                    </button>
+                    </Button>
                   </details>
                   <p className="account-storage">
                     <Icon name="lock" />
@@ -946,7 +952,7 @@ export function IdentityApp() {
                     alone cannot identify your account.
                   </p>
                   <label htmlFor="recovery-handle">Recovery handle</label>
-                  <input
+                  <Input
                     id="recovery-handle"
                     value={handle}
                     onChange={(event) => setHandle(event.target.value)}
@@ -958,7 +964,7 @@ export function IdentityApp() {
                     disabled={busy}
                   />
                   <label htmlFor="recovery-code">Unused recovery code</label>
-                  <input
+                  <Input
                     id="recovery-code"
                     type="password"
                     value={code}
@@ -968,24 +974,24 @@ export function IdentityApp() {
                     maxLength={100}
                     disabled={busy}
                   />
-                  <button type="submit" disabled={busy || !handle.trim() || !code.trim()}>
+                  <Button type="submit" disabled={busy || !handle.trim() || !code.trim()}>
                     Verify recovery kit
-                  </button>
+                  </Button>
                   <p className="muted recovery-note">
                     You’ll create a replacement passkey before you can access your account. If a
                     connection is interrupted after verification, that code may already be used; try
                     an existing passkey or another unused code.
                   </p>
-                  <a href="/">Back to sign in</a>
+                  <TextLink href="/">Back to sign in</TextLink>
                 </form>
               ) : (
                 <section className="landing-content">
-                  <p className="lead">
+                  <p className="lead account-explainer">
                     Create a passkey to access your account without an email address or password.
                     Then save a complete recovery kit for the times your passkeys are unavailable.
                   </p>
                   <div className="actions">
-                    <button
+                    <Button
                       type="button"
                       disabled={busy}
                       onClick={() =>
@@ -998,10 +1004,10 @@ export function IdentityApp() {
                       }
                     >
                       {live === false ? 'Create a test account' : 'Create an account'}
-                    </button>
-                    <button
+                    </Button>
+                    <Button
                       type="button"
-                      className="secondary"
+                      variant="secondary"
                       disabled={busy}
                       onClick={() =>
                         void run(async (isCurrent) => {
@@ -1011,9 +1017,9 @@ export function IdentityApp() {
                     >
                       <Icon name="key" />
                       Sign in with a passkey
-                    </button>
+                    </Button>
                   </div>
-                  <a href="/recover">Recover with your saved kit</a>
+                  <TextLink href="/recover">Recover with your saved kit</TextLink>
                 </section>
               )}
               {busy && (
@@ -1023,9 +1029,6 @@ export function IdentityApp() {
                 </p>
               )}
             </div>
-            {landing && (
-              <Art name="account-sprig" className="landing-sprig" sizes="280px" loading="lazy" />
-            )}
           </div>
           {deletionReceipt && (
             <DeletionReceiptPanel

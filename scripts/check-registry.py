@@ -60,5 +60,5 @@ if __name__ == '__main__':
     args = parser.parse_args()
     paths = [args.schema] if args.schema else sorted(args.migrations.glob('*.sql'))
     assert paths, 'No migrations found'
-    schema = '\n'.join(path.read_text() for path in paths)
-    print(json.dumps(validate(schema, json.loads(args.registry.read_text()))))
+    schema = '\n'.join(path.read_text(encoding='utf-8') for path in paths)
+    print(json.dumps(validate(schema, json.loads(args.registry.read_text(encoding='utf-8')))))

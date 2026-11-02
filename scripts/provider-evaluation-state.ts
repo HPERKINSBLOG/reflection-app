@@ -1,19 +1,7 @@
 import { DatabaseSync } from 'node:sqlite';
 import { createCipheriv, createDecipheriv, createHmac, randomBytes } from 'node:crypto';
-import {
-  chmodSync,
-  closeSync,
-  existsSync,
-  fsyncSync,
-  lstatSync,
-  mkdirSync,
-  openSync,
-  readFileSync,
-  realpathSync,
-  rmSync,
-  writeFileSync,
-} from 'node:fs';
-import { dirname, isAbsolute, join, resolve, sep } from 'node:path';
+import { existsSync, readFileSync, realpathSync, rmSync } from 'node:fs';
+import { join, sep } from 'node:path';
 import { z } from 'zod';
 import {
   Hash,
@@ -27,6 +15,13 @@ import { priceReceipt } from '../src/domain/provider-cost.ts';
 import { UNCERTAINTY_EVALUATION_POLICY } from '../src/contracts/provider-policy.ts';
 import { digest, type PreparedEvaluation } from './provider-evaluation-corpus.ts';
 export { digest } from './provider-evaluation-corpus.ts';
+import {
+  privateDirectory,
+  protectedPath,
+  protectPrivatePath,
+  writePrivateFile,
+} from './private-files.ts';
+export { protectedPath } from './private-files.ts';
 
 export const EvaluationPermit = z.strictObject({
   version: z.literal('reflection-evaluation-permit.v1'),
@@ -99,41 +94,16 @@ type Receipt = {
 };
 const inside = (path: string, root: string) => path === root || path.startsWith(root + sep);
 
-/** Reject symlinks in every existing ancestor, including paths outside the checkout. */
-export function protectedPath(path: string): string {
-  if (!isAbsolute(path)) throw new Error('Absolute protected path required');
-  const result = resolve(path);
-  for (let cursor = result; ; cursor = dirname(cursor)) {
-    if (existsSync(cursor) && lstatSync(cursor).isSymbolicLink())
-      throw new Error('Protected path is a symlink');
-    if (cursor === dirname(cursor)) break;
-  }
-  return result;
-}
 function directory(path: string, checkoutRoot: string) {
   const target = protectedPath(path),
     root = realpathSync(checkoutRoot);
   if (inside(target, root)) throw new Error('Evaluation data must remain outside checkout');
-  mkdirSync(target, { recursive: true, mode: 0o700 });
+  privateDirectory(target);
   if (inside(realpathSync(target), root)) throw new Error('Evaluation path aliases checkout');
-  if ((lstatSync(target).mode & 0o077) !== 0)
-    throw new Error('Evaluation directory must be private');
   return target;
 }
 function durableFile(path: string, bytes: string) {
-  const fd = openSync(path, 'wx', 0o600);
-  try {
-    writeFileSync(fd, bytes);
-    fsyncSync(fd);
-  } finally {
-    closeSync(fd);
-  }
-  const parent = openSync(dirname(path), 'r');
-  try {
-    fsyncSync(parent);
-  } finally {
-    closeSync(parent);
-  }
+  writePrivateFile(path, bytes);
 }
 export function validatePermit(
   value: unknown,
@@ -234,7 +204,7 @@ export class EvaluationJournal {
     this.output = join(outputRoot, this.permit.runId);
     const dbPath = protectedPath(join(this.state, 'journal.sqlite'));
     this.db = new DatabaseSync(dbPath);
-    chmodSync(dbPath, 0o600);
+    protectPrivatePath(dbPath);
     try {
       this.db.exec(`PRAGMA journal_mode=WAL; PRAGMA synchronous=FULL; PRAGMA busy_timeout=3000;
         CREATE TABLE IF NOT EXISTS runs(run_id TEXT PRIMARY KEY,permit_hash TEXT NOT NULL,output_directory TEXT NOT NULL,expires_at TEXT NOT NULL);
@@ -257,7 +227,7 @@ export class EvaluationJournal {
         this.db
           .prepare('INSERT INTO runs VALUES(?,?,?,?)')
           .run(this.permit.runId, permitHash, this.output, this.expiry());
-        mkdirSync(this.output, { mode: 0o700 });
+        privateDirectory(this.output);
       }
     } catch (error) {
       this.db.close();
@@ -345,7 +315,7 @@ export class EvaluationJournal {
     if (this.lock) throw new Error('Evaluation already executing');
     const path = protectedPath(join(this.state, `${this.permit.runId}.lock.sqlite`));
     const db = new DatabaseSync(path);
-    chmodSync(path, 0o600);
+    protectPrivatePath(path);
     try {
       db.exec('PRAGMA busy_timeout=0; BEGIN EXCLUSIVE');
       this.lock = db;

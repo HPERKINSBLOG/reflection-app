@@ -1,4 +1,5 @@
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
+import { writePrivateFile } from '../../scripts/private-files.ts';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, expect, test, vi } from 'vitest';
@@ -81,7 +82,7 @@ function decoded(bytes: Uint8Array) {
 
 test('source diagnostic dry run freezes twelve calls with only selected source text varied', async () => {
   const file = join(directory(), 'sources.json');
-  writeFileSync(file, JSON.stringify(bundle()), { mode: 0o600 });
+  writePrivateFile(file, JSON.stringify(bundle()));
   const network = vi
     .spyOn(globalThis, 'fetch')
     .mockRejectedValue(new Error('No network in dry run'));

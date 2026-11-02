@@ -1,0 +1,223 @@
+{
+  "kind": "milestone-3-preparation-baseline.v1",
+  "preparedOn": "2026-11-01",
+  "scope": "Previous application snapshot before Milestone 3 preparation documents; synthetic local verification only.",
+  "head": "dd7bcca73b178812caaf9c39d04c0b639df858b4",
+  "workingTree": "Includes existing uncommitted Reflection design-system and Windows-tooling changes; HEAD alone is not the tested source.",
+  "sourceDigest": "feacdbe7a2e6886b67fd2869e502d3a7f3cccb22c84122d6da47c5772cf248ad",
+  "sourceMatchCheckedBeforePreparationEdits": true,
+  "freshGateRequiredAfterImplementation": true,
+  "summaryReceipt": {
+    "path": "artifacts/windows-verification-summary.json",
+    "sha256": "df8b1a19592005d05df879b7def29a6c02351831c04aa51749f608e581d2889b"
+  },
+  "verification": {
+    "version": 1,
+    "status": "passed",
+    "sourceDigest": "feacdbe7a2e6886b67fd2869e502d3a7f3cccb22c84122d6da47c5772cf248ad",
+    "node": "v26.12.1",
+    "platform": "win32",
+    "finishedAt": "2026-11-02T03:23:17.299Z",
+    "durationMs": 676495,
+    "deadlineMs": 1200000,
+    "stages": [
+      {
+        "name": "format and lint",
+        "durationMs": 527,
+        "status": "passed"
+      },
+      {
+        "name": "strict TypeScript",
+        "durationMs": 6829,
+        "status": "passed"
+      },
+      {
+        "name": "generated schema drift",
+        "durationMs": 408,
+        "status": "passed"
+      },
+      {
+        "name": "publication guard drift",
+        "durationMs": 107,
+        "status": "passed"
+      },
+      {
+        "name": "contract and reference checks",
+        "durationMs": 299,
+        "status": "passed"
+      },
+      {
+        "name": "private field coverage",
+        "durationMs": 298,
+        "status": "passed"
+      },
+      {
+        "name": "SQLite constraints",
+        "durationMs": 1541,
+        "status": "passed"
+      },
+      {
+        "name": "OpenAPI",
+        "durationMs": 631,
+        "status": "passed"
+      },
+      {
+        "name": "domain and verification behavior",
+        "durationMs": 119497,
+        "status": "passed"
+      },
+      {
+        "name": "workerd D1 batches",
+        "durationMs": 59343,
+        "status": "passed"
+      },
+      {
+        "name": "client production build",
+        "durationMs": 465,
+        "status": "passed"
+      },
+      {
+        "name": "Worker dry-run build",
+        "durationMs": 1619,
+        "status": "passed"
+      },
+      {
+        "name": "identity and saved-reading browser journeys",
+        "durationMs": 484495,
+        "status": "passed"
+      },
+      {
+        "name": "specification package links",
+        "durationMs": 197,
+        "status": "passed"
+      }
+    ],
+    "scope": "synthetic-local-only",
+    "applicationBrowserAcceptance": "local-identity-and-saved-reading-only",
+    "hostedQualification": "not-run"
+  },
+  "summary": {
+    "status": "passed",
+    "scope": "synthetic-local-only",
+    "completedAt": "2026-11-02T03:34:13.600Z",
+    "platform": "win32",
+    "node": "v26.12.1",
+    "sourceDigest": "feacdbe7a2e6886b67fd2869e502d3a7f3cccb22c84122d6da47c5772cf248ad",
+    "fullGate": {
+      "stages": 14,
+      "durationMs": 676495,
+      "deadlineMs": 1200000
+    },
+    "domain": {
+      "passed": 409,
+      "files": 51
+    },
+    "database": {
+      "passed": 525,
+      "files": 46
+    },
+    "browser": {
+      "passed": 134,
+      "files": 15
+    },
+    "crossEngineJourney": {
+      "passed": 36,
+      "files": 4,
+      "durationMs": 630138.689,
+      "projects": [
+        "chromium",
+        "firefox",
+        "webkit"
+      ]
+    },
+    "nativeZoom": [
+      {
+        "theme": "light",
+        "states": 56,
+        "windowInsets": [
+          16
+        ],
+        "faults": 0,
+        "report": "artifacts/accessibility-pass/screens/chromium-native-200-light.json"
+      },
+      {
+        "theme": "dark",
+        "states": 56,
+        "windowInsets": [
+          16
+        ],
+        "faults": 0,
+        "report": "artifacts/accessibility-pass/screens/chromium-native-200-dark.json"
+      }
+    ],
+    "webkitReadinessRegression": {
+      "passed": 3,
+      "files": 1
+    },
+    "diagnostics": {
+      "initialJourney": {
+        "report": "artifacts/windows-journey-before-readiness.json",
+        "passed": 35,
+        "failed": 1,
+        "finding": "Keyboard Enter arrived while Save reading was disabled; final source waits for enabled and focused state."
+      },
+      "trace": "artifacts/windows-webkit-readiness-trace.zip"
+    },
+    "skipped": 0,
+    "flaky": 0,
+    "reports": [
+      {
+        "name": "verification",
+        "path": "artifacts/verify.json",
+        "sha256": "308f9e20a1fa0751d817cabfd3149f7f396e780183c7937801ba229ab80c4ba4"
+      },
+      {
+        "name": "domain",
+        "path": "artifacts/domain-tests.json",
+        "sha256": "ef56d3f07c498b36f7f2a4da4bd38381266f367010e0b96639c1fb0845a6b31d"
+      },
+      {
+        "name": "database",
+        "path": "artifacts/db-tests.json",
+        "sha256": "3dd69541116866b09bd24df954bcd75b0d721c131788301cf8fe7a76deb6af2b"
+      },
+      {
+        "name": "browser",
+        "path": "artifacts/browser-tests.json",
+        "sha256": "87c270b40c84294d99c5860477d92261ef1b8dc7bf2fa991a1d5b3c0d3f4ed53"
+      },
+      {
+        "name": "journey",
+        "path": "artifacts/visual-pass/browser-matrix.json",
+        "sha256": "7e9043016cb1cf9a775fb66f8b97ec76f16d7f55da90b6da116cdf2af04c0804"
+      }
+    ],
+    "limitations": [
+      "No hosted deployment",
+      "No live provider calls",
+      "No physical-device, real-authenticator or screen-reader qualification"
+    ]
+  },
+  "nativeZoomArtifacts": [
+    {
+      "path": "artifacts/accessibility-pass/screens/chromium-native-200-light.json",
+      "sha256": "50c81628ba4be4baf63b18a639b52768183f36056bc7e863697d3af20967dcdd",
+      "theme": "light",
+      "states": 56,
+      "faults": 0
+    },
+    {
+      "path": "artifacts/accessibility-pass/screens/chromium-native-200-dark.json",
+      "sha256": "45aa91baf2ef1cf43de158cacc2ea31eb70e220cfe3a1c055994fe368d34eea4",
+      "theme": "dark",
+      "states": 56,
+      "faults": 0
+    }
+  ],
+  "limitations": [
+    "These receipts predate the preparation documents, which change the repository source digest.",
+    "No Milestone 3 implementation or acceptance pass is asserted.",
+    "No hosted deployment, live provider, physical authenticator or screen-reader qualification is asserted.",
+    "Report paths refer to local artifacts; the summary, original gate receipt and hashes are frozen here, not every raw report."
+  ]
+}

@@ -1,6 +1,8 @@
 import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { pathToFileURL } from 'node:url';
+import { writePrivateFile } from '../../scripts/private-files.ts';
 import { spawnSync } from 'node:child_process';
 import { afterEach, expect, test, vi } from 'vitest';
 import {
@@ -318,7 +320,7 @@ test.each([
 test('execute refuses absent credentials and wrong project before opening a journal', async () => {
   const f = await fixture();
   const file = join(f.directory, 'permit.json');
-  writeFileSync(file, JSON.stringify(f.permit), { mode: 0o600 });
+  writePrivateFile(file, JSON.stringify(f.permit));
   await expect(runEvaluationCli(['--execute', '--permit', file], {})).rejects.toThrow(
     'Evaluation credentials are missing',
   );
@@ -428,14 +430,15 @@ test.each(['reserved', 'returned'] as const)(
     writeFileSync(
       script,
       `
-import { readFileSync } from 'node:fs';
-import { prepareEvaluation, runEvaluation } from ${JSON.stringify(join(process.cwd(), 'scripts/provider-evaluate.ts'))};
-import { EvaluationJournal } from ${JSON.stringify(join(process.cwd(), 'scripts/provider-evaluation-state.ts'))};
+import { readFileSync, writeSync } from 'node:fs';
+import { prepareEvaluation, runEvaluation } from ${JSON.stringify(pathToFileURL(join(process.cwd(), 'scripts/provider-evaluate.ts')).href)};
+import { EvaluationJournal } from ${JSON.stringify(pathToFileURL(join(process.cwd(), 'scripts/provider-evaluation-state.ts')).href)};
 const config=JSON.parse(readFileSync(process.argv[2],'utf8'));
 const prepared=await prepareEvaluation('smoke');
 const journal=new EvaluationJournal(config.permit,{stateDirectory:config.stateDirectory,checkoutRoot:process.cwd(),key:new Uint8Array(config.key),prepared});
-if(config.phase==='reserved') { journal.reserve(prepared.requests[0].id); process.kill(process.pid,'SIGKILL'); }
-journal.recordReceipt=()=>{process.kill(process.pid,'SIGKILL');};
+function crash() { writeSync(1, 'crash:' + config.phase); process.kill(process.pid,'SIGKILL'); }
+if(config.phase==='reserved') { journal.reserve(prepared.requests[0].id); crash(); }
+journal.recordReceipt=crash;
 await runEvaluation(config.permit,{write:async()=>({kind:'refusal',receipt:null})},journal);
 `,
     );
@@ -443,7 +446,10 @@ await runEvaluation(config.permit,{write:async()=>({kind:'refusal',receipt:null}
       cwd: process.cwd(),
       encoding: 'utf8',
     });
-    expect(child.signal).toBe('SIGKILL');
+    expect(child.error).toBeUndefined();
+    expect(child.stdout).toBe(`crash:${phase}`);
+    if (process.platform === 'win32') expect(child.status).toBe(1);
+    else expect(child.signal).toBe('SIGKILL');
     const resumed = f.open(true),
       sent: string[] = [];
     const result = await runEvaluation(
@@ -657,7 +663,7 @@ test('private prompts and responses are encrypted outside checkout; tampering an
 test('normal verification cannot reach the live CLI even with a key', async () => {
   const f = await fixture();
   const file = join(f.directory, 'permit.json');
-  writeFileSync(file, JSON.stringify(f.permit), { mode: 0o600 });
+  writePrivateFile(file, JSON.stringify(f.permit));
   const result = spawnSync(
     process.execPath,
     ['--import', 'tsx', 'scripts/provider-evaluate.ts', '--execute', '--permit', file],

@@ -1,4 +1,5 @@
 import { readFileSync, lstatSync } from 'node:fs';
+import { hasPrivateAccess } from './private-files.ts';
 import { homedir } from 'node:os';
 import { join, relative, resolve, sep } from 'node:path';
 import { pathToFileURL } from 'node:url';
@@ -194,7 +195,7 @@ function liveWriter(
 function protectedJson(file: string) {
   const path = protectedPath(file),
     stat = lstatSync(path);
-  if (!stat.isFile() || stat.size > 64000 || (stat.mode & 0o077) !== 0)
+  if (!stat.isFile() || stat.size > 64000 || !hasPrivateAccess(path))
     throw new Error('Permit must be a protected regular file');
   return JSON.parse(readFileSync(path, 'utf8')) as unknown;
 }

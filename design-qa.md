@@ -1,5 +1,23 @@
 # Reflection design QA
 
+## November 1 — Reflection Paper and Evening system
+
+The owner's [editable Reflection library](https://www.figma.com/design/a0u0Ok74iKTMjp1L5osRnU?node-id=3-347) now supplies the exact eight-color palette, typography, shared controls and theme behavior. This increment supersedes the earlier Solstice palette guidance. [Implementation and component guide](docs/design/reflection-system.md).
+
+The landing page uses the library's spiral bloom and returning ribbon, open space and “A little space to reflect.” Shared buttons, links, inputs, labelled fields, chips, cards and branding apply across identity, recovery, account, readings, reflections, revisit notes and progress. System follows the OS; an explicit Paper/Evening choice persists only the non-private preference and synchronizes across tabs. Changing themes preserves in-memory drafts.
+
+| Reviewed capture | Paper | Evening |
+| --- | --- | --- |
+| Desktop landing | [1280 px](docs/design/screens/2026-11-01-reflection/1280-paper-landing.png) | [1280 px](docs/design/screens/2026-11-01-reflection/1280-evening-landing.png) |
+| Phone landing | [390 px](docs/design/screens/2026-11-01-reflection/390-paper-landing.png) | [390 px](docs/design/screens/2026-11-01-reflection/390-evening-landing.png) |
+| Reading form | [Paper](docs/design/screens/2026-11-01-reflection/paper-reading-form.png) | [Evening](docs/design/screens/2026-11-01-reflection/evening-reading-form.png) |
+
+Windows verification follow-through: the extensionless CLI launch, CRLF-sensitive frozen inputs, Python encoding, Windows permission checks and ESM crash subprocesses have been corrected. The native Chromium 200% zoom harness now compensates for the measured window frame; both Paper and Evening journeys pass at exact 320/390/768/1280 CSS-pixel widths.
+
+The [Windows verification guide](docs/WINDOWS_VERIFICATION.md) describes the platform behavior and reproduction commands. The [combined verification receipt](artifacts/windows-verification-summary.json) records the full gate and complete cross-engine matrix, with counts, source identity and report hashes. It supersedes the earlier partial design-only runs preserved in `artifacts/reflection-*`. No native zoom cases are excluded from these commands.
+
+Earlier failures were retained as diagnostic evidence: 366/403 domain/tooling tests and 119/134 broad Chromium tests passed before the tooling, selector, fixture-path and geometry corrections. The earlier 34-case engine run explicitly omitted native zoom; the complete matrix includes all 36 cases. This is local working-tree evidence. No hosted deployment, live-provider, physical-device, screen-reader or real-passkey qualification is claimed.
+
 ## November 1 — Dated revisit notes
 
 The approved dated-note increment is implemented. [Qualification and comparison scope](docs/verification/2026-11-01/dated-revisit-notes.md) identifies final-source receipts and captures. The chronological list follows the Return, with time board: original reflection first, complete note text and separate saved/edited dates, then a labelled text/stance editor. Full retention/encryption disclosure remains visible; illustrative board copy is not substituted.

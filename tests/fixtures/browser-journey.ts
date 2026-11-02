@@ -1,7 +1,8 @@
 import { chromium, expect, type Page } from '@playwright/test';
+import { fileURLToPath } from 'node:url';
 import { account } from './browser-reading.ts';
 
-export const spreadPhotoPath = new URL('./spread-photo.jpg', import.meta.url).pathname;
+export const spreadPhotoPath = fileURLToPath(new URL('./spread-photo.jpg', import.meta.url));
 export const longQuestion = (
   'What should I consider as I make room for a different direction, while keeping the commitments that already matter to me? '.repeat(
     4,

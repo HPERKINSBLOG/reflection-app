@@ -98,7 +98,12 @@ test('keyboard upload, processing, save, reflection, Account and exact return jo
   await expect(accepted.getByRole('heading', { name: question, exact: true })).toBeFocused();
   const original = await accepted.textContent();
   const url = page.url();
-  await page.getByRole('button', { name: 'Save reading', exact: true }).focus();
+  const saveReading = page.getByRole('button', { name: 'Save reading', exact: true });
+  // The accepted heading can mount before the request's final busy-state cleanup.
+  // focus() does not wait for a disabled button to become keyboard actionable.
+  await expect(saveReading).toBeEnabled();
+  await saveReading.focus();
+  await expect(saveReading).toBeFocused();
   await page.keyboard.press('Enter');
   await expect(page.getByRole('status').filter({ hasText: 'Reading saved.' })).toBeVisible();
   const reflection = page.getByLabel('Your reflection', { exact: true });
@@ -185,7 +190,7 @@ test('keyboard upload, processing, save, reflection, Account and exact return jo
   ).toBeFocused();
   await page.keyboard.press('Enter');
   await expect(
-    page.getByRole('heading', { name: 'A place to return to.', exact: true }),
+    page.getByRole('heading', { name: 'A little space to reflect.', exact: true }),
   ).toBeFocused();
   await expect(
     page.getByRole('status').filter({ hasText: 'Deletion is complete for active storage.' }),

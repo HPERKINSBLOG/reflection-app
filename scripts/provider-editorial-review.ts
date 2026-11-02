@@ -1,4 +1,5 @@
-import { lstatSync, readFileSync, writeFileSync } from 'node:fs';
+import { lstatSync, readFileSync } from 'node:fs';
+import { hasPrivateAccess, writePrivateFile } from './private-files.ts';
 import { dirname, relative, resolve, sep } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { z } from 'zod';
@@ -84,7 +85,7 @@ export async function runEditorialReview(argv: string[]) {
   if ((!within.startsWith(`..${sep}`) && within !== '..') || dirname(input) !== dirname(output))
     throw new Error('Review report must stay beside its external packet');
   const stat = lstatSync(input);
-  if (!stat.isFile() || stat.size > 8 * 1024 * 1024 || (stat.mode & 0o077) !== 0)
+  if (!stat.isFile() || stat.size > 8 * 1024 * 1024 || !hasPrivateAccess(input))
     throw new Error('Protected bounded packet required');
   const bytes = readFileSync(input);
   const packet = z
@@ -120,7 +121,7 @@ export async function runEditorialReview(argv: string[]) {
       semanticAssessment: 'requires-human-review',
     })),
   };
-  writeFileSync(output, `${JSON.stringify(report, null, 2)}\n`, { flag: 'wx', mode: 0o600 });
+  writePrivateFile(output, `${JSON.stringify(report, null, 2)}\n`);
   return {
     cases: report.cases.length,
     calls: 0,

@@ -1,3 +1,4 @@
+import { Button } from './design/components.tsx';
 import { READING_PRODUCT_COPY } from '../contracts/product-copy.ts';
 import { useEffect, useRef, useState } from 'react';
 import type { z } from 'zod';
@@ -304,7 +305,7 @@ export function RequestProgress(props: {
         </p>
         <div className="actions progress-actions">
           {status?.state === 'published' && (
-            <button
+            <Button
               type="button"
               disabled={!status.editionId}
               onClick={() => {
@@ -316,28 +317,28 @@ export function RequestProgress(props: {
               }}
             >
               Open reading
-            </button>
+            </Button>
           )}
           {canRetry && (
-            <button type="button" onClick={() => actions.current.retry()}>
+            <Button type="button" onClick={() => actions.current.retry()}>
               Retry this request
-            </button>
+            </Button>
           )}
           {notice && (
-            <button type="button" className="secondary" onClick={() => actions.current.check()}>
+            <Button type="button" variant="secondary" onClick={() => actions.current.check()}>
               <Icon name="sync" />
               Check request again
-            </button>
+            </Button>
           )}
           {status && !terminal(status) && (
-            <button
+            <Button
               type="button"
-              className="secondary"
+              variant="secondary"
               disabled={cancelling}
               onClick={() => actions.current.cancel()}
             >
               Cancel reading
-            </button>
+            </Button>
           )}
         </div>
       </div>

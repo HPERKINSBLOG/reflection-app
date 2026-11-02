@@ -34,7 +34,7 @@ test('complete downloaded kit recovers the same account in a new browser without
   const original = await authenticator(page);
   const initial = await page.goto('/');
   expect(initial?.headers()['content-security-policy']).toContain("frame-ancestors 'none'");
-  await expect(page.getByRole('heading', { name: 'A place to return to.' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'A little space to reflect.' })).toBeVisible();
   await expect(page).toHaveTitle(/Reflection/);
   await page.screenshot({ path: '/tmp/reflection-identity-desktop.png', fullPage: true });
   await page.getByRole('button', { name: 'Create a test account' }).click();
@@ -158,7 +158,7 @@ test('cross-tab invalidation prevents a delayed registration response from resto
   await page.waitForTimeout(200);
   await expect(page.getByRole('heading', { name: 'Keep your recovery kit' })).toHaveCount(0);
   await expect(page.getByRole('button', { name: 'Download recovery kit' })).toHaveCount(0);
-  await expect(page.getByRole('heading', { name: 'A place to return to.' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'A little space to reflect.' })).toBeVisible();
 });
 
 test('a transient session-refresh error preserves the newly issued one-time kit', async ({
@@ -209,6 +209,6 @@ test('an explicitly invalidated session clears a replacement kit after rotation'
       : route.continue(),
   );
   await page.getByRole('button', { name: 'Replace recovery kit' }).click();
-  await expect(page.getByRole('heading', { name: 'A place to return to.' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'A little space to reflect.' })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Download recovery kit' })).toHaveCount(0);
 });

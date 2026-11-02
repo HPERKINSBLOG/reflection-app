@@ -1,10 +1,10 @@
 # Journey milestones
 
-The current implementation batch extends the existing frontend to **landing and saved-reading visual refinement** using the owner's November 1 concept boards. It does not add data models, routes, permissions or generation behavior. The earlier functional/accessibility corrections, mobile hierarchy, reading composition and illustration delivery remain the baseline.
+The current implementation applies the owner's editable **Reflection Paper and Evening design system** across the existing app. The [implementation guide](reflection-system.md) documents the exact eight-color palette, local typography, reusable components, theme preference and Figma source. The earlier functional/accessibility corrections, mobile hierarchy, reading composition and illustration delivery remain the baseline.
 
 ## Current visual increment: entry and return
 
-The [November 1 concept direction](concept-direction.md) links the three refined boards and distinguishes existing screens from proposals. Apply the artwork scale hierarchy to landing and saved readings; preserve PR #7's date/question history rows and status-first outcome screens. Recovery/replacement/recovery-kit remain a later styling increment. Use the placement inventory in [`src/client/design/art/README.md`](../../src/client/design/art/README.md). Keep Newsreader/Figtree/Outfit, Fluent icons and the Solstice light/dark tokens. Do not replace the current palette just to sample compressed concepts.
+The [November 1 concept direction](concept-direction.md) remains historical context. The later approved Figma library supersedes its Solstice palette guidance. The app retains Newsreader/Figtree/Outfit and Fluent icons, applies the exact Paper/Evening tokens and uses the spiral bloom with “A little space to reflect.” on the landing page. Date/question history rows and status-first outcome screens retain their existing workflow. Use the placement inventory in [`src/client/design/art/README.md`](../../src/client/design/art/README.md).
 
 Acceptance: the same 320/390/768/1280 px, two-theme matrix; empty/populated history and long questions; all recovery warnings/codes and progress outcomes; no decorative art mistaken for a user photograph, recognized card or security status. Extend the existing evidence harness and update `design-qa.md`, then run `npm run verify`. No illustration-only change closes the physical-device or assistive-technology gaps.
 

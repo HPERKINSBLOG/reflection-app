@@ -1,11 +1,12 @@
 import { execFileSync, spawnSync } from 'node:child_process';
 import { randomBytes } from 'node:crypto';
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { parseEnv } from 'node:util';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { parseIdentitySecrets } from '../src/worker/identity/crypto.ts';
 import { verificationEnvironment } from './verification-environment.ts';
+import { hasPrivateAccess, privateDirectory, writePrivateFile } from './private-files.ts';
 
 /** Keep provider credentials in memory; persist only this app's own encryption keys. */
 export function loadLocalLiveSettings(
@@ -33,10 +34,10 @@ export function loadLocalLiveSettings(
   const projectId = environment.OPENAI_PROJECT_ID ?? values.OPENAI_PROJECT_ID;
   const modelApiKey = environment.MODEL_API_KEY ?? values.MODEL_API_KEY;
   const persistence = join(root, '.wrangler', 'live-development');
-  mkdirSync(persistence, { recursive: true, mode: 0o700 });
+  privateDirectory(persistence);
   const identityFile = join(persistence, 'identity.json');
   if (!existsSync(identityFile)) {
-    writeFileSync(
+    writePrivateFile(
       identityFile,
       JSON.stringify({
         environment: 'live-local',
@@ -45,9 +46,9 @@ export function loadLocalLiveSettings(
         recoveryKey: randomBytes(32).toString('base64url'),
         hmacKey: randomBytes(32).toString('base64url'),
       }),
-      { flag: 'wx', mode: 0o600 },
     );
   }
+  if (!hasPrivateAccess(identityFile)) throw new Error('Local app keys must be private');
   const identitySecrets = readFileSync(identityFile, 'utf8');
   if (parseIdentitySecrets(identitySecrets).environment !== 'live-local')
     throw new Error('Local app key configuration unavailable');

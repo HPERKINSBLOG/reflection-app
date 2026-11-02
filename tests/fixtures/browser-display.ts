@@ -51,15 +51,21 @@ export async function nativeZoomContext(baseURL: string, theme: 'light' | 'dark'
     expect(zoom).toBe(2);
     const cdp = await context.newCDPSession(page);
     const { windowId } = await cdp.send('Browser.getWindowForTarget');
+    await expect.poll(() => page.evaluate(() => devicePixelRatio)).toBe(2);
+    // Windows includes non-content window borders in Browser.setWindowBounds.
+    // Measure that inset at real browser zoom instead of emulating a viewport.
+    const chromeWidth = await page.evaluate(() => outerWidth - innerWidth * devicePixelRatio);
+    expect(chromeWidth).toBeGreaterThanOrEqual(0);
     const resize = async (width: number) => {
+      const windowWidth = width * zoom + chromeWidth;
       await cdp.send('Browser.setWindowBounds', {
         windowId,
-        bounds: { width: width * 2, height: 1000, windowState: 'normal' },
+        bounds: { width: windowWidth, height: 1000, windowState: 'normal' },
       });
       await expect.poll(() => page.evaluate(() => innerWidth)).toBe(width);
       // These distinguish real page zoom from CSS zoom, pinch zoom and DPR emulation.
       await expect.poll(() => page.evaluate(() => devicePixelRatio)).toBe(2);
-      expect(await page.evaluate(() => outerWidth)).toBe(width * 2);
+      expect(await page.evaluate(() => outerWidth)).toBe(windowWidth);
       expect(await page.evaluate(() => visualViewport?.scale)).toBe(1);
       expect(await page.locator('html').evaluate((element) => getComputedStyle(element).zoom)).toBe(
         '1',

@@ -28,6 +28,7 @@ function fixture() {
   writeFileSync(join(root, 'package-lock.json'), '{}');
   writeFileSync(join(root, '.node-version'), '26.12.1\n');
   writeFileSync(join(root, '.npmrc'), 'engine-strict=true\n');
+  writeFileSync(join(root, '.gitattributes'), '* text=auto eol=lf\n');
   writeFileSync(join(root, 'config/runtime.template.json'), '{"generation":"off"}');
   writeFileSync(join(root, '.env'), 'SECRET=must-not-be-shipped');
   writeFileSync(join(root, '.wrangler/private.sqlite'), 'private database');
@@ -74,6 +75,7 @@ test('the ZIP is reproducible, includes verification evidence, and excludes loca
     { encoding: 'utf8' },
   ).stdout;
   expect(contents).toContain('reflection-app/src/app.ts');
+  expect(contents).toContain('reflection-app/.gitattributes');
   expect(contents).toContain('reflection-app/artifacts/verify.json');
   expect(contents).toContain('reflection-app/config/runtime.template.json');
   expect(contents).toContain('reflection-app/evaluation/corpus.json');

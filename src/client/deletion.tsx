@@ -1,3 +1,4 @@
+import { Button } from './design/components.tsx';
 import { useEffect, useRef, useState } from 'react';
 import type { z } from 'zod';
 import { apiSchemas } from '../contracts/index.ts';
@@ -109,16 +110,16 @@ export function DeletionReceiptPanel({
         </p>
         <Notice message={message ? { text: message, tone: 'error' } : null} />
         <div className="actions">
-          <button type="button" onClick={() => void check()} disabled={busy}>
+          <Button type="button" onClick={() => void check()} disabled={busy}>
             Check deletion status
-          </button>
-          <button type="button" className="secondary" onClick={download}>
+          </Button>
+          <Button type="button" variant="secondary" onClick={download}>
             <Icon name="download" />
             Download deletion receipt
-          </button>
-          <button type="button" className="text-button" onClick={onDismiss}>
+          </Button>
+          <Button type="button" variant="text-button" onClick={onDismiss}>
             Dismiss receipt
-          </button>
+          </Button>
         </div>
       </div>
     </section>

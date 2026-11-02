@@ -14,7 +14,7 @@ for name in required:
 links = 0
 for file in [root / 'README.md', *docs.glob('*.md')]:
     assert file.is_file(), file
-    for target in re.findall(r'\[[^\]]*\]\(([^)]+)\)', file.read_text()):
+    for target in re.findall(r'\[[^\]]*\]\(([^)]+)\)', file.read_text(encoding='utf-8')):
         target = target.strip().strip('<>')
         if re.match(r'[A-Za-z][A-Za-z0-9+.-]*:', target) or target.startswith('#'):
             continue
@@ -24,7 +24,7 @@ for file in [root / 'README.md', *docs.glob('*.md')]:
 
 json_files = list(docs.glob('*.json'))
 for file in json_files:
-    json.loads(file.read_text())
+    json.loads(file.read_text(encoding='utf-8'))
 
 objects = 0
 def closed_objects(node):
@@ -40,8 +40,8 @@ def closed_objects(node):
         for value in node:
             closed_objects(value)
 
-closed_objects(json.loads((docs / 'model-output.schema.json').read_text()))
-closed_objects(json.loads((docs / 'model-output-v2.schema.json').read_text()))
+closed_objects(json.loads((docs / 'model-output.schema.json').read_text(encoding='utf-8')))
+closed_objects(json.loads((docs / 'model-output-v2.schema.json').read_text(encoding='utf-8')))
 assert objects > 0
 print(json.dumps({'required_files': len(required), 'local_markdown_links': links,
                   'json_files': len(json_files), 'closed_model_objects': objects,

@@ -2,6 +2,8 @@
 
 Status: specification only; follows dated notes and the selected-context preview/permission increment. Not a reinterpretation or mutation of the original accepted reading.
 
+Review note, 2026-11-02: the independent child-save/deletion proposal below is **unresolved**, not the Milestone 3 default. [Decision D1](../MILESTONE_3_PREPARATION.md#decisions-and-proposed-defaults) recommends shared retention within one saved reading, matching the architecture. Resolve that choice before implementing either retention behavior; use the continuity plan for current version compatibility and provider-payload constraints.
+
 ## Screens and behavior
 
 - **Ask a follow-up** is available from a saved reading. The composer names the exact saved parent's question, date and edition, shows its original three-card draw and labels the new question as a follow-up. No implicit “latest reading” lookup.

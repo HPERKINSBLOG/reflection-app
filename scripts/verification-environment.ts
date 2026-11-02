@@ -13,6 +13,9 @@ const inherited = new Set([
   'SYSTEMROOT',
   'COMSPEC',
   'PATHEXT',
+  'USERPROFILE',
+  'LOCALAPPDATA',
+  'APPDATA',
   'LANG',
   'LC_ALL',
   'TZ',
@@ -31,10 +34,14 @@ const inherited = new Set([
   'CURL_CA_BUNDLE',
 ]);
 
-export function verificationEnvironment(environment: NodeJS.ProcessEnv): NodeJS.ProcessEnv {
+export function verificationEnvironment(
+  environment: NodeJS.ProcessEnv,
+  platform: NodeJS.Platform = process.platform,
+): NodeJS.ProcessEnv {
   const result: NodeJS.ProcessEnv = {};
   for (const [name, value] of Object.entries(environment)) {
-    if (inherited.has(name) || name.startsWith('CODEX_') || name.startsWith('OIC_'))
+    const key = platform === 'win32' ? name.toUpperCase() : name;
+    if (inherited.has(key) || key.startsWith('CODEX_') || key.startsWith('OIC_'))
       result[name] = value;
   }
   return {

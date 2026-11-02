@@ -2,6 +2,8 @@
 
 Status: specification only; follows dated revisit notes and precedes follow-up generation. General AI permission and permission for a particular context submission are separate choices.
 
+Review note, 2026-11-02: [Milestone 3 decisions D2–D7](../MILESTONE_3_PREPARATION.md#decisions-and-proposed-defaults) and [Continuity C1–C3](../superpowers/plans/2026-11-01-milestone-3-continuity.md) specify the proposed source/revision bounds, exact request acknowledgement and old-request compatibility. Parent questions and interpretations remain unselected unless explicitly previewed. These are planning contracts; the flow is still unimplemented.
+
 ## November 1 visual reference
 
 See [Choose what travels forward](concepts/2026-11-01/03-selected-context.jpg) and the [shared concept direction](concept-direction.md). The refined board uses the simple Reflection / Account header and two distinct states: empty selection and review of complete excerpts with their saved dates and exact revisions. Use a quiet × **Remove selection**, not a trash icon or destructive color; removing request context does not delete the original writing. The concept ends at **Continue to permission review**, before acknowledgement or dispatch. Final permission wording and submission rules remain open; **this flow remains specification only** and the implementation gate below still applies.

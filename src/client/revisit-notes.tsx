@@ -1,3 +1,4 @@
+import { Button, Input, TextArea } from './design/components.tsx';
 import {
   type Ref,
   useCallback,
@@ -493,13 +494,13 @@ export function RevisitNotes({
         (busy === 'list' ? (
           <p role="status">Loading notes…</p>
         ) : (
-          <button
+          <Button
             type="button"
-            className="secondary"
+            variant="secondary"
             onClick={() => void run('list', (current) => list(current))}
           >
             Retry loading notes
-          </button>
+          </Button>
         ))}
       {loaded && page.items.length === 0 && <p>No revisit notes yet.</p>}
       <ol className="revisit-list">
@@ -532,17 +533,17 @@ export function RevisitNotes({
               <p className="authored-note">{note.note || 'This saved legacy note is blank.'}</p>
               <p className="muted">Response: {labels[note.stance]}</p>
               <div className="actions">
-                <button
+                <Button
                   type="button"
-                  className="secondary"
+                  variant="secondary"
                   disabled={!saved || busy === 'save'}
                   onClick={(event) => begin(note, event.currentTarget)}
                 >
                   Edit note
-                </button>
-                <button
+                </Button>
+                <Button
                   type="button"
-                  className="text-button"
+                  variant="text-button"
                   onClick={(event) => {
                     deleteInitiator.current = event.currentTarget;
                     setDeleting(note);
@@ -550,23 +551,23 @@ export function RevisitNotes({
                   }}
                 >
                   Delete note
-                </button>
+                </Button>
               </div>
             </article>
           </li>
         ))}
       </ol>
       {page.nextCursor && (
-        <button
+        <Button
           type="button"
-          className="secondary"
+          variant="secondary"
           disabled={busy === 'list'}
           onClick={() => void run('list', (current) => list(current, page.nextCursor))}
         >
           Load more notes
-        </button>
+        </Button>
       )}
-      <button
+      <Button
         ref={addRef}
         type="button"
         disabled={
@@ -578,7 +579,7 @@ export function RevisitNotes({
         onClick={(event) => begin(null, event.currentTarget)}
       >
         Add revisit note
-      </button>
+      </Button>
       {page.items.length >= REVISIT_LIMITS.activePerEdition && (
         <p>This reading has reached its 100-note limit. You can still read or delete notes.</p>
       )}
@@ -592,7 +593,7 @@ export function RevisitNotes({
         >
           <h3>{editor.base ? 'Edit revisit note' : 'Add revisit note'}</h3>
           <label htmlFor="revisit-text">Your revisit note</label>
-          <textarea
+          <TextArea
             ref={textRef}
             id="revisit-text"
             name="note"
@@ -631,7 +632,7 @@ export function RevisitNotes({
             Unsaved drafts stay only in memory and are lost when you leave this reading or reload.
           </p>
           <div className="actions">
-            <button
+            <Button
               type="submit"
               disabled={
                 busy === 'save' ||
@@ -642,10 +643,10 @@ export function RevisitNotes({
               }
             >
               Save note
-            </button>
-            <button type="button" className="secondary" disabled={busy === 'save'} onClick={cancel}>
+            </Button>
+            <Button type="button" variant="secondary" disabled={busy === 'save'} onClick={cancel}>
               Cancel
-            </button>
+            </Button>
           </div>
           {editor.base?.revision === REVISIT_LIMITS.revisionsPerNote && (
             <p>
@@ -655,20 +656,20 @@ export function RevisitNotes({
           {conflict && (
             <div className="notice revisit-conflict">
               <p>Your editable draft above has been kept.</p>
-              <button
+              <Button
                 type="button"
-                className="secondary"
+                variant="secondary"
                 disabled={busy === 'refresh'}
                 onClick={refresh}
               >
                 Refresh saved note
-              </button>
+              </Button>
               {latest && (
                 <>
                   <p>Current saved note · revision {latest.revision}</p>
                   <blockquote>{latest.note || 'This saved legacy note is blank.'}</blockquote>
                   <p>Saved response: {labels[latest.stance]}</p>
-                  <button
+                  <Button
                     type="button"
                     onClick={() => {
                       setEditor({ base: latest });
@@ -684,7 +685,7 @@ export function RevisitNotes({
                     }}
                   >
                     Use this revision for my next save
-                  </button>
+                  </Button>
                 </>
               )}
             </div>
@@ -697,11 +698,11 @@ export function RevisitNotes({
             Seven days have passed since this attempt. It will not be submitted again. Reconcile
             saved notes before choosing a new intent.
           </p>
-          <button type="button" disabled={busy === 'reconcile'} onClick={reconcile}>
+          <Button type="button" disabled={busy === 'reconcile'} onClick={reconcile}>
             Reconcile saved notes
-          </button>
+          </Button>
           {reconciled && !editor?.base && (
-            <button
+            <Button
               type="button"
               onClick={() => {
                 intent.current = null;
@@ -713,7 +714,7 @@ export function RevisitNotes({
               }}
             >
               Save as a new note
-            </button>
+            </Button>
           )}
         </div>
       )}
@@ -725,8 +726,9 @@ export function RevisitNotes({
             versions? This removes active storage; backups are deleted on their own schedule.
             Downloaded copies are unchanged.
           </p>
-          <label className="check">
-            <input
+          <label className="check" htmlFor="check-checked">
+            <Input
+              id="check-checked"
               ref={checkRef}
               type="checkbox"
               checked={checked}
@@ -735,17 +737,17 @@ export function RevisitNotes({
             Delete this note and all saved versions permanently
           </label>
           <div className="actions">
-            <button
+            <Button
               type="button"
-              className="danger"
+              variant="danger"
               disabled={!checked || deletionBusy || expired}
               onClick={remove}
             >
               Confirm note deletion
-            </button>
-            <button
+            </Button>
+            <Button
               type="button"
-              className="secondary"
+              variant="secondary"
               onClick={() => {
                 setDeleting(null);
                 setChecked(false);
@@ -753,7 +755,7 @@ export function RevisitNotes({
               }}
             >
               Cancel note deletion
-            </button>
+            </Button>
           </div>
         </div>
       )}
@@ -771,14 +773,14 @@ export function RevisitNotes({
         </section>
       ))}
       {loaded && (
-        <button
+        <Button
           type="button"
-          className="text-button"
+          variant="text-button"
           disabled={busy === 'list'}
           onClick={() => void run('list', (current) => list(current, null, true))}
         >
           Refresh notes
-        </button>
+        </Button>
       )}
     </section>
   );

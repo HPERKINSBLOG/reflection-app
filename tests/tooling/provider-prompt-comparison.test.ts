@@ -1,4 +1,5 @@
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
+import { writePrivateFile } from '../../scripts/private-files.ts';
 import { createDecipheriv } from 'node:crypto';
 import { DatabaseSync } from 'node:sqlite';
 import { tmpdir } from 'node:os';
@@ -50,7 +51,7 @@ async function fixture() {
   const directory = mkdtempSync(join(tmpdir(), 'prompt-comparison-'));
   directories.push(directory);
   const sourceBundlePath = join(directory, 'sources.json');
-  writeFileSync(sourceBundlePath, JSON.stringify(sources()), { mode: 0o600 });
+  writePrivateFile(sourceBundlePath, JSON.stringify(sources()));
   const prepared = await prepareEvaluation(profile, sources()),
     key = new Uint8Array(32).fill(15);
   const permit: EvaluationPermit = {
@@ -76,7 +77,7 @@ async function fixture() {
     sourceBundlePath,
   };
   const permitPath = join(directory, 'permit.json');
-  writeFileSync(permitPath, JSON.stringify(permit), { mode: 0o600 });
+  writePrivateFile(permitPath, JSON.stringify(permit));
   const stateDirectory = join(directory, 'state');
   const env = {
     OPENAI_API_KEY: 'synthetic-key',

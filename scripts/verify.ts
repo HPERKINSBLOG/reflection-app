@@ -1,4 +1,4 @@
-import { spawn } from 'node:child_process';
+import { spawn, spawnSync } from 'node:child_process';
 import { mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
@@ -7,10 +7,14 @@ import { sourceDigest } from './verification-state.ts';
 import { assertNoLocalSecrets, verificationEnvironment } from './verification-environment.ts';
 import { requireBrowserTests, requireExecutedTests } from './test-evidence.ts';
 
-const deadlineMs = 540_000;
+// Windows ACL subprocesses and browser window capture require a larger bounded
+// local budget. Receipt consumers validate the platform and the same ceiling.
+export const verificationDeadline = (platform: string) =>
+  platform === 'win32' ? 1_200_000 : 540_000;
+const deadlineMs = verificationDeadline(process.platform);
 const stages = [
-  ['format and lint', 'node_modules/@biomejs/biome/bin/biome', ['check', '.']],
-  ['strict TypeScript', 'node_modules/typescript/bin/tsc', ['--noEmit']],
+  ['format and lint', 'node', ['node_modules/@biomejs/biome/bin/biome', 'check', '.']],
+  ['strict TypeScript', 'node', ['node_modules/typescript/bin/tsc', '--noEmit']],
   ['generated schema drift', 'node', ['--import', 'tsx', 'scripts/schemas.ts', '--check']],
   [
     'publication guard drift',
@@ -88,7 +92,14 @@ function run(command: string, args: readonly string[], remainingMs: number): Pro
         } catch {
           /* Process already exited. */
         }
-      } else child.kill('SIGKILL');
+      } else if (child.pid) {
+        // Terminate only this stage's owned process tree, including dev servers.
+        spawnSync('taskkill.exe', ['/PID', String(child.pid), '/T', '/F'], {
+          windowsHide: true,
+          stdio: 'ignore',
+          timeout: 10_000,
+        });
+      }
     };
     const onInterrupt = () => {
       interrupted = 'SIGINT';
@@ -116,7 +127,8 @@ function run(command: string, args: readonly string[], remainingMs: number): Pro
     child.on('close', (code) => {
       cleanup();
       if (interrupted) reject(new Error(`Verification interrupted by ${interrupted}`));
-      else if (timedOut) reject(new Error('Verification exceeded the 540-second deadline'));
+      else if (timedOut)
+        reject(new Error(`Verification exceeded the ${deadlineMs / 1000}-second deadline`));
       else if (code !== 0) reject(new Error(`Verification command failed (exit ${code})`));
       else accept();
     });
@@ -184,6 +196,7 @@ export async function verify(): Promise<void> {
       status: passed ? 'passed' : 'failed',
       sourceDigest: source,
       node: process.version,
+      platform: process.platform,
       finishedAt: new Date().toISOString(),
       durationMs: Math.round(performance.now() - started),
       deadlineMs,

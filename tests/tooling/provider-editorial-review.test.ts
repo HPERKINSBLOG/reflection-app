@@ -1,4 +1,5 @@
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
+import { writePrivateFile } from '../../scripts/private-files.ts';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { afterEach, expect, test } from 'vitest';
@@ -90,7 +91,7 @@ test('offline report binds the original packet, never grants acceptance, and pre
     manifestHash: 'a'.repeat(64),
     items: [item()],
   });
-  writeFileSync(packetPath, packet, { mode: 0o600 });
+  writePrivateFile(packetPath, packet);
   const result = await runEditorialReview(['--packet', packetPath, '--out', outPath]);
   expect(result).toMatchObject({ cases: 1, calls: 0, humanReviewRequired: true });
   const report = JSON.parse(readFileSync(outPath, 'utf8'));

@@ -20,7 +20,7 @@ import {
 } from '../src/worker/runtime/config.ts';
 import { sourceDigest } from './verification-state.ts';
 import { assertNoLocalSecrets, verificationEnvironment } from './verification-environment.ts';
-import { verificationStageNames } from './verify.ts';
+import { verificationDeadline, verificationStageNames } from './verify.ts';
 import { projectRoot } from './schemas.ts';
 
 const hash = z.string().regex(/^[a-f0-9]{64}$/),
@@ -70,26 +70,34 @@ export function hostedConfigurationDigest(target: unknown) {
     .update(canonicalJson(hostedConfiguration(target)))
     .digest('hex');
 }
-const Verification = z.object({
-  version: z.literal(1),
-  status: z.literal('passed'),
-  sourceDigest: hash,
-  node: z.string().regex(/^v26\./),
-  finishedAt: z.iso.datetime(),
-  durationMs: z.number().positive().max(540000),
-  deadlineMs: z.literal(540000),
-  stages: z
-    .array(
-      z.strictObject({
-        name: z.string(),
-        status: z.literal('passed'),
-        durationMs: z.number().nonnegative(),
-      }),
-    )
-    .length(14),
-  scope: z.literal('synthetic-local-only'),
-  hostedQualification: z.literal('not-run'),
-});
+const Verification = z
+  .object({
+    version: z.literal(1),
+    status: z.literal('passed'),
+    sourceDigest: hash,
+    node: z.string().regex(/^v26\./),
+    platform: z.string().optional(),
+    finishedAt: z.iso.datetime(),
+    durationMs: z.number().positive().max(1200000),
+    deadlineMs: z.union([z.literal(540000), z.literal(1200000)]),
+    stages: z
+      .array(
+        z.strictObject({
+          name: z.string(),
+          status: z.literal('passed'),
+          durationMs: z.number().nonnegative(),
+        }),
+      )
+      .length(14),
+    scope: z.literal('synthetic-local-only'),
+    hostedQualification: z.literal('not-run'),
+  })
+  .refine(
+    (value) =>
+      value.deadlineMs === verificationDeadline(value.platform ?? 'legacy') &&
+      value.durationMs <= value.deadlineMs,
+    'Verification exceeded its platform budget',
+  );
 export function checkHostedCandidate(input: {
   trustedBranch: string;
   commit: string;

@@ -25,6 +25,7 @@ const rootFiles = new Set([
   'LICENSE',
   'LICENSE.md',
   '.gitignore',
+  '.gitattributes',
   'index.html',
   'tsconfig.json',
   'biome.json',

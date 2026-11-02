@@ -5,6 +5,7 @@ import art3 from './design/art/study-stillness.jpg';
 import art4 from './design/art/study-possibility.jpg';
 import art5 from './design/art/study-tension.jpg';
 import manifest from './design/art/optimized/manifest.json';
+import spiralBloom from './design/art/spiral-bloom.svg';
 
 type ImageSpec = { src: string; width: number; height: number; srcSet?: string; sizes?: string };
 const variants = import.meta.glob<string>('./design/art/optimized/*.webp', {
@@ -26,6 +27,7 @@ function responsive(name: keyof typeof manifest, sizes: string): ImageSpec {
 }
 
 const art = {
+  'spiral-bloom': plate(spiralBloom, 347.649, 422.238),
   'study-return': plate(art0, 487, 450),
   'study-inquiry': plate(art1, 488, 434),
   'study-perspective': plate(art2, 488, 450),

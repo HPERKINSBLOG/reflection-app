@@ -2,7 +2,7 @@
 import sqlite3,json
 from pathlib import Path
 root=Path(__file__).resolve().parents[1]/'src/worker/db'
-schema='\n'.join(p.read_text() for p in sorted((root/'migrations').glob('*.sql')));guard=(root/'publication_guard.sql').read_text()
+schema='\n'.join(p.read_text(encoding='utf-8') for p in sorted((root/'migrations').glob('*.sql')));guard=(root/'publication_guard.sql').read_text(encoding='utf-8')
 A='10101010-1010-4010-8010-101010101010';B='20202020-2020-4020-8020-202020202020';H='a'*64;H2='b'*64;POL='c'*64
 checks=[]
 def new():
@@ -97,7 +97,7 @@ assert not d.execute('pragma foreign_key_check').fetchall()
 checks.append('detached erased alias survives source deletion')
 rejects(d,"INSERT INTO import_identities(owner_id,source_key_hmac,source_entity_hmac,original_hmac,entity_kind,key_version,erased_at) VALUES(?,'source-key','source-entity','changed','session',1,1000)",(A,))
 checks.append('erased source key still prevents duplicate alias insertion')
-registry=json.loads((root/'column-registry.json').read_text())['tables'];d=new()
+registry=json.loads((root/'column-registry.json').read_text(encoding='utf-8'))['tables'];d=new()
 actual={r[0] for r in d.execute("select name from sqlite_master where type='table'")};assert actual==set(registry)
 for t in actual:
  cols={r[1] for r in d.execute(f'pragma table_xinfo({t})')};assert cols==set(registry[t]['columns']),t

@@ -1,4 +1,5 @@
-import { mkdtempSync, mkdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
+import { mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { hasPrivateAccess } from '../../scripts/private-files.ts';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { expect, test } from 'vitest';
@@ -22,7 +23,7 @@ test('live startup reads the supplied env file without copying the API key into 
     expect(stored).not.toContain('synthetic-private-key');
     expect(stored).not.toContain('do-not-expose');
     expect(JSON.parse(stored).environment).toBe('live-local');
-    expect(statSync(identityFile).mode & 0o777).toBe(0o600);
+    expect(hasPrivateAccess(identityFile)).toBe(true);
     expect(Object.keys(first).sort()).toEqual([
       'apiKey',
       'identitySecrets',
