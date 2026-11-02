@@ -12,6 +12,7 @@ import { copyLinks, destinationLinks, nativeLinks } from './import-lifecycle.ts'
 import { nativeImport } from './import-native.ts';
 import { nativeImports } from './import-native-batch.ts';
 import { encryptedBytes } from './crypto.ts';
+import { resolvedImportLinks, importGroupUnavailable } from './import-provenance.ts';
 import {
   ImportHeader,
   ImportItemBody,
@@ -248,6 +249,14 @@ export class ReadingImports extends RecordBase {
       );
       const prior = aliases.find((a) => a.source_key_hmac === disposition.key);
       const copies = copyLinks(this, session.subjectId, 'item', `${id}:${index}`, [
+        ...(await resolvedImportLinks(
+          this,
+          session.subjectId,
+          account.key_version,
+          item.unit,
+          header,
+          aliases,
+        )),
         ...nativeLinks(session.subjectId, item.unit),
         ...(prior ? destinationLinks(prior) : []),
       ]);
@@ -489,7 +498,17 @@ export class ReadingImports extends RecordBase {
       reviewed.header.recovery.kind === 'none'
         ? await nativeImports(this, session, reviewed.units)
         : new Map();
+    if (await importGroupUnavailable(this, session.subjectId, id))
+      throw new RecordError(410, 'CONTENT_UNAVAILABLE');
     for (const [i, unit] of reviewed.units.entries()) {
+      await resolvedImportLinks(
+        this,
+        session.subjectId,
+        account.key_version,
+        unit,
+        reviewed.header,
+        aliases,
+      );
       const row = reviewed.rows[i]!,
         actual = await this.disposition(
           session,
@@ -531,7 +550,7 @@ export class ReadingImports extends RecordBase {
         statements.push(
           q(
             this.db,
-            'INSERT INTO import_identities(owner_id,source_key_hmac,source_entity_hmac,original_hmac,entity_kind,session_id,edition_id,reflection_id,reflection_revision,revisit_id,revisit_revision,source_record_enc,key_version,materialized) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
+            'INSERT INTO import_identities(owner_id,source_key_hmac,source_entity_hmac,original_hmac,entity_kind,session_id,edition_id,reflection_id,reflection_revision,revisit_id,revisit_revision,source_record_enc,key_version,materialized,source_family_hmac,record_revision) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
             session.subjectId,
             entry.row.source_key_hmac,
             entry.row.source_entity_hmac,
@@ -554,6 +573,8 @@ export class ReadingImports extends RecordBase {
             ),
             account.key_version,
             entry.duplicate?.native ? 0 : 1,
+            await reviewed.hashes.family(effectiveIdentity(entry.unit.identity, reviewed.header)),
+            entry.unit.identity.recordRevision,
           ),
         );
       }

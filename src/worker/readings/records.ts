@@ -4,6 +4,7 @@ import type { Session } from '../identity/types.ts';
 import { assertion } from '../identity/checkpoint.ts';
 import { statement as q, DB_NOW } from '../db/core.ts';
 import { availableSession, iso, type RecordBase, RecordError, type SessionRow } from './base.ts';
+import { importedReadingUnavailable } from './import-provenance.ts';
 export const Question = z.strictObject({ v: z.literal(1), text: z.string().max(10000).nullable() });
 export class ReadingRecords {
   constructor(readonly base: RecordBase) {}
@@ -83,6 +84,11 @@ export class ReadingRecords {
       !row.body_enc ||
       !['accepted', 'imported'].includes(row.status) ||
       row.content_state === 'withdrawn'
+    )
+      throw new RecordError(410, 'CONTENT_UNAVAILABLE');
+    if (
+      row.status === 'imported' &&
+      (await importedReadingUnavailable(this.base, session.subjectId, id))
     )
       throw new RecordError(410, 'CONTENT_UNAVAILABLE');
     const result = await this.base.opened<z.infer<typeof Reading>>(

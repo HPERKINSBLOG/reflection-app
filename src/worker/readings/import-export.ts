@@ -3,6 +3,7 @@ import type { RecordBase } from './base.ts';
 import { RecordError } from './base.ts';
 import { statement as q } from '../db/core.ts';
 import { ImportItemBody, effectiveIdentity } from './import-model.ts';
+import { importCopyUnavailable } from './import-provenance.ts';
 
 export async function exportImport(
   base: RecordBase,
@@ -22,7 +23,47 @@ export async function exportImport(
     ImportItemBody,
   );
   const identity = effectiveIdentity(unit.identity, header);
-  if (unit.kind === 'portable') return PortableRecord.parse({ ...unit.record, identity });
+  if (unit.kind === 'portable') {
+    if (await importCopyUnavailable(base, owner, 'alias', key)) {
+      if (unit.record.kind === 'reading') {
+        const value = unit.record.value;
+        const at = await q(
+          base.db,
+          'SELECT coalesce(e.invalidated_at,c.withdrawn_at,e.accepted_at) at FROM import_identities a JOIN reading_editions e ON e.owner_id=a.owner_id AND e.id=a.edition_id LEFT JOIN content_editions c ON c.hash=e.content_hash WHERE a.owner_id=? AND a.source_key_hmac=?',
+          owner,
+          key,
+        ).first<number>('at');
+        return PortableRecord.parse({
+          ...unit.record,
+          identity,
+          value: {
+            kind: 'reading.unavailable.v1',
+            editionId: value.editionId,
+            sessionId: value.sessionId,
+            editionNumber: value.editionNumber,
+            parentEditionId: 'parentEditionId' in value ? value.parentEditionId : null,
+            reason: 'content_withdrawn',
+            unavailableAt: new Date(at ?? 0).toISOString(),
+          },
+        });
+      }
+      if (unit.record.kind === 'generation_receipt')
+        return PortableRecord.parse({
+          ...unit.record,
+          identity,
+          value: {
+            ...unit.record.value,
+            transmission: null,
+            selected: [],
+            contextReceipt: undefined,
+            redactedSelectionCount: unit.record.value.selected?.length ?? 0,
+            reproduction: 'redacted',
+          },
+        });
+      throw new RecordError(410, 'CONTENT_UNAVAILABLE');
+    }
+    return PortableRecord.parse({ ...unit.record, identity });
+  }
   const alias = await q(
     base.db,
     'SELECT * FROM import_identities WHERE owner_id=? AND source_key_hmac=? AND erased_at IS NULL AND withheld_at IS NULL',

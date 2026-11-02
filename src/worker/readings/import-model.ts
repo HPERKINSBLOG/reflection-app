@@ -42,6 +42,8 @@ export interface ItemRow {
   session_id: string | null;
 }
 export interface AliasRow {
+  source_family_hmac?: string | null;
+  record_revision?: number | null;
   source_key_hmac: string;
   source_entity_hmac: string;
   original_hmac: string;
@@ -73,7 +75,7 @@ export function originalContent(unit: Unit): unknown {
       return record;
     }
     const { identity: _identity, ...record } = unit.record;
-    return record;
+    return { record, originalJsonText: unit.originalJsonText, originalSha256: unit.originalSha256 };
   }
   const { identity: _identity, parentIdentity: _parent, ...record } = unit.record;
   return record;
@@ -88,6 +90,14 @@ export async function importHashers(base: RecordBase, owner: string, version: nu
   ]);
   return {
     key: (identity: Identity) => key(importKeyInput(identity)),
+    family: (identity: Identity) =>
+      key([
+        'import-family.v1',
+        identity.source.namespaceId,
+        identity.source.revision,
+        identity.kind,
+        identity.recordId,
+      ]),
     entity: (identity: Identity) => entity(importEntityInput(identity)),
     content: (unit: Unit) => content(originalContent(unit)),
     acknowledgement,

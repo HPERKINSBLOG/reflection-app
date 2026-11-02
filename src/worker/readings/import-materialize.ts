@@ -15,6 +15,7 @@ import { editionContextText } from '../../domain/tarot/continuity.ts';
 import { revisitField } from './revisit-codec.ts';
 import { destinationLinks, unitLinks, type Link } from './import-lifecycle.ts';
 import { encryptedBytes } from './crypto.ts';
+import { resolvedImportLinks } from './import-provenance.ts';
 
 export type Destination = Pick<
   AliasRow,
@@ -54,6 +55,50 @@ export async function materializeImport(
   const entityIds = new Map<string, string>();
   const hashes = await importHashers(base, owner, version),
     unitKeys = new Set(entries.map((e) => e.unit.key));
+  const [sessionRows, reflectionRows, revisitRows, reflectionRevisions, revisitRevisions] =
+    await base.db.batch<Record<string, unknown>>([
+      q(base.db, 'SELECT id,revision FROM reading_sessions WHERE owner_id=?', owner),
+      q(
+        base.db,
+        'SELECT id,current_revision,session_id,edition_id,deleted_at FROM reflections WHERE owner_id=?',
+        owner,
+      ),
+      q(base.db, 'SELECT * FROM revisits WHERE owner_id=?', owner),
+      q(base.db, 'SELECT reflection_id,revision FROM reflection_revisions WHERE owner_id=?', owner),
+      q(base.db, 'SELECT revisit_id,revision FROM revisit_revisions WHERE owner_id=?', owner),
+    ]);
+  const existingSessions = new Set(sessionRows!.results.map((r) => String(r.id))),
+    existingReflections = new Map(reflectionRows!.results.map((r) => [String(r.id), r])),
+    existingRevisits = new Map(revisitRows!.results.map((r) => [String(r.id), r]));
+  const occupiedReflections = new Set(
+      reflectionRevisions!.results.map((r) => `${r.reflection_id}:${r.revision}`),
+    ),
+    occupiedRevisits = new Set([
+      ...revisitRevisions!.results.map((r) => `${r.revisit_id}:${r.revision}`),
+      ...revisitRows!.results.map((r) => `${r.id}:${r.current_revision}`),
+    ]);
+  for (const entry of entries)
+    if (entry.unit.kind === 'portable') {
+      const familyKey = await hashes.family(effectiveIdentity(entry.unit.identity, header));
+      const candidates = aliases.filter(
+        (a) => a.source_family_hmac === familyKey && a.erased_at === null && a.withheld_at === null,
+      );
+      const ids = new Set(
+        candidates.flatMap((a) => {
+          const id =
+            entry.unit.identity.kind === 'session'
+              ? a.session_id
+              : entry.unit.identity.kind === 'reflection'
+                ? a.reflection_id
+                : entry.unit.identity.kind === 'revisit'
+                  ? a.revisit_id
+                  : null;
+          return id ? [id] : [];
+        }),
+      );
+      if (ids.size > 1) throw new RecordError(409, 'CONFLICT');
+      if (ids.size) entityIds.set(familyKey, [...ids][0]!);
+    }
   for (const entry of entries)
     for (const dependency of entry.unit.dependencies) {
       if (dependency.recordRevision === null) throw new RecordError(422, 'IMPORT_INVALID');
@@ -126,11 +171,7 @@ export async function materializeImport(
         });
       else {
         const record = unit.record;
-        const entityKey = JSON.stringify([
-          unit.identity.source,
-          record.kind,
-          unit.identity.recordId,
-        ]);
+        const entityKey = await hashes.family(effectiveIdentity(unit.identity, header));
         const id = entityIds.get(entityKey) ?? crypto.randomUUID();
         entityIds.set(entityKey, id);
         if (record.kind === 'session')
@@ -181,7 +222,8 @@ export async function materializeImport(
     ).first('n'),
   );
   const editionNumbers = new Map<string, number>([[family, editionNumber]]),
-    authored = new Set<string>();
+    authored = new Set<string>(),
+    sessionWrites = new Set<string>();
   for (const { unit, duplicate } of ordered) {
     if (duplicate) continue;
     const destination = known.get(unit.key)!;
@@ -267,20 +309,57 @@ export async function materializeImport(
         destination.session_id =
           dependency('session')?.session_id ?? dependency('reading')?.session_id ?? null;
       if (record.kind === 'session') {
+        if (sessionWrites.has(destination.session_id!)) continue;
+        sessionWrites.add(destination.session_id!);
+        const candidates = entries.filter(
+          (e) =>
+            e.unit.kind === 'portable' &&
+            e.unit.record.kind === 'session' &&
+            known.get(e.unit.key)?.session_id === destination.session_id,
+        );
+        const latest = candidates.reduce((a, b) =>
+          a.unit.identity.recordRevision > b.unit.identity.recordRevision ? a : b,
+        ).unit;
+        if (latest.kind !== 'portable' || latest.record.kind !== 'session')
+          throw new RecordError(422, 'IMPORT_INVALID');
+        const familyHash = await hashes.family(effectiveIdentity(unit.identity, header)),
+          previousRevision = Math.max(
+            0,
+            ...aliases
+              .filter((a) => a.source_family_hmac === familyHash)
+              .map((a) => a.record_revision ?? 0),
+          );
+        if (
+          existingSessions.has(destination.session_id!) &&
+          latest.identity.recordRevision <= previousRevision
+        )
+          continue;
         const encrypted = await seal('reading_sessions', 'question_enc', destination.session_id!, {
           v: 1,
-          text: record.value.question,
+          text: latest.record.value.question,
         });
-        statements.push(
-          q(
-            base.db,
-            `INSERT INTO reading_sessions(id,owner_id,status,question_enc,created_at,saved_at) VALUES(?,?,'saved',?,${DB_NOW},${DB_NOW})`,
-            destination.session_id,
-            owner,
-            encrypted,
-          ),
-        );
-        editionNumbers.set(destination.session_id!, 0);
+        if (existingSessions.has(destination.session_id!)) {
+          statements.push(
+            q(
+              base.db,
+              'UPDATE reading_sessions SET question_enc=?,revision=revision+1 WHERE owner_id=? AND id=?',
+              encrypted,
+              owner,
+              destination.session_id,
+            ),
+          );
+        } else
+          statements.push(
+            q(
+              base.db,
+              `INSERT INTO reading_sessions(id,owner_id,status,question_enc,created_at,saved_at) VALUES(?,?,'saved',?,${DB_NOW},${DB_NOW})`,
+              destination.session_id,
+              owner,
+              encrypted,
+            ),
+          );
+        if (!existingSessions.has(destination.session_id!))
+          editionNumbers.set(destination.session_id!, 0);
       } else if (record.kind === 'reading') {
         if (!destination.session_id) throw new RecordError(422, 'IMPORT_INVALID');
         if (!editionNumbers.has(destination.session_id))
@@ -376,6 +455,15 @@ export async function materializeImport(
           throw new RecordError(422, 'IMPORT_INVALID');
         const revision = record.value.revision,
           id = destination.reflection_id!;
+        const existing = existingReflections.get(id);
+        if (occupiedReflections.has(`${id}:${revision}`)) throw new RecordError(409, 'CONFLICT');
+        if (
+          existing &&
+          (existing.deleted_at !== null ||
+            existing.session_id !== destination.session_id ||
+            existing.edition_id !== parent.edition_id)
+        )
+          throw new RecordError(409, 'CONFLICT');
         const max = Math.max(
           ...entries
             .filter(
@@ -386,17 +474,28 @@ export async function materializeImport(
             .map((e) => e.unit.identity.recordRevision),
         );
         if (!authored.has(id)) {
-          statements.push(
-            q(
-              base.db,
-              'INSERT INTO reflections(id,owner_id,session_id,edition_id,current_revision) VALUES(?,?,?,?,?)',
-              id,
-              owner,
-              destination.session_id,
-              parent.edition_id,
-              max,
-            ),
-          );
+          if (existing)
+            statements.push(
+              q(
+                base.db,
+                'UPDATE reflections SET current_revision=max(current_revision,?) WHERE owner_id=? AND id=?',
+                max,
+                owner,
+                id,
+              ),
+            );
+          else
+            statements.push(
+              q(
+                base.db,
+                'INSERT INTO reflections(id,owner_id,session_id,edition_id,current_revision) VALUES(?,?,?,?,?)',
+                id,
+                owner,
+                destination.session_id,
+                parent.edition_id,
+                max,
+              ),
+            );
           authored.add(id);
         }
         const body = Reflection.parse({
@@ -423,6 +522,15 @@ export async function materializeImport(
           throw new RecordError(422, 'IMPORT_INVALID');
         const id = destination.revisit_id!,
           revision = destination.revisit_revision!;
+        const existing = existingRevisits.get(id);
+        if (occupiedRevisits.has(`${id}:${revision}`)) throw new RecordError(409, 'CONFLICT');
+        if (
+          existing &&
+          (existing.deleted_at !== null ||
+            existing.session_id !== destination.session_id ||
+            existing.edition_id !== parent.edition_id)
+        )
+          throw new RecordError(409, 'CONFLICT');
         const revisions = entries
           .map((e) => e.unit)
           .filter(
@@ -433,6 +541,10 @@ export async function materializeImport(
           );
         const latest = revisions.reduce((a, b) =>
           a.identity.recordRevision > b.identity.recordRevision ? a : b,
+        );
+        const currentRevision = Math.max(
+          latest.identity.recordRevision,
+          Number(existing?.current_revision ?? 0),
         );
         const bodyFor = (candidate: typeof record) =>
           RevisitV2.parse({
@@ -450,26 +562,59 @@ export async function materializeImport(
           });
         if (!authored.has(id)) {
           if (latest.record.kind !== 'revisit') throw new RecordError(422, 'IMPORT_INVALID');
-          const body = bodyFor(latest.record),
-            encrypted = await sealField(revisitField(owner, id, body.revision), body);
-          statements.push(
-            q(
-              base.db,
-              'INSERT INTO revisits(id,owner_id,edition_id,note_enc,key_version,created_at,session_id,current_revision,updated_at) VALUES(?,?,?,?,?,?,?,?,?)',
-              id,
-              owner,
-              parent.edition_id,
-              encrypted,
-              version,
-              Date.parse(body.createdAt),
-              destination.session_id,
-              body.revision,
-              Date.parse(body.updatedAt),
-            ),
-          );
+          const body = bodyFor(latest.record);
+          if (existing && Date.parse(body.createdAt) !== Number(existing.created_at))
+            throw new RecordError(409, 'CONFLICT');
+          if (existing && body.revision > Number(existing.current_revision)) {
+            const oldRevision = Number(existing.current_revision),
+              old = await base.opened(
+                revisitField(owner, id, oldRevision),
+                String(existing.note_enc),
+                RevisitV2,
+              );
+            statements.push(
+              q(
+                base.db,
+                'INSERT INTO revisit_revisions(revisit_id,owner_id,revision,body_enc,key_version,created_at) VALUES(?,?,?,?,?,?)',
+                id,
+                owner,
+                oldRevision,
+                await sealField(revisitField(owner, id, oldRevision, true), old),
+                version,
+                Date.parse(old.updatedAt),
+              ),
+            );
+            statements.push(
+              q(
+                base.db,
+                'UPDATE revisits SET note_enc=?,key_version=?,current_revision=?,updated_at=? WHERE owner_id=? AND id=?',
+                await sealField(revisitField(owner, id, body.revision), body),
+                version,
+                body.revision,
+                Date.parse(body.updatedAt),
+                owner,
+                id,
+              ),
+            );
+          } else if (!existing)
+            statements.push(
+              q(
+                base.db,
+                'INSERT INTO revisits(id,owner_id,edition_id,note_enc,key_version,created_at,session_id,current_revision,updated_at) VALUES(?,?,?,?,?,?,?,?,?)',
+                id,
+                owner,
+                parent.edition_id,
+                await sealField(revisitField(owner, id, body.revision), body),
+                version,
+                Date.parse(body.createdAt),
+                destination.session_id,
+                body.revision,
+                Date.parse(body.updatedAt),
+              ),
+            );
           authored.add(id);
         }
-        if (revision !== latest.identity.recordRevision) {
+        if (revision !== currentRevision) {
           const body = bodyFor(record),
             encrypted = await sealField(revisitField(owner, id, revision, true), body);
           statements.push(
@@ -490,7 +635,14 @@ export async function materializeImport(
   }
   const provenance: Link[][] = [];
   for (const entry of entries) {
-    const links: Link[] = [];
+    const links: Link[] = await resolvedImportLinks(
+      base,
+      owner,
+      version,
+      entry.unit,
+      header,
+      aliases,
+    );
     for (const dependency of entry.unit.dependencies) {
       if (dependency.recordRevision === null) continue;
       const destination = known.get(

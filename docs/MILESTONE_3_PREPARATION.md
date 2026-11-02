@@ -1,6 +1,6 @@
 # Milestone 3 preparation
 
-Status: C1/P1 foundations are published on main. C2/C3 continuity lifecycle and selection UI have been adopted and locally checked; P2 encrypted import persistence is implemented under final branch review. See [implementation evidence and remaining gates](MILESTONE_3_IMPLEMENTATION.md). C4/C5 continuity activation, P3/P4 import UI/qualification and hosted/provider qualification remain outstanding. The owner approved implementation and shared-session retention (D1) on 2026-11-02.
+Status: C1/P1 foundations are published on main. C2/C3 continuity lifecycle and selection UI have been adopted and locally checked; P2 encrypted import persistence and the final review fixes are implemented locally. See [implementation evidence and remaining gates](MILESTONE_3_IMPLEMENTATION.md). C4/C5 continuity activation, P3/P4 import UI/qualification and hosted/provider qualification remain outstanding. The owner approved implementation and shared-session retention (D1) on 2026-11-02.
 
 Milestone 3 extends Reflection with deliberate, bounded use of selected context, follow-ups tied to an exact saved edition, and supported legacy/portable imports. Dated revisit notes were brought forward and are already implemented. Ordinary saved history, exact reopening, initial reflections, recovery, export and deletion are existing regression requirements.
 
@@ -40,7 +40,7 @@ Code authorities: [`src/contracts/index.ts`](../src/contracts/index.ts), [`gener
 | D7 — permission and activation | Preview itself sends nothing. A submission-specific acknowledgement binds the complete reviewed selections and current permission. Revocation is distinct from erasing retained copies. Live continuity remains disabled until its separate provider qualification is recorded. | Existing consent architecture; final recipient/retention copy must be accurate for the configured provider. No zero-retention claim, human-review gate, geography policy or age gate is introduced. |
 | D8 — bounded import assembly | Selected-unit chunks preserve identities and exact scoped raw values; one group per commit, with no server queue of later groups. Groups may span bounded previews. | Local real D1 fixtures cover a 102-reading group across uploads, atomic rollback, export/erasure, lost acknowledgements and stale restore. Hosted timing and resource qualification remain separate. |
 
-D1 and the D2–D7 implementation defaults were approved with the delivery sequence on 2026-11-02. D8 remains a technical proof obligation. The earlier preparation review did not itself record approval; the later instruction “Approved. Proceed.” authorizes this implementation.
+D1 and the D2–D7 implementation defaults were approved with the delivery sequence on 2026-11-02. D8 now has local real-D1 publication, rollback, erasure and reconciliation proof; hosted resource and timing qualification remains separate. The earlier preparation review did not itself record approval; the later instruction “Approved. Proceed.” authorizes this implementation.
 
 ## Delivery sequence
 

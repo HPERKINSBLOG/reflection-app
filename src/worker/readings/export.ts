@@ -159,7 +159,7 @@ export class ReadingExports {
     ) n WHERE NOT EXISTS(SELECT 1 FROM import_identities a WHERE a.owner_id=? AND (
       (n.kind='reading' AND a.edition_id=n.id) OR (n.kind='reflection' AND a.reflection_id=n.id AND a.reflection_revision=n.revision) OR
       (n.kind='revisit' AND a.revisit_id=n.id AND (a.revisit_revision=n.revision OR a.revisit_revision IS NULL)) OR
-      (n.kind='session' AND a.entity_kind='session' AND a.session_id=n.id)))
+      (n.kind='session' AND a.entity_kind='session' AND a.session_id=n.id AND (a.materialized=1 OR a.record_revision=n.revision))))
       AND ${point ? '(kind,id,revision)>(?,?,?)' : '1'} ORDER BY kind,id,revision LIMIT 101)
     SELECT * FROM (SELECT * FROM native UNION ALL
       SELECT CASE entity_kind WHEN 'edition' THEN 'reading' WHEN 'reflection_revision' THEN 'reflection' WHEN 'receipt' THEN 'generation_receipt' ELSE entity_kind END,

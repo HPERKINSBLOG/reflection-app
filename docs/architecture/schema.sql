@@ -1447,6 +1447,9 @@ CREATE INDEX import_items_entity ON import_items(owner_id,source_entity_hmac);
 ALTER TABLE import_identities ADD COLUMN revisit_revision INTEGER CHECK(revisit_revision IS NULL OR (revisit_revision BETWEEN 1 AND 100 AND entity_kind='revisit' AND erased_at IS NULL AND revisit_id IS NOT NULL));
 ALTER TABLE import_identities ADD COLUMN materialized INTEGER NOT NULL DEFAULT 1 CHECK(materialized IN(0,1));
 ALTER TABLE import_identities ADD COLUMN withheld_at INTEGER;
+ALTER TABLE import_identities ADD COLUMN source_family_hmac TEXT;
+ALTER TABLE import_identities ADD COLUMN record_revision INTEGER CHECK(record_revision>=1);
+CREATE INDEX import_identity_family ON import_identities(owner_id,source_family_hmac,record_revision);
 -- Deliberately no source FK: provenance must survive a missing primary source on restore.
 CREATE TABLE import_copy_sources (
  owner_id TEXT NOT NULL REFERENCES accounts(id) ON DELETE CASCADE,

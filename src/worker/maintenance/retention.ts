@@ -81,6 +81,22 @@ export class RetentionMaintenance {
       this.invalidate('import_items', results),
       q(this.db, `UPDATE import_items SET result_enc=NULL WHERE rowid IN(${results})`),
     ]);
+    // Bounded row cleanup after every receipt/idempotency window; aliases and tombstones remain.
+    await remove(
+      'import_items',
+      `body_enc IS NULL AND result_enc IS NULL AND group_id IN(SELECT id FROM import_groups g WHERE g.owner_id=import_items.owner_id AND g.expires_at<=${DB_NOW} AND g.outcome_expires_at<=${DB_NOW}) AND NOT EXISTS(SELECT 1 FROM idempotency_keys k WHERE k.owner_id=import_items.owner_id AND k.resource_id IN(import_items.group_id,import_items.batch_id) AND k.expires_at>${DB_NOW})`,
+      'batch_id,item_index',
+    );
+    await remove(
+      'import_groups',
+      `expires_at<=${DB_NOW} AND outcome_expires_at<=${DB_NOW} AND NOT EXISTS(SELECT 1 FROM import_items i WHERE i.owner_id=import_groups.owner_id AND i.group_id=import_groups.id) AND NOT EXISTS(SELECT 1 FROM idempotency_keys k WHERE k.owner_id=import_groups.owner_id AND k.resource_id=import_groups.id AND k.expires_at>${DB_NOW})`,
+      'expires_at',
+    );
+    await remove(
+      'import_batches',
+      `expires_at<=${DB_NOW} AND NOT EXISTS(SELECT 1 FROM import_items i WHERE i.owner_id=import_batches.owner_id AND i.batch_id=import_batches.id) AND NOT EXISTS(SELECT 1 FROM idempotency_keys k WHERE k.owner_id=import_batches.owner_id AND k.resource_id=import_batches.id AND k.expires_at>${DB_NOW})`,
+      'expires_at',
+    );
     await remove(
       'import_copy_sources',
       `copy_kind='item' AND NOT EXISTS(SELECT 1 FROM import_items i WHERE i.owner_id=import_copy_sources.owner_id AND i.batch_id || ':' || i.item_index=import_copy_sources.copy_id AND (i.body_enc IS NOT NULL OR i.result_enc IS NOT NULL))`,

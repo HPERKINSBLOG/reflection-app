@@ -109,6 +109,12 @@ export async function withdrawContent(
       hash,
     ),
     assertion(db, 'changes()=1'),
+    // Invalidate already-started private reads/exports, including aliases and imported copies.
+    q(
+      db,
+      'UPDATE accounts SET data_revision=data_revision+1 WHERE id IN(SELECT owner_id FROM reading_editions WHERE content_hash=?)',
+      hash,
+    ),
     q(
       db,
       `UPDATE system_state SET revision=revision+1,generation_enabled=CASE WHEN active_content_hash=? THEN 0 ELSE generation_enabled END,dispatch_mode=CASE WHEN active_content_hash=? THEN 'off' ELSE dispatch_mode END,updated_at=${DB_NOW} WHERE id=1 AND revision=?`,

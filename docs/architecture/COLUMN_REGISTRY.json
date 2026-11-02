@@ -1759,6 +1759,22 @@
           "nullable": true,
           "default": null,
           "export": "privacy fence and materialization metadata; never live authority"
+        },
+        "source_family_hmac": {
+          "aadRule": null,
+          "class": "M",
+          "sqlType": "TEXT",
+          "nullable": true,
+          "default": null,
+          "export": "original source records decrypted; no keyed indexes"
+        },
+        "record_revision": {
+          "aadRule": null,
+          "class": "M",
+          "sqlType": "INTEGER",
+          "nullable": true,
+          "default": null,
+          "export": "owned exact source revision; no authority restored"
         }
       }
     },

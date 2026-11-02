@@ -7,8 +7,9 @@ Foundations are published on main at c56ebcd. The implementation branch preserve
 ## Evidence
 
 - C2/C3 takeover: 126 database tests, 151 domain tests and 8 selected-context browser tests passed after the final adopted source changes. TypeScript, build and source/schema checks passed.
-- P2 focused local run: 117 tests across import service, privacy, migration, round trip, account rekey, stale restore, cleanup and accounting passed. Cases cover atomic publication of 102 readings across uploads, transactional rollback, seven-day outcomes, 24-hour raw expiry, typed identity forgery, AI-off import, explicit recovery, native and historical snapshot reconciliation, pending erasure fences and exact raw provenance.
-- Further local checks cover native reconciliation of 100 authored revisions with a bounded D1 query count. Registry coverage is complete for 43 tables and 420 columns; SQL constraints and OpenAPI checks pass.
+- P2 initial focused local run: 117 tests across import service, privacy, migration, round trip, account rekey, stale restore, cleanup and accounting passed. Cases cover atomic publication of 102 readings across uploads, transactional rollback, seven-day outcomes, 24-hour raw expiry, typed identity forgery, AI-off import, explicit recovery, native and historical snapshot reconciliation, pending erasure fences and exact raw provenance.
+- Further local checks cover native reconciliation of 100 authored revisions with a bounded D1 query count. Registry coverage is complete for 43 tables and 422 columns; SQL constraints and OpenAPI checks pass.
+- Final independent review found five Important issues; regression tests now cover and pass withdrawal/restore redaction, foreign staged-copy erasure, incremental authored/session histories, exact portable raw conflicts and staging-overhead reclamation. The expanded focused suite passes 142 tests.
 - Final branch review and the full gate are recorded in canonical verification artifacts. Changing run receipts remain under `artifacts/`; only a passing receipt with the same source digest establishes a full local gate.
 
 ## Persistence decisions

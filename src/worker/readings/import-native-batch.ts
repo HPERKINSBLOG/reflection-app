@@ -31,7 +31,10 @@ export async function nativeImports(base: RecordBase, session: Session, units: U
               offset += request.statements.length;
             }
           },
-          (error) => requests.forEach((request) => request.reject(error)),
+          (error) =>
+            requests.forEach((request) => {
+              request.reject(error);
+            }),
         );
       }, 0);
     });
