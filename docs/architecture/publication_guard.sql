@@ -2,6 +2,7 @@
 -- update. Earlier statements roll back on failure; a prior read is insufficient.
 -- Deadline authority is the database execution clock, never a bound worker time.
 -- Failure deliberately violates CHECK(ok=1), rolling back the whole batch.
+-- Group conjunctions to keep all stage variants below D1's expression-depth limit.
 INSERT INTO assertion_probe(ok)
 SELECT 0
 WHERE NOT EXISTS (
@@ -19,17 +20,17 @@ WHERE NOT EXISTS (
     AND a.key_version=:key_version AND r.key_version=:key_version
     AND a.permission_revision=r.permission_revision AND p.model_allowed=1)
     AND s.status IN('open','saved') AND b.body_enc IS NOT NULL
+    AND (r.expires_at>CAST(unixepoch('subsec') * 1000 AS INTEGER)
     AND r.run_epoch=:run_epoch AND r.lease_token=:lease_token
     AND r.lease_expires_at>CAST(unixepoch('subsec') * 1000 AS INTEGER)
-    AND r.expires_at>CAST(unixepoch('subsec') * 1000 AS INTEGER)
     AND r.state=:expected_state AND r.state IN('validating','fallback_pending')
-    AND r.plan_hmac=:plan_hmac AND r.plan_enc IS NOT NULL
+    AND r.plan_hmac=:plan_hmac AND r.plan_enc IS NOT NULL)
+    AND (r.context_withdrawn_at IS NULL
     AND r.context_count=:context_count
-    AND r.context_withdrawn_at IS NULL
-    AND (SELECT count(*) FROM generation_context xc WHERE xc.request_id=r.id)=r.context_count
-    AND r.content_policy_revision=c.policy_revision
+    AND (SELECT count(*) FROM generation_context xc WHERE xc.request_id=r.id)=r.context_count)
+    AND (r.content_policy_revision=c.policy_revision
     AND c.state IN('approved','superseded') AND c.rights_status='cleared'
-    AND c.reviewed_hash=c.hash AND c.reviewer_kind='human_approved'
+    AND c.reviewed_hash=c.hash AND c.reviewer_kind='human_approved')
     AND sys.generation_enabled=1 AND sys.provider_policy_hash=r.policy_hash
     AND (r.parent_edition_id IS NULL OR EXISTS (
       SELECT 1 FROM reading_editions parent
