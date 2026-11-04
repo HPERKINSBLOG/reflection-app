@@ -22,6 +22,7 @@ import {
 // Keep historical v1 presentation coverage while the local generator now produces v2.
 function legacyReading(value: ReturnType<typeof AnyAcceptedReading.parse>) {
   if (value.kind === 'tarot.accepted.v1') return value;
+  if (value.kind !== 'tarot.accepted.v2') throw new Error('Expected an initial v2 fixture');
   const {
     draw: _draw,
     spread: _spread,
@@ -686,6 +687,7 @@ test('uploading an offline spread photo recognizes the 3 cards in one step and s
     'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR4nGP4z8DwHwAFAAH/iZk9HQAAAABJRU5ErkJggg==',
     'base64',
   );
+  await page.getByText('Use my own spread', { exact: true }).click();
   await page.getByLabel('Photo of your spread (optional)').setInputFiles({
     name: 'dealt-spread.png',
     mimeType: 'image/png',

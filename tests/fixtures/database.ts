@@ -85,6 +85,12 @@ export async function addContext(db: D1Database, plan: SyntheticPlan): Promise<S
   await db.batch([
     sql(
       db,
+      "UPDATE reading_sessions SET status='saved',saved_at=coalesce(saved_at,1),retention_expires_at=NULL WHERE owner_id=? AND id=?",
+      plan.ownerId,
+      plan.sessionId,
+    ),
+    sql(
+      db,
       `INSERT INTO reading_editions(id,owner_id,session_id,edition_number,status,mode,body_enc,key_version,accepted_at) VALUES (?,?,?,1,'imported','legacy',?,1,1)`,
       edition,
       plan.ownerId,
@@ -99,7 +105,61 @@ export async function addContext(db: D1Database, plan: SyntheticPlan): Promise<S
       edition,
     ),
   ]);
-  return { ...plan, context: [{ grantId: grant, grantRevision: 1, fragmentHmac: HASH }] };
+  return {
+    ...plan,
+    context: [
+      {
+        grantId: grant,
+        grantRevision: 1,
+        fragmentHmac: HASH,
+        sourceKind: 'edition',
+        sourceId: edition,
+        sourceRevision: 1,
+      },
+    ],
+  };
+}
+
+/** Pre-0018 migration fixtures must not execute a current writer against their old schema. */
+export async function seedHistoricalRequest(db: D1Database, plan: SyntheticPlan) {
+  const requestId = crypto.randomUUID(),
+    attemptId = crypto.randomUUID();
+  await db.batch([
+    sql(
+      db,
+      "INSERT INTO generation_requests(id,owner_id,session_id,client_intent_id,basis_id,operation,payload_hmac,state,next_run_at,permission_revision,key_version,content_hash,content_policy_revision,policy_hash,plan_enc,plan_hmac,context_count,run_epoch,lease_token,lease_expires_at,created_at,expires_at) VALUES(?,?,?,?,?,'initial',?,'prepared',1,1,1,?,1,?,'historical plan',?,?,1,'old-lease',30001,1,180001)",
+      requestId,
+      plan.ownerId,
+      plan.sessionId,
+      plan.clientIntentId,
+      plan.basisId,
+      plan.payloadHmac,
+      plan.contentHash,
+      plan.policyHash,
+      plan.planHmac,
+      plan.context.length,
+    ),
+    sql(
+      db,
+      "INSERT INTO generation_attempts(id,owner_id,request_id,run_epoch,lease_token,started_at) VALUES(?,?,?,1,'old-lease',1)",
+      attemptId,
+      plan.ownerId,
+      requestId,
+    ),
+    ...plan.context.map((item, ordinal) =>
+      sql(
+        db,
+        "INSERT INTO generation_context(request_id,owner_id,ordinal,grant_id,grant_revision,fragment_enc,fragment_hmac,key_version) VALUES(?,?,?,?,?,'historical fragment',?,1)",
+        requestId,
+        plan.ownerId,
+        ordinal,
+        item.grantId,
+        item.grantRevision,
+        item.fragmentHmac,
+      ),
+    ),
+  ]);
+  return { requestId, attemptId };
 }
 
 /** Plugin v1 does not roll storage back between tests; clean in one FK-deferred batch. */

@@ -5,6 +5,10 @@ import { beforeAll, beforeEach, expect, test } from 'vitest';
 import { z } from 'zod';
 import { AccountRekey } from '../../src/worker/recovery/account-rekey.ts';
 import { ACCOUNT_FIELD_HANDLERS } from '../../src/worker/recovery/private-fields.ts';
+import { ReadingImports } from '../../src/worker/readings/imports.ts';
+import { projectImportGroup } from '../../src/worker/readings/import-targets.ts';
+import { buildImportGroups } from '../../src/domain/imports/chunks.ts';
+import { parseImportFile } from '../../src/domain/imports/parse.ts';
 import {
   createRuntime,
   createRuntimeWorker,
@@ -115,6 +119,66 @@ async function deferredFields(f: Awaited<ReturnType<typeof fixture>>) {
     aadRevision = 1,
   ) =>
     f.runtime.base.crypt.seal({ ownerId: owner, table, column, recordId, aadRevision }, value, 1);
+  // Keep an actual committed alias/outcome and an in-progress raw review in the
+  // inventory. Destination ciphertext is sealed with the final edition's AAD.
+  const imports = new ReadingImports(env.DB, f.runtime.identity);
+  const session = await f.runtime.identity.sessions.get(f.client.cookies.get('__Host-session'));
+  const source = { namespaceId: crypto.randomUUID(), revision: 'historical' };
+  for (const nativeId of ['committed', 'staged']) {
+    const parsed = await parseImportFile({
+      source,
+      recovery: { kind: 'none' },
+      format: 'tarot-json',
+      document: JSON.stringify({
+        exportedAt: '2026-11-01T00:00:00Z',
+        entryCount: 1,
+        entries: [
+          {
+            id: nativeId,
+            question: 'A preserved imported question',
+            personalReading: 'A preserved historical response',
+          },
+        ],
+      }),
+    });
+    const [group] = await buildImportGroups(parsed.units, () => crypto.randomUUID());
+    await imports.preview(session, crypto.randomUUID(), group!.chunks[0]!);
+    if (nativeId === 'committed') {
+      const status = await imports.groupStatus(session, group!.id);
+      await imports.commitGroup(session, group!.id, crypto.randomUUID(), {
+        version: 'import-group.v1',
+        manifestHash: group!.manifestHash,
+        previewHash: status.previewHash!,
+        confirmedRecovery: { kind: 'none' },
+      });
+    } else {
+      const projected = await projectImportGroup(
+        owner,
+        group!.id,
+        [{ ordinal: 0, unit: parsed.units[0]!, duplicate: null }],
+        async () => null,
+        Date.now(),
+        f.runtime.base,
+      );
+      const field = projected.get(0)!.fields.find((x) => x.kind === 'edition')!;
+      await env.DB.prepare(`INSERT INTO import_staging(owner_id,group_id,ordinal,kind,source_entity_hmac,target_id,meta_json,field_enc,key_version)
+        SELECT owner_id,group_id,ordinal,'edition',source_entity_hmac,?,?,?,1 FROM import_items WHERE owner_id=? AND group_id=? AND ordinal=0`)
+        .bind(
+          field.targetId,
+          JSON.stringify(field.meta),
+          await encrypt(
+            'reading_editions',
+            'body_enc',
+            field.targetId,
+            field.value,
+            field.aadRevision,
+          ),
+          owner,
+          group!.id,
+        )
+        .run();
+    }
+  }
   const batch = crypto.randomUUID(),
     revisit = crypto.randomUUID(),
     grant = crypto.randomUUID(),
@@ -123,13 +187,9 @@ async function deferredFields(f: Awaited<ReturnType<typeof fixture>>) {
       'id',
     ))!;
   await env.DB.batch([
-    env.DB.prepare("INSERT INTO import_batches VALUES(?,?,'synthetic',?,'preview',?,?)").bind(
-      batch,
-      owner,
-      'a'.repeat(64),
-      Date.now(),
-      Date.now() + 86400000,
-    ),
+    env.DB.prepare(
+      "INSERT INTO import_batches(id,owner_id,source_format,document_hmac,state,created_at,expires_at) VALUES(?,?,'synthetic',?,'preview',?,?)",
+    ).bind(batch, owner, 'a'.repeat(64), Date.now(), Date.now() + 86400000),
     env.DB.prepare(
       "INSERT INTO import_items(batch_id,owner_id,item_index,source_key_hmac,original_hmac,body_enc,key_version,state,session_id) VALUES(?,?,0,?,?,?,1,'ready',?)",
     ).bind(
@@ -189,7 +249,18 @@ async function deferredFields(f: Awaited<ReturnType<typeof fixture>>) {
       owner,
       grant,
       await encrypt('generation_context', 'fragment_enc', request + ':0', {
-        fragment: 'Synthetic retained context',
+        ordinal: 0,
+        grantId: grant,
+        grantRevision: 1,
+        sourceKind: 'edition',
+        sourceId: edition,
+        sourceRevision: 1,
+        start: 0,
+        end: 26,
+        text: 'Synthetic retained context',
+        textHash: 'a'.repeat(64),
+        availability: 'retained',
+        authorship: 'generated',
       }),
       'a'.repeat(64),
     ),
@@ -253,6 +324,22 @@ test('bounded replacement resumes in fresh instances, preserves exact values and
   );
   expect(receipt).toMatchObject({ fromVersion: 1, toVersion: 2, stillOffline: true });
   expect(await values(f)).toEqual(before);
+  for (const [table, column] of [
+    ['import_staging', 'field_enc'],
+    ['import_items', 'body_enc'],
+    ['import_items', 'result_enc'],
+    ['import_identities', 'source_record_enc'],
+  ]) {
+    const blobs = (
+      await env.DB.prepare(
+        `SELECT key_version,json_extract(${column},'$.keyVersion') envelope_version FROM ${table} WHERE owner_id=? AND ${column} IS NOT NULL`,
+      )
+        .bind(f.owner)
+        .all()
+    ).results;
+    expect(blobs.length).toBeGreaterThan(0);
+    for (const blob of blobs) expect(blob).toEqual({ key_version: 2, envelope_version: 2 });
+  }
   expect(
     await new RecordCrypto(env.DB, f.runtime.identity.crypt).hash(f.owner, 'mutation', {
       same: 'identity',
@@ -400,6 +487,19 @@ test.each(['before', 'during', 'after'] as const)(
     const f = await fixture();
     await deferredFields(f);
     const original = await values(f);
+    const abandoned = (
+      await env.DB.prepare(`SELECT 'import_items.body_enc:'||i.batch_id||':'||i.item_index name FROM import_items i JOIN import_groups g ON g.id=i.group_id WHERE g.owner_id=? AND g.state='staged' AND i.body_enc IS NOT NULL
+      UNION ALL SELECT 'import_items.result_enc:'||i.batch_id||':'||i.item_index FROM import_items i JOIN import_groups g ON g.id=i.group_id WHERE g.owner_id=? AND g.state='staged' AND i.result_enc IS NOT NULL
+      UNION ALL SELECT 'import_staging.field_enc:'||s.target_id FROM import_staging s JOIN import_groups g ON g.id=s.group_id WHERE g.owner_id=? AND g.state='staged' AND s.field_enc IS NOT NULL`)
+        .bind(f.owner, f.owner, f.owner)
+        .all<{ name: string }>()
+    ).results;
+    expect(abandoned).toHaveLength(3);
+    const retained = { ...original };
+    for (const { name } of abandoned) {
+      expect(original).toHaveProperty([name]);
+      delete retained[name];
+    }
     let saved = await snapshot(env.DB);
     const start = await f.service.begin(f.owner, 1);
     while (
@@ -432,7 +532,14 @@ test.each(['before', 'during', 'after'] as const)(
       },
     );
     await restore.replay();
-    expect(await values(f)).toEqual(original);
+    expect(await values(f)).toEqual(retained);
+    expect(
+      (
+        await env.DB.prepare('SELECT state FROM import_groups WHERE owner_id=? ORDER BY state')
+          .bind(f.owner)
+          .all()
+      ).results,
+    ).toEqual([{ state: 'complete' }, { state: 'expired' }]);
     if (point === 'during') {
       await f.runtime.coordinator!.complete(restoreContext, 'b'.repeat(64));
       const context = await f.runtime.coordinator!.acquire('rekey'),
@@ -441,6 +548,7 @@ test.each(['before', 'during', 'after'] as const)(
       let next = '';
       while (next !== 'complete') next = (await service.step(start.operationId, 20)).phase;
       await service.validate(start.operationId);
+      expect(await values(f)).toEqual(retained);
     }
   },
 );

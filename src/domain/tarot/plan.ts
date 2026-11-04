@@ -158,8 +158,14 @@ export function validateCandidateBindings(value: PreparedPlan, candidate: unknow
   const plan = assertPlan(value);
   const parsed = ModelCandidate.safeParse(candidate);
   if (!parsed.success) throw new Error('INVALID_CANDIDATE: schema');
+  validateUnitBindings(plan, parsed.data.units);
+}
+export function validateUnitBindings(
+  plan: Pick<PreparedPlan, 'basis' | 'sources'>,
+  units: z.infer<typeof ModelCandidate>['units'],
+): void {
   const positions = new Set<string>();
-  for (const unit of parsed.data.units) {
+  for (const unit of units) {
     const i = Position.options.indexOf(unit.position);
     const card = plan.basis.cards[i]!;
     const source = plan.sources[i]!;

@@ -6,6 +6,8 @@ import { READING_PRODUCT_COPY, SPREAD_PHOTO_COPY } from '../../src/contracts/pro
 import {
   journeyAccount,
   noteJourneyStates,
+  continuityJourneyStates,
+  importReviewState,
   longFilename,
   longQuestion,
   spreadPhotoPath,
@@ -128,6 +130,7 @@ for (const width of [320, 390, 768, 1280]) {
       await page.getByLabel('Your question', { exact: true }).fill(longQuestion);
       await page.getByLabel('Use English for this reading').check();
       await capture('new-empty');
+      await page.getByText('Use my own spread', { exact: true }).click();
       const illustration = await page.locator('.spread-intro-art').boundingBox();
       expect(illustration).not.toBeNull();
       expect(illustration!.height / illustration!.width).toBeCloseTo(793 / 1983, 2);
@@ -206,6 +209,8 @@ for (const width of [320, 390, 768, 1280]) {
         'Synthetic writing kept for a later return.',
       );
 
+      await continuityJourneyStates(page, capture);
+
       // CSS zoom is a reflow probe, not native browser/OS zoom or screen-reader evidence.
       await page.setViewportSize({ width: 640, height: 1000 });
       await page.locator('html').evaluate((element) => {
@@ -221,6 +226,7 @@ for (const width of [320, 390, 768, 1280]) {
         element.style.zoom = '';
       });
       await page.setViewportSize({ width, height: 1000 });
+      await importReviewState(page, capture);
       await page.getByRole('link', { name: 'Back to readings', exact: true }).click();
       await page.getByRole('button', { name: 'New reading', exact: true }).click();
       await page.getByLabel('Your question', { exact: true }).fill('Synthetic drawn-card layout');
@@ -287,6 +293,7 @@ test('2x mobile illustration delivery uses transparent variants, not full-size o
     await page.getByRole('link', { name: 'Back to readings', exact: true }).click();
     await page.getByRole('button', { name: 'New reading', exact: true }).click();
     const cards = page.locator('.spread-intro-art');
+    await page.getByText('Use my own spread', { exact: true }).click();
     await expect
       .poll(() => cards.evaluate((image: HTMLImageElement) => image.currentSrc))
       .toContain('three-card-spread-640-');

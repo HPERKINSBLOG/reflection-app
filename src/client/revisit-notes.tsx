@@ -1,4 +1,4 @@
-import { Button, Input, TextArea } from './design/components.tsx';
+import { Button, Input, TextArea, TextLink } from './design/components.tsx';
 import {
   type Ref,
   useCallback,
@@ -474,20 +474,25 @@ export function RevisitNotes({
   const length = revisitTextLength(text);
   return (
     <section className="revisit-notes" aria-label="Revisit notes">
-      <h2>Revisit notes</h2>
+      <h2 id="revisit-notes" tabIndex={-1}>
+        Revisit notes
+      </h2>
       <p>Your own dated thoughts, separate from the original reading and reflection.</p>
       <p id="revisit-disclosure">{REVISIT_PRODUCT_COPY.disclosure}</p>
       <Notice message={message} />
       {!saved && (
         <p className="notice">
-          Save this reading explicitly before adding or editing a revisit note.
-          {parentExpiresAt && (
-            <>
-              {' '}
-              Temporary storage expires{' '}
-              <time dateTime={parentExpiresAt}>{date(parentExpiresAt)}</time>.
-            </>
-          )}
+          <span>
+            <TextLink href="#save-reading">Save this reading</TextLink> before adding or editing a
+            revisit note.
+            {parentExpiresAt && (
+              <>
+                {' '}
+                Temporary storage expires{' '}
+                <time dateTime={parentExpiresAt}>{date(parentExpiresAt)}</time>.
+              </>
+            )}
+          </span>
         </p>
       )}
       {!loaded &&

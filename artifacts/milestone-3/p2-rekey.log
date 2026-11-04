@@ -1,0 +1,31 @@
+
+> reflection-app@0.1.0 test:db
+> vitest run --config vitest.db.config.ts tests/db/account-rekey.test.ts
+
+
+ RUN  v5.0.5 /home/htper/reflection-app
+
+uncaught exception; source = Uncaught (in promise); stack = Error: Environment is offline
+    at /home/htper/reflection-app/src/worker/recovery/hosted-coordinator.ts:282:48
+    at OfflineControl.registerWriter (/home/htper/reflection-app/src/worker/recovery/hosted-coordinator.ts:280:29)
+uncaught exception; source = Uncaught (in promise); stack = Error: Environment is offline
+    at /home/htper/reflection-app/src/worker/recovery/hosted-coordinator.ts:282:48
+    at OfflineControl.registerWriter (/home/htper/reflection-app/src/worker/recovery/hosted-coordinator.ts:280:29)
+uncaught exception; source = Uncaught (in promise); stack = Error: Environment is offline
+    at /home/htper/reflection-app/src/worker/recovery/hosted-coordinator.ts:282:48
+    at OfflineControl.registerWriter (/home/htper/reflection-app/src/worker/recovery/hosted-coordinator.ts:280:29)
+uncaught exception; source = Uncaught (in promise); stack = Error: Offline lease unavailable
+    at OfflineControl.#current (/home/htper/reflection-app/src/worker/recovery/hosted-coordinator.ts:274:13)
+    at OfflineControl.assertCurrent (/home/htper/reflection-app/src/worker/recovery/hosted-coordinator.ts:330:10)
+    at OfflineControl.beginOffline (/home/htper/reflection-app/src/worker/recovery/hosted-coordinator.ts:339:5)
+uncaught exception; source = Uncaught (in promise); stack = Error: Environment is offline
+    at /home/htper/reflection-app/src/worker/recovery/hosted-coordinator.ts:282:48
+    at OfflineControl.registerWriter (/home/htper/reflection-app/src/worker/recovery/hosted-coordinator.ts:280:29)
+uncaught exception; source = Uncaught (in promise); stack = Error: Environment is offline
+    at /home/htper/reflection-app/src/worker/recovery/hosted-coordinator.ts:282:48
+    at OfflineControl.registerWriter (/home/htper/reflection-app/src/worker/recovery/hosted-coordinator.ts:280:29)
+
+ Test Files  1 passed (1)
+      Tests  12 passed (12)
+   Start at  22:39:04
+   Duration  9.38s (tests 82%, transform 12%, import 6%)

@@ -1,0 +1,936 @@
+{
+  "evidence": [
+    {
+      "state": "landing",
+      "viewport": 1280,
+      "content": 1280,
+      "images": [
+        {
+          "source": "user-spread-data-url",
+          "width": 30,
+          "naturalWidth": 30
+        },
+        {
+          "source": "user-spread-data-url",
+          "width": 0,
+          "naturalWidth": 30
+        },
+        {
+          "source": "/assets/spiral-bloom-DP-0uNhx.svg",
+          "width": 491.421875,
+          "naturalWidth": 347
+        }
+      ]
+    },
+    {
+      "state": "recovery",
+      "viewport": 1280,
+      "content": 1280,
+      "images": [
+        {
+          "source": "user-spread-data-url",
+          "width": 30,
+          "naturalWidth": 30
+        },
+        {
+          "source": "user-spread-data-url",
+          "width": 0,
+          "naturalWidth": 30
+        },
+        {
+          "source": "/assets/study-inquiry-CqDDKxCr.jpg",
+          "width": 522,
+          "naturalWidth": 488
+        }
+      ]
+    },
+    {
+      "state": "saved-empty-hover-contrast",
+      "selectedText": 10.398341681598737
+    },
+    {
+      "state": "saved-empty",
+      "viewport": 1280,
+      "content": 1280,
+      "images": [
+        {
+          "source": "user-spread-data-url",
+          "width": 30,
+          "naturalWidth": 30
+        },
+        {
+          "source": "user-spread-data-url",
+          "width": 0,
+          "naturalWidth": 30
+        },
+        {
+          "source": "/assets/study-stillness-Ci_sHAXQ.jpg",
+          "width": 112,
+          "naturalWidth": 488
+        },
+        {
+          "source": "/assets/study-possibility-BQcKT-wb.jpg",
+          "width": 200.234375,
+          "naturalWidth": 488
+        }
+      ]
+    },
+    {
+      "state": "theme-contrast",
+      "inputOnCard": 10.398341681598737,
+      "inputOnBackground": 10.398341681598737,
+      "mutedOnCard": 10.398341681598737,
+      "mutedOnBackground": 10.398341681598737,
+      "destructiveOnCard": 10.398341681598737,
+      "destructiveOnBackground": 10.398341681598737,
+      "primaryButton": 5.339725471828284,
+      "destructiveButton": 4.806277517183023
+    },
+    {
+      "state": "account",
+      "viewport": 1280,
+      "content": 1280,
+      "images": [
+        {
+          "source": "user-spread-data-url",
+          "width": 30,
+          "naturalWidth": 30
+        },
+        {
+          "source": "user-spread-data-url",
+          "width": 0,
+          "naturalWidth": 30
+        },
+        {
+          "source": "/assets/account-sprig-320-C7sWf4hU.webp",
+          "width": 240,
+          "naturalWidth": 279
+        }
+      ]
+    },
+    {
+      "state": "new-empty-hover-contrast",
+      "selectedText": 10.398341681598737
+    },
+    {
+      "state": "new-empty",
+      "viewport": 1280,
+      "content": 1280,
+      "images": [
+        {
+          "source": "user-spread-data-url",
+          "width": 30,
+          "naturalWidth": 30
+        },
+        {
+          "source": "user-spread-data-url",
+          "width": 0,
+          "naturalWidth": 30
+        },
+        {
+          "source": "/assets/study-stillness-Ci_sHAXQ.jpg",
+          "width": 0,
+          "naturalWidth": 488
+        },
+        {
+          "source": "/assets/spread-ribbon-640-KHSCiQ27.webp",
+          "width": 455.390625,
+          "naturalWidth": 480
+        },
+        {
+          "source": "/assets/three-card-spread-320-CsWohK6j.webp",
+          "width": 320,
+          "naturalWidth": 320
+        }
+      ]
+    },
+    {
+      "state": "new-attached",
+      "viewport": 1280,
+      "content": 1280,
+      "images": [
+        {
+          "source": "user-spread-data-url",
+          "width": 30,
+          "naturalWidth": 30
+        },
+        {
+          "source": "user-spread-data-url",
+          "width": 0,
+          "naturalWidth": 30
+        },
+        {
+          "source": "/assets/study-stillness-Ci_sHAXQ.jpg",
+          "width": 0,
+          "naturalWidth": 488
+        },
+        {
+          "source": "/assets/spread-ribbon-640-KHSCiQ27.webp",
+          "width": 455.390625,
+          "naturalWidth": 480
+        },
+        {
+          "source": "user-spread-data-url",
+          "width": 630.265625,
+          "naturalWidth": 720
+        }
+      ]
+    },
+    {
+      "state": "reading-photo",
+      "viewport": 1280,
+      "content": 1280,
+      "images": [
+        {
+          "source": "user-spread-data-url",
+          "width": 30,
+          "naturalWidth": 30
+        },
+        {
+          "source": "user-spread-data-url",
+          "width": 0,
+          "naturalWidth": 30
+        },
+        {
+          "source": "/assets/study-stillness-Ci_sHAXQ.jpg",
+          "width": 0,
+          "naturalWidth": 488
+        },
+        {
+          "source": "user-spread-data-url",
+          "width": 720,
+          "naturalWidth": 720
+        },
+        {
+          "source": "/assets/study-possibility-BQcKT-wb.jpg",
+          "width": 48,
+          "naturalWidth": 488
+        },
+        {
+          "source": "/assets/study-tension-dp-MHMAq.jpg",
+          "width": 48,
+          "naturalWidth": 487
+        },
+        {
+          "source": "/assets/study-tension-dp-MHMAq.jpg",
+          "width": 48,
+          "naturalWidth": 487
+        },
+        {
+          "source": "user-spread-data-url",
+          "width": 260,
+          "naturalWidth": 720
+        }
+      ]
+    },
+    {
+      "state": "sources",
+      "viewport": 1280,
+      "content": 1280,
+      "images": [
+        {
+          "source": "user-spread-data-url",
+          "width": 30,
+          "naturalWidth": 30
+        },
+        {
+          "source": "user-spread-data-url",
+          "width": 0,
+          "naturalWidth": 30
+        },
+        {
+          "source": "/assets/study-stillness-Ci_sHAXQ.jpg",
+          "width": 0,
+          "naturalWidth": 488
+        },
+        {
+          "source": "user-spread-data-url",
+          "width": 720,
+          "naturalWidth": 720
+        },
+        {
+          "source": "/assets/study-possibility-BQcKT-wb.jpg",
+          "width": 48,
+          "naturalWidth": 488
+        },
+        {
+          "source": "/assets/study-tension-dp-MHMAq.jpg",
+          "width": 48,
+          "naturalWidth": 487
+        },
+        {
+          "source": "/assets/study-tension-dp-MHMAq.jpg",
+          "width": 48,
+          "naturalWidth": 487
+        },
+        {
+          "source": "user-spread-data-url",
+          "width": 260,
+          "naturalWidth": 720
+        }
+      ]
+    },
+    {
+      "state": "reflection",
+      "viewport": 1280,
+      "content": 1280,
+      "images": [
+        {
+          "source": "user-spread-data-url",
+          "width": 30,
+          "naturalWidth": 30
+        },
+        {
+          "source": "user-spread-data-url",
+          "width": 0,
+          "naturalWidth": 30
+        },
+        {
+          "source": "/assets/study-stillness-Ci_sHAXQ.jpg",
+          "width": 0,
+          "naturalWidth": 488
+        },
+        {
+          "source": "user-spread-data-url",
+          "width": 720,
+          "naturalWidth": 720
+        },
+        {
+          "source": "/assets/study-possibility-BQcKT-wb.jpg",
+          "width": 48,
+          "naturalWidth": 488
+        },
+        {
+          "source": "/assets/study-tension-dp-MHMAq.jpg",
+          "width": 48,
+          "naturalWidth": 487
+        },
+        {
+          "source": "/assets/study-tension-dp-MHMAq.jpg",
+          "width": 48,
+          "naturalWidth": 487
+        },
+        {
+          "source": "user-spread-data-url",
+          "width": 260,
+          "naturalWidth": 720
+        }
+      ]
+    },
+    {
+      "state": "notes-empty",
+      "viewport": 1280,
+      "content": 1280,
+      "images": [
+        {
+          "source": "user-spread-data-url",
+          "width": 30,
+          "naturalWidth": 30
+        },
+        {
+          "source": "user-spread-data-url",
+          "width": 0,
+          "naturalWidth": 30
+        },
+        {
+          "source": "/assets/study-stillness-Ci_sHAXQ.jpg",
+          "width": 0,
+          "naturalWidth": 488
+        },
+        {
+          "source": "user-spread-data-url",
+          "width": 720,
+          "naturalWidth": 720
+        },
+        {
+          "source": "/assets/study-possibility-BQcKT-wb.jpg",
+          "width": 48,
+          "naturalWidth": 488
+        },
+        {
+          "source": "/assets/study-tension-dp-MHMAq.jpg",
+          "width": 48,
+          "naturalWidth": 487
+        },
+        {
+          "source": "/assets/study-tension-dp-MHMAq.jpg",
+          "width": 48,
+          "naturalWidth": 487
+        },
+        {
+          "source": "user-spread-data-url",
+          "width": 260,
+          "naturalWidth": 720
+        }
+      ]
+    },
+    {
+      "state": "notes-populated",
+      "viewport": 1280,
+      "content": 1280,
+      "images": [
+        {
+          "source": "user-spread-data-url",
+          "width": 30,
+          "naturalWidth": 30
+        },
+        {
+          "source": "user-spread-data-url",
+          "width": 0,
+          "naturalWidth": 30
+        },
+        {
+          "source": "/assets/study-stillness-Ci_sHAXQ.jpg",
+          "width": 0,
+          "naturalWidth": 488
+        },
+        {
+          "source": "user-spread-data-url",
+          "width": 720,
+          "naturalWidth": 720
+        },
+        {
+          "source": "/assets/study-possibility-BQcKT-wb.jpg",
+          "width": 48,
+          "naturalWidth": 488
+        },
+        {
+          "source": "/assets/study-tension-dp-MHMAq.jpg",
+          "width": 48,
+          "naturalWidth": 487
+        },
+        {
+          "source": "/assets/study-tension-dp-MHMAq.jpg",
+          "width": 48,
+          "naturalWidth": 487
+        },
+        {
+          "source": "user-spread-data-url",
+          "width": 260,
+          "naturalWidth": 720
+        }
+      ]
+    },
+    {
+      "state": "notes-edit",
+      "viewport": 1280,
+      "content": 1280,
+      "images": [
+        {
+          "source": "user-spread-data-url",
+          "width": 30,
+          "naturalWidth": 30
+        },
+        {
+          "source": "user-spread-data-url",
+          "width": 0,
+          "naturalWidth": 30
+        },
+        {
+          "source": "/assets/study-stillness-Ci_sHAXQ.jpg",
+          "width": 0,
+          "naturalWidth": 488
+        },
+        {
+          "source": "user-spread-data-url",
+          "width": 720,
+          "naturalWidth": 720
+        },
+        {
+          "source": "/assets/study-possibility-BQcKT-wb.jpg",
+          "width": 48,
+          "naturalWidth": 488
+        },
+        {
+          "source": "/assets/study-tension-dp-MHMAq.jpg",
+          "width": 48,
+          "naturalWidth": 487
+        },
+        {
+          "source": "/assets/study-tension-dp-MHMAq.jpg",
+          "width": 48,
+          "naturalWidth": 487
+        },
+        {
+          "source": "user-spread-data-url",
+          "width": 260,
+          "naturalWidth": 720
+        }
+      ]
+    },
+    {
+      "state": "notes-conflict",
+      "viewport": 1280,
+      "content": 1280,
+      "images": [
+        {
+          "source": "user-spread-data-url",
+          "width": 30,
+          "naturalWidth": 30
+        },
+        {
+          "source": "user-spread-data-url",
+          "width": 0,
+          "naturalWidth": 30
+        },
+        {
+          "source": "/assets/study-stillness-Ci_sHAXQ.jpg",
+          "width": 0,
+          "naturalWidth": 488
+        },
+        {
+          "source": "user-spread-data-url",
+          "width": 720,
+          "naturalWidth": 720
+        },
+        {
+          "source": "/assets/study-possibility-BQcKT-wb.jpg",
+          "width": 48,
+          "naturalWidth": 488
+        },
+        {
+          "source": "/assets/study-tension-dp-MHMAq.jpg",
+          "width": 48,
+          "naturalWidth": 487
+        },
+        {
+          "source": "/assets/study-tension-dp-MHMAq.jpg",
+          "width": 48,
+          "naturalWidth": 487
+        },
+        {
+          "source": "user-spread-data-url",
+          "width": 260,
+          "naturalWidth": 720
+        }
+      ]
+    },
+    {
+      "state": "notes-deletion",
+      "viewport": 1280,
+      "content": 1280,
+      "images": [
+        {
+          "source": "user-spread-data-url",
+          "width": 30,
+          "naturalWidth": 30
+        },
+        {
+          "source": "user-spread-data-url",
+          "width": 0,
+          "naturalWidth": 30
+        },
+        {
+          "source": "/assets/study-stillness-Ci_sHAXQ.jpg",
+          "width": 0,
+          "naturalWidth": 488
+        },
+        {
+          "source": "user-spread-data-url",
+          "width": 720,
+          "naturalWidth": 720
+        },
+        {
+          "source": "/assets/study-possibility-BQcKT-wb.jpg",
+          "width": 48,
+          "naturalWidth": 488
+        },
+        {
+          "source": "/assets/study-tension-dp-MHMAq.jpg",
+          "width": 48,
+          "naturalWidth": 487
+        },
+        {
+          "source": "/assets/study-tension-dp-MHMAq.jpg",
+          "width": 48,
+          "naturalWidth": 487
+        },
+        {
+          "source": "user-spread-data-url",
+          "width": 260,
+          "naturalWidth": 720
+        }
+      ]
+    },
+    {
+      "state": "notes-receipt",
+      "viewport": 1280,
+      "content": 1280,
+      "images": [
+        {
+          "source": "user-spread-data-url",
+          "width": 30,
+          "naturalWidth": 30
+        },
+        {
+          "source": "user-spread-data-url",
+          "width": 0,
+          "naturalWidth": 30
+        },
+        {
+          "source": "/assets/study-stillness-Ci_sHAXQ.jpg",
+          "width": 0,
+          "naturalWidth": 488
+        },
+        {
+          "source": "user-spread-data-url",
+          "width": 720,
+          "naturalWidth": 720
+        },
+        {
+          "source": "/assets/study-possibility-BQcKT-wb.jpg",
+          "width": 48,
+          "naturalWidth": 488
+        },
+        {
+          "source": "/assets/study-tension-dp-MHMAq.jpg",
+          "width": 48,
+          "naturalWidth": 487
+        },
+        {
+          "source": "/assets/study-tension-dp-MHMAq.jpg",
+          "width": 48,
+          "naturalWidth": 487
+        },
+        {
+          "source": "user-spread-data-url",
+          "width": 260,
+          "naturalWidth": 720
+        }
+      ]
+    },
+    {
+      "state": "saved-populated-hover-contrast",
+      "selectedText": 10.398341681598737
+    },
+    {
+      "state": "saved-populated",
+      "viewport": 1280,
+      "content": 1280,
+      "images": [
+        {
+          "source": "user-spread-data-url",
+          "width": 30,
+          "naturalWidth": 30
+        },
+        {
+          "source": "user-spread-data-url",
+          "width": 0,
+          "naturalWidth": 30
+        },
+        {
+          "source": "/assets/study-stillness-Ci_sHAXQ.jpg",
+          "width": 112,
+          "naturalWidth": 488
+        }
+      ]
+    },
+    {
+      "state": "follow-up-compose",
+      "viewport": 1280,
+      "content": 1280,
+      "images": [
+        {
+          "source": "user-spread-data-url",
+          "width": 30,
+          "naturalWidth": 30
+        },
+        {
+          "source": "user-spread-data-url",
+          "width": 0,
+          "naturalWidth": 30
+        },
+        {
+          "source": "/assets/study-stillness-Ci_sHAXQ.jpg",
+          "width": 0,
+          "naturalWidth": 488
+        },
+        {
+          "source": "/assets/spread-ribbon-640-KHSCiQ27.webp",
+          "width": 455.390625,
+          "naturalWidth": 480
+        }
+      ]
+    },
+    {
+      "state": "selected-context-review",
+      "viewport": 1280,
+      "content": 1280,
+      "images": [
+        {
+          "source": "user-spread-data-url",
+          "width": 30,
+          "naturalWidth": 30
+        },
+        {
+          "source": "user-spread-data-url",
+          "width": 0,
+          "naturalWidth": 30
+        },
+        {
+          "source": "/assets/study-stillness-Ci_sHAXQ.jpg",
+          "width": 0,
+          "naturalWidth": 488
+        },
+        {
+          "source": "/assets/spread-ribbon-640-KHSCiQ27.webp",
+          "width": 455.390625,
+          "naturalWidth": 480
+        }
+      ]
+    },
+    {
+      "state": "follow-up-accepted",
+      "viewport": 1280,
+      "content": 1280,
+      "images": [
+        {
+          "source": "user-spread-data-url",
+          "width": 30,
+          "naturalWidth": 30
+        },
+        {
+          "source": "user-spread-data-url",
+          "width": 0,
+          "naturalWidth": 30
+        },
+        {
+          "source": "/assets/study-stillness-Ci_sHAXQ.jpg",
+          "width": 0,
+          "naturalWidth": 488
+        },
+        {
+          "source": "/assets/study-inquiry-CqDDKxCr.jpg",
+          "width": 144,
+          "naturalWidth": 488
+        },
+        {
+          "source": "/assets/study-possibility-BQcKT-wb.jpg",
+          "width": 122.99996948242188,
+          "naturalWidth": 488
+        },
+        {
+          "source": "/assets/study-tension-dp-MHMAq.jpg",
+          "width": 123,
+          "naturalWidth": 487
+        },
+        {
+          "source": "/assets/study-tension-dp-MHMAq.jpg",
+          "width": 123,
+          "naturalWidth": 487
+        },
+        {
+          "source": "/assets/study-possibility-BQcKT-wb.jpg",
+          "width": 48,
+          "naturalWidth": 488
+        },
+        {
+          "source": "/assets/study-tension-dp-MHMAq.jpg",
+          "width": 48,
+          "naturalWidth": 487
+        },
+        {
+          "source": "/assets/study-tension-dp-MHMAq.jpg",
+          "width": 48,
+          "naturalWidth": 487
+        }
+      ]
+    },
+    {
+      "state": "reading-css-zoom-200",
+      "viewport": 640,
+      "content": 640,
+      "images": [
+        {
+          "source": "user-spread-data-url",
+          "width": 60,
+          "naturalWidth": 30
+        },
+        {
+          "source": "user-spread-data-url",
+          "width": 0,
+          "naturalWidth": 30
+        },
+        {
+          "source": "/assets/study-stillness-Ci_sHAXQ.jpg",
+          "width": 0,
+          "naturalWidth": 488
+        },
+        {
+          "source": "user-spread-data-url",
+          "width": 560,
+          "naturalWidth": 720
+        },
+        {
+          "source": "/assets/study-possibility-BQcKT-wb.jpg",
+          "width": 96,
+          "naturalWidth": 488
+        },
+        {
+          "source": "/assets/study-tension-dp-MHMAq.jpg",
+          "width": 96,
+          "naturalWidth": 487
+        },
+        {
+          "source": "/assets/study-tension-dp-MHMAq.jpg",
+          "width": 96,
+          "naturalWidth": 487
+        },
+        {
+          "source": "user-spread-data-url",
+          "width": 520,
+          "naturalWidth": 720
+        }
+      ]
+    },
+    {
+      "state": "notes-edit-css-zoom-200",
+      "viewport": 640,
+      "content": 640,
+      "images": [
+        {
+          "source": "user-spread-data-url",
+          "width": 60,
+          "naturalWidth": 30
+        },
+        {
+          "source": "user-spread-data-url",
+          "width": 0,
+          "naturalWidth": 30
+        },
+        {
+          "source": "/assets/study-stillness-Ci_sHAXQ.jpg",
+          "width": 0,
+          "naturalWidth": 488
+        },
+        {
+          "source": "user-spread-data-url",
+          "width": 560,
+          "naturalWidth": 720
+        },
+        {
+          "source": "/assets/study-possibility-BQcKT-wb.jpg",
+          "width": 96,
+          "naturalWidth": 488
+        },
+        {
+          "source": "/assets/study-tension-dp-MHMAq.jpg",
+          "width": 96,
+          "naturalWidth": 487
+        },
+        {
+          "source": "/assets/study-tension-dp-MHMAq.jpg",
+          "width": 96,
+          "naturalWidth": 487
+        },
+        {
+          "source": "user-spread-data-url",
+          "width": 520,
+          "naturalWidth": 720
+        }
+      ]
+    },
+    {
+      "state": "account-css-zoom-200",
+      "viewport": 640,
+      "content": 640,
+      "images": [
+        {
+          "source": "user-spread-data-url",
+          "width": 60,
+          "naturalWidth": 30
+        },
+        {
+          "source": "user-spread-data-url",
+          "width": 0,
+          "naturalWidth": 30
+        },
+        {
+          "source": "/assets/mobile-corner-80-mXqp_oyF.webp",
+          "width": 128,
+          "naturalWidth": 72
+        }
+      ]
+    },
+    {
+      "state": "import-review",
+      "viewport": 1280,
+      "content": 1280,
+      "images": [
+        {
+          "source": "user-spread-data-url",
+          "width": 30,
+          "naturalWidth": 30
+        },
+        {
+          "source": "user-spread-data-url",
+          "width": 0,
+          "naturalWidth": 30
+        },
+        {
+          "source": "/assets/account-sprig-320-C7sWf4hU.webp",
+          "width": 240,
+          "naturalWidth": 279
+        }
+      ]
+    },
+    {
+      "state": "reading-drawn",
+      "viewport": 1280,
+      "content": 1280,
+      "images": [
+        {
+          "source": "user-spread-data-url",
+          "width": 30,
+          "naturalWidth": 30
+        },
+        {
+          "source": "user-spread-data-url",
+          "width": 0,
+          "naturalWidth": 30
+        },
+        {
+          "source": "/assets/study-stillness-Ci_sHAXQ.jpg",
+          "width": 0,
+          "naturalWidth": 488
+        },
+        {
+          "source": "/assets/study-inquiry-CqDDKxCr.jpg",
+          "width": 144,
+          "naturalWidth": 488
+        },
+        {
+          "source": "/assets/study-perspective-DhFS8mrh.jpg",
+          "width": 123,
+          "naturalWidth": 488
+        },
+        {
+          "source": "/assets/study-stillness-Ci_sHAXQ.jpg",
+          "width": 123.00003051757812,
+          "naturalWidth": 488
+        },
+        {
+          "source": "/assets/study-perspective-DhFS8mrh.jpg",
+          "width": 123,
+          "naturalWidth": 488
+        },
+        {
+          "source": "/assets/study-perspective-DhFS8mrh.jpg",
+          "width": 48,
+          "naturalWidth": 488
+        },
+        {
+          "source": "/assets/study-stillness-Ci_sHAXQ.jpg",
+          "width": 48,
+          "naturalWidth": 488
+        },
+        {
+          "source": "/assets/study-perspective-DhFS8mrh.jpg",
+          "width": 48,
+          "naturalWidth": 488
+        }
+      ]
+    }
+  ],
+  "faults": []
+}

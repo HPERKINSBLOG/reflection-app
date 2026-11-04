@@ -9,6 +9,35 @@ import {
   reading,
 } from '../fixtures/browser-reading.ts';
 
+test('retrying the reading connection keeps the question and photo in the open form', async ({
+  page,
+}) => {
+  await account(page, '198.51.100.86');
+  await enableAi(page);
+  await page.route('**/health', (route) => route.abort());
+  await page.goto('/new');
+  const question = page.getByLabel('Your question', { exact: true });
+  await question.fill('How could I make time for a walk?');
+  await page.getByLabel('Use English for this reading').check();
+  await page.getByText('Use my own spread', { exact: true }).click();
+  await page
+    .getByLabel('Photo of your spread (optional)')
+    .setInputFiles('tests/fixtures/spread-photo.jpg');
+  const photo = page.getByRole('img', { name: 'Uploaded tarot spread preview' });
+  await expect(photo).toBeVisible();
+  const source = await photo.getAttribute('src');
+  const start = page.getByRole('button', { name: 'Start reading', exact: true });
+  const retry = page.getByRole('button', { name: 'Check connection again', exact: true });
+  await expect(start).toBeDisabled();
+  await expect(retry).toBeVisible();
+  await page.unroute('**/health');
+  await retry.click();
+  await expect(start).toBeEnabled();
+  await expect(question).toHaveValue('How could I make time for a walk?');
+  await expect(photo).toHaveAttribute('src', source!);
+  await expect(retry).toHaveCount(0);
+});
+
 test('failed runtime discovery never describes a possible live call as simulation', async ({
   page,
 }) => {
@@ -70,6 +99,7 @@ for (const mode of ['live-local', 'live-preview', 'production'] as const) {
     const preflight = page.getByRole('complementary', { name: 'Before you start' });
     await expect(preflight).toContainText('sends your attached photo to Meta');
     await expect(preflight).toContainText('zero retention is not guaranteed');
+    await page.getByText('Use my own spread', { exact: true }).click();
     await expect(
       page.getByRole('button', { name: 'Choose photo', exact: true }),
     ).toHaveAccessibleDescription(

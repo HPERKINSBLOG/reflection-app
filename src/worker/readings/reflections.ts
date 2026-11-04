@@ -4,6 +4,7 @@ import { assertion } from '../identity/checkpoint.ts';
 import type { Session } from '../identity/types.ts';
 import { statement as q, DB_NOW } from '../db/core.ts';
 import { iso, type RecordBase, RecordError } from './base.ts';
+import { revokeGrants } from './context-grant.ts';
 type Input = z.infer<typeof apiSchemas.ReflectionWrite>;
 export class Reflections {
   constructor(readonly base: RecordBase) {}
@@ -130,19 +131,7 @@ export class Reflections {
                 input.editionId,
                 edit.revision,
               ),
-              // No context APIs are exposed in this slice. Still refuse an edit that would leave an active dependent request unfenced.
-              assertion(
-                this.base.db,
-                "NOT EXISTS(SELECT 1 FROM context_grants g JOIN generation_context gc ON gc.grant_id=g.id AND gc.owner_id=g.owner_id JOIN generation_requests r ON r.id=gc.request_id AND r.owner_id=gc.owner_id WHERE g.owner_id=? AND g.reflection_id=? AND r.state NOT IN ('published','blocked','failed','expired','cancelled'))",
-                session.subjectId,
-                id,
-              ),
-              q(
-                this.base.db,
-                `UPDATE context_grants SET state='revoked',revision=revision+1,updated_at=${DB_NOW} WHERE owner_id=? AND reflection_id=? AND state='allowed'`,
-                session.subjectId,
-                id,
-              ),
+              ...revokeGrants(this.base, session.subjectId, 'reflection_id', id),
               q(
                 this.base.db,
                 'UPDATE reflections SET current_revision=? WHERE owner_id=? AND id=?',

@@ -320,6 +320,16 @@ p.notice {
   align-items: flex-start;
   gap: 12px;
 }
+.service-notice {
+  display: grid;
+  justify-items: start;
+  gap: 12px;
+}
+.service-notice p {
+  display: flex;
+  gap: 12px;
+  margin: 0;
+}
 .notice > span {
   max-width: 48ch;
 }
@@ -682,7 +692,7 @@ main {
   max-width: 36ch;
 }
 .landing-card .brand-promise {
-  max-width: 27ch;
+  max-width: 35ch;
   margin-top: 24px;
   font-size: 20px;
   line-height: 30px;
@@ -909,7 +919,7 @@ main {
   font-size: 14px;
   line-height: 20px;
 }
-.receipt-content h2 {
+.receipt-content :is(h1, h2) {
   margin-bottom: 16px;
 }
 .receipt-status {
@@ -1396,9 +1406,10 @@ button.history-link:hover:enabled {
   border-radius: 4px;
 }
 .spread-upload-field {
-  margin-block: 20px 8px;
-  padding-bottom: 16px;
-  border-bottom: 1px solid var(--border);
+  margin-block: 12px 0;
+}
+.spread-upload-field[open] > summary {
+  margin-bottom: 12px;
 }
 .spread-upload-field label {
   display: block;
@@ -1512,6 +1523,11 @@ button.history-link:hover:enabled {
   margin: 0;
   font-size: 14px;
   line-height: 21px;
+}
+.reading-preflight > button,
+.consent-disclosures > button {
+  align-self: flex-start;
+  margin-block: 12px;
 }
 .reading-preflight > :where(p) + p {
   margin-top: 20px;
@@ -1642,6 +1658,10 @@ button.history-link:hover:enabled {
   font-weight: 500;
   letter-spacing: -0.015em;
   text-wrap: balance;
+}
+.reading-title > .text-link {
+  display: inline-block;
+  padding-block: 8px;
 }
 .question-art {
   flex: 0 0 144px;
@@ -2380,4 +2400,98 @@ div.reading-closing {
     --muted-foreground: var(--reflection-ink);
     color: var(--reflection-ink);
   }
+}
+
+.context-selection {
+  min-width: 0;
+  padding-block: 1rem;
+  border-block-start: 1px solid var(--border);
+}
+.context-selection > p,
+.context-controls p,
+.context-review p {
+  margin-block: 0.5rem;
+}
+.context-controls,
+.context-review {
+  display: grid;
+  gap: 0.75rem;
+  min-width: 0;
+  margin-block-start: 0.75rem;
+}
+.context-controls > button,
+.context-review > button {
+  justify-self: start;
+}
+.context-controls label:not(.check),
+.context-range label {
+  display: grid;
+  gap: 0.4rem;
+  min-width: 0;
+  font-weight: 600;
+}
+.context-controls select {
+  width: 100%;
+  min-width: 0;
+  min-height: 3rem;
+  padding: 0.5rem;
+  background: var(--card);
+  color: var(--foreground);
+  border: 1px solid var(--input);
+  border-radius: 0.4rem;
+  font: inherit;
+}
+.context-range {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+.context-review ol {
+  margin: 0;
+  padding-inline-start: 1.5rem;
+}
+.context-review blockquote {
+  margin: 0.5rem 0 1rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--border);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.import-tools,
+.import-group,
+.imported-reading {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.import-tools fieldset,
+.import-group {
+  margin-block: 1rem;
+  padding: 1rem;
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  min-inline-size: 0;
+}
+.import-tools label:not(.import-choice),
+.import-tools label small {
+  display: block;
+  margin-block: 0.5rem;
+}
+.import-tools input:not([type="checkbox"]),
+.import-tools select {
+  display: block;
+  width: 100%;
+  min-height: 2.75rem;
+  color: inherit;
+  background: var(--card);
+}
+.import-tools .import-choice {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+  padding-block: 0.65rem;
+}
+.imported-reading .kept-text {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
 }

@@ -71,6 +71,85 @@ export interface RekeyReceipt {
   stillOffline: true;
 }
 
+const inventoryColumns =
+  'table_name,column_name,key_json,aad_revision,source_version,source_cipher_hash,value_hmac';
+/** Restore owns the offline database. Couple exact abandoned import fields to
+ * the same transaction that removes their bytes. All surviving digests, HMACs
+ * and rewrite/validation progress remain part of the original replacement. */
+export async function abandonImportRekeyEntries(db: D1Database) {
+  const statements: D1PreparedStatement[] = [];
+  const jobs = await q(
+    db,
+    `SELECT * FROM account_rekey_jobs j WHERE phase!='complete' AND EXISTS(
+    SELECT 1 FROM import_groups g WHERE g.owner_id=j.owner_id AND g.state IN('staged','committing'))`,
+  ).all<Job>();
+  for (const job of jobs.results) {
+    const expiring = `WITH doomed AS (
+      SELECT 'import_items' t,'body_enc' c,json_array(i.batch_id,i.item_index) k FROM import_items i JOIN import_groups g ON g.id=i.group_id AND g.owner_id=i.owner_id WHERE i.owner_id=? AND g.state IN('staged','committing') AND i.body_enc IS NOT NULL
+      UNION ALL SELECT 'import_items','result_enc',json_array(i.batch_id,i.item_index) FROM import_items i JOIN import_groups g ON g.id=i.group_id AND g.owner_id=i.owner_id WHERE i.owner_id=? AND g.state IN('staged','committing') AND i.result_enc IS NOT NULL
+      UNION ALL SELECT 'import_staging','field_enc',json_array(s.group_id,s.ordinal,s.kind) FROM import_staging s JOIN import_groups g ON g.id=s.group_id AND g.owner_id=s.owner_id WHERE s.owner_id=? AND g.state IN('staged','committing') AND s.field_enc IS NOT NULL)`;
+    const owner = job.owner_id,
+      args = [owner, owner, owner];
+    const count = await q(db, `${expiring} SELECT count(*) n FROM doomed`, ...args).first<number>(
+      'n',
+    );
+    if (!count) continue;
+    const inventory = (
+      await q(
+        db,
+        `SELECT ${inventoryColumns} FROM account_rekey_entries WHERE operation_id=? ORDER BY ordinal`,
+        job.id,
+      ).all()
+    ).results;
+    const match = '(table_name,column_name,key_json) IN (SELECT t,c,k FROM doomed)';
+    const kept = (
+      await q(
+        db,
+        `${expiring} SELECT ${inventoryColumns} FROM account_rekey_entries WHERE operation_id=? AND NOT (${match}) ORDER BY ordinal`,
+        ...args,
+        job.id,
+      ).all()
+    ).results;
+    const partial = job.phase === 'inventorying';
+    if (
+      inventory.length !== job.field_count ||
+      count > job.expected_count ||
+      (!partial &&
+        (count !== inventory.length - kept.length ||
+          (await sha256Json(inventory)) !== job.inventory_hash))
+    )
+      throw new Error('Replacement inventory changed before import expiry');
+    statements.push(
+      assertion(
+        db,
+        'EXISTS(SELECT 1 FROM system_state WHERE id=1 AND restore_in_progress=1 AND generation_enabled=0)',
+      ),
+      assertion(
+        db,
+        'EXISTS(SELECT 1 FROM account_rekey_jobs WHERE id=? AND phase=? AND revision=?)',
+        job.id,
+        job.phase,
+        job.revision,
+      ),
+      q(
+        db,
+        `${expiring} DELETE FROM account_rekey_entries WHERE operation_id=? AND ${match}`,
+        ...args,
+        job.id,
+      ),
+      q(
+        db,
+        `UPDATE account_rekey_jobs SET field_count=?,expected_count=expected_count-?,inventory_hash=?,revision=revision+1,updated_at=${DB_NOW} WHERE id=?`,
+        kept.length,
+        count,
+        partial ? job.inventory_hash : await sha256Json(kept),
+        job.id,
+      ),
+    );
+  }
+  return statements;
+}
+
 /** Trusted offline operator only. Journals contain ciphertext digests/HMACs, never raw keys or values. */
 export class AccountRekey {
   constructor(
@@ -358,6 +437,12 @@ export class AccountRekey {
     const cursor = Cursor.parse(JSON.parse(job.cursor_json));
     const statements: D1PreparedStatement[] = [];
     const pending: Record<string, unknown>[] = [];
+    // An offline restore can remove abandoned import entries and leave ordinal gaps.
+    const ordinal = (await q(
+      this.base.db,
+      'SELECT coalesce(max(ordinal)+1,0) n FROM account_rekey_entries WHERE operation_id=?',
+      job.id,
+    ).first<number>('n'))!;
     let added = 0;
     while (cursor.field < ACCOUNT_FIELD_HANDLERS.length && added < limit) {
       const field = ACCOUNT_FIELD_HANDLERS[cursor.field]!;
@@ -411,7 +496,7 @@ export class AccountRekey {
             'INSERT INTO account_rekey_entries(operation_id,owner_id,ordinal,table_name,column_name,key_json,aad_revision,source_version,source_cipher_hash,value_hmac) VALUES(?,?,?,?,?,?,?,?,?,?)',
             job.id,
             job.owner_id,
-            job.field_count + added,
+            ordinal + added,
             field.table,
             field.column,
             canonicalJson(keys),
@@ -454,7 +539,7 @@ export class AccountRekey {
     return (
       await q(
         this.base.db,
-        'SELECT table_name,column_name,key_json,aad_revision,source_version,source_cipher_hash,value_hmac FROM account_rekey_entries WHERE operation_id=? ORDER BY ordinal',
+        `SELECT ${inventoryColumns} FROM account_rekey_entries WHERE operation_id=? ORDER BY ordinal`,
         id,
       ).all()
     ).results;

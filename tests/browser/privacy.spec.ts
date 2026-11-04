@@ -87,7 +87,8 @@ for (const lost of [false, true])
     await page.getByRole('button', { name: 'Delete account permanently', exact: true }).click();
     await expect(
       page.getByRole('heading', { name: 'Deletion receipt', exact: true }),
-    ).toBeVisible();
+    ).toBeFocused();
+    await expect(page.getByRole('heading').first()).toHaveText('Deletion receipt');
     await expect(page.locator('.receipt-card img')).toHaveCount(0);
     await expect(
       page.getByRole('button', { name: 'Sign in with a passkey', exact: true }),
@@ -145,5 +146,7 @@ for (const lost of [false, true])
       fullPage: true,
     });
     expect(await page.locator('body').evaluate((el) => el.scrollWidth <= innerWidth)).toBe(true);
+    await page.getByRole('button', { name: 'Dismiss receipt', exact: true }).click();
+    await expect(page.getByRole('heading', { name: 'A little space to reflect.' })).toBeFocused();
     await fresh.close();
   });

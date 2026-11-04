@@ -52,6 +52,7 @@ export const ErrorCode = z.enum([
   'RATE_LIMITED',
   'QUOTA_EXCEEDED',
   'NOTE_LIMIT_EXCEEDED',
+  'FOLLOWUP_LIMIT_EXCEEDED',
   'REVISION_LIMIT_EXCEEDED',
   'STORAGE_LIMIT_EXCEEDED',
   'DEPENDENTS_EXIST',
@@ -491,7 +492,29 @@ export const PreparedPlanV2 = PreparedPlan.omit({ fallbackClosing: true }).exten
   fallbackV2: FallbackV2,
 });
 export type PreparedPlanV2 = z.infer<typeof PreparedPlanV2>;
-export const AnyPreparedPlan = z.discriminatedUnion('version', [PreparedPlan, PreparedPlanV2]);
+const ContinuitySources = z.union([PreparedPlan.shape.sources, PreparedPlanV2.shape.sources]);
+const CanonVersion = z.union([z.literal(1), z.literal(2)]);
+export const PreparedPlanV3 = PreparedPlan.extend({
+  version: z.literal('tarot-plan.v3'),
+  canonVersion: CanonVersion,
+  sources: ContinuitySources,
+  contextHash: Hash,
+  writerPolicyHash: Hash,
+  fallbackClosing: z.string().min(1).max(250),
+  developed: PreparedPlanV2.pick({
+    contextHash: true,
+    draw: true,
+    spread: true,
+    relationships: true,
+    fallbackV2: true,
+  }).optional(),
+});
+export type PreparedPlanV3 = z.infer<typeof PreparedPlanV3>;
+export const AnyPreparedPlan = z.discriminatedUnion('version', [
+  PreparedPlan,
+  PreparedPlanV2,
+  PreparedPlanV3,
+]);
 const ContextRefs = z.array(z.literal('reader:question')).length(1);
 export const ModelUnitV2 = ModelUnit.omit({ reflectionQuestion: true }).extend({
   contextRefs: ContextRefs,
@@ -514,9 +537,23 @@ export const ModelCandidateV2 = z.strictObject({
   reflectionQuestion: ReferencedText.extend({ text: z.string().min(1).max(200) }).nullable(),
 });
 export type ModelCandidateV2 = z.infer<typeof ModelCandidateV2>;
+export const ContinuityRef = z.enum([
+  'reader:question',
+  'selection:0',
+  'selection:1',
+  'selection:2',
+]);
+export const ModelUnitV3 = ModelUnit.extend({ contextRefs: z.array(ContinuityRef).min(1).max(4) });
+export const ModelCandidateV3 = ModelCandidate.extend({
+  schemaVersion: z.literal(3),
+  kind: z.literal('tarot.interpretation.v3'),
+  units: z.array(ModelUnitV3).length(3),
+});
+export type ModelCandidateV3 = z.infer<typeof ModelCandidateV3>;
 export const AnyModelCandidate = z.discriminatedUnion('schemaVersion', [
   ModelCandidate,
   ModelCandidateV2,
+  ModelCandidateV3,
 ]);
 export const WriterReceiptV2 = z.strictObject({
   version: z.literal('writer-packet.v2'),
@@ -539,6 +576,22 @@ export const WriterReceiptV2 = z.strictObject({
   payloadBytes: z.number().int().positive(),
 });
 export type WriterReceiptV2 = z.infer<typeof WriterReceiptV2>;
+export const WriterReceiptV3 = WriterReceiptV2.omit({
+  spreadVersion: true,
+  omissions: true,
+  relationships: true,
+}).extend({
+  version: z.literal('writer-packet.v3'),
+  diagnosticOnly: z.literal(true),
+  canonVersion: CanonVersion,
+  shared: z
+    .array(z.strictObject({ ordinal: SelectedFragment.shape.ordinal, textHash: Hash }))
+    .max(3),
+  relationships: WriterReceiptV2.shape.relationships.optional(),
+});
+export type WriterReceiptV3 = z.infer<typeof WriterReceiptV3>;
+export const AnyWriterReceipt = z.discriminatedUnion('version', [WriterReceiptV2, WriterReceiptV3]);
+export type AnyWriterReceipt = z.infer<typeof AnyWriterReceipt>;
 export const AcceptedReadingV2 = AcceptedReading.omit({ units: true, closing: true }).extend({
   kind: z.literal('tarot.accepted.v2'),
   sources: z.array(CanonSourceV2).length(3),
@@ -552,9 +605,18 @@ export const AcceptedReadingV2 = AcceptedReading.omit({ units: true, closing: tr
   contextReceipt: WriterReceiptV2.nullable(),
   provenance: AcceptedReading.shape.provenance.extend({ schemaHash: Hash, contextHash: Hash }),
 });
+export const AcceptedReadingV3 = AcceptedReading.extend({
+  kind: z.literal('tarot.accepted.v3'),
+  canonVersion: CanonVersion,
+  sources: ContinuitySources,
+  units: z.array(ModelUnitV3.extend({ basisText: z.string().max(350) })).length(3),
+  contextReceipt: WriterReceiptV3.nullable(),
+  provenance: AcceptedReadingV2.shape.provenance,
+});
 export const AnyAcceptedReading = z.discriminatedUnion('kind', [
   AcceptedReading,
   AcceptedReadingV2,
+  AcceptedReadingV3,
 ]);
 
 export const LegacyBasis = z.strictObject({
@@ -656,6 +718,7 @@ export const UnavailableReading = z.strictObject({
 export const Reading = z.discriminatedUnion('kind', [
   AcceptedReading,
   AcceptedReadingV2,
+  AcceptedReadingV3,
   ImportedReading,
   UnavailableReading,
 ]);
@@ -793,6 +856,7 @@ export const AuthResult = z.strictObject({
 });
 export const SessionView = z.strictObject({
   subjectId: Id,
+  continuityReady: z.boolean().optional(),
   csrfToken: Base64url,
   permission: Permission,
   remainingDay: z.number().int().min(0),
@@ -801,6 +865,7 @@ export const SessionView = z.strictObject({
 });
 export const SessionRecord = z.strictObject({
   id: Id,
+  imported: z.boolean().optional(),
   revision: Revision,
   status: z.enum(['open', 'saved']),
   question: z.string().max(10000).nullable(),
@@ -884,8 +949,29 @@ export const GenerationReceipt = z.strictObject({
   actualCostMicroUsd: z.number().int().nullable(),
   costState: z.enum(['none', 'reserved', 'actual', 'unknown', 'expired']),
   transmission: JsonText.nullable(),
-  contextReceipt: WriterReceiptV2.optional(),
+  contextReceipt: AnyWriterReceipt.optional(),
+  selectedFragments: z
+    .array(
+      z.union([
+        SelectedFragment,
+        SelectedFragment.pick({ ordinal: true, grantId: true, grantRevision: true }).extend({
+          availability: z.literal('erased'),
+        }),
+      ]),
+    )
+    .max(3)
+    .optional(),
   reproduction: z.enum(['complete', 'redacted', 'legacy_unknown']),
+});
+export const LegacyAuthoredRecord = z.strictObject({
+  identity: ImportRecordIdentity,
+  parentIdentity: ImportRecordIdentity,
+  label: z.string().max(200),
+  text: z.string().min(1).max(10000),
+  originalTimestamp: z.string().max(200).nullable(),
+  occurredAt: Instant.nullable(),
+  originalJsonText: JsonText,
+  originalSha256: Hash,
 });
 export const PortableRecord = z.discriminatedUnion('kind', [
   z.strictObject({
@@ -905,6 +991,7 @@ export const PortableRecord = z.discriminatedUnion('kind', [
     identity: ImportRecordIdentity,
     originalId: z.string(),
     value: Reflection,
+    importedOriginal: LegacyAuthoredRecord.optional(),
   }),
   z.strictObject({
     kind: z.literal('revisit'),
@@ -947,16 +1034,6 @@ export const ExportPage = z.strictObject({
         .max(10),
     })
     .nullable(),
-});
-export const LegacyAuthoredRecord = z.strictObject({
-  identity: ImportRecordIdentity,
-  parentIdentity: ImportRecordIdentity,
-  label: z.string().max(200),
-  text: z.string().min(1).max(10000),
-  originalTimestamp: z.string().max(200).nullable(),
-  occurredAt: Instant.nullable(),
-  originalJsonText: JsonText,
-  originalSha256: Hash,
 });
 const ImportUnitCommon = {
   key: z.string().min(1).max(2000),
@@ -1028,6 +1105,15 @@ export const ImportPreview = z.strictObject({
     )
     .max(100),
 });
+export const ImportReviewPage = z.strictObject({
+  groupId: Id,
+  source: ImportSource,
+  recovery: ImportRecovery,
+  items: z
+    .array(ImportPreview.shape.items.element.extend({ label: z.string().max(10000) }))
+    .max(25),
+  nextCursor: z.string().nullable(),
+});
 export const ImportResult = z.strictObject({
   id: Id,
   items: z
@@ -1071,6 +1157,7 @@ export const apiSchemas = {
   ImportPreview,
   ImportResult,
   ImportGroupStatus,
+  ImportReviewPage,
   ImportGroupResultPage,
   ImportChunkDocument,
   DeletionReceipt,
@@ -1363,7 +1450,12 @@ export const ErasureTarget = z.discriminatedUnion('scope', [
     reflectionId: Id,
     revision: Revision,
   }),
-  z.strictObject({ scope: z.literal('context_copy'), subjectId: Id, source: Grant.shape.source }),
+  z.strictObject({
+    scope: z.literal('context_copy'),
+    subjectId: Id,
+    source: Grant.shape.source,
+    eraseImportedEdition: z.literal(true).optional(),
+  }),
 ]);
 export const ErasureIntent = z.strictObject({
   v: z.literal(1),

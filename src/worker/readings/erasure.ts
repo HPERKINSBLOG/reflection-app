@@ -15,6 +15,8 @@ import {
 } from '../recovery/ledger.ts';
 import { iso, type RecordBase, RecordError } from './base.ts';
 import { EraseData } from './erase-data.ts';
+import { ContextCopies } from './context-copies.ts';
+import { ImportCopies } from './import-copies.ts';
 
 interface Job {
   id: string;
@@ -56,6 +58,26 @@ export class SessionErasure {
     return this.removeTarget(
       session,
       { scope: 'session', subjectId: session.subjectId, sessionId: id },
+      key,
+      receipt,
+      revision,
+    );
+  }
+  async removeImportedEdition(
+    session: Session,
+    editionId: string,
+    revision: number,
+    key: string,
+    receipt: Receipt,
+  ) {
+    return this.removeTarget(
+      session,
+      {
+        scope: 'context_copy',
+        subjectId: session.subjectId,
+        source: { kind: 'edition', editionId },
+        eraseImportedEdition: true,
+      },
       key,
       receipt,
       revision,
@@ -134,6 +156,22 @@ export class SessionErasure {
           if (row.deleted_at !== null) throw new RecordError(410, 'CONTENT_UNAVAILABLE');
           if (row.current_revision !== revision)
             throw new RecordError(409, 'CONFLICT', row.current_revision);
+        } else if (
+          target.scope === 'context_copy' &&
+          target.eraseImportedEdition &&
+          target.source.kind === 'edition'
+        ) {
+          const row = await q(
+            this.base.db,
+            "SELECT session_id,edition_number,status FROM reading_editions WHERE owner_id=? AND id=? AND mode='legacy' AND parent_edition_id IS NOT NULL",
+            target.subjectId,
+            target.source.editionId,
+          ).first<{ session_id: string; edition_number: number; status: string }>();
+          if (!row) throw new RecordError(404, 'NOT_FOUND');
+          await this.base.ownedSession(session, row.session_id);
+          if (row.status !== 'imported') throw new RecordError(410, 'CONTENT_UNAVAILABLE');
+          if (row.edition_number !== revision)
+            throw new RecordError(409, 'CONFLICT', row.edition_number);
         } else if (target.scope === 'reflection_revision') {
           const row = await q(
             this.base.db,
@@ -223,6 +261,20 @@ export class SessionErasure {
               target.sessionId,
             ),
       );
+    } else if (
+      target.scope === 'context_copy' &&
+      target.eraseImportedEdition &&
+      target.source.kind === 'edition'
+    ) {
+      statements.push(
+        assertion(
+          this.base.db,
+          "EXISTS(SELECT 1 FROM reading_editions WHERE owner_id=? AND id=? AND mode='legacy' AND parent_edition_id IS NOT NULL AND status='imported' AND edition_number=?)",
+          target.subjectId,
+          target.source.editionId,
+          revision ?? null,
+        ),
+      );
     } else if (target.scope === 'revisit') {
       statements.push(
         assertion(
@@ -244,7 +296,14 @@ export class SessionErasure {
         ),
       );
     }
-    statements.push(...this.fence(target, id));
+    if (target.scope !== 'account') {
+      const imports = await ImportCopies.find(this.base, target);
+      statements.push(
+        imports.admissionGuard(),
+        ...imports.fence(),
+        ...this.fence(target, id, imports.destinations),
+      );
+    } else statements.push(...this.fence(target, id));
     statements.push(
       q(
         this.base.db,
@@ -270,7 +329,11 @@ export class SessionErasure {
     await this.base.db.batch(statements);
   }
   /** Idempotent privacy fence used both at live admission and offline replay. */
-  fence(target: Target, jobId: string): D1PreparedStatement[] {
+  fence(
+    target: Target,
+    jobId: string,
+    mirrors: readonly { kind: string; id: string; revision: number }[] = [],
+  ): D1PreparedStatement[] {
     const owner = target.subjectId;
     if (target.scope === 'account')
       return [
@@ -283,9 +346,10 @@ export class SessionErasure {
         q(this.base.db, 'DELETE FROM auth_sessions WHERE owner_id=?', owner),
         q(this.base.db, 'DELETE FROM auth_challenges WHERE owner_id=?', owner),
       ];
+    const copies = new ContextCopies(this.base, target, mirrors).fence();
     if (target.scope === 'session')
       return [
-        ...this.base.stopStatements(owner, target.sessionId),
+        ...copies,
         q(
           this.base.db,
           `UPDATE reading_sessions SET status='deleted',saved_at=NULL,deleted_at=coalesce(deleted_at,${DB_NOW}),retention_expires_at=NULL,revision=revision+1 WHERE owner_id=? AND id=? AND status!='deleted'`,
@@ -295,6 +359,7 @@ export class SessionErasure {
       ];
     if (target.scope === 'revisit')
       return [
+        ...copies,
         q(
           this.base.db,
           `UPDATE revisits SET deleted_at=coalesce(deleted_at,${DB_NOW}),deletion_job_id=? WHERE owner_id=? AND id=?`,
@@ -305,7 +370,7 @@ export class SessionErasure {
       ];
     if (target.scope === 'reflection_revision')
       return [
-        ...this.base.stopStatements(owner),
+        ...copies,
         q(
           this.base.db,
           `UPDATE reflection_revisions SET erased_at=coalesce(erased_at,${DB_NOW}) WHERE owner_id=? AND reflection_id=? AND revision=?`,
@@ -321,17 +386,28 @@ export class SessionErasure {
           target.revision,
         ),
       ];
-    throw new Error('Unsupported erasure family');
+    if (
+      target.scope === 'context_copy' &&
+      target.eraseImportedEdition &&
+      target.source.kind === 'edition'
+    )
+      return [
+        ...copies,
+        q(
+          this.base.db,
+          `UPDATE reading_editions SET status='deleted',invalidated_at=coalesce(invalidated_at,${DB_NOW}) WHERE owner_id=? AND id=? AND mode='legacy'`,
+          owner,
+          target.source.editionId,
+        ),
+      ];
+    return copies;
   }
   async eraseTarget(id: string, target: Target) {
     const data = new EraseData(this.base);
-    if (target.scope === 'session') await data.session({ id }, target);
-    else if (target.scope === 'reflection_revision') await data.reflection({ id }, target);
-    else if (target.scope === 'revisit') await data.revisit({ id }, target);
-    else if (target.scope === 'account') {
+    if (target.scope === 'account') {
       await this.retireCheckpoints(target.subjectId);
       await data.account(target);
-    } else throw new Error('Unsupported erasure family');
+    } else await data.records(id, target);
   }
   private async retireCheckpoints(owner: string) {
     const prefixes = await Promise.all(

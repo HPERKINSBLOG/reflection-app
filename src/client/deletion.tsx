@@ -1,5 +1,5 @@
 import { Button } from './design/components.tsx';
-import { useEffect, useRef, useState } from 'react';
+import { type Ref, useEffect, useRef, useState } from 'react';
 import type { z } from 'zod';
 import { apiSchemas } from '../contracts/index.ts';
 import { date } from './date.ts';
@@ -19,10 +19,12 @@ export function deletionIntent() {
 export function DeletionReceiptPanel({
   proof,
   initial,
+  pageHeading,
   onDismiss,
 }: {
   proof: DeletionProof;
   initial: Status | null;
+  pageHeading?: Ref<HTMLHeadingElement>;
   onDismiss: () => void;
 }) {
   const [status, setStatus] = useState(initial),
@@ -83,7 +85,13 @@ export function DeletionReceiptPanel({
   return (
     <section className="card receipt-card" aria-label="Deletion receipt">
       <div className="receipt-content">
-        <h2>Deletion receipt</h2>
+        {pageHeading ? (
+          <h1 ref={pageHeading} tabIndex={-1}>
+            Deletion receipt
+          </h1>
+        ) : (
+          <h2>Deletion receipt</h2>
+        )}
         <p
           role="status"
           className={`receipt-status ${status?.state === 'complete' ? 'complete' : ''}`}

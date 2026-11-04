@@ -1,6 +1,6 @@
 # Selected context — proposed design and acceptance
 
-Status: specification only; follows dated revisit notes and precedes follow-up generation. General AI permission and permission for a particular context submission are separate choices.
+Local readers can grant access to a revision, review an exact excerpt, and confirm its use for one submission. General AI permission and the choice of excerpts are separate. [Milestone 3 evidence](../MILESTONE_3_RESULTS.md)
 
 Review note, 2026-11-02: [Milestone 3 decisions D2–D7](../MILESTONE_3_PREPARATION.md#decisions-and-proposed-defaults) and [Continuity C1–C3](../superpowers/plans/2026-11-01-milestone-3-continuity.md) specify the proposed source/revision bounds, exact request acknowledgement and old-request compatibility. Parent questions and interpretations remain unselected unless explicitly previewed. These are planning contracts; the flow is still unimplemented.
 

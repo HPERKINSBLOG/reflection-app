@@ -61,10 +61,12 @@ export function RequestProgress(props: {
   onExpired: () => void;
   onTarget: (target: ReadingRequest['target']) => void;
   onAllowNew: () => void;
+  onReviewDraft: (reason: string) => void;
 }) {
   const latest = useRef(props);
   latest.current = props;
   const [status, setStatus] = useState<Status | null>(null);
+  const [contextStopped, setContextStopped] = useState('');
   const [notice, setNotice] = useState('');
   const [cancelling, setCancelling] = useState(false);
   const [canRetry, setCanRetry] = useState(false);
@@ -83,12 +85,24 @@ export function RequestProgress(props: {
       opening = false,
       stopping = false,
       definite = false;
+    let observedThrough = 0,
+      completeHistory = true,
+      writerAuthorized = false;
+    let lastEvent: Status['events'][number]['code'] | null = null;
     let cancelIntent: { revision: number; key: string } | null = null;
     const current = () =>
       live && !controller.signal.aborted && window.location.pathname === requestPath(target);
     const receive = (value: Status) => {
       if (!current() || (snapshot && value.revision < snapshot.revision)) return;
       snapshot = value;
+      if (value.state === 'dispatching' || value.state === 'received') writerAuthorized = true;
+      for (const event of value.events) {
+        if (event.sequence <= observedThrough) continue;
+        if (event.sequence !== observedThrough + 1) completeHistory = false;
+        observedThrough = event.sequence;
+        lastEvent = event.code;
+        if (event.code === 'WRITING') writerAuthorized = true;
+      }
       cursor = Math.max(cursor, value.nextSequence);
       target = { kind: 'request', id: value.requestId };
       latest.current.onTarget(target);
@@ -97,6 +111,14 @@ export function RequestProgress(props: {
       setCanRetry(false);
       if (terminal(value)) {
         latest.current.onAllowNew();
+        if (value.errorCode === 'CONTEXT_CHANGED') {
+          const delivery = writerAuthorized
+            ? 'Sending to the writer had started. Revoking eligibility cannot retract an excerpt already sent.'
+            : completeHistory && observedThrough === value.nextSequence && lastEvent === 'STOPPED'
+              ? 'The writer was not sent your selected excerpts.'
+              : 'The remaining request history cannot confirm whether sending had started.';
+          setContextStopped(`A selected source changed and this request stopped. ${delivery}`);
+        }
         if (value.state !== 'published')
           void api('/me', apiSchemas.SessionView, undefined, undefined, {
             signal: controller.signal,
@@ -122,6 +144,17 @@ export function RequestProgress(props: {
       if (!current()) return;
       if (error instanceof ApiFailure && error.status === 401) {
         latest.current.onExpired();
+        return;
+      }
+      if (
+        submission &&
+        initial.start &&
+        (initial.start.input.parentEditionId || initial.start.input.selection.length) &&
+        error instanceof ApiFailure &&
+        ['CONTEXT_CHANGED', 'CONTENT_UNAVAILABLE', 'CONSENT_REQUIRED'].includes(error.code ?? '')
+      ) {
+        definite = true;
+        latest.current.onReviewDraft(error.message);
         return;
       }
       if (error instanceof ApiFailure && error.status === 410) {
@@ -297,13 +330,21 @@ export function RequestProgress(props: {
           className={`progress-status status-${indicator ?? 'working'}`}
         >
           {indicator ? <Icon name={indicator} /> : <span className="spinner" aria-hidden="true" />}
-          <span>{notice || description(status)}</span>
+          <span>{notice || contextStopped || description(status)}</span>
         </p>
         <p className="muted">
           Only the accepted reading is shown. Reconnecting checks this request without starting
           another reading.
         </p>
         <div className="actions progress-actions">
+          {contextStopped && props.request.start && (
+            <Button
+              type="button"
+              onClick={() => latest.current.onReviewDraft('Your selected context changed.')}
+            >
+              Return to your question
+            </Button>
+          )}
           {status?.state === 'published' && (
             <Button
               type="button"

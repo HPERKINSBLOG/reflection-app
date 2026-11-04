@@ -35,6 +35,7 @@ async function form(page: Page, ip: string) {
   await page.getByRole('button', { name: 'New reading', exact: true }).click();
   await page.getByLabel('Your question').fill('How can I compare my options?');
   await page.getByLabel('Use English for this reading').check();
+  await page.getByText('Use my own spread', { exact: true }).click();
 }
 
 test('starting while image preparation is pending keeps the chosen photo', async ({ page }) => {

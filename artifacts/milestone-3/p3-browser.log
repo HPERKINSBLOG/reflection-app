@@ -1,0 +1,20 @@
+
+> reflection-app@0.1.0 test:browser
+> playwright test tests/browser/imports.spec.ts --reporter=list
+
+[WebServer] (node:213214) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:213228) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 5 tests using 1 worker
+
+(node:213540) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  1 tests/browser/imports.spec.ts:8:1 › review, interrupted commit, resume and exact reopen of an imported Tarot reading with AI off (2.6s)
+  ✓  2 tests/browser/imports.spec.ts:126:1 › versioned Patternlike files, native Pixel and invalid input are distinguishable before staging (699ms)
+  ✓  3 tests/browser/imports.spec.ts:159:1 › a staged group reopens by ID after reload and shows its original selection before confirmation (965ms)
+  ✓  4 tests/browser/imports.spec.ts:186:1 › changed journal content needs an explicit new source revision and expired review clears private file state (1.1s)
+  ✓  5 tests/browser/imports.spec.ts:240:1 › an imported deletion reopens as the recorded unavailable edition without offering a follow-up (977ms)
+
+  5 passed (12.8s)

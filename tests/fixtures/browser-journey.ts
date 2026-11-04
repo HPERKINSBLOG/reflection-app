@@ -197,3 +197,90 @@ export async function noteJourneyStates(page: Page, capture: (state: string) => 
   await page.getByRole('button', { name: 'Save note', exact: true }).click();
   await expect(notes.getByRole('status').filter({ hasText: 'Note saved.' })).toBeVisible();
 }
+
+/** Runs on an owned, saved native edition. Use the real local preview, then return to the exact original. */
+export async function continuityJourneyStates(
+  page: Page,
+  capture: (state: string) => Promise<void>,
+) {
+  const original = page.getByTestId('accepted-reading').getByRole('heading', { level: 2 });
+  const parentQuestion = await original.textContent();
+  const follow = page.getByRole('link', { name: 'Follow up on this edition', exact: true });
+  const target = await follow.getAttribute('href');
+  if (!target) throw new Error('Missing saved parent link');
+  const family = target.split('/')[2]!;
+  await follow.focus();
+  await expect(follow).toBeFocused();
+  await page.keyboard.press('Enter');
+  await expect(page.getByRole('heading', { name: 'Ask a follow-up', exact: true })).toBeFocused();
+  await expect(page.getByRole('heading', { name: 'No new draw', exact: true })).toBeVisible();
+  const question = 'What changed since I tried putting the first idea into practice?';
+  await page.getByLabel('Your follow-up question', { exact: true }).fill(question);
+  await page.getByLabel('Use English for this reading').check();
+  await expect(page.getByText('No excerpts selected.', { exact: true })).toBeVisible();
+  await capture('follow-up-compose');
+  await page.getByRole('button', { name: 'Choose excerpts', exact: true }).click();
+  await page.getByLabel('Saved reading', { exact: true }).selectOption(family);
+  const sources = page.getByLabel('Source', { exact: true });
+  const questionOption = sources.locator('option').filter({ hasText: 'Your saved question' });
+  await expect(questionOption).toHaveCount(1);
+  await sources.selectOption({ value: (await questionOption.getAttribute('value'))! });
+  await page.getByRole('button', { name: 'Allow this source', exact: true }).click();
+  await page.getByRole('button', { name: 'Use whole passage', exact: true }).click();
+  await page.getByRole('button', { name: 'Add excerpt', exact: true }).click();
+  await page.getByRole('button', { name: 'Review selected excerpts', exact: true }).click();
+  const review = page.getByRole('region', { name: 'Review selected excerpts' });
+  await expect(review.getByRole('heading')).toBeFocused();
+  await expect(review.getByRole('blockquote')).toHaveText(parentQuestion!);
+  const check = review.getByRole('checkbox');
+  await check.focus();
+  await expect(check).toBeFocused();
+  await page.keyboard.press('Space');
+  await expect(check).toBeChecked();
+  await capture('selected-context-review');
+  const submit = page.getByRole('button', { name: 'Start follow-up', exact: true });
+  await expect(submit).toBeEnabled();
+  await submit.focus();
+  await expect(submit).toBeFocused();
+  await page.keyboard.press('Enter');
+  await expect(
+    page.getByTestId('accepted-reading').getByRole('heading', { name: question, exact: true }),
+  ).toBeFocused();
+  await expect(page.getByRole('navigation', { name: 'Edition history' })).toBeVisible();
+  await capture('follow-up-accepted');
+  await page.getByRole('link', { name: 'Open parent edition', exact: true }).click();
+  await expect(original).toHaveText(parentQuestion!);
+}
+
+/** Review only in memory. No encrypted intake batch or imported journal records are created. */
+export async function importReviewState(page: Page, capture: (state: string) => Promise<void>) {
+  const opener = page.getByRole('button', { name: 'Import records', exact: true });
+  await opener.click();
+  await expect(page.getByRole('heading', { name: 'Review an import', exact: true })).toBeVisible();
+  await page.getByLabel('File format').selectOption('tarot-json');
+  await page
+    .getByLabel('Import file', { exact: true })
+    .setInputFiles(fileURLToPath(new URL('./imports/tarot-nested.json', import.meta.url)));
+  await page.getByRole('button', { name: 'Read file', exact: true }).click();
+  const rows = page.getByRole('group', { name: 'Records in the file' });
+  const items = rows.getByRole('checkbox');
+  await expect(items).toHaveCount(4);
+  const chosen = items.first();
+  await expect(chosen).not.toBeChecked();
+  await chosen.focus();
+  await expect(chosen).toBeFocused();
+  await page.keyboard.press('Space');
+  await expect(chosen).toBeChecked();
+  await expect(items.nth(1)).not.toBeChecked();
+  await capture('import-review');
+  await page.getByRole('button', { name: 'Close import', exact: true }).click();
+  await expect(opener).toBeFocused();
+  expect(
+    await page.evaluate(async () => ({
+      local: localStorage.length,
+      session: sessionStorage.length,
+      databases: (await indexedDB.databases()).length,
+      caches: (await caches.keys()).length,
+    })),
+  ).toEqual({ local: 0, session: 0, databases: 0, caches: 0 });
+}

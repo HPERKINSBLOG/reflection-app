@@ -9,6 +9,7 @@ export const erasedRevisitEligible = `revisits.deleted_at<=${DB_NOW}-${30 * DAY}
   AND EXISTS(SELECT 1 FROM deletion_jobs j WHERE j.id=revisits.deletion_job_id AND j.owner_id=revisits.owner_id AND j.scope='revisit' AND j.state='complete' AND j.completed_at<=${DB_NOW}-${30 * DAY} AND j.backup_expires_by<=${DB_NOW})
   AND NOT EXISTS(SELECT 1 FROM deletion_jobs j WHERE j.owner_id=revisits.owner_id AND j.state!='complete')
   AND NOT EXISTS(SELECT 1 FROM revisit_revisions r WHERE r.owner_id=revisits.owner_id AND r.revisit_id=revisits.id AND (r.body_enc IS NOT NULL OR r.erased_at IS NULL))
+  AND NOT EXISTS(SELECT 1 FROM context_grants g WHERE g.owner_id=revisits.owner_id AND g.revisit_id=revisits.id)
   AND NOT EXISTS(SELECT 1 FROM import_identities i WHERE i.owner_id=revisits.owner_id AND i.revisit_id=revisits.id)
   AND NOT EXISTS(SELECT 1 FROM idempotency_keys i WHERE i.owner_id=revisits.owner_id AND i.resource_id LIKE revisits.id||':%' AND i.expires_at>${DB_NOW})`;
 /** Routine D1 retention only. Independent recovery objects require the offline cleanup service. */
@@ -42,6 +43,25 @@ export class RetentionMaintenance {
         q(this.db, `DELETE FROM ${table} WHERE rowid IN (${ids})`),
       ]);
     };
+    const expiredGroups = `SELECT id FROM import_groups WHERE expires_at<=${DB_NOW} AND(state IN('staged','committing') OR EXISTS(SELECT 1 FROM import_items i WHERE i.group_id=import_groups.id AND i.body_enc IS NOT NULL) OR EXISTS(SELECT 1 FROM import_staging st WHERE st.group_id=import_groups.id)) ORDER BY expires_at LIMIT 100`;
+    await batch('import_previews', [
+      q(
+        this.db,
+        `UPDATE accounts SET data_revision=data_revision+1 WHERE id IN (SELECT owner_id FROM import_groups WHERE id IN (${expiredGroups}))`,
+      ),
+      q(this.db, `DELETE FROM import_staging WHERE group_id IN (${expiredGroups})`),
+      q(this.db, `UPDATE import_items SET body_enc=NULL WHERE group_id IN (${expiredGroups})`),
+      q(
+        this.db,
+        `UPDATE import_groups SET state='expired',preview_hash=NULL,lease_token=NULL,lease_until=NULL WHERE id IN (${expiredGroups}) AND state IN('staged','committing')`,
+      ),
+    ]);
+    await remove(
+      'import_groups',
+      `retain_until<=${DB_NOW} AND state IN('failed','expired','complete')`,
+      'retain_until',
+    );
+    await remove('import_batches', `group_id IS NULL AND expires_at<=${DB_NOW}`, 'expires_at');
     await remove('auth_challenges', `expires_at<=${DB_NOW}`, 'expires_at');
     await remove(
       'auth_sessions',
@@ -79,11 +99,11 @@ export class RetentionMaintenance {
       ),
     ]);
 
-    const failed = `state IN ('blocked','failed','expired','cancelled') AND NOT EXISTS(SELECT 1 FROM reading_editions e WHERE e.request_id=generation_requests.id AND e.owner_id=generation_requests.owner_id) AND NOT EXISTS(SELECT 1 FROM generation_context gc WHERE gc.request_id=generation_requests.id)`;
+    const failed = `state IN ('blocked','failed','expired','cancelled') AND NOT EXISTS(SELECT 1 FROM reading_editions e WHERE e.request_id=generation_requests.id AND e.owner_id=generation_requests.owner_id)`;
     const oldFailure = `${failed} AND coalesce(finished_at,expires_at)<=${DB_NOW}-${DAY}`;
     const bodyCandidates = this.ids(
       'generation_requests',
-      `${oldFailure} AND (input_enc IS NOT NULL OR plan_enc IS NOT NULL OR EXISTS(SELECT 1 FROM provider_dispatches d WHERE d.request_id=generation_requests.id AND (d.transmission_enc IS NOT NULL OR d.candidate_enc IS NOT NULL OR d.provider_response_id_enc IS NOT NULL)))`,
+      `${oldFailure} AND (input_enc IS NOT NULL OR plan_enc IS NOT NULL OR EXISTS(SELECT 1 FROM generation_context x WHERE x.request_id=generation_requests.id AND x.fragment_enc IS NOT NULL) OR EXISTS(SELECT 1 FROM provider_dispatches d WHERE d.request_id=generation_requests.id AND (d.transmission_enc IS NOT NULL OR d.candidate_enc IS NOT NULL OR d.provider_response_id_enc IS NOT NULL)))`,
       'coalesce(finished_at,expires_at)',
     );
     // Freeze only the bounded row identities. Recheck terminal/deadline/reference eligibility
@@ -96,19 +116,24 @@ export class RetentionMaintenance {
       this.invalidate('generation_requests', bodies, ...bodyIds),
       q(
         this.db,
-        `UPDATE generation_requests SET input_enc=NULL,plan_enc=NULL,revision=revision+1 WHERE rowid IN (${bodies})`,
+        `UPDATE generation_requests SET input_enc=NULL,plan_enc=NULL,plan_hmac=NULL,revision=revision+1 WHERE rowid IN (${bodies})`,
         ...bodyIds,
       ),
       q(
         this.db,
-        `UPDATE provider_dispatches SET transmission_enc=NULL,candidate_enc=NULL,provider_response_id_enc=NULL WHERE request_id IN (SELECT id FROM generation_requests WHERE rowid IN (${bodies}))`,
+        `UPDATE provider_dispatches SET transmission_enc=NULL,transmission_hmac='',candidate_enc=NULL,provider_response_id_enc=NULL WHERE request_id IN (SELECT id FROM generation_requests WHERE rowid IN (${bodies}))`,
+        ...bodyIds,
+      ),
+      q(
+        this.db,
+        `UPDATE generation_context SET fragment_enc=NULL,fragment_hmac='' WHERE request_id IN (SELECT id FROM generation_requests WHERE rowid IN (${bodies}))`,
         ...bodyIds,
       ),
     ]);
 
     const stale = this.ids(
       'generation_requests',
-      `${failed} AND coalesce(finished_at,expires_at)<=${DB_NOW}-${30 * DAY} AND input_enc IS NULL AND plan_enc IS NULL AND NOT EXISTS(SELECT 1 FROM quota_reservations qr WHERE qr.request_id=generation_requests.id AND qr.state='held') AND NOT EXISTS(SELECT 1 FROM provider_dispatches d WHERE d.request_id=generation_requests.id AND (d.transmission_enc IS NOT NULL OR d.candidate_enc IS NOT NULL OR d.provider_response_id_enc IS NOT NULL))`,
+      `${failed} AND coalesce(finished_at,expires_at)<=${DB_NOW}-${30 * DAY} AND input_enc IS NULL AND plan_enc IS NULL AND NOT EXISTS(SELECT 1 FROM generation_context x WHERE x.request_id=generation_requests.id AND x.fragment_enc IS NOT NULL) AND NOT EXISTS(SELECT 1 FROM quota_reservations qr WHERE qr.request_id=generation_requests.id AND qr.state='held') AND NOT EXISTS(SELECT 1 FROM provider_dispatches d WHERE d.request_id=generation_requests.id AND (d.transmission_enc IS NOT NULL OR d.candidate_enc IS NOT NULL OR d.provider_response_id_enc IS NOT NULL))`,
       'coalesce(finished_at,expires_at)',
     );
     await batch('failed_metadata', [
@@ -168,9 +193,12 @@ export class RetentionMaintenance {
     const empty = [
       `status='deleted' AND deleted_at<=${DB_NOW}-${30 * DAY} AND question_enc IS NULL`,
       owned('deletion_jobs', "x.state!='complete'"),
-      owned('context_grants'),
-      owned('import_items'),
-      owned('import_identities'),
+      `NOT EXISTS(SELECT 1 FROM context_grants g
+        LEFT JOIN reading_editions e ON e.owner_id=g.owner_id AND e.id=g.edition_id
+        LEFT JOIN reflections f ON f.owner_id=g.owner_id AND f.id=g.reflection_id
+        WHERE g.owner_id=${source}.owner_id AND (e.session_id=${source}.id OR f.session_id=${source}.id))`,
+      session('import_items', '1'),
+      session('import_identities', '1'),
       session('revisits', '1'),
       `NOT EXISTS(SELECT 1 FROM revisit_revisions rv JOIN revisits n ON n.id=rv.revisit_id AND n.owner_id=rv.owner_id WHERE n.owner_id=${source}.owner_id AND n.session_id=${source}.id AND (rv.body_enc IS NOT NULL OR rv.erased_at IS NULL))`,
       session('basis_snapshots', 'x.body_enc IS NOT NULL'),
@@ -184,14 +212,17 @@ export class RetentionMaintenance {
       `NOT EXISTS(SELECT 1 FROM quota_reservations qr JOIN generation_requests r ON r.id=qr.request_id WHERE r.session_id=${source}.id AND qr.state='held')`,
       `NOT EXISTS(SELECT 1 FROM provider_dispatches d JOIN generation_requests r ON r.id=d.request_id WHERE r.session_id=${source}.id AND (d.transmission_enc IS NOT NULL OR d.candidate_enc IS NOT NULL OR d.provider_response_id_enc IS NOT NULL))`,
     ].join(' AND ');
-    const shells = this.ids(source, empty, 'deleted_at');
+    const shells = `WITH shells AS MATERIALIZED (SELECT id,owner_id FROM reading_sessions WHERE ${empty} ORDER BY deleted_at,rowid LIMIT 100)`;
     await batch('deleted_session_metadata', [
-      this.invalidate(source, shells),
       q(
         this.db,
-        `UPDATE cost_reservations SET owner_id=NULL,dispatch_id=NULL WHERE dispatch_id IN (SELECT d.id FROM provider_dispatches d JOIN generation_requests r ON r.id=d.request_id WHERE r.session_id IN (SELECT id FROM reading_sessions WHERE rowid IN (${shells})) UNION SELECT spread_dispatch_id FROM generation_requests WHERE session_id IN (SELECT id FROM reading_sessions WHERE rowid IN (${shells})))`,
+        `${shells} UPDATE accounts SET data_revision=data_revision+1 WHERE id IN (SELECT owner_id FROM shells)`,
       ),
-      q(this.db, `DELETE FROM reading_sessions WHERE rowid IN (${shells})`),
+      q(
+        this.db,
+        `${shells} UPDATE cost_reservations SET owner_id=NULL,dispatch_id=NULL WHERE dispatch_id IN (SELECT d.id FROM provider_dispatches d JOIN generation_requests r ON r.id=d.request_id WHERE r.session_id IN (SELECT id FROM shells) UNION SELECT spread_dispatch_id FROM generation_requests WHERE session_id IN (SELECT id FROM shells))`,
+      ),
+      q(this.db, `${shells} DELETE FROM reading_sessions WHERE id IN (SELECT id FROM shells)`),
     ]);
     return { scope: 'd1-retention' as const, mutations: counts };
   }

@@ -1,0 +1,12 @@
+
+> reflection-app@0.1.0 test:db
+> vitest run --config vitest.db.config.ts tests/db/import-roundtrip.test.ts tests/db/import-privacy.test.ts
+
+
+ RUN  v5.0.5 /home/htper/reflection-app
+
+
+ Test Files  2 passed (2)
+      Tests  6 passed (6)
+   Start at  22:47:03
+   Duration  4.15s (tests 41%, transform 37%, import 21%, worker 1%)

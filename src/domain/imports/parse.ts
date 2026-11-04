@@ -129,6 +129,20 @@ export async function validateUnit(unit: Unit): Promise<void> {
     assertTarotProjection(originalNode, unit.parentIdentity !== null);
   if (unit.kind === 'legacy-authored' && originalNode.value !== unit.record.text)
     throw new Error('IMPORT_INVALID');
+  if (
+    unit.kind === 'portable' &&
+    unit.record.kind === 'reflection' &&
+    unit.record.importedOriginal
+  ) {
+    const a = unit.record.importedOriginal;
+    if (
+      canonicalJson(a.identity) !== canonicalJson(unit.identity) ||
+      a.text !== unit.record.value.text ||
+      readJson(a.originalJsonText).value !== a.text ||
+      (await rawHash(a.originalJsonText)) !== a.originalSha256
+    )
+      throw new Error('IMPORT_INVALID');
+  }
   if (unit.kind === 'portable' && canonicalJson(originalNode.value) !== canonicalJson(unit.record))
     throw new Error('IMPORT_INVALID');
   if (

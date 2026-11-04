@@ -1,0 +1,320 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-03T18:26:19.478Z",
+  "title": "Reflection Design System",
+  "extensions": {
+    "colorMeta": {
+      "paper": {
+        "role": "neutral",
+        "displayName": "Paper",
+        "canonical": "#f7f3e8",
+        "tonalRamp": [
+          "oklch(15% 0.0069 90.2)",
+          "oklch(26% 0.0111 90.2)",
+          "oklch(38% 0.0141 90.2)",
+          "oklch(49% 0.0152 90.2)",
+          "oklch(61% 0.0143 90.2)",
+          "oklch(72% 0.0117 90.2)",
+          "oklch(84% 0.0073 90.2)",
+          "oklch(95% 0.0024 90.2)"
+        ]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Ink",
+        "canonical": "#103f46",
+        "tonalRamp": [
+          "oklch(15% 0.0229 209.2)",
+          "oklch(26% 0.0367 209.2)",
+          "oklch(38% 0.0468 209.2)",
+          "oklch(49% 0.0504 209.2)",
+          "oklch(61% 0.0474 209.2)",
+          "oklch(72% 0.0388 209.2)",
+          "oklch(84% 0.0243 209.2)",
+          "oklch(95% 0.0079 209.2)"
+        ]
+      },
+      "teal": {
+        "role": "primary",
+        "displayName": "Teal",
+        "canonical": "#126f73",
+        "tonalRamp": [
+          "oklch(15% 0.0361 199.5)",
+          "oklch(26% 0.0580 199.5)",
+          "oklch(38% 0.0739 199.5)",
+          "oklch(49% 0.0795 199.5)",
+          "oklch(61% 0.0748 199.5)",
+          "oklch(72% 0.0613 199.5)",
+          "oklch(84% 0.0383 199.5)",
+          "oklch(95% 0.0124 199.5)"
+        ]
+      },
+      "evening": {
+        "role": "neutral",
+        "displayName": "Evening",
+        "canonical": "#082f33",
+        "tonalRamp": [
+          "oklch(15% 0.0192 205.1)",
+          "oklch(26% 0.0309 205.1)",
+          "oklch(38% 0.0394 205.1)",
+          "oklch(49% 0.0423 205.1)",
+          "oklch(61% 0.0399 205.1)",
+          "oklch(72% 0.0326 205.1)",
+          "oklch(84% 0.0204 205.1)",
+          "oklch(95% 0.0066 205.1)"
+        ]
+      },
+      "mint": {
+        "role": "primary",
+        "displayName": "Mint",
+        "canonical": "#a8d5ba",
+        "tonalRamp": [
+          "oklch(15% 0.0274 158.4)",
+          "oklch(26% 0.0440 158.4)",
+          "oklch(38% 0.0561 158.4)",
+          "oklch(49% 0.0603 158.4)",
+          "oklch(61% 0.0568 158.4)",
+          "oklch(72% 0.0465 158.4)",
+          "oklch(84% 0.0291 158.4)",
+          "oklch(95% 0.0094 158.4)"
+        ]
+      },
+      "coral": {
+        "role": "tertiary",
+        "displayName": "Coral",
+        "canonical": "#f28b7b",
+        "tonalRamp": [
+          "oklch(15% 0.0583 29.8)",
+          "oklch(26% 0.0937 29.8)",
+          "oklch(38% 0.1194 29.8)",
+          "oklch(49% 0.1284 29.8)",
+          "oklch(61% 0.1209 29.8)",
+          "oklch(72% 0.0990 29.8)",
+          "oklch(84% 0.0619 29.8)",
+          "oklch(95% 0.0201 29.8)"
+        ]
+      },
+      "butter": {
+        "role": "secondary",
+        "displayName": "Butter",
+        "canonical": "#f1d27b",
+        "tonalRamp": [
+          "oklch(15% 0.0509 90.4)",
+          "oklch(26% 0.0818 90.4)",
+          "oklch(38% 0.1043 90.4)",
+          "oklch(49% 0.1122 90.4)",
+          "oklch(61% 0.1056 90.4)",
+          "oklch(72% 0.0865 90.4)",
+          "oklch(84% 0.0541 90.4)",
+          "oklch(95% 0.0176 90.4)"
+        ]
+      },
+      "sage": {
+        "role": "secondary",
+        "displayName": "Sage",
+        "canonical": "#a9b88f",
+        "tonalRamp": [
+          "oklch(15% 0.0268 124.1)",
+          "oklch(26% 0.0430 124.1)",
+          "oklch(38% 0.0548 124.1)",
+          "oklch(49% 0.0589 124.1)",
+          "oklch(61% 0.0554 124.1)",
+          "oklch(72% 0.0454 124.1)",
+          "oklch(84% 0.0284 124.1)",
+          "oklch(95% 0.0092 124.1)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "Poster scale in the design library."
+      },
+      "title-page": {
+        "displayName": "Page title",
+        "purpose": "Desktop end of the fluid page-title scale."
+      },
+      "title-section": {
+        "displayName": "Section title",
+        "purpose": "A major section, including Saved readings."
+      },
+      "card-title": {
+        "displayName": "Card title",
+        "purpose": "Introduces a writing area or a group of controls."
+      },
+      "history-question": {
+        "displayName": "History question",
+        "purpose": "The question that opens a saved reading."
+      },
+      "brand": {
+        "displayName": "Wordmark",
+        "purpose": "Reflection in the header."
+      },
+      "body-lg": {
+        "displayName": "Lead",
+        "purpose": "A short introduction to the page."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Reading text, explanations, and field values."
+      },
+      "body-sm": {
+        "displayName": "Supporting copy",
+        "purpose": "Secondary explanations beside a task."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Button text and visible form labels."
+      },
+      "caption": {
+        "displayName": "Caption",
+        "purpose": "Writing hints and provenance chips."
+      },
+      "code": {
+        "displayName": "Code",
+        "purpose": "Recovery material and technical identifiers."
+      }
+    },
+    "shadows": [
+      {
+        "name": "Flat surfaces",
+        "value": "none",
+        "purpose": "Rules separate sections. Evening also uses Ink panels on the darker page."
+      }
+    ],
+    "motion": [
+      {
+        "name": "Disclosure chevron",
+        "value": "transform 150ms ease",
+        "purpose": "Turns when details open or close. Reduced motion removes the transition."
+      },
+      {
+        "name": "Busy spinner",
+        "value": "spin 1s linear infinite",
+        "purpose": "Turns alongside written status. Reduced motion stops the rotation."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "Welcome page stacks · max-width",
+        "value": "900px"
+      },
+      {
+        "name": "Reading and account layouts stack · max-width",
+        "value": "760px"
+      },
+      {
+        "name": "Compact header · max-width",
+        "value": "390px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The filled action for keeping a reading.",
+      "html": "<button type=\"button\" class=\"ds-button-primary\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 16 16\" fill=\"currentColor\" aria-hidden=\"true\" focusable=\"false\"><path d=\"M3.78 13.92A.5.5 0 0 1 3 13.5V4.01c0-1.1.9-2 2-2L11 2a2 2 0 0 1 2 2v9.5a.5.5 0 0 1-.78.42L8 11.1zM12 4v-.12A1 1 0 0 0 11 3l-6 .01a1 1 0 0 0-1 1v8.56l3.72-2.49a.5.5 0 0 1 .56 0L12 12.57z\"/></svg><span>Save reading</span></button>",
+      "css": ".ds-button-primary { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 48px; padding: 11px 24px; font-family: var(--font-sans, \"Figtree\", ui-sans-serif, system-ui, sans-serif); font-size: 16px; line-height: 24px; font-weight: 600; color: var(--primary-foreground, #f7f3e8); background: var(--primary, #126f73); border: 1px solid transparent; border-radius: var(--radius-full, 9999px); cursor: pointer; }\n.ds-button-primary:hover:enabled { background: var(--primary-hover, #103f46); }\n.ds-button-primary:active:enabled { background: var(--primary-pressed, #082f33); }\n.ds-button-primary:focus-visible { outline: 2px solid var(--foreground, #103f46); outline-offset: 4px; }\n.ds-button-primary:disabled { color: var(--action-disabled-label, #103f46); background: var(--action-disabled, #a9b88f); border-color: transparent; opacity: 1; cursor: not-allowed; }\n@media (forced-colors: active) { .ds-button-primary:disabled { color: GrayText; opacity: 1; } }\n.ds-button-primary svg { display: inline-block; flex: 0 0 16px; vertical-align: middle; }"
+    },
+    {
+      "name": "Secondary button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "An outlined alternative alongside a primary action.",
+      "html": "<button type=\"button\" class=\"ds-button-secondary\">Cancel</button>",
+      "css": ".ds-button-secondary { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 48px; padding: 11px 24px; font-family: var(--font-sans, \"Figtree\", ui-sans-serif, system-ui, sans-serif); font-size: 16px; line-height: 24px; font-weight: 600; color: var(--primary-foreground, #f7f3e8); background: var(--primary, #126f73); border: 1px solid transparent; border-radius: var(--radius-full, 9999px); cursor: pointer; color: var(--foreground, #103f46); border-color: var(--input, #103f46); background: transparent; }\n.ds-button-secondary:hover:enabled { color: var(--muted-text, #103f46); background: var(--muted, #a8d5ba); }\n.ds-button-secondary:active:enabled { color: var(--reflection-ink, #103f46); background: var(--reflection-sage, #a9b88f); }\n.ds-button-secondary:focus-visible { outline: 2px solid var(--foreground, #103f46); outline-offset: 4px; }\n.ds-button-secondary:disabled { color: var(--action-disabled-label, #103f46); background: var(--action-disabled, #a9b88f); border-color: transparent; opacity: 1; cursor: not-allowed; }\n@media (forced-colors: active) { .ds-button-secondary:disabled { color: GrayText; opacity: 1; } }"
+    },
+    {
+      "name": "Text button",
+      "kind": "button",
+      "refersTo": "button-text",
+      "description": "An underlined action within a form.",
+      "html": "<button type=\"button\" class=\"ds-button-text\">Remove photo</button>",
+      "css": ".ds-button-text { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 48px; padding: 11px 24px; font-family: var(--font-sans, \"Figtree\", ui-sans-serif, system-ui, sans-serif); font-size: 16px; line-height: 24px; font-weight: 600; color: var(--primary-foreground, #f7f3e8); background: var(--primary, #126f73); border: 1px solid transparent; border-radius: var(--radius-full, 9999px); cursor: pointer; color: var(--reflection-link, #126f73); background: transparent; border-color: transparent; text-decoration: underline; text-underline-offset: 4px; }\n.ds-button-text:hover:enabled { color: var(--muted-text, #103f46); background: var(--muted, #a8d5ba); }\n.ds-button-text:active:enabled { color: var(--reflection-ink, #103f46); background: var(--reflection-sage, #a9b88f); }\n.ds-button-text:focus-visible { outline: 2px solid var(--foreground, #103f46); outline-offset: 4px; }\n.ds-button-text:disabled { color: var(--action-disabled-label, #103f46); background: var(--action-disabled, #a9b88f); border-color: transparent; opacity: 1; cursor: not-allowed; }\n@media (forced-colors: active) { .ds-button-text:disabled { color: GrayText; opacity: 1; } }"
+    },
+    {
+      "name": "Destructive button",
+      "kind": "button",
+      "refersTo": "button-danger",
+      "description": "An explicitly named destructive action.",
+      "html": "<button type=\"button\" class=\"ds-button-danger\">Delete account permanently</button>",
+      "css": ".ds-button-danger { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 48px; padding: 11px 24px; font-family: var(--font-sans, \"Figtree\", ui-sans-serif, system-ui, sans-serif); font-size: 16px; line-height: 24px; font-weight: 600; color: var(--primary-foreground, #f7f3e8); background: var(--primary, #126f73); border: 1px solid transparent; border-radius: var(--radius-full, 9999px); cursor: pointer; color: var(--destructive-foreground, #103f46); background: var(--destructive-button, #f28b7b); }\n.ds-button-danger:hover:enabled { background: var(--reflection-butter, #f1d27b); }\n.ds-button-danger:active:enabled { background: var(--reflection-sage, #a9b88f); }\n.ds-button-danger:focus-visible { outline: 2px solid var(--foreground, #103f46); outline-offset: 4px; }\n.ds-button-danger:disabled { color: var(--action-disabled-label, #103f46); background: var(--action-disabled, #a9b88f); border-color: transparent; opacity: 1; cursor: not-allowed; }\n@media (forced-colors: active) { .ds-button-danger:disabled { color: GrayText; opacity: 1; } }"
+    },
+    {
+      "name": "Text input",
+      "kind": "input",
+      "refersTo": "text-input",
+      "description": "A labeled, single-line field from the recovery form.",
+      "html": "<div class=\"ds-text-input\"><label for=\"ds-text-input-value\">Unused recovery code</label><input id=\"ds-text-input-value\" type=\"password\" required maxlength=\"100\" autocomplete=\"off\"></div>",
+      "css": ".ds-text-input { width: 100%; min-width: 0; font-family: var(--font-sans, \"Figtree\", ui-sans-serif, system-ui, sans-serif); color: var(--foreground, #103f46); }\n.ds-text-input label { display: block; font-size: 16px; font-weight: 600; line-height: 24px; }\n.ds-text-input input { box-sizing: border-box; display: block; width: 100%; min-height: 48px; margin: 8px 0 16px; padding: 12px 16px; font-family: var(--font-sans, \"Figtree\", ui-sans-serif, system-ui, sans-serif); font-size: 16px; line-height: 24px; color: var(--foreground, #103f46); background: var(--background, #f7f3e8); border: 1px solid var(--input, #103f46); border-radius: var(--radius-lg, 0.75rem); }\n.ds-text-input input::placeholder { color: var(--muted-foreground, #103f46); }\n.ds-text-input input:focus-visible { outline: 2px solid var(--foreground, #103f46); outline-offset: 4px; border-color: var(--ring, #126f73); outline-color: var(--ring, #126f73); outline-offset: 2px; }\n.ds-text-input input:disabled { opacity: 0.5; pointer-events: none; }\n@media (forced-colors: active) { .ds-text-input input:disabled { color: GrayText; opacity: 1; } }"
+    },
+    {
+      "name": "Reflection field",
+      "kind": "input",
+      "refersTo": "reflection-field",
+      "description": "A question, a writing area, and an associated hint.",
+      "html": "<div class=\"ds-reflection-field\"><label for=\"ds-reflection-field-value\">Your question</label><textarea id=\"ds-reflection-field-value\" rows=\"3\" required maxlength=\"500\" aria-describedby=\"ds-reflection-field-value-help\"></textarea><p id=\"ds-reflection-field-value-help\">Include what you are considering, what already works, and anything you want the reading to take into account.</p></div>",
+      "css": ".ds-reflection-field { width: 100%; min-width: 0; font-family: var(--font-sans, \"Figtree\", ui-sans-serif, system-ui, sans-serif); color: var(--foreground, #103f46); }\n.ds-reflection-field label { display: block; font-size: 16px; font-weight: 600; line-height: 24px; }\n.ds-reflection-field textarea { box-sizing: border-box; display: block; width: 100%; min-height: 48px; margin: 8px 0 16px; padding: 12px 16px; font-family: var(--font-sans, \"Figtree\", ui-sans-serif, system-ui, sans-serif); font-size: 16px; line-height: 24px; color: var(--foreground, #103f46); background: var(--background, #f7f3e8); border: 1px solid var(--input, #103f46); border-radius: var(--radius-lg, 0.75rem); min-height: 96px; resize: vertical; margin-bottom: 8px; }\n.ds-reflection-field textarea::placeholder { color: var(--muted-foreground, #103f46); }\n.ds-reflection-field textarea:focus-visible { outline: 2px solid var(--foreground, #103f46); outline-offset: 4px; border-color: var(--ring, #126f73); outline-color: var(--ring, #126f73); outline-offset: 2px; }\n.ds-reflection-field textarea:disabled { opacity: 0.5; pointer-events: none; }\n@media (forced-colors: active) { .ds-reflection-field textarea:disabled { color: GrayText; opacity: 1; } }\n.ds-reflection-field p { margin: 0; color: var(--muted-foreground, #103f46); font-size: 12px; font-weight: 500; line-height: 18px; }"
+    },
+    {
+      "name": "Reading navigation",
+      "kind": "nav",
+      "refersTo": "reading-navigation",
+      "description": "Saved readings and New reading share one current destination.",
+      "html": "<nav class=\"ds-reading-nav\" aria-label=\"Reading actions\"><button type=\"button\" aria-current=\"page\">Saved readings</button><button type=\"button\">New reading</button></nav>",
+      "css": ".ds-reading-nav { box-sizing: border-box; display: flex; width: 100%; max-width: 440px; gap: 4px; margin: 0; padding: 3px; border: 1px solid var(--input, #103f46); border-radius: var(--radius-full, 9999px); }\n.ds-reading-nav button { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 48px; padding: 11px 24px; font-family: var(--font-sans, \"Figtree\", ui-sans-serif, system-ui, sans-serif); font-size: 16px; line-height: 24px; font-weight: 600; color: var(--primary-foreground, #f7f3e8); background: var(--primary, #126f73); border: 1px solid transparent; border-radius: var(--radius-full, 9999px); cursor: pointer; color: var(--foreground, #103f46); border-color: var(--input, #103f46); background: transparent; flex: 1; min-width: 0; padding-inline: 12px; color: var(--foreground, #103f46); background: transparent; border-color: transparent; }\n.ds-reading-nav button:active:enabled { color: var(--reflection-ink, #103f46); background: var(--reflection-sage, #a9b88f); }\n.ds-reading-nav button:hover:enabled { color: var(--muted-text, #103f46); background: var(--muted, #a8d5ba); }\n.ds-reading-nav button[aria-current=\"page\"] { color: var(--primary-foreground, #f7f3e8); background: var(--primary, #126f73); border-color: var(--primary, #126f73); }\n.ds-reading-nav button[aria-current=\"page\"]:hover:enabled { color: var(--primary-foreground, #f7f3e8); background: var(--primary-hover, #103f46); }\n.ds-reading-nav button:focus-visible { outline: 2px solid var(--foreground, #103f46); outline-offset: 4px; }\n@media (forced-colors: active) { .ds-reading-nav button[aria-current=\"page\"], .ds-reading-nav button[aria-current=\"page\"]:hover:enabled { color: HighlightText; background: Highlight; border-color: Highlight; forced-color-adjust: none; } }"
+    },
+    {
+      "name": "Reading provenance chip",
+      "kind": "chip",
+      "refersTo": "topic-chip-sage",
+      "description": "A static Sage label at the opening of the reading.",
+      "html": "<span class=\"ds-topic-chip\">AI reading</span>",
+      "css": ".ds-topic-chip { font-family: var(--font-sans, \"Figtree\", ui-sans-serif, system-ui, sans-serif); display: inline-flex; align-items: center; max-width: 100%; padding: 8px 12px; color: var(--reflection-ink, #103f46); background: var(--reflection-mint, #a8d5ba); border-radius: var(--radius-full, 9999px); font-size: 12px; font-weight: 500; line-height: 18px; background: var(--reflection-sage, #a9b88f); }"
+    },
+    {
+      "name": "Reflection card",
+      "kind": "card",
+      "refersTo": "reflection-card",
+      "description": "The writing section begins with a serif heading and a short explanation.",
+      "html": "<section class=\"ds-reflection-card\" aria-labelledby=\"ds-reflection-title\"><h2 id=\"ds-reflection-title\">Add reflection</h2><p>This is your own writing. It does not change the reading or request AI generation.</p></section>",
+      "css": ".ds-reflection-card { font-family: var(--font-sans, \"Figtree\", ui-sans-serif, system-ui, sans-serif); background: var(--card, #f7f3e8); color: var(--card-foreground, #103f46); border: 1px solid var(--border-subtle, color-mix(in srgb, #103f46 25%, transparent)); border-radius: var(--radius-3xl, 24px); box-shadow: var(--shadow-sm, none); padding: var(--space-6, 1.5rem); border-block: 1px solid var(--border, #103f46); margin: 0; padding: var(--space-6, 1.5rem); }\n.ds-reflection-card h2 { margin: 0; font-family: var(--font-serif, \"Newsreader\", Georgia, ui-serif, serif); font-size: 28px; font-weight: 400; line-height: 1.2143; margin-bottom: 8px; }\n.ds-reflection-card p { margin: 0 0 20px; color: var(--muted-foreground, #103f46); font-size: 14px; line-height: 20px; max-width: 48ch; }"
+    },
+    {
+      "name": "Saved reading row",
+      "kind": "custom",
+      "refersTo": "history-row",
+      "description": "The reading date and original question form one return target.",
+      "html": "<ol class=\"ds-history\"><li><div><time datetime=\"2026-11-01\">Nov 1, 2026</time><button type=\"button\"><span>What would make room for another perspective?</span><svg width=\"16\" height=\"16\" viewBox=\"0 0 16 16\" fill=\"currentColor\" aria-hidden=\"true\" focusable=\"false\"><path d=\"M5.65 3.15a.5.5 0 0 0 0 .7L9.79 8l-4.14 4.15a.5.5 0 0 0 .7.7l4.5-4.5a.5.5 0 0 0 0-.7l-4.5-4.5a.5.5 0 0 0-.7 0\"/></svg></button></div></li></ol>",
+      "css": ".ds-history { width: 100%; font-family: var(--font-sans, \"Figtree\", ui-sans-serif, system-ui, sans-serif); color: var(--foreground, #103f46); list-style: none; padding: 0; margin: 16px 0 0; border-top: 1px solid var(--border, #103f46); }\n.ds-history li { border-bottom: 1px solid var(--border, #103f46); display: flex; align-items: center; gap: 16px; padding: 12px 4px; }\n.ds-history li > div { flex: 1; min-width: 0; }\n.ds-history time { line-height: 1.5; font-variant-numeric: tabular-nums; display: block; color: var(--muted-foreground, #103f46); font-size: 12px; }\n.ds-history button { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 48px; padding: 11px 24px; font-family: var(--font-sans, \"Figtree\", ui-sans-serif, system-ui, sans-serif); font-size: 16px; line-height: 24px; font-weight: 600; color: var(--primary-foreground, #f7f3e8); background: var(--primary, #126f73); border: 1px solid transparent; border-radius: var(--radius-full, 9999px); cursor: pointer; width: 100%; padding-inline: 0; color: var(--foreground, #103f46); background: transparent; border: 0; text-align: left; overflow-wrap: anywhere; justify-content: space-between; gap: 16px; padding-block: 10px; font-family: var(--font-serif, \"Newsreader\", Georgia, ui-serif, serif); font-size: 22px; font-weight: 500; line-height: 24px; border-radius: 0; }\n.ds-history button svg { display: inline-block; flex: 0 0 16px; vertical-align: middle; color: var(--muted-foreground, #103f46); }\n.ds-history button:active:enabled { background: var(--primary-pressed, #082f33); }\n.ds-history button:hover:enabled { color: var(--foreground, #103f46); background: transparent; }\n.ds-history button:hover span { text-decoration: underline; text-underline-offset: 4px; }\n.ds-history button:focus-visible { outline: 2px solid var(--foreground, #103f46); outline-offset: 4px; }\n.ds-history button:disabled { color: var(--action-disabled-label, #103f46); background: var(--action-disabled, #a9b88f); border-color: transparent; opacity: 1; cursor: not-allowed; }\n@media (forced-colors: active) { .ds-history button:disabled { color: GrayText; opacity: 1; } }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Botanical Field Journal",
+    "overview": "Reflection is quiet, warm, and editorial. A spiral bloom fills the open side of the welcome page. Inside the journal, a botanical print can mark a section while the reader’s question takes the largest type. Generous margins give both the illustration and the writing room.\n\nThe same journal can be read on Paper or in Evening. The return mark, type hierarchy, and placement of controls stay familiar as the page changes color. A saved reading is recognizable by its date and the question the reader wrote.",
+    "keyCharacteristics": [
+      "A circular return mark and a spiral bloom drawn from the same print palette.",
+      "Serif questions and headings alongside plain, legible controls.",
+      "Fine rules, generous writing space, and dates aligned with their entries."
+    ],
+    "rules": [
+      {
+        "name": "The Pastel Rule",
+        "body": "Keep Ink lettering on Mint, Coral, Butter, and Sage in both themes.",
+        "section": "colors"
+      }
+    ],
+    "dos": [
+      "Do keep the date and full available question preview together when a history row wraps.",
+      "Do retain the visible focus outline and the system highlight for the current navigation segment in forced colors.",
+      "Do label the example spread “Illustration only” and give an uploaded spread its own caption."
+    ],
+    "donts": [
+      "Don't place a decorative thumbnail beside an individual saved question.",
+      "Don't use artwork to communicate progress, deletion, or recovery status.",
+      "Don't clip a reader’s note or replace its paragraph breaks with a single line."
+    ]
+  }
+}

@@ -427,7 +427,7 @@ test('a deletion during export decryption prevents releasing the page', async ()
   expect(await outcome).toMatchObject({ code: 'EXPORT_CHANGED' });
 });
 
-test('note erasure detaches exact imported aliases without opening unsupported import export', async () => {
+test('note erasure detaches exact imported aliases and exports only surviving records', async () => {
   const f = await fixture(),
     first = await note(f);
   await env.DB.prepare(
@@ -447,9 +447,12 @@ test('note erasure detaches exact imported aliases without opening unsupported i
     erased_at: expect.any(Number),
   });
   const ticket = await f.exports.create(f.session, crypto.randomUUID());
-  await expect(f.exports.page(f.session, ticket.id, null)).rejects.toMatchObject({
-    code: 'DEPENDENCY_UNAVAILABLE',
-  });
+  const page = await f.exports.page(f.session, ticket.id, null);
+  expect(
+    page.records.some((r) => r.kind === 'reading' && r.originalId === f.reading.editionId),
+  ).toBe(true);
+  expect(JSON.stringify(page.records)).not.toContain('synthetic-opaque-source');
+  expect(page.records.some((r) => r.kind === 'revisit' && r.originalId === first.id)).toBe(false);
 });
 
 test('export pagination includes more than one hundred note snapshots exactly once', async () => {

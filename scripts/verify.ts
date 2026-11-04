@@ -1,6 +1,7 @@
 import { spawn, spawnSync } from 'node:child_process';
 import { mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
+import { availableParallelism } from 'node:os';
 import { pathToFileURL } from 'node:url';
 import { projectRoot } from './schemas.ts';
 import { sourceDigest } from './verification-state.ts';
@@ -68,7 +69,14 @@ const stages = [
   [
     'identity and saved-reading browser journeys',
     'node',
-    ['node_modules/@playwright/test/cli.js', 'test'],
+    [
+      'node_modules/@playwright/test/cli.js',
+      'test',
+      // The complete Chromium suite shares one local Worker. Separate files use
+      // isolated browser contexts and accounts. Two file workers keep the expanded
+      // suite within the measured Linux gate on hosts with at least four CPUs.
+      ...(process.platform === 'linux' && availableParallelism() >= 4 ? ['--workers=2'] : []),
+    ],
   ],
   ['specification package links', 'python3', ['checks/check-package.py']],
 ] as const;

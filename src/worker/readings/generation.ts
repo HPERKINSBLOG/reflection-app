@@ -34,6 +34,15 @@ import { inputAdmission, boundedCandidateJson } from '../../domain/tarot/safety.
 import { basisFromSpread, drawTarot } from '../../domain/tarot/draw.ts';
 import { DeterministicSpreadRecognizer } from '../provider/meta-vision.ts';
 import { currentGuard } from '../db/statements.ts';
+import { ContextRecords } from './context.ts';
+import {
+  savedParent,
+  capturedContext,
+  captureStatements,
+  readCaptures,
+  familyHasRoom,
+} from './continuity-request.ts';
+import { READING_V3_SYNTHETIC_POLICY } from '../../contracts/provider-policy.ts';
 import { renderFacts } from '../../domain/tarot/facts.ts';
 import { assertion, onlineGuard } from '../identity/checkpoint.ts';
 import type { Session } from '../identity/types.ts';
@@ -148,10 +157,11 @@ export class ReadingGeneration extends RequestState {
     content: string,
     policy: string,
     version: number,
+    pinnedParent = false,
   ) {
     return assertion(
       this.base.db,
-      `EXISTS(SELECT 1 FROM accounts a JOIN permission_revisions p ON p.owner_id=a.id AND p.revision=a.permission_revision JOIN system_state sys ON sys.id=1 JOIN content_editions c ON c.hash=sys.active_content_hash WHERE a.id=? AND a.permission_revision=? AND p.model_allowed=1 AND a.recovery_ack_at IS NOT NULL AND a.key_version=? AND sys.generation_enabled=1 AND sys.dispatch_mode IN('model','outage_template') AND c.hash=? AND c.state='${this.development ? 'staged' : 'approved'}' AND sys.provider_policy_hash=?)`,
+      `EXISTS(SELECT 1 FROM accounts a JOIN permission_revisions p ON p.owner_id=a.id AND p.revision=a.permission_revision JOIN system_state sys ON sys.id=1 JOIN content_editions c ON ${pinnedParent ? "c.state IN('approved','superseded')" : `c.hash=sys.active_content_hash AND c.state='${this.development ? 'staged' : 'approved'}'`} WHERE a.id=? AND a.permission_revision=? AND p.model_allowed=1 AND a.recovery_ack_at IS NOT NULL AND a.key_version=? AND sys.generation_enabled=1 AND sys.dispatch_mode IN('model','outage_template') AND c.hash=? AND sys.provider_policy_hash=?)`,
       session.subjectId,
       permission,
       version,
@@ -176,8 +186,6 @@ export class ReadingGeneration extends RequestState {
   ) {
     const denied = inputAdmission(input.question, input.languageConfirmed);
     if (denied) throw new RecordError(422, denied);
-    if (input.parentEditionId !== null || input.selection.length)
-      throw new RecordError(422, 'BAD_INPUT');
     const mutation = await this.base.mutation(session, key, 'reading.start', input);
     const resolve = async () => {
       const row = await q(
@@ -203,14 +211,32 @@ export class ReadingGeneration extends RequestState {
     };
     const prior = await resolve();
     if (prior) return prior;
+    const continuity = input.parentEditionId !== null || input.selection.length > 0;
+    if (continuity && !this.synthetic) throw new RecordError(503, 'DEPENDENCY_UNAVAILABLE');
     const account = await this.base.account(session);
     if (!account.model_allowed) throw new RecordError(403, 'CONSENT_REQUIRED');
     if (!account.recovery_ack_at) throw new RecordError(403, 'FORBIDDEN');
     if (account.permission_revision !== input.permissionRevision)
       throw new RecordError(409, 'CONFLICT', account.permission_revision);
+    const context = new ContextRecords(this.base.db, this.base.identity);
+    const selected = continuity ? await context.confirmStart(session, input) : [];
+    const parent = await savedParent(this.base, session, input);
+    const countArgs = parent
+      ? [session.subjectId, parent.sessionId, session.subjectId, parent.sessionId]
+      : [];
+    const requireRoom = async () => {
+      if (
+        parent &&
+        !(await q(this.base.db, 'SELECT ' + familyHasRoom + ' AS room', ...countArgs).first<number>(
+          'room',
+        ))
+      )
+        throw new RecordError(409, 'FOLLOWUP_LIMIT_EXCEEDED');
+    };
+    await requireRoom();
     let ready: Awaited<ReturnType<ReadingGeneration['ready']>>;
     try {
-      ready = await this.ready();
+      ready = await this.ready(parent?.contentHash);
     } catch (error) {
       throw new RecordError(
         503,
@@ -220,47 +246,63 @@ export class ReadingGeneration extends RequestState {
     const content = ready.bundle,
       policyHash = ready.policyHash;
     const requestId = crypto.randomUUID(),
-      sessionId = crypto.randomUUID(),
-      basisId = crypto.randomUUID();
+      sessionId = parent?.sessionId ?? crypto.randomUUID(),
+      basisId = parent?.basis.basisId ?? crypto.randomUUID();
     if (input.spreadPhoto && !this.spreadRecognizer)
       throw new RecordError(503, 'PROVIDER_UNAVAILABLE');
     // Photos are recognized only after the request and quota hold are durable.
-    const basis = input.spreadPhoto
-      ? null
-      : await drawTarot({
-          deck: content.deck.map((c) => c.id),
-          deckEdition: content.deckEdition,
-          basisId,
-          drawnAt: iso(Date.now()),
-          reversals: input.reversals,
-        });
-    const plan = basis
-      ? await buildWriterPlan(
-          {
-            requestId,
-            basis,
-            content,
-            question: input.question,
-            language: 'en',
-            operation: 'initial',
-            parentEditionId: null,
-            selected: [],
-            permissionRevision: input.permissionRevision,
-            keyVersion: account.key_version,
-            promptHash: policyHash,
-            validatorHash: policyHash,
-            generationPolicyHash: policyHash,
-            ...(input.spreadPhoto ? { spreadPhoto: input.spreadPhoto } : {}),
-          },
-          this.dependencies.policy,
-          this.synthetic || this.development,
-        )
-      : null;
+    const basis = parent
+      ? parent.basis
+      : input.spreadPhoto
+        ? null
+        : await drawTarot({
+            deck: content.deck.map((c) => c.id),
+            deckEdition: content.deckEdition,
+            basisId,
+            drawnAt: iso(Date.now()),
+            reversals: input.reversals,
+          });
+    const writerPolicy = continuity ? READING_V3_SYNTHETIC_POLICY : this.dependencies.policy;
+    let plan: VersionedPlan | null;
     try {
-      if (plan) await prepareWriter(plan, this.dependencies.policy);
+      plan = basis
+        ? await buildWriterPlan(
+            {
+              requestId,
+              basis,
+              content,
+              question: input.question,
+              language: 'en',
+              operation: parent ? 'followup' : 'initial',
+              parentEditionId: input.parentEditionId,
+              ...(parent
+                ? {
+                    parent: {
+                      editionId: parent.editionId,
+                      basis: parent.basis,
+                      contentHash: parent.contentHash,
+                      sources: parent.sources,
+                    },
+                  }
+                : {}),
+              selected,
+              permissionRevision: input.permissionRevision,
+              keyVersion: account.key_version,
+              promptHash: policyHash,
+              validatorHash: policyHash,
+              generationPolicyHash: policyHash,
+              ...(input.spreadPhoto ? { spreadPhoto: input.spreadPhoto } : {}),
+            },
+            writerPolicy,
+            this.synthetic || this.development,
+          )
+        : null;
+      if (plan) await prepareWriter(plan, writerPolicy);
     } catch (error) {
       if (error instanceof Error && error.message.startsWith('INPUT_TOO_LARGE'))
         throw new RecordError(422, 'INPUT_TOO_LARGE');
+      if (error instanceof Error && error.message.startsWith('CONTENT_UNAVAILABLE'))
+        throw new RecordError(410, 'CONTENT_UNAVAILABLE');
       throw error;
     }
     const seal = (table: string, column: string, id: string, value: unknown) =>
@@ -269,11 +311,14 @@ export class ReadingGeneration extends RequestState {
         value,
         account.key_version,
       );
-    const question = await seal('reading_sessions', 'question_enc', sessionId, {
-      v: 1,
-      text: input.question,
-    });
-    const basisEnc = basis ? await seal('basis_snapshots', 'body_enc', basisId, basis) : null;
+    const question = parent
+      ? null
+      : await seal('reading_sessions', 'question_enc', sessionId, {
+          v: 1,
+          text: input.question,
+        });
+    const basisEnc =
+      basis && !parent ? await seal('basis_snapshots', 'body_enc', basisId, basis) : null;
     const inputEnc = await seal('generation_requests', 'input_enc', requestId, input);
     const planEnc = plan ? await seal('generation_requests', 'plan_enc', requestId, plan) : null;
     const planHash = plan ? await this.base.crypt.hash(session.subjectId, 'plan', plan) : null;
@@ -286,7 +331,9 @@ export class ReadingGeneration extends RequestState {
           content.editionHash,
           policyHash,
           account.key_version,
+          !!parent,
         ),
+        ...(parent ? [assertion(this.base.db, familyHasRoom, ...countArgs)] : []),
         assertion(
           this.base.db,
           `(SELECT count(*) FROM generation_requests WHERE owner_id=? AND state NOT IN (${terminalStates}))<2`,
@@ -304,13 +351,17 @@ export class ReadingGeneration extends RequestState {
           session.subjectId,
         ),
         assertion(this.base.db, 'changes()=2'),
-        q(
-          this.base.db,
-          `INSERT INTO reading_sessions(id,owner_id,question_enc,created_at,retention_expires_at) VALUES (?,?,?,${DB_NOW},${DB_NOW}+86400000)`,
-          sessionId,
-          session.subjectId,
-          question,
-        ),
+        ...(!parent
+          ? [
+              q(
+                this.base.db,
+                `INSERT INTO reading_sessions(id,owner_id,question_enc,created_at,retention_expires_at) VALUES (?,?,?,${DB_NOW},${DB_NOW}+86400000)`,
+                sessionId,
+                session.subjectId,
+                question,
+              ),
+            ]
+          : []),
         ...(basisEnc
           ? [
               q(
@@ -326,12 +377,15 @@ export class ReadingGeneration extends RequestState {
           : []),
         q(
           this.base.db,
-          `INSERT INTO generation_requests(id,owner_id,session_id,client_intent_id,basis_id,operation,payload_hmac,state,next_run_at,permission_revision,key_version,content_hash,content_policy_revision,policy_hash,input_enc,plan_enc,plan_hmac,created_at,expires_at) VALUES (?,?,?,?,?,'initial',?,?,${DB_NOW},?,?,?,?,?,?,?,?,${DB_NOW},${DB_NOW}+180000)`,
+          `INSERT INTO generation_requests(id,owner_id,session_id,client_intent_id,basis_id,operation,parent_edition_id,context_count,payload_hmac,state,next_run_at,permission_revision,key_version,content_hash,content_policy_revision,policy_hash,input_enc,plan_enc,plan_hmac,created_at,expires_at) VALUES (?,?,?,?,?,?,?,?,?,?,${DB_NOW},?,?,?,?,?,?,?,?,${DB_NOW},${DB_NOW}+180000)`,
           requestId,
           session.subjectId,
           sessionId,
           input.clientIntentId,
           basis ? basisId : null,
+          parent ? 'followup' : 'initial',
+          input.parentEditionId,
+          selected.length,
           mutation.payloadHash,
           basis ? 'prepared' : 'reserved',
           input.permissionRevision,
@@ -355,12 +409,41 @@ export class ReadingGeneration extends RequestState {
           requestId,
           session.subjectId,
         ),
+        ...(await captureStatements(
+          this.base,
+          session.subjectId,
+          requestId,
+          account.key_version,
+          selected,
+        )),
+        ...(continuity
+          ? [
+              currentGuard(
+                this.base.db,
+                {
+                  request_id: requestId,
+                  owner_id: session.subjectId,
+                  key_version: account.key_version,
+                  expected_state: basis ? 'prepared' : 'reserved',
+                  plan_hmac: planHash,
+                  ...capturedContext(input.parentEditionId, selected),
+                },
+                basis ? 'start' : 'start-photo',
+              ),
+            ]
+          : []),
         mutation.insert(requestId),
         ...requestEvent(this.base.db, session.subjectId, requestId, 'QUEUED'),
       ]);
     } catch (error) {
       const joined = await resolve();
       if (joined) return joined;
+      if (continuity) {
+        await requireRoom();
+        await context.confirmStart(session, input);
+        if ((await this.base.account(session)).storage_bytes >= 20 * 1024 * 1024)
+          throw new RecordError(409, 'STORAGE_LIMIT_EXCEEDED');
+      }
       const view = await this.base.identity.sessions.view(session);
       if (!view.permission.modelAllowed) throw new RecordError(403, 'CONSENT_REQUIRED');
       const active = await q(
@@ -470,7 +553,7 @@ export class ReadingGeneration extends RequestState {
         lease_token: h.lease_token,
         expected_state: state,
         plan_hmac: h.plan_hmac,
-        context_count: h.context_count,
+        ...(h.context ?? capturedContext(null, [])),
       },
       stage,
       this.development,
@@ -630,7 +713,12 @@ export class ReadingGeneration extends RequestState {
       h.input_enc,
       StartRequest,
     );
-    if (!input.spreadPhoto) throw new GenerationFailure('CONTENT_UNAVAILABLE');
+    if (!input.spreadPhoto || h.parent_edition_id !== null)
+      throw new GenerationFailure('CONTENT_UNAVAILABLE');
+    if (h.context_count) {
+      const selected = await readCaptures(this.base, h.owner_id, h.id, input);
+      h.context = capturedContext(null, selected);
+    }
     const ready = await this.ready(h.content_hash);
     const dispatchId = crypto.randomUUID();
     await this.base.db.batch([
@@ -770,6 +858,9 @@ export class ReadingGeneration extends RequestState {
           TarotBasis,
         );
         const content = await this.dependencies.content.byHash(h.content_hash);
+        const selected = h.context_count
+          ? await readCaptures(this.base, h.owner_id, h.id, input)
+          : [];
         plan = await buildWriterPlan(
           {
             requestId: h.id,
@@ -779,7 +870,7 @@ export class ReadingGeneration extends RequestState {
             language: 'en',
             operation: 'initial',
             parentEditionId: null,
-            selected: [],
+            selected,
             permissionRevision: h.permission_revision,
             keyVersion: h.key_version,
             promptHash: h.policy_hash,
@@ -787,7 +878,7 @@ export class ReadingGeneration extends RequestState {
             generationPolicyHash: h.policy_hash,
             ...(input.spreadPhoto ? { spreadPhoto: input.spreadPhoto } : {}),
           },
-          this.dependencies.policy,
+          selected.length ? READING_V3_SYNTHETIC_POLICY : this.dependencies.policy,
           this.synthetic || this.development,
         );
         const enc = await this.base.crypt.seal(
@@ -802,6 +893,7 @@ export class ReadingGeneration extends RequestState {
           h.key_version,
         );
         h.plan_hmac = await this.base.crypt.hash(h.owner_id, 'plan', plan);
+        h.context = capturedContext(plan.parentEditionId, plan.selected);
         await this.base.db.batch([
           onlineGuard(this.base.db),
           this.fence(h),
@@ -826,13 +918,15 @@ export class ReadingGeneration extends RequestState {
         plan.keyVersion !== h.key_version ||
         plan.permissionRevision !== h.permission_revision ||
         plan.generationPolicyHash !== h.policy_hash ||
-        plan.operation !== 'initial' ||
-        plan.parentEditionId !== null ||
-        plan.selected.length !== 0 ||
-        h.context_count !== 0 ||
+        plan.operation !== h.operation ||
+        plan.parentEditionId !== h.parent_edition_id ||
+        plan.selected.length !== h.context_count ||
+        (h.context_count > 0 || h.parent_edition_id !== null) !==
+          (plan.version === 'tarot-plan.v3') ||
         (await this.base.crypt.hash(h.owner_id, 'plan', plan)) !== h.plan_hmac
       )
         throw new GenerationFailure('CONTENT_UNAVAILABLE');
+      h.context = capturedContext(plan.parentEditionId, plan.selected);
       if (h.state === 'reserved') await this.transition(h, 'prepared');
       return plan;
     } catch (error) {
@@ -879,11 +973,9 @@ export class ReadingGeneration extends RequestState {
   }
 
   private async dispatch(h: Lease, plan: VersionedPlan): Promise<DispatchRow> {
-    const { payload, receipt: contextReceipt } = await prepareWriter(
-        plan,
-        this.dependencies.policy,
-      ),
-      policy = this.dependencies.policy,
+    const policy =
+      plan.version === 'tarot-plan.v3' ? READING_V3_SYNTHETIC_POLICY : this.dependencies.policy;
+    const { payload, receipt: contextReceipt } = await prepareWriter(plan, policy),
       text = new TextDecoder().decode(payload),
       id = crypto.randomUUID();
     const transmission = await this.base.crypt.seal(
@@ -1092,7 +1184,10 @@ export class ReadingGeneration extends RequestState {
   private async publish(h: Lease, plan: VersionedPlan, dispatch: DispatchRow | null) {
     let candidate: z.infer<typeof AnyModelCandidate>;
     let template = h.state === 'fallback_pending';
-    const prepared = await prepareWriter(plan, this.dependencies.policy);
+    const prepared = await prepareWriter(
+      plan,
+      plan.version === 'tarot-plan.v3' ? READING_V3_SYNTHETIC_POLICY : this.dependencies.policy,
+    );
     if (
       dispatch &&
       (await this.base.crypt.hash(
@@ -1129,131 +1224,169 @@ export class ReadingGeneration extends RequestState {
     const facts = renderFacts(plan.basis),
       editionId = crypto.randomUUID(),
       acceptedAt = Date.now();
-    const reading = AnyAcceptedReading.parse({
-      kind: plan.version === 'tarot-plan.v2' ? 'tarot.accepted.v2' : 'tarot.accepted.v1',
-      editionId,
-      sessionId: h.session_id,
-      editionNumber: 1,
-      parentEditionId: null,
-      question: plan.question,
-      basis: plan.basis,
-      ...(plan.spreadPhoto ? { spreadPhoto: plan.spreadPhoto } : {}),
-      mode: template ? 'template' : 'model',
-      contentHash: plan.contentHash,
-      planHash: h.plan_hmac,
-      sources: plan.sources,
-      units: plan.basis.cards.map((card, i) => ({
-        ...candidate!.units.find((unit) => unit.position === card.position)!,
-        basisText: facts[i]!.text,
-      })),
-      ...(candidate!.schemaVersion === 2 && plan.version === 'tarot-plan.v2'
-        ? {
-            draw: plan.draw,
-            spread: plan.spread,
-            relationships: plan.relationships,
-            synthesis: candidate!.synthesis,
-            action: candidate!.action,
-            reflectionQuestion: candidate!.reflectionQuestion,
-            contextReceipt: receipt,
-          }
-        : candidate!.schemaVersion === 1
-          ? { closing: candidate!.closing }
-          : {}),
-      acceptedAt: iso(acceptedAt),
-      provenance: {
-        ...(plan.version === 'tarot-plan.v2'
-          ? { schemaHash: prepared.receipt!.schemaHash, contextHash: plan.contextHash }
-          : {}),
-        requestId: h.id,
-        dispatchId: dispatch?.id ?? null,
-        provider: dispatch && !this.synthetic ? 'openai' : null,
-        requestedModel: dispatch?.requested_model ?? null,
-        returnedModel: dispatch?.returned_model ?? null,
-        promptHash: plan.promptHash,
-        validatorHash: plan.validatorHash,
-        policyHash: plan.generationPolicyHash,
-        contentHash: plan.contentHash,
-        selected: plan.selected,
-        transmissionHash: dispatch?.transmission_hmac ?? null,
-        fallbackReason: template ? h.fallback_reason : null,
-      },
-    });
-    const enc = await this.base.crypt.seal(
-      {
-        ownerId: h.owner_id,
-        table: 'reading_editions',
-        column: 'body_enc',
-        recordId: editionId,
-        aadRevision: 1,
-      },
-      reading,
-      h.key_version,
-    );
-    const ready = await this.ready(h.content_hash);
-    await this.base.db.batch([
-      onlineGuard(this.base.db),
-      ...ready.guards,
-      q(
-        this.base.db,
-        `INSERT INTO reading_editions(id,owner_id,session_id,edition_number,request_id,basis_id,status,mode,body_enc,key_version,content_hash,accepted_at) VALUES (?,?,?,1,?,?,'accepted',?,?,?,?,?)`,
+    for (;;) {
+      const editionNumber =
+        plan.parentEditionId === null
+          ? 1
+          : await q(
+              this.base.db,
+              'SELECT coalesce(max(edition_number),0)+1 n FROM reading_editions WHERE owner_id=? AND session_id=?',
+              h.owner_id,
+              h.session_id,
+            ).first<number>('n');
+      const reading = AnyAcceptedReading.parse({
+        kind:
+          plan.version === 'tarot-plan.v3'
+            ? 'tarot.accepted.v3'
+            : plan.version === 'tarot-plan.v2'
+              ? 'tarot.accepted.v2'
+              : 'tarot.accepted.v1',
         editionId,
-        h.owner_id,
-        h.session_id,
-        h.id,
-        h.basis_id,
-        template ? 'template' : 'model',
-        enc,
+        sessionId: h.session_id,
+        editionNumber,
+        parentEditionId: plan.parentEditionId,
+        question: plan.question,
+        basis: plan.basis,
+        ...(plan.spreadPhoto ? { spreadPhoto: plan.spreadPhoto } : {}),
+        mode: template ? 'template' : 'model',
+        contentHash: plan.contentHash,
+        planHash: h.plan_hmac,
+        sources: plan.sources,
+        units: plan.basis.cards.map((card, i) => ({
+          ...candidate!.units.find((unit) => unit.position === card.position)!,
+          basisText: facts[i]!.text,
+        })),
+        ...(candidate!.schemaVersion === 2 && plan.version === 'tarot-plan.v2'
+          ? {
+              draw: plan.draw,
+              spread: plan.spread,
+              relationships: plan.relationships,
+              synthesis: candidate!.synthesis,
+              action: candidate!.action,
+              reflectionQuestion: candidate!.reflectionQuestion,
+              contextReceipt: receipt,
+            }
+          : candidate!.schemaVersion === 3 && plan.version === 'tarot-plan.v3'
+            ? {
+                closing: candidate!.closing,
+                canonVersion: plan.canonVersion,
+                contextReceipt: receipt,
+              }
+            : candidate!.schemaVersion === 1
+              ? { closing: candidate!.closing }
+              : {}),
+        acceptedAt: iso(acceptedAt),
+        provenance: {
+          ...(plan.version !== 'tarot-plan.v1'
+            ? { schemaHash: prepared.receipt!.schemaHash, contextHash: plan.contextHash }
+            : {}),
+          requestId: h.id,
+          dispatchId: dispatch?.id ?? null,
+          provider: dispatch && !this.synthetic ? 'openai' : null,
+          requestedModel: dispatch?.requested_model ?? null,
+          returnedModel: dispatch?.returned_model ?? null,
+          promptHash: plan.promptHash,
+          validatorHash: plan.validatorHash,
+          policyHash:
+            plan.version === 'tarot-plan.v3' ? plan.writerPolicyHash : plan.generationPolicyHash,
+          contentHash: plan.contentHash,
+          selected: plan.selected,
+          transmissionHash: dispatch?.transmission_hmac ?? null,
+          fallbackReason: template ? h.fallback_reason : null,
+        },
+      });
+      const enc = await this.base.crypt.seal(
+        {
+          ownerId: h.owner_id,
+          table: 'reading_editions',
+          column: 'body_enc',
+          recordId: editionId,
+          aadRevision: 1,
+        },
+        reading,
         h.key_version,
-        h.content_hash,
-        acceptedAt,
-      ),
-      q(
-        this.base.db,
-        "UPDATE quota_reservations SET state=? WHERE request_id=? AND state='held'",
-        template ? 'released' : 'consumed',
-        h.id,
-      ),
-      assertion(this.base.db, 'changes()=1'),
-      q(
-        this.base.db,
-        'UPDATE quota_buckets SET held=held-1,consumed=consumed+? WHERE owner_id=? AND period IN (SELECT day_period FROM quota_reservations WHERE request_id=? UNION SELECT month_period FROM quota_reservations WHERE request_id=?)',
-        template ? 0 : 1,
-        h.owner_id,
-        h.id,
-        h.id,
-      ),
-      assertion(this.base.db, 'changes()=2'),
-      q(
-        this.base.db,
-        `INSERT INTO quota_events VALUES (?,?,?,${DB_NOW})`,
-        h.id,
-        h.owner_id,
-        template ? 'release' : 'consume',
-      ),
-      this.guardCurrent(h, template ? 'fallback_pending' : 'validating', 'publish'),
-      assertion(
-        this.base.db,
-        `EXISTS(SELECT 1 FROM reading_sessions WHERE owner_id=? AND id=? AND (status='saved' OR (status='open' AND retention_expires_at>${DB_NOW})))`,
-        h.owner_id,
-        h.session_id,
-      ),
-      q(
-        this.base.db,
-        `UPDATE generation_requests SET state='published',revision=revision+1,lease_token=NULL,lease_expires_at=NULL,finished_at=${DB_NOW} WHERE id=? AND run_epoch=? AND lease_token=? AND state=? AND lease_expires_at>${DB_NOW} AND expires_at>${DB_NOW}`,
-        h.id,
-        h.run_epoch,
-        h.lease_token,
-        template ? 'fallback_pending' : 'validating',
-      ),
-      assertion(this.base.db, 'changes()=1'),
-      q(
-        this.base.db,
-        `UPDATE generation_attempts SET outcome='complete',finished_at=${DB_NOW} WHERE id=?`,
-        h.attempt_id,
-      ),
-      ...requestEvent(this.base.db, h.owner_id, h.id, 'ACCEPTED', editionId),
-      ...this.accountWrite(h.owner_id),
-    ]);
+      );
+      const ready = await this.ready(h.content_hash);
+      try {
+        await this.base.db.batch([
+          onlineGuard(this.base.db),
+          ...ready.guards,
+          q(
+            this.base.db,
+            `INSERT INTO reading_editions(id,owner_id,session_id,edition_number,parent_edition_id,request_id,basis_id,status,mode,body_enc,key_version,content_hash,accepted_at) VALUES (?,?,?,?,?,?,?,'accepted',?,?,?,?,?)`,
+            editionId,
+            h.owner_id,
+            h.session_id,
+            editionNumber,
+            plan.parentEditionId,
+            h.id,
+            h.basis_id,
+            template ? 'template' : 'model',
+            enc,
+            h.key_version,
+            h.content_hash,
+            acceptedAt,
+          ),
+          q(
+            this.base.db,
+            "UPDATE quota_reservations SET state=? WHERE request_id=? AND state='held'",
+            template ? 'released' : 'consumed',
+            h.id,
+          ),
+          assertion(this.base.db, 'changes()=1'),
+          q(
+            this.base.db,
+            'UPDATE quota_buckets SET held=held-1,consumed=consumed+? WHERE owner_id=? AND period IN (SELECT day_period FROM quota_reservations WHERE request_id=? UNION SELECT month_period FROM quota_reservations WHERE request_id=?)',
+            template ? 0 : 1,
+            h.owner_id,
+            h.id,
+            h.id,
+          ),
+          assertion(this.base.db, 'changes()=2'),
+          q(
+            this.base.db,
+            `INSERT INTO quota_events VALUES (?,?,?,${DB_NOW})`,
+            h.id,
+            h.owner_id,
+            template ? 'release' : 'consume',
+          ),
+          this.guardCurrent(h, template ? 'fallback_pending' : 'validating', 'publish'),
+          assertion(
+            this.base.db,
+            `EXISTS(SELECT 1 FROM reading_sessions WHERE owner_id=? AND id=? AND (status='saved' OR (status='open' AND retention_expires_at>${DB_NOW})))`,
+            h.owner_id,
+            h.session_id,
+          ),
+          q(
+            this.base.db,
+            `UPDATE generation_requests SET state='published',revision=revision+1,lease_token=NULL,lease_expires_at=NULL,finished_at=${DB_NOW} WHERE id=? AND run_epoch=? AND lease_token=? AND state=? AND lease_expires_at>${DB_NOW} AND expires_at>${DB_NOW}`,
+            h.id,
+            h.run_epoch,
+            h.lease_token,
+            template ? 'fallback_pending' : 'validating',
+          ),
+          assertion(this.base.db, 'changes()=1'),
+          q(
+            this.base.db,
+            `UPDATE generation_attempts SET outcome='complete',finished_at=${DB_NOW} WHERE id=?`,
+            h.attempt_id,
+          ),
+          ...requestEvent(this.base.db, h.owner_id, h.id, 'ACCEPTED', editionId),
+          ...this.accountWrite(h.owner_id),
+        ]);
+        return;
+      } catch (error) {
+        // Another valid child won this number. D1 rolled this entire batch back.
+        if (
+          !plan.parentEditionId ||
+          !(error instanceof Error) ||
+          !error.message.includes(
+            'reading_editions.owner_id, reading_editions.session_id, reading_editions.edition_number',
+          )
+        )
+          throw error;
+      }
+    }
   }
   async drive(id: string): Promise<void> {
     if (this.synthetic) await this.dependencies.ensureReady();
@@ -1264,7 +1397,10 @@ export class ReadingGeneration extends RequestState {
       await this.stop(row, 'EXPIRED');
       return;
     }
-    if (row.policy_hash !== (await this.policyHash())) {
+    if (
+      (!this.synthetic && (row.parent_edition_id !== null || row.context_count > 0)) ||
+      row.policy_hash !== (await this.policyHash())
+    ) {
       await this.stop(row, 'DEPENDENCY_UNAVAILABLE');
       return;
     }
@@ -1323,6 +1459,13 @@ export class ReadingGeneration extends RequestState {
       )
         return;
       let failure = await this.eligibility(id);
+      if (!failure && h.context && (h.parent_edition_id || h.context_count)) {
+        try {
+          await this.base.db.batch([this.guardCurrent(h, latest.state)]);
+        } catch {
+          failure = h.parent_edition_id ? 'CONTENT_UNAVAILABLE' : 'CONTEXT_CHANGED';
+        }
+      }
       if (!failure) {
         try {
           await this.ready(h.content_hash);
@@ -1342,6 +1485,8 @@ interface RequestRow {
   id: string;
   owner_id: string;
   session_id: string;
+  parent_edition_id: string | null;
+  operation: 'initial' | 'followup';
   basis_id: string | null;
   spread_dispatch_id: string | null;
   state: string;
@@ -1360,6 +1505,7 @@ interface RequestRow {
   expired: number;
 }
 interface Lease extends RequestRow {
+  context?: ReturnType<typeof capturedContext>;
   lease_token: string;
   attempt_id: string;
 }

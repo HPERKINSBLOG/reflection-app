@@ -229,6 +229,7 @@ for (const preparation of ['ready', 'preparing'] as const) {
     await account(page, preparation === 'ready' ? '192.0.2.224' : '192.0.2.225');
     await enableAi(page);
     await page.getByRole('button', { name: 'New reading', exact: true }).click();
+    await page.getByText('Use my own spread', { exact: true }).click();
     await page.getByLabel('Photo of your spread (optional)').setInputFiles({
       name: 'spread.png',
       mimeType: 'image/png',

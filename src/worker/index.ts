@@ -65,7 +65,10 @@ export function createWorker(factory?: GenerationFactory, runtime?: ApplicationR
         { 'Cache-Control': 'private, no-store' },
       );
     }
-    const response = await identityRoute(c.req.raw, c.env, runtime?.identity);
+    const continuityReady = runtime
+      ? runtime.health.mode === 'synthetic-local' && runtime.health.generationReady
+      : c.env.READING_MODE === 'synthetic-local';
+    const response = await identityRoute(c.req.raw, c.env, runtime?.identity, continuityReady);
     if (response) return response;
     // Direct service/in-process callers may await completion; Worker requests acknowledge admission.
     let defer: ((work: Promise<void>) => void) | undefined;

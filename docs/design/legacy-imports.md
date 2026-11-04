@@ -1,8 +1,8 @@
-# Legacy imports — proposed design and acceptance
+# Legacy imports
 
-Status: specification only; scheduled after dated notes, selected context and exact-parent follow-ups. No import button, parser or persistence is added by the current frontend batch.
+Account tools offers local file review, confirmation by group and status by import ID. [Milestone 3 evidence](../MILESTONE_3_RESULTS.md)
 
-Review note, 2026-11-02: [Milestone 3 portability](../superpowers/plans/2026-11-01-milestone-3-portability.md) defines the current proposed identity, lifecycle and status contract. “Preview before writes” below means before creating saved readings; authenticated encrypted preview storage is allowed, counted and erased after 24 hours. D8 must prove bounded chunks and groups spanning previews before the runtime API is frozen. Native Pixel remains unsupported.
+An authenticated preview stores only selected records in encrypted form for up to 24 hours. Successful imports stay saved. Native Pixel files remain unsupported. [Portability plan](../superpowers/plans/2026-11-01-milestone-3-portability.md)
 
 ## Screens and behavior
 

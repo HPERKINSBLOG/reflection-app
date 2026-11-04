@@ -1,0 +1,12 @@
+
+> reflection-app@0.1.0 test:db
+> vitest run --config vitest.db.config.ts tests/db/imports.test.ts tests/db/import-atomicity.test.ts tests/db/import-migration.test.ts tests/db/import-targets.test.ts tests/db/import-privacy.test.ts tests/db/import-roundtrip.test.ts tests/db/import-export.test.ts
+
+
+ RUN  v5.0.5 /home/htper/reflection-app
+
+
+ Test Files  7 passed (7)
+      Tests  23 passed (23)
+   Start at  22:36:34
+   Duration  8.68s (transform 48%, tests 35%, import 17%)

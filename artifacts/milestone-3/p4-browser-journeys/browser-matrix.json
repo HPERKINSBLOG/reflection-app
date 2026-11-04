@@ -1,0 +1,1494 @@
+{
+  "config": {
+    "argv": [
+      "/home/htper/.local/lib/nodejs/node-v26.13.0-linux-x64/bin/node",
+      "/tmp/reflection-push-Sq7rPY/source/node_modules/.bin/playwright",
+      "test",
+      "--config",
+      "playwright.journey.config.ts"
+    ],
+    "configFile": "/tmp/reflection-push-Sq7rPY/source/playwright.journey.config.ts",
+    "rootDir": "/tmp/reflection-push-Sq7rPY/source/tests/browser",
+    "failOnFlakyTests": true,
+    "forbidOnly": true,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "/tmp/reflection-push-Sq7rPY/source/artifacts/visual-pass/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "chromium",
+        "name": "chromium",
+        "testDir": "/tmp/reflection-push-Sq7rPY/source/tests/browser",
+        "testIgnore": [],
+        "testMatch": [
+          "journey-cross-browser.spec.ts",
+          "journey-layout.spec.ts",
+          "journey-native-zoom.spec.ts",
+          "journey-forced-colors.spec.ts"
+        ],
+        "timeout": 90000
+      },
+      {
+        "outputDir": "/tmp/reflection-push-Sq7rPY/source/artifacts/visual-pass/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "firefox",
+        "name": "firefox",
+        "testDir": "/tmp/reflection-push-Sq7rPY/source/tests/browser",
+        "testIgnore": [
+          "journey-native-zoom.spec.ts"
+        ],
+        "testMatch": [
+          "journey-cross-browser.spec.ts",
+          "journey-layout.spec.ts",
+          "journey-native-zoom.spec.ts",
+          "journey-forced-colors.spec.ts"
+        ],
+        "timeout": 90000
+      },
+      {
+        "outputDir": "/tmp/reflection-push-Sq7rPY/source/artifacts/visual-pass/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "webkit",
+        "name": "webkit",
+        "testDir": "/tmp/reflection-push-Sq7rPY/source/tests/browser",
+        "testIgnore": [
+          "journey-native-zoom.spec.ts",
+          "journey-forced-colors.spec.ts"
+        ],
+        "testMatch": [
+          "journey-cross-browser.spec.ts",
+          "journey-layout.spec.ts",
+          "journey-native-zoom.spec.ts",
+          "journey-forced-colors.spec.ts"
+        ],
+        "timeout": 90000
+      }
+    ],
+    "filteredProjects": [
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "/tmp/reflection-push-Sq7rPY/source/artifacts/visual-pass/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "name": "chromium",
+        "testDir": "/tmp/reflection-push-Sq7rPY/source/tests/browser",
+        "snapshotDir": "/tmp/reflection-push-Sq7rPY/source/tests/browser",
+        "testIgnore": [],
+        "testMatch": [
+          "journey-cross-browser.spec.ts",
+          "journey-layout.spec.ts",
+          "journey-native-zoom.spec.ts",
+          "journey-forced-colors.spec.ts"
+        ],
+        "timeout": 90000,
+        "use": {
+          "baseURL": "https://localhost:8843",
+          "ignoreHTTPSErrors": true,
+          "viewport": {
+            "width": 1280,
+            "height": 1000
+          },
+          "deviceScaleFactor": 1,
+          "reducedMotion": "reduce",
+          "trace": "retain-on-failure",
+          "browserName": "chromium"
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": "chromium"
+      },
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "/tmp/reflection-push-Sq7rPY/source/artifacts/visual-pass/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "name": "firefox",
+        "testDir": "/tmp/reflection-push-Sq7rPY/source/tests/browser",
+        "snapshotDir": "/tmp/reflection-push-Sq7rPY/source/tests/browser",
+        "testIgnore": "journey-native-zoom.spec.ts",
+        "testMatch": [
+          "journey-cross-browser.spec.ts",
+          "journey-layout.spec.ts",
+          "journey-native-zoom.spec.ts",
+          "journey-forced-colors.spec.ts"
+        ],
+        "timeout": 90000,
+        "use": {
+          "baseURL": "https://localhost:8843",
+          "ignoreHTTPSErrors": true,
+          "viewport": {
+            "width": 1280,
+            "height": 1000
+          },
+          "deviceScaleFactor": 1,
+          "reducedMotion": "reduce",
+          "trace": "retain-on-failure",
+          "browserName": "firefox"
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": "firefox"
+      },
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "/tmp/reflection-push-Sq7rPY/source/artifacts/visual-pass/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "name": "webkit",
+        "testDir": "/tmp/reflection-push-Sq7rPY/source/tests/browser",
+        "snapshotDir": "/tmp/reflection-push-Sq7rPY/source/tests/browser",
+        "testIgnore": [
+          "journey-native-zoom.spec.ts",
+          "journey-forced-colors.spec.ts"
+        ],
+        "testMatch": [
+          "journey-cross-browser.spec.ts",
+          "journey-layout.spec.ts",
+          "journey-native-zoom.spec.ts",
+          "journey-forced-colors.spec.ts"
+        ],
+        "timeout": 90000,
+        "use": {
+          "baseURL": "https://localhost:8843",
+          "ignoreHTTPSErrors": true,
+          "viewport": {
+            "width": 1280,
+            "height": 1000
+          },
+          "deviceScaleFactor": 1,
+          "reducedMotion": "reduce",
+          "trace": "retain-on-failure",
+          "browserName": "webkit"
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": "webkit"
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "list",
+        null
+      ],
+      [
+        "json",
+        {
+          "outputFile": "artifacts/visual-pass/browser-matrix.json"
+        }
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "default",
+    "updateSourceMethod": "patch",
+    "version": "1.64.1",
+    "workers": 1,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "journey-cross-browser.spec.ts",
+      "file": "journey-cross-browser.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "keyboard upload, processing, save, reflection, Account and exact return journey",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 90000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2345,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T01:36:16.029Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "10093a1532595d5f0733-b2ed56fa39ae76425d2e",
+          "file": "journey-cross-browser.spec.ts",
+          "line": 8,
+          "column": 1
+        },
+        {
+          "title": "keyboard upload, processing, save, reflection, Account and exact return journey",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 90000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "firefox",
+              "projectName": "firefox",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3223,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T01:39:37.773Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "10093a1532595d5f0733-fc2dce2ecf37aa31c138",
+          "file": "journey-cross-browser.spec.ts",
+          "line": 8,
+          "column": 1
+        },
+        {
+          "title": "keyboard upload, processing, save, reflection, Account and exact return journey",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 90000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "webkit",
+              "projectName": "webkit",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2475,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T01:41:59.215Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "10093a1532595d5f0733-4af98ce06190bc549c6d",
+          "file": "journey-cross-browser.spec.ts",
+          "line": 8,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "title": "journey-forced-colors.spec.ts",
+      "file": "journey-forced-colors.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "forced colors with light preference: controls and exact saved return",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 15234,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T01:36:18.425Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "396e59022252bc5f0a0e-f73eb3027310acf8dda1",
+          "file": "journey-forced-colors.spec.ts",
+          "line": 6,
+          "column": 3
+        },
+        {
+          "title": "forced colors with dark preference: controls and exact saved return",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 14994,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T01:36:33.668Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "396e59022252bc5f0a0e-f74f90bf44643fd80796",
+          "file": "journey-forced-colors.spec.ts",
+          "line": 6,
+          "column": 3
+        },
+        {
+          "title": "forced colors with light preference: controls and exact saved return",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "firefox",
+              "projectName": "firefox",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 14091,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T01:39:41.251Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "396e59022252bc5f0a0e-dd98090b723e3950c2f1",
+          "file": "journey-forced-colors.spec.ts",
+          "line": 6,
+          "column": 3
+        },
+        {
+          "title": "forced colors with dark preference: controls and exact saved return",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "firefox",
+              "projectName": "firefox",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 13726,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T01:39:55.348Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "396e59022252bc5f0a0e-3f285bf6a484d9502df0",
+          "file": "journey-forced-colors.spec.ts",
+          "line": 6,
+          "column": 3
+        }
+      ]
+    },
+    {
+      "title": "journey-layout.spec.ts",
+      "file": "journey-layout.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "320px light: full journey, long content and enlarged layout",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 90000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 12719,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T01:36:48.677Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "dbc6b5e50265ab07053c-6af92febe459ac7c4c90",
+          "file": "journey-layout.spec.ts",
+          "line": 19,
+          "column": 5
+        },
+        {
+          "title": "320px dark: full journey, long content and enlarged layout",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 90000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 12712,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T01:37:01.402Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "dbc6b5e50265ab07053c-1619fa26b17ff1c76be4",
+          "file": "journey-layout.spec.ts",
+          "line": 19,
+          "column": 5
+        },
+        {
+          "title": "390px light: full journey, long content and enlarged layout",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 90000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 12812,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T01:37:14.120Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "dbc6b5e50265ab07053c-94b40c59be9479367912",
+          "file": "journey-layout.spec.ts",
+          "line": 19,
+          "column": 5
+        },
+        {
+          "title": "390px dark: full journey, long content and enlarged layout",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 90000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 12645,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T01:37:26.938Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "dbc6b5e50265ab07053c-76bae4e9c5249896fda9",
+          "file": "journey-layout.spec.ts",
+          "line": 19,
+          "column": 5
+        },
+        {
+          "title": "768px light: full journey, long content and enlarged layout",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 90000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 13643,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T01:37:39.588Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "dbc6b5e50265ab07053c-ad46b634c37f17120a9e",
+          "file": "journey-layout.spec.ts",
+          "line": 19,
+          "column": 5
+        },
+        {
+          "title": "768px dark: full journey, long content and enlarged layout",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 90000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 13612,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T01:37:53.237Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "dbc6b5e50265ab07053c-124bb26b6cc6d15e3277",
+          "file": "journey-layout.spec.ts",
+          "line": 19,
+          "column": 5
+        },
+        {
+          "title": "1280px light: full journey, long content and enlarged layout",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 90000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 14134,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T01:38:06.855Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "dbc6b5e50265ab07053c-8501f485e5f8144b934a",
+          "file": "journey-layout.spec.ts",
+          "line": 19,
+          "column": 5
+        },
+        {
+          "title": "1280px dark: full journey, long content and enlarged layout",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 90000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 14039,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T01:38:20.995Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "dbc6b5e50265ab07053c-3207b2138aa016fadcb2",
+          "file": "journey-layout.spec.ts",
+          "line": 19,
+          "column": 5
+        },
+        {
+          "title": "2x mobile illustration delivery uses transparent variants, not full-size originals",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 90000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1291,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T01:38:35.041Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "dbc6b5e50265ab07053c-ce2c5c9f274c259c737b",
+          "file": "journey-layout.spec.ts",
+          "line": 259,
+          "column": 1
+        },
+        {
+          "title": "320px light: full journey, long content and enlarged layout",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 90000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "firefox",
+              "projectName": "firefox",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 13582,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T01:40:09.089Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "dbc6b5e50265ab07053c-66f289dd22a094e71f61",
+          "file": "journey-layout.spec.ts",
+          "line": 19,
+          "column": 5
+        },
+        {
+          "title": "320px dark: full journey, long content and enlarged layout",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 90000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "firefox",
+              "projectName": "firefox",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 13398,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T01:40:22.679Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "dbc6b5e50265ab07053c-6cef2b72722fcc7f10d9",
+          "file": "journey-layout.spec.ts",
+          "line": 19,
+          "column": 5
+        },
+        {
+          "title": "390px light: full journey, long content and enlarged layout",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 90000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "firefox",
+              "projectName": "firefox",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 13110,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T01:40:36.083Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "dbc6b5e50265ab07053c-9ce8a96b8eb9c804e4cb",
+          "file": "journey-layout.spec.ts",
+          "line": 19,
+          "column": 5
+        },
+        {
+          "title": "390px dark: full journey, long content and enlarged layout",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 90000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "firefox",
+              "projectName": "firefox",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 13009,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T01:40:49.201Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "dbc6b5e50265ab07053c-ce3d25da312358b8937b",
+          "file": "journey-layout.spec.ts",
+          "line": 19,
+          "column": 5
+        },
+        {
+          "title": "768px light: full journey, long content and enlarged layout",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 90000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "firefox",
+              "projectName": "firefox",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 13332,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T01:41:02.218Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "dbc6b5e50265ab07053c-5fd887e229a6526397f1",
+          "file": "journey-layout.spec.ts",
+          "line": 19,
+          "column": 5
+        },
+        {
+          "title": "768px dark: full journey, long content and enlarged layout",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 90000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "firefox",
+              "projectName": "firefox",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 13263,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T01:41:15.557Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "dbc6b5e50265ab07053c-761b5fb8f1fb9a6d30e8",
+          "file": "journey-layout.spec.ts",
+          "line": 19,
+          "column": 5
+        },
+        {
+          "title": "1280px light: full journey, long content and enlarged layout",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 90000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "firefox",
+              "projectName": "firefox",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 15125,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T01:41:28.827Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "dbc6b5e50265ab07053c-d9bc8b330e6c2f41c0d5",
+          "file": "journey-layout.spec.ts",
+          "line": 19,
+          "column": 5
+        },
+        {
+          "title": "1280px dark: full journey, long content and enlarged layout",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 90000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "firefox",
+              "projectName": "firefox",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 13443,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T01:41:43.958Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "dbc6b5e50265ab07053c-78a6beb80ecc071f5bb5",
+          "file": "journey-layout.spec.ts",
+          "line": 19,
+          "column": 5
+        },
+        {
+          "title": "2x mobile illustration delivery uses transparent variants, not full-size originals",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 90000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "firefox",
+              "projectName": "firefox",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1416,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T01:41:57.407Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "dbc6b5e50265ab07053c-c0bd56762cb994d4a8c7",
+          "file": "journey-layout.spec.ts",
+          "line": 259,
+          "column": 1
+        },
+        {
+          "title": "320px light: full journey, long content and enlarged layout",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 90000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "webkit",
+              "projectName": "webkit",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 13283,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T01:42:01.781Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "dbc6b5e50265ab07053c-9426bb8d2acc6764dd6b",
+          "file": "journey-layout.spec.ts",
+          "line": 19,
+          "column": 5
+        },
+        {
+          "title": "320px dark: full journey, long content and enlarged layout",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 90000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "webkit",
+              "projectName": "webkit",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 13263,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T01:42:15.070Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "dbc6b5e50265ab07053c-c8079d52a6ff915dad92",
+          "file": "journey-layout.spec.ts",
+          "line": 19,
+          "column": 5
+        },
+        {
+          "title": "390px light: full journey, long content and enlarged layout",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 90000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "webkit",
+              "projectName": "webkit",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 13280,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T01:42:28.340Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "dbc6b5e50265ab07053c-3c6b501cea4166de4ee3",
+          "file": "journey-layout.spec.ts",
+          "line": 19,
+          "column": 5
+        },
+        {
+          "title": "390px dark: full journey, long content and enlarged layout",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 90000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "webkit",
+              "projectName": "webkit",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 13360,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T01:42:41.627Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "dbc6b5e50265ab07053c-d31a61aa807342d89cf4",
+          "file": "journey-layout.spec.ts",
+          "line": 19,
+          "column": 5
+        },
+        {
+          "title": "768px light: full journey, long content and enlarged layout",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 90000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "webkit",
+              "projectName": "webkit",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 14465,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T01:42:54.993Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "dbc6b5e50265ab07053c-97c4c947ca50fd089fb0",
+          "file": "journey-layout.spec.ts",
+          "line": 19,
+          "column": 5
+        },
+        {
+          "title": "768px dark: full journey, long content and enlarged layout",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 90000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "webkit",
+              "projectName": "webkit",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 14570,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T01:43:09.465Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "dbc6b5e50265ab07053c-42f4919bfd649d2f2614",
+          "file": "journey-layout.spec.ts",
+          "line": 19,
+          "column": 5
+        },
+        {
+          "title": "1280px light: full journey, long content and enlarged layout",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 90000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "webkit",
+              "projectName": "webkit",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 15508,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T01:43:24.042Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "dbc6b5e50265ab07053c-ff2d633ce5fad1550628",
+          "file": "journey-layout.spec.ts",
+          "line": 19,
+          "column": 5
+        },
+        {
+          "title": "1280px dark: full journey, long content and enlarged layout",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 90000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "webkit",
+              "projectName": "webkit",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 15332,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T01:43:39.557Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "dbc6b5e50265ab07053c-fe90a61ab94552fd2db1",
+          "file": "journey-layout.spec.ts",
+          "line": 19,
+          "column": 5
+        },
+        {
+          "title": "2x mobile illustration delivery uses transparent variants, not full-size originals",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 90000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "webkit",
+              "projectName": "webkit",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1638,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T01:43:54.897Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "dbc6b5e50265ab07053c-c507d9f9cbdb938856bf",
+          "file": "journey-layout.spec.ts",
+          "line": 259,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "title": "journey-native-zoom.spec.ts",
+      "file": "journey-native-zoom.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "native Chromium 200% page zoom: light read, save, reflect and return",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 30620,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T01:38:36.343Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "a3b18a7d30cf3ebb3834-4b29856659fd9a825f85",
+          "file": "journey-native-zoom.spec.ts",
+          "line": 18,
+          "column": 3
+        },
+        {
+          "title": "native Chromium 200% page zoom: dark read, save, reflect and return",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 30420,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T01:39:06.969Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "a3b18a7d30cf3ebb3834-ffb6d5c400f4c5263d57",
+          "file": "journey-native-zoom.spec.ts",
+          "line": 18,
+          "column": 3
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-11-04T01:36:09.409Z",
+    "duration": 467251.587,
+    "expected": 36,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  }
+}

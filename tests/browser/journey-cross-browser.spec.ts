@@ -33,6 +33,7 @@ test('keyboard upload, processing, save, reflection, Account and exact return jo
   const question = 'Synthetic return to the exact saved reading';
   await page.getByLabel('Your question', { exact: true }).fill(question);
   await page.getByLabel('Use English for this reading').check();
+  await page.locator('summary', { hasText: 'Use my own spread' }).press('Enter');
   const choose = page.getByRole('button', { name: 'Choose photo', exact: true });
   await expect(choose).toHaveAccessibleDescription(
     /sends your attached photo to Meta.*zero retention/,
@@ -190,7 +191,7 @@ test('keyboard upload, processing, save, reflection, Account and exact return jo
   ).toBeFocused();
   await page.keyboard.press('Enter');
   await expect(
-    page.getByRole('heading', { name: 'A little space to reflect.', exact: true }),
+    page.getByRole('heading', { name: 'Deletion receipt', level: 1, exact: true }),
   ).toBeFocused();
   await expect(
     page.getByRole('status').filter({ hasText: 'Deletion is complete for active storage.' }),

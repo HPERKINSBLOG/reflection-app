@@ -1,0 +1,90 @@
+{
+  "sourceDigest": "45fcfcd68b60dd2ca4f47784f9715f446f114f1ae489aa25cb260cd6e4f1d832",
+  "finishedAt": "2026-11-04T01:44:15.782Z",
+  "scope": "local D1, R2 and synthetic writer",
+  "node": "v26.13.0",
+  "commands": [
+    "npm run verify",
+    "npm run test:journey"
+  ],
+  "verification": {
+    "completedAt": "2026-11-04T01:36:08.964Z",
+    "stages": 14,
+    "elapsedMs": 347040,
+    "domain": {
+      "passed": 442,
+      "files": 57
+    },
+    "database": {
+      "passed": 619,
+      "files": 62
+    },
+    "browser": {
+      "passed": 147,
+      "files": 18
+    }
+  },
+  "journey": {
+    "startedAt": "2026-11-04T01:36:09.409Z",
+    "elapsedMs": 467251.587,
+    "passed": 36,
+    "files": 4,
+    "stats": {
+      "startTime": "2026-11-04T01:36:09.409Z",
+      "duration": 467251.587,
+      "expected": 36,
+      "skipped": 0,
+      "unexpected": 0,
+      "flaky": 0
+    },
+    "engines": [
+      "chromium",
+      "firefox",
+      "webkit"
+    ],
+    "captures": 192,
+    "widths": [
+      320,
+      390,
+      768,
+      1280
+    ],
+    "themes": [
+      "Paper",
+      "Evening"
+    ]
+  },
+  "syntheticEvaluation": {
+    "cases": 7,
+    "liveCalls": 0,
+    "corpusHash": "a63db3ae51c38af06e0f4d9884291e5ccfdd72455c909b7b7bc3a535b400b46b",
+    "policyHash": "1509e6d9ded19ebde1f20cb0b44dff5193e48dbb00af90e6d6f98d52bfd69cb8",
+    "command": "node --import tsx scripts/provider-evaluate.ts --dry-run --profile continuity-local"
+  },
+  "liveContinuity": "disabled; separate provider evaluation required",
+  "productionAcceptance": "separate; no deployment or hosted recovery performed",
+  "reports": {
+    "artifacts/verify.json": "be61c12f5bc9f5db9388987143a6a0380fe63669bfa3a96bda0bf3e2cf3b063b",
+    "artifacts/domain-tests.json": "22843625a914a68c315c5318384ba5b7971d1b36b5edf77463d69ce37000150d",
+    "artifacts/db-tests.json": "a6fa87297fe096594ba6e337a9ba55a53aa8953400c180b4f778ea1a86118186",
+    "artifacts/browser-tests.json": "2f1c3272d65e7de7f22d3970037cb69b95d983993b7007ade220742c3542db97",
+    "artifacts/visual-pass/browser-matrix.json": "6f6c6468cc583a0cd540909700f0d8e3713665afa550c31627c4a7710732c03c",
+    "artifacts/continuity-evaluation.json": "7d159eb4ed0f0eed46448cce17fc5dcfb1d058753483c53363a7d51a1521944e",
+    "artifacts/milestone-3/verify.log": "8a8d22e6e334854bba59d0c449f35a9c087301663cf80290c9a9dfec807304f3",
+    "artifacts/milestone-3/journey.log": "cb83f90b6516d574c2535a51101f5fbe9844f7dad6cff6cf96fc4d4bfb71ce9d",
+    "artifacts/m3-foundations/summary.json": "1a45e97febba11e8330cc0f0688805851d31017a1932ff970512141827e66d57",
+    "artifacts/milestone-3/c2-db.log": "7c9417e0fa69dc065f5dddfa964df5bc8d5f3539bce54c80df532f7a1c2230aa",
+    "artifacts/milestone-3/c2-restore.log": "1514f1073aebc066bff2fd6d7d4057c9c8c8af5a90052c63e211fbd3b7c0730a",
+    "artifacts/milestone-3/c2-cleanup.log": "0af220f5a3c442369a60b095cb87845cfb8feb006539f5a2f62a0b6b9e821c7d",
+    "artifacts/milestone-3/p2-checkpoint.log": "8c56c8146dc39f65020b92d95fa6794009a7884d81dfba8faf504e6b857b5e42",
+    "artifacts/milestone-3/p2-rekey.log": "009cf6fc313186c27413d03efc8958ba2e88f787d24f6b1729408bd8358d3d50",
+    "artifacts/milestone-3/p2-routes.log": "2f67c557ee7ebc1411756002c63efdfdd9b6758ccccf31c88de849f38e987f29",
+    "artifacts/milestone-3/p3-browser.log": "184aec6f505f1bc938980c5b984b4a4017bb97b7abcd3229bfb313a8d5b05b88",
+    "artifacts/milestone-3/p4-roundtrip.log": "2803cf7d0dc5a8849566832b149d5b457d71fc68ede8de02cd919d49055f9f2d",
+    "artifacts/milestone-3/p4-reopen.log": "db8f4264a5f55bad8d977a1d04c67cdb5c4b6469b952cf7b0c3d856d6efd081e",
+    "artifacts/milestone-3/p2-private-fields.log": "1ef23263cfc304c9fbef037d9f505474ff666a6a46405d545f703de162d7db6f",
+    "artifacts/milestone-3/p4-browser-journeys/evidence.json": "e07d82afeadb162d62304e1038459d80ccc7abff29a78de841ca72a2938f5845",
+    "artifacts/milestone-3/p2-import-service.log": "67da24bb185d9145e64495d767d78f07244ca367c199de09442cf75af6f06e55",
+    "artifacts/milestone-3/c4-follow-up.log": "832b4efc3734bb8f1d16a332566b683a95330f4cb4f59622436233641bd13c9f"
+  }
+}

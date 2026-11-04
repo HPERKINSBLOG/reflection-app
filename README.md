@@ -61,7 +61,7 @@ The [local retention and cleanup slice](docs/RETENTION_CLEANUP_RESULTS.md) adds 
 
 The [local request lifecycle](docs/REQUEST_LIFECYCLE_RESULTS.md) adds early Start acknowledgement, resumable progress, cancellation and distinct stopped outcomes. Reload or sign in at the same request URL to recover the result without starting again. Reading headings separate drawn cards, interpretation, source snapshots and personal reflection.
 
-The [Milestone 3 preparation](docs/MILESTONE_3_PREPARATION.md) defines selected context, exact-parent follow-ups and legacy/portable imports, with separate implementation plans, a decision register and acceptance tests. Dated revisit notes are already implemented. This is a planning package; new Milestone 3 workflows and production qualification remain outstanding.
+The local app supports dated revisit notes, reader-selected excerpts, synthetic follow-ups on a saved edition, and reviewed journal imports. Account tools opens the import review with AI readings off. [Milestone 3 results](docs/MILESTONE_3_RESULTS.md) · [Completion checklist](docs/MILESTONE_3_CHECKLIST.md) · [Decisions and acceptance criteria](docs/MILESTONE_3_PREPARATION.md)
 
 Use Node 26.12.1 and Python 3 with SQLite supporting `unixepoch('subsec')` (3.42 or newer):
 

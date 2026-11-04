@@ -2,6 +2,8 @@ import type { Target } from '../recovery/ledger.ts';
 import { statement as q, DB_NOW } from '../db/core.ts';
 import { assertion } from '../identity/checkpoint.ts';
 import type { RecordBase } from './base.ts';
+import { ImportCopies } from './import-copies.ts';
+import { ContextCopies } from './context-copies.ts';
 
 export class EraseData {
   constructor(readonly base: RecordBase) {}
@@ -17,202 +19,130 @@ export class EraseData {
       q(this.base.db, 'DELETE FROM accounts WHERE id=?', target.subjectId),
     ]);
   }
-  async revisit(job: { id: string }, target: Extract<Target, { scope: 'revisit' }>): Promise<void> {
-    const owner = target.subjectId,
-      id = target.revisitId;
-    await this.base.db.batch([
+  async records(jobId: string, target: Exclude<Target, { scope: 'account' }>) {
+    const db = this.base.db,
+      owner = target.subjectId,
+      imports = await ImportCopies.find(this.base, target),
+      copies = new ContextCopies(this.base, target, imports.destinations);
+    const statements = [
       assertion(
-        this.base.db,
+        db,
         "EXISTS(SELECT 1 FROM deletion_jobs WHERE id=? AND state!='complete' AND target_enc IS NOT NULL)",
-        job.id,
+        jobId,
       ),
-      // Unsupported raw imports remain closed. An exact source alias can be detached safely.
-      assertion(
-        this.base.db,
-        'NOT EXISTS(SELECT 1 FROM import_items WHERE owner_id=?) AND NOT EXISTS(SELECT 1 FROM context_grants WHERE owner_id=?)',
-        owner,
-        owner,
-      ),
-      q(this.base.db, 'UPDATE accounts SET data_revision=data_revision+1 WHERE id=?', owner),
+      ...(imports.destinations.length ? copies.fence() : []),
+      ...imports.erase(),
+    ];
+    statements.push(...copies.erase());
+    if (target.scope === 'revisit') {
+      statements.push(
+        q(
+          db,
+          `UPDATE revisits SET note_enc=NULL,deleted_at=coalesce(deleted_at,${DB_NOW}),deletion_job_id=? WHERE owner_id=? AND id=?`,
+          jobId,
+          owner,
+          target.revisitId,
+        ),
+        q(
+          db,
+          `UPDATE revisit_revisions SET body_enc=NULL,erased_at=coalesce(erased_at,${DB_NOW}) WHERE owner_id=? AND revisit_id=?`,
+          owner,
+          target.revisitId,
+        ),
+      );
+    } else if (target.scope === 'reflection_revision') {
+      statements.push(
+        q(
+          db,
+          `UPDATE reflection_revisions SET body_enc=NULL,erased_at=coalesce(erased_at,${DB_NOW}) WHERE owner_id=? AND reflection_id=? AND revision=?`,
+          owner,
+          target.reflectionId,
+          target.revision,
+        ),
+        q(
+          db,
+          `UPDATE reflections SET deleted_at=coalesce(deleted_at,${DB_NOW}) WHERE owner_id=? AND id=? AND current_revision=?`,
+          owner,
+          target.reflectionId,
+          target.revision,
+        ),
+      );
+    } else if (target.scope === 'session') {
+      const id = target.sessionId;
+      statements.push(
+        assertion(
+          db,
+          "NOT EXISTS(SELECT 1 FROM reading_sessions WHERE owner_id=? AND id=? AND status!='deleted')",
+          owner,
+          id,
+        ),
+        q(db, 'UPDATE reading_sessions SET question_enc=NULL WHERE owner_id=? AND id=?', owner, id),
+        q(
+          db,
+          'UPDATE basis_snapshots SET body_enc=NULL WHERE owner_id=? AND session_id=?',
+          owner,
+          id,
+        ),
+        q(
+          db,
+          `UPDATE reading_editions SET body_enc=NULL,status='deleted',invalidated_at=coalesce(invalidated_at,${DB_NOW}) WHERE owner_id=? AND session_id=?`,
+          owner,
+          id,
+        ),
+        q(
+          db,
+          `UPDATE reflection_revisions SET body_enc=NULL,erased_at=coalesce(erased_at,${DB_NOW}) WHERE owner_id=? AND reflection_id IN (SELECT id FROM reflections WHERE owner_id=? AND session_id=?)`,
+          owner,
+          owner,
+          id,
+        ),
+        q(
+          db,
+          `UPDATE reflections SET deleted_at=coalesce(deleted_at,${DB_NOW}) WHERE owner_id=? AND session_id=?`,
+          owner,
+          id,
+        ),
+        q(
+          db,
+          `UPDATE revisit_revisions SET body_enc=NULL,erased_at=coalesce(erased_at,${DB_NOW}) WHERE owner_id=? AND revisit_id IN (SELECT id FROM revisits WHERE owner_id=? AND session_id=?)`,
+          owner,
+          owner,
+          id,
+        ),
+        // Captured grants retain exact source identity. Remove unreferenced
+        // note shells and keep only a bodyless FK target for the referenced ones.
+        q(
+          db,
+          'DELETE FROM revisits WHERE owner_id=? AND session_id=? AND NOT EXISTS(SELECT 1 FROM context_grants g WHERE g.owner_id=revisits.owner_id AND g.revisit_id=revisits.id)',
+          owner,
+          id,
+        ),
+        q(
+          db,
+          `UPDATE revisits SET note_enc=NULL,deleted_at=coalesce(deleted_at,${DB_NOW}) WHERE owner_id=? AND session_id=?`,
+          owner,
+          id,
+        ),
+        q(
+          db,
+          `UPDATE cost_reservations SET owner_id=NULL,dispatch_id=NULL WHERE owner_id=? AND dispatch_id IN (SELECT d.id FROM provider_dispatches d JOIN generation_requests r ON r.id=d.request_id AND r.owner_id=d.owner_id WHERE r.owner_id=? AND r.session_id=? UNION SELECT spread_dispatch_id FROM generation_requests WHERE owner_id=? AND session_id=?)`,
+          owner,
+          owner,
+          id,
+          owner,
+          id,
+        ),
+      );
+    }
+    await db.batch([
+      ...statements,
+      copies.erased(),
+      imports.erased(),
+      q(db, 'UPDATE accounts SET data_revision=data_revision+1 WHERE id=?', owner),
       q(
-        this.base.db,
-        `UPDATE revisits SET note_enc=NULL,deleted_at=coalesce(deleted_at,${DB_NOW}),deletion_job_id=? WHERE owner_id=? AND id=?`,
-        job.id,
-        owner,
-        id,
-      ),
-      q(
-        this.base.db,
-        `UPDATE revisit_revisions SET body_enc=NULL,erased_at=coalesce(erased_at,${DB_NOW}) WHERE owner_id=? AND revisit_id=?`,
-        owner,
-        id,
-      ),
-      q(
-        this.base.db,
-        `UPDATE import_identities SET source_record_enc=NULL,session_id=NULL,edition_id=NULL,reflection_id=NULL,reflection_revision=NULL,revisit_id=NULL,erased_at=coalesce(erased_at,${DB_NOW}) WHERE owner_id=? AND revisit_id=?`,
-        owner,
-        id,
-      ),
-      q(
-        this.base.db,
+        db,
         `UPDATE deletion_jobs SET state='erasing',completed_at=coalesce(completed_at,${DB_NOW}) WHERE id=?`,
-        job.id,
-      ),
-    ]);
-  }
-  async reflection(job: { id: string }, target: Extract<Target, { scope: 'reflection_revision' }>) {
-    const owner = target.subjectId,
-      id = target.reflectionId,
-      revision = target.revision;
-    await this.base.db.batch([
-      assertion(
-        this.base.db,
-        "EXISTS(SELECT 1 FROM deletion_jobs WHERE id=? AND state!='complete' AND target_enc IS NOT NULL)",
-        job.id,
-      ),
-      assertion(
-        this.base.db,
-        'NOT EXISTS(SELECT 1 FROM import_items WHERE owner_id=?) AND NOT EXISTS(SELECT 1 FROM import_identities WHERE owner_id=?) AND NOT EXISTS(SELECT 1 FROM context_grants WHERE owner_id=? AND reflection_id=? AND reflection_revision=?)',
-        owner,
-        owner,
-        owner,
-        id,
-        revision,
-      ),
-      q(this.base.db, `UPDATE accounts SET data_revision=data_revision+1 WHERE id=?`, owner),
-      q(
-        this.base.db,
-        `UPDATE reflection_revisions SET body_enc=NULL,erased_at=coalesce(erased_at,${DB_NOW}) WHERE owner_id=? AND reflection_id=? AND revision=?`,
-        owner,
-        id,
-        revision,
-      ),
-      q(
-        this.base.db,
-        `UPDATE reflections SET deleted_at=coalesce(deleted_at,${DB_NOW}) WHERE owner_id=? AND id=? AND current_revision=?`,
-        owner,
-        id,
-        revision,
-      ),
-      q(
-        this.base.db,
-        `UPDATE deletion_jobs SET state='erasing',completed_at=coalesce(completed_at,${DB_NOW}) WHERE id=?`,
-        job.id,
-      ),
-    ]);
-  }
-  async session(job: { id: string }, target: Extract<Target, { scope: 'session' }>) {
-    const owner = target.subjectId,
-      id = target.sessionId;
-    const requests = 'SELECT id FROM generation_requests WHERE owner_id=? AND session_id=?';
-    const reflections = 'SELECT id FROM reflections WHERE owner_id=? AND session_id=?';
-    const editions = 'SELECT id FROM reading_editions WHERE owner_id=? AND session_id=?';
-    // This integration creates no selected context/imports. Refuse completion if future unsupported copies exist.
-    const unsupported = `NOT EXISTS(SELECT 1 FROM generation_context gc JOIN context_grants g ON g.id=gc.grant_id AND g.owner_id=gc.owner_id JOIN generation_requests r ON r.id=gc.request_id AND r.owner_id=gc.owner_id WHERE g.owner_id=? AND (g.edition_id IN (${editions}) OR g.reflection_id IN (${reflections})) AND r.session_id!=?) AND NOT EXISTS(SELECT 1 FROM import_identities WHERE owner_id=?) AND NOT EXISTS(SELECT 1 FROM import_items WHERE owner_id=?)`;
-    await this.base.db.batch([
-      // Completion is terminal. Check inside the atomic batch, not only at resume entry.
-      assertion(
-        this.base.db,
-        "EXISTS(SELECT 1 FROM deletion_jobs WHERE id=? AND state!='complete' AND target_enc IS NOT NULL)",
-        job.id,
-      ),
-      assertion(
-        this.base.db,
-        "NOT EXISTS(SELECT 1 FROM reading_sessions WHERE owner_id=? AND id=? AND status!='deleted')",
-        owner,
-        id,
-      ),
-      assertion(this.base.db, unsupported, owner, owner, id, owner, id, id, owner, owner),
-      // Trigger accounting releases only ciphertext that this transaction actually nulls.
-      q(this.base.db, `UPDATE accounts SET data_revision=data_revision+1 WHERE id=?`, owner),
-      q(
-        this.base.db,
-        `UPDATE deletion_jobs SET state='erasing',completed_at=coalesce(completed_at,${DB_NOW}) WHERE id=?`,
-        job.id,
-      ),
-      q(
-        this.base.db,
-        'UPDATE reading_sessions SET question_enc=NULL WHERE owner_id=? AND id=?',
-        owner,
-        id,
-      ),
-      q(
-        this.base.db,
-        'UPDATE basis_snapshots SET body_enc=NULL WHERE owner_id=? AND session_id=?',
-        owner,
-        id,
-      ),
-      q(
-        this.base.db,
-        `UPDATE reading_editions SET body_enc=NULL,status='deleted',invalidated_at=coalesce(invalidated_at,${DB_NOW}) WHERE owner_id=? AND session_id=?`,
-        owner,
-        id,
-      ),
-      q(
-        this.base.db,
-        'UPDATE generation_requests SET input_enc=NULL,plan_enc=NULL WHERE owner_id=? AND session_id=?',
-        owner,
-        id,
-      ),
-      q(
-        this.base.db,
-        `UPDATE provider_dispatches SET transmission_enc=NULL,candidate_enc=NULL,provider_response_id_enc=NULL WHERE owner_id=? AND request_id IN (${requests})`,
-        owner,
-        owner,
-        id,
-      ),
-      q(
-        this.base.db,
-        `UPDATE generation_context SET fragment_enc=NULL WHERE owner_id=? AND request_id IN (${requests})`,
-        owner,
-        owner,
-        id,
-      ),
-      q(
-        this.base.db,
-        `UPDATE reflection_revisions SET body_enc=NULL,erased_at=coalesce(erased_at,${DB_NOW}) WHERE owner_id=? AND reflection_id IN (${reflections})`,
-        owner,
-        owner,
-        id,
-      ),
-      q(
-        this.base.db,
-        `UPDATE reflections SET deleted_at=coalesce(deleted_at,${DB_NOW}) WHERE owner_id=? AND session_id=?`,
-        owner,
-        id,
-      ),
-      q(
-        this.base.db,
-        `UPDATE context_grants SET state='revoked',revision=revision+1,updated_at=${DB_NOW} WHERE owner_id=? AND (edition_id IN (${editions}) OR reflection_id IN (${reflections})) AND state='allowed'`,
-        owner,
-        owner,
-        id,
-        owner,
-        id,
-      ),
-      q(
-        this.base.db,
-        `UPDATE revisit_revisions SET body_enc=NULL,erased_at=coalesce(erased_at,${DB_NOW}) WHERE owner_id=? AND revisit_id IN (SELECT id FROM revisits WHERE owner_id=? AND session_id=?)`,
-        owner,
-        owner,
-        id,
-      ),
-      q(
-        this.base.db,
-        `DELETE FROM revisits WHERE owner_id=? AND edition_id IN (${editions})`,
-        owner,
-        owner,
-        id,
-      ),
-      q(
-        this.base.db,
-        `UPDATE cost_reservations SET owner_id=NULL,dispatch_id=NULL WHERE owner_id=? AND dispatch_id IN (SELECT id FROM provider_dispatches WHERE owner_id=? AND request_id IN (${requests}) UNION SELECT spread_dispatch_id FROM generation_requests WHERE owner_id=? AND session_id=?)`,
-        owner,
-        owner,
-        owner,
-        id,
-        owner,
-        id,
+        jobId,
       ),
     ]);
   }

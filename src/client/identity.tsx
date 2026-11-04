@@ -1,11 +1,16 @@
 import { Button, Input, TextLink } from './design/components.tsx';
-import { type MouseEvent, useCallback, useEffect, useRef, useState } from 'react';
+import { type MouseEvent, useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import type { z } from 'zod';
 import { apiSchemas, type AuthResult } from '../contracts/index.ts';
 import { READING_PRODUCT_COPY, SPREAD_PHOTO_COPY } from '../contracts/product-copy.ts';
 import { api, ApiFailure } from './api.ts';
 import { enroll, signIn } from './passkeys.ts';
-import { ReadingWorkspace, type WorkspaceHandle, type WorkspaceResume } from './readings.tsx';
+import {
+  ReadingWorkspace,
+  savedEditionFromPath,
+  type WorkspaceHandle,
+  type WorkspaceResume,
+} from './readings.tsx';
 import { requestFromPath } from './request-progress.tsx';
 import { deletionIntent, DeletionReceiptPanel, type DeletionProof } from './deletion.tsx';
 import { date } from './date.ts';
@@ -13,6 +18,7 @@ import { Notice, type NoticeMessage } from './notice.tsx';
 import { Art } from './art.tsx';
 import { Icon } from './icon.tsx';
 import { Brand } from './design/components.tsx';
+import { ImportRecords } from './imports.tsx';
 import { ThemeSelect } from './design/theme.tsx';
 
 type View = z.infer<typeof apiSchemas.SessionView>;
@@ -61,10 +67,17 @@ function environmentNotice(mode: string | null, live: boolean | null) {
 export function IdentityApp() {
   const [live, setLive] = useState<boolean | null>(null);
   const [runtimeMode, setRuntimeMode] = useState<string | null>(null);
-  useEffect(() => {
-    void fetch('/health', { cache: 'no-store' })
-      .then((response) => response.json())
+  const connectionRequest = useRef<AbortController | null>(null);
+  const [checkingConnection, setCheckingConnection] = useState(true);
+  const checkConnection = useCallback(() => {
+    connectionRequest.current?.abort();
+    const controller = new AbortController();
+    connectionRequest.current = controller;
+    setCheckingConnection(true);
+    void fetch('/health', { cache: 'no-store', signal: controller.signal })
+      .then((response) => (response.ok ? response.json() : null))
       .then((runtime) => {
+        if (controller.signal.aborted) return;
         if (typeof runtime === 'object' && runtime !== null && 'mode' in runtime) {
           const mode = String(runtime.mode);
           const ready = 'generationReady' in runtime && runtime.generationReady === true;
@@ -81,8 +94,20 @@ export function IdentityApp() {
             setLive(true);
         }
       })
-      .catch(() => {});
+      .catch(() => {})
+      .finally(() => {
+        if (!controller.signal.aborted) setCheckingConnection(false);
+      });
   }, []);
+  useEffect(() => {
+    checkConnection();
+    return () => connectionRequest.current?.abort();
+  }, [checkConnection]);
+  const connectionRetry = live === null && (
+    <Button variant="secondary" disabled={checkingConnection} onClick={checkConnection}>
+      {checkingConnection ? 'Checking connection…' : 'Check connection again'}
+    </Button>
+  );
   const [session, setSession] = useState<View | null>(null);
   const [kit, setKit] = useState<Kit | null>(null);
   const [grant, setGrant] = useState<Grant | null>(null);
@@ -114,6 +139,14 @@ export function IdentityApp() {
   const version = useRef(0),
     channel = useRef<BroadcastChannel | null>(null),
     heading = useRef<HTMLHeadingElement>(null);
+  const receiptHeading = useRef<HTMLHeadingElement>(null);
+  const hadReceipt = useRef(false);
+  useLayoutEffect(() => {
+    // The receipt and the welcome screen replace each other's primary heading.
+    if (deletionReceipt) receiptHeading.current?.focus();
+    else if (hadReceipt.current) heading.current?.focus();
+    hadReceipt.current = Boolean(deletionReceipt);
+  }, [deletionReceipt]);
   const clear = useCallback(() => {
     version.current++;
     inFlight.current = false;
@@ -288,7 +321,8 @@ export function IdentityApp() {
     setSession(current);
     setGrant(null);
     // Saved readings are the default destination; a requested reading or the account page stays.
-    if (!requestFromPath() && window.location.pathname !== '/account') navigate('/');
+    if (!requestFromPath() && !savedEditionFromPath() && window.location.pathname !== '/account')
+      navigate('/');
   };
   const verifyExistingPasskey = async (isCurrent: () => boolean) => {
     if (!session) throw new Error('Your session has ended. Sign in again.');
@@ -449,6 +483,14 @@ export function IdentityApp() {
           />
         )}
         <div className={authPage ? 'auth-column' : 'page-stack'}>
+          {deletionReceipt && (
+            <DeletionReceiptPanel
+              key={deletionReceipt.proof.receiptId}
+              {...deletionReceipt}
+              pageHeading={receiptHeading}
+              onDismiss={() => setDeletionReceipt(null)}
+            />
+          )}
           <div
             className={
               authPage
@@ -469,12 +511,17 @@ export function IdentityApp() {
             )}
             <div className="page-title">
               <div className="title-copy">
-                <h1 ref={heading} tabIndex={-1}>
-                  {title}
-                </h1>
-                {landing && (
+                {deletionReceipt ? (
+                  <h2>Account access</h2>
+                ) : (
+                  <h1 ref={heading} tabIndex={-1}>
+                    {title}
+                  </h1>
+                )}
+                {landing && !deletionReceipt && (
                   <p className="brand-promise">
-                    Bring a question. Make room for another perspective.
+                    Draw three tarot cards or bring your own spread. Save your reading and return
+                    with a note.
                   </p>
                 )}
                 {(!session || kit || grant) && (
@@ -654,11 +701,12 @@ export function IdentityApp() {
                       <p>{READING_PRODUCT_COPY.aiPermission}</p>
                       <p>
                         {live === null
-                          ? 'Refresh to check the reading service before enabling AI. Your saved readings and reflections remain available.'
+                          ? 'The reading service is unavailable. Check the connection before enabling AI.'
                           : live
                             ? SPREAD_PHOTO_COPY.liveProviderRetention
                             : READING_PRODUCT_COPY.providerRetention}
                       </p>
+                      {connectionRetry}
                     </div>
                   </section>
                   <section className="card passkeys-card" aria-label="Manage passkeys">
@@ -761,6 +809,12 @@ export function IdentityApp() {
                   </section>
                   <section className="account-tool-group" aria-labelledby="account-tools-title">
                     <h2 id="account-tools-title">Account tools</h2>
+                    <ImportRecords
+                      key={session.subjectId}
+                      owner={session.subjectId}
+                      csrf={session.csrfToken}
+                      onExpired={expire}
+                    />
                     <div className="account-tools">
                       <Button
                         type="button"
@@ -903,7 +957,7 @@ export function IdentityApp() {
                           clear();
                           setDeletionReceipt({ proof, initial });
                           channel.current?.postMessage('signed-out');
-                          show('/');
+                          navigate('/');
                         })
                       }
                     >
@@ -922,6 +976,7 @@ export function IdentityApp() {
                     resume={readingResume}
                     live={live}
                     runtimeMode={runtimeMode}
+                    connectionRetry={connectionRetry}
                     key={session.subjectId}
                     user={session}
                     onSession={setSession}
@@ -1030,13 +1085,6 @@ export function IdentityApp() {
               )}
             </div>
           </div>
-          {deletionReceipt && (
-            <DeletionReceiptPanel
-              key={deletionReceipt.proof.receiptId}
-              {...deletionReceipt}
-              onDismiss={() => setDeletionReceipt(null)}
-            />
-          )}
         </div>
       </main>
     </div>

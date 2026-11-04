@@ -6,11 +6,13 @@ import type { WritingProvider, WriterOutcome } from '../../contracts/index.ts';
 import {
   assertChanges,
   assertExists,
+  continuityGuardValues,
   currentGuard,
   DAY,
   DB_NOW,
   MONTH,
   statement as q,
+  type CapturedFragmentIdentity,
 } from './statements.ts';
 
 /** Internal, synthetic-only prepared fixture boundary. NOT a GenerationService.
@@ -35,7 +37,7 @@ export interface SyntheticPlan {
   contentPolicyRevision: number;
   policyHash: string;
   parentEditionId?: string;
-  context: Array<{ grantId: string; grantRevision: number; fragmentHmac: string }>;
+  context: CapturedFragmentIdentity[];
 }
 export interface SyntheticLease {
   ownerId: string;
@@ -61,7 +63,7 @@ function guardValues(h: SyntheticLease, state: string) {
     lease_token: h.leaseToken,
     expected_state: state,
     plan_hmac: h.plan.planHmac,
-    context_count: h.plan.context.length,
+    ...continuityGuardValues(h.plan.parentEditionId ?? null, h.plan.context),
   };
 }
 export class SyntheticGenerationPrototype {
@@ -79,20 +81,6 @@ export class SyntheticGenerationPrototype {
     ).first<Record<string, string | number | null>>();
     if (!row) throw new Error('NOT_FOUND');
     return row;
-  }
-  private fragments(h: SyntheticLease) {
-    return h.plan.context.map((x, i) =>
-      assertExists(
-        this.db,
-        `SELECT 1 FROM generation_context WHERE request_id=? AND owner_id=? AND ordinal=? AND grant_id=? AND grant_revision=? AND fragment_hmac=?`,
-        h.requestId,
-        h.ownerId,
-        i,
-        x.grantId,
-        x.grantRevision,
-        x.fragmentHmac,
-      ),
-    );
   }
   private event(
     owner: string,
@@ -305,7 +293,6 @@ export class SyntheticGenerationPrototype {
           this.db,
           "SELECT 1 WHERE (SELECT count(*) FROM provider_dispatches WHERE state='authorized')<10",
         ),
-        ...this.fragments(h),
         q(
           this.db,
           `INSERT INTO provider_dispatches(id,owner_id,request_id,attempt_id,state,provider,requested_model,transmission_enc,transmission_hmac,key_version,prompt_hash,validator_hash,content_hash,parameters_json,authorized_at) VALUES (?,?,?,?,'authorized','openai',?,?,?,?,?,?,?,?,${DB_NOW})`,
@@ -442,7 +429,6 @@ export class SyntheticGenerationPrototype {
     const editionId = crypto.randomUUID();
     try {
       await this.db.batch([
-        ...this.fragments(h),
         q(
           this.db,
           `INSERT INTO reading_editions(id,owner_id,session_id,edition_number,request_id,basis_id,parent_edition_id,status,mode,body_enc,key_version,content_hash,accepted_at) SELECT ?,r.owner_id,r.session_id,(SELECT coalesce(max(edition_number),0)+1 FROM reading_editions e WHERE e.owner_id=r.owner_id AND e.session_id=r.session_id),r.id,r.basis_id,r.parent_edition_id,'accepted','model',?,r.key_version,r.content_hash,${DB_NOW} FROM generation_requests r WHERE r.id=? AND r.owner_id=?`,

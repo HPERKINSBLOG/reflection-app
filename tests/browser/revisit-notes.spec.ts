@@ -1026,6 +1026,7 @@ test('unavailable history never derives its URL from a truncated unrelated reque
       requestReads.push(new URL(request.url()).pathname);
   });
   const readingRoute = `**/api/v1/readings/${original.reading.editionId}`;
+  const editionUrl = `http://localhost:8787/saved/${original.session.id}/${original.reading.editionId}`;
   for (const unavailable of ['typed 410', 'unavailable projection'] as const) {
     await test.step(unavailable, async () => {
       await page.route(readingRoute, (route) =>
@@ -1062,7 +1063,7 @@ test('unavailable history never derives its URL from a truncated unrelated reque
       await expect(
         page.getByText('Synthetic unavailable history note', { exact: true }),
       ).toBeVisible();
-      await expect(page).toHaveURL('http://localhost:8787/');
+      await expect(page).toHaveURL(editionUrl);
       const refreshed = page.waitForResponse((response) =>
         response.url().endsWith(`/api/v1/readings/${original.reading.editionId}`),
       );
@@ -1071,10 +1072,12 @@ test('unavailable history never derives its URL from a truncated unrelated reque
       await expect(
         page.getByText('Synthetic unavailable history note', { exact: true }),
       ).toBeVisible();
-      await expect(page).toHaveURL('http://localhost:8787/');
+      await expect(page).toHaveURL(editionUrl);
       await page.reload();
-      await expect(page.getByRole('heading', { name: 'Your readings', exact: true })).toBeVisible();
-      await expect(page).toHaveURL('http://localhost:8787/');
+      await expect(
+        page.getByText('Synthetic unavailable history note', { exact: true }),
+      ).toBeVisible();
+      await expect(page).toHaveURL(editionUrl);
       expect(requestReads).toEqual([]);
       await page.unroute(readingRoute);
     });

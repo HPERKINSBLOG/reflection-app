@@ -1551,8 +1551,8 @@
       }
     },
     "import_batches": {
-      "retention": "preview24h; committed metadata30d",
-      "erasure": "expiry/owner cascade",
+      "retention": "Preview 24h; completed outcomes through current seven-day retry window",
+      "erasure": "Group/owner cascade and expiry",
       "columns": {
         "id": {
           "aadRule": null,
@@ -1609,12 +1609,20 @@
           "nullable": false,
           "default": null,
           "export": "import origin projected from editions"
+        },
+        "group_id": {
+          "aadRule": null,
+          "class": "M",
+          "sqlType": "TEXT",
+          "nullable": true,
+          "default": null,
+          "export": "Internal import identity, lifecycle or linkage; never export keyed/lease values"
         }
       }
     },
     "import_identities": {
-      "retention": "with imported records; erased alias tombstone while account lives",
-      "erasure": "set erased_at; null body and entity FKs before deletion; retain both identity HMACs to prevent silent reimport; account cascade",
+      "retention": "Committed copy with imported record; detached tombstones through account lifetime",
+      "erasure": "Clear body and local links including revisit_revision before deleting target; owner cascade",
       "columns": {
         "owner_id": {
           "aadRule": null,
@@ -1719,12 +1727,20 @@
           "nullable": true,
           "default": null,
           "export": "original source records decrypted; no keyed indexes"
+        },
+        "revisit_revision": {
+          "aadRule": null,
+          "class": "M",
+          "sqlType": "INTEGER",
+          "nullable": true,
+          "default": null,
+          "export": "Internal import identity, lifecycle or linkage; never export keyed/lease values"
         }
       }
     },
     "import_items": {
-      "retention": "preview raw24h; completed body purged after copy into edition",
-      "erasure": "purge preview after24h; raw original in edition also erased",
+      "retention": "Preview raw 24h; content-free outcomes and encrypted result identities through seven-day retry window",
+      "erasure": "Clear pending/result/staged copies by source entity; purge group or cascade with owner",
       "columns": {
         "batch_id": {
           "aadRule": null,
@@ -1805,6 +1821,38 @@
           "nullable": true,
           "default": null,
           "export": "only committed original in edition"
+        },
+        "group_id": {
+          "aadRule": null,
+          "class": "M",
+          "sqlType": "TEXT",
+          "nullable": true,
+          "default": null,
+          "export": "Internal import identity, lifecycle or linkage; never export keyed/lease values"
+        },
+        "ordinal": {
+          "aadRule": null,
+          "class": "M",
+          "sqlType": "INTEGER",
+          "nullable": true,
+          "default": null,
+          "export": "Internal import identity, lifecycle or linkage; never export keyed/lease values"
+        },
+        "source_entity_hmac": {
+          "aadRule": null,
+          "class": "M",
+          "sqlType": "TEXT",
+          "nullable": true,
+          "default": null,
+          "export": "Internal import identity, lifecycle or linkage; never export keyed/lease values"
+        },
+        "result_enc": {
+          "aadRule": "[env,import_items,result_enc,owner_id,batch_id || : || item_index,envelope.aadRevision,1,envelope.keyVersion]",
+          "class": "E",
+          "sqlType": "TEXT",
+          "nullable": true,
+          "default": null,
+          "export": "Owned scoped import result identity only"
         }
       }
     },
@@ -3388,6 +3436,232 @@
           "export": "never"
         }
       }
+    },
+    "import_groups": {
+      "columns": {
+        "id": {
+          "aadRule": null,
+          "class": "M",
+          "sqlType": "TEXT",
+          "nullable": false,
+          "default": null,
+          "export": "Internal import identity, lifecycle or linkage; never export keyed/lease values"
+        },
+        "owner_id": {
+          "aadRule": null,
+          "class": "M",
+          "sqlType": "TEXT",
+          "nullable": false,
+          "default": null,
+          "export": "Internal import identity, lifecycle or linkage; never export keyed/lease values"
+        },
+        "manifest_hash": {
+          "aadRule": null,
+          "class": "M",
+          "sqlType": "TEXT",
+          "nullable": false,
+          "default": null,
+          "export": "Internal import identity, lifecycle or linkage; never export keyed/lease values"
+        },
+        "source_hmac": {
+          "aadRule": null,
+          "class": "M",
+          "sqlType": "TEXT",
+          "nullable": false,
+          "default": null,
+          "export": "Internal import identity, lifecycle or linkage; never export keyed/lease values"
+        },
+        "recovery_hmac": {
+          "aadRule": null,
+          "class": "M",
+          "sqlType": "TEXT",
+          "nullable": false,
+          "default": null,
+          "export": "Internal import identity, lifecycle or linkage; never export keyed/lease values"
+        },
+        "epoch": {
+          "aadRule": null,
+          "class": "M",
+          "sqlType": "INTEGER",
+          "nullable": false,
+          "default": null,
+          "export": "Internal import identity, lifecycle or linkage; never export keyed/lease values"
+        },
+        "unit_count": {
+          "aadRule": null,
+          "class": "M",
+          "sqlType": "INTEGER",
+          "nullable": false,
+          "default": null,
+          "export": "Internal import identity, lifecycle or linkage; never export keyed/lease values"
+        },
+        "preview_hash": {
+          "aadRule": null,
+          "class": "M",
+          "sqlType": "TEXT",
+          "nullable": true,
+          "default": null,
+          "export": "Internal import identity, lifecycle or linkage; never export keyed/lease values"
+        },
+        "state": {
+          "aadRule": null,
+          "class": "M",
+          "sqlType": "TEXT",
+          "nullable": false,
+          "default": null,
+          "export": "Internal import identity, lifecycle or linkage; never export keyed/lease values"
+        },
+        "created_at": {
+          "aadRule": null,
+          "class": "M",
+          "sqlType": "INTEGER",
+          "nullable": false,
+          "default": null,
+          "export": "Internal import identity, lifecycle or linkage; never export keyed/lease values"
+        },
+        "expires_at": {
+          "aadRule": null,
+          "class": "M",
+          "sqlType": "INTEGER",
+          "nullable": false,
+          "default": null,
+          "export": "Internal import identity, lifecycle or linkage; never export keyed/lease values"
+        },
+        "retain_until": {
+          "aadRule": null,
+          "class": "M",
+          "sqlType": "INTEGER",
+          "nullable": false,
+          "default": null,
+          "export": "Internal import identity, lifecycle or linkage; never export keyed/lease values"
+        },
+        "lease_token": {
+          "aadRule": null,
+          "class": "M",
+          "sqlType": "TEXT",
+          "nullable": true,
+          "default": null,
+          "export": "Internal import identity, lifecycle or linkage; never export keyed/lease values"
+        },
+        "lease_until": {
+          "aadRule": null,
+          "class": "M",
+          "sqlType": "INTEGER",
+          "nullable": true,
+          "default": null,
+          "export": "Internal import identity, lifecycle or linkage; never export keyed/lease values"
+        }
+      },
+      "retention": "Stage 24h; group outcome through seven-day commit retry window",
+      "erasure": "Purge expired/private staging; terminal outcomes expire; account cascade"
+    },
+    "import_staging": {
+      "columns": {
+        "owner_id": {
+          "aadRule": null,
+          "class": "M",
+          "sqlType": "TEXT",
+          "nullable": false,
+          "default": null,
+          "export": "Internal import identity, lifecycle or linkage; never export keyed/lease values"
+        },
+        "group_id": {
+          "aadRule": null,
+          "class": "M",
+          "sqlType": "TEXT",
+          "nullable": false,
+          "default": null,
+          "export": "Internal import identity, lifecycle or linkage; never export keyed/lease values"
+        },
+        "ordinal": {
+          "aadRule": null,
+          "class": "M",
+          "sqlType": "INTEGER",
+          "nullable": false,
+          "default": null,
+          "export": "Internal import identity, lifecycle or linkage; never export keyed/lease values"
+        },
+        "kind": {
+          "aadRule": null,
+          "class": "M",
+          "sqlType": "TEXT",
+          "nullable": false,
+          "default": null,
+          "export": "Internal import identity, lifecycle or linkage; never export keyed/lease values"
+        },
+        "source_entity_hmac": {
+          "aadRule": null,
+          "class": "M",
+          "sqlType": "TEXT",
+          "nullable": false,
+          "default": null,
+          "export": "Internal import identity, lifecycle or linkage; never export keyed/lease values"
+        },
+        "target_id": {
+          "aadRule": null,
+          "class": "M",
+          "sqlType": "TEXT",
+          "nullable": false,
+          "default": null,
+          "export": "Internal import identity, lifecycle or linkage; never export keyed/lease values"
+        },
+        "meta_json": {
+          "aadRule": null,
+          "class": "M",
+          "sqlType": "TEXT",
+          "nullable": false,
+          "default": null,
+          "export": "Internal import identity, lifecycle or linkage; never export keyed/lease values"
+        },
+        "field_enc": {
+          "aadRule": "[env,destination(kind).table,destination(kind).column,owner_id,target_id,envelope.aadRevision,1,envelope.keyVersion]",
+          "class": "E",
+          "sqlType": "TEXT",
+          "nullable": true,
+          "default": null,
+          "export": "Unpublished destination ciphertext; export only committed source aliases"
+        },
+        "key_version": {
+          "aadRule": null,
+          "class": "M",
+          "sqlType": "INTEGER",
+          "nullable": false,
+          "default": null,
+          "export": "Internal import identity, lifecycle or linkage; never export keyed/lease values"
+        }
+      },
+      "retention": "Only while publishing one submitted group; purge after commit, failure, or 24h expiry",
+      "erasure": "Remove by source_entity_hmac, group, family or account; no private staging survives outcome"
+    },
+    "import_copy_sources": {
+      "columns": {
+        "owner_id": {
+          "aadRule": null,
+          "class": "M",
+          "sqlType": "TEXT",
+          "nullable": false,
+          "default": null,
+          "export": "Internal import identity, lifecycle or linkage; never export keyed/lease values"
+        },
+        "source_entity_hmac": {
+          "aadRule": null,
+          "class": "M",
+          "sqlType": "TEXT",
+          "nullable": false,
+          "default": null,
+          "export": "Internal import identity, lifecycle or linkage; never export keyed/lease values"
+        },
+        "dependent_entity_hmac": {
+          "aadRule": null,
+          "class": "M",
+          "sqlType": "TEXT",
+          "nullable": false,
+          "default": null,
+          "export": "Internal import identity, lifecycle or linkage; never export keyed/lease values"
+        }
+      },
+      "retention": "While a corresponding imported preview or committed alias requires copy traversal",
+      "erasure": "Remove with owner or when no derived material remains"
     }
   }
 }

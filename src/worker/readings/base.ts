@@ -7,7 +7,7 @@ import type { IdentityService } from '../identity/service.ts';
 import type { Session } from '../identity/types.ts';
 import { statement as q, DB_NOW } from '../db/core.ts';
 import { RecordCrypto } from './crypto.ts';
-import { stoppedEvents, type StopState } from './request-state.ts';
+import { stopFilter, stoppedEvents, type StopScope, type StopState } from './request-state.ts';
 
 export class RecordError extends Error {
   constructor(
@@ -183,15 +183,14 @@ export class RecordBase {
   /** Release each held reservation once, then fence all unfinished work in the same transaction. */
   stopStatements(
     owner: string,
-    sessionId?: string,
+    scope?: StopScope,
     state: StopState = 'blocked',
     code: ErrorCode = 'CONSENT_REQUIRED',
   ) {
-    const filter = sessionId ? ' AND session_id=?' : '';
-    const args = sessionId ? [owner, sessionId] : [owner];
+    const { filter, args } = stopFilter(owner, scope);
     const ids = `SELECT id FROM generation_requests WHERE owner_id=?${filter} AND state NOT IN (${terminalStates})`;
     return [
-      ...stoppedEvents(this.db, owner, sessionId, state, code),
+      ...stoppedEvents(this.db, owner, scope, state, code),
       q(
         this.db,
         `UPDATE quota_buckets SET held=held-(SELECT count(*) FROM quota_reservations qr WHERE qr.owner_id=quota_buckets.owner_id AND qr.state='held' AND (qr.day_period=quota_buckets.period OR qr.month_period=quota_buckets.period) AND qr.request_id IN (${ids})) WHERE owner_id=?`,

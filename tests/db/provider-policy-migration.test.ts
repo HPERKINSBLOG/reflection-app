@@ -1,8 +1,15 @@
 import { env } from 'cloudflare:workers';
 import { applyD1Migrations } from 'cloudflare:test';
 import { expect, test } from 'vitest';
-import { SyntheticGenerationPrototype } from '../../src/worker/db/prototype.ts';
-import { CONTENT, HASH, OTHER, OWNER, seedDatabase, sql } from '../fixtures/database.ts';
+import {
+  CONTENT,
+  HASH,
+  OTHER,
+  OWNER,
+  seedDatabase,
+  seedHistoricalRequest,
+  sql,
+} from '../fixtures/database.ts';
 
 async function rows() {
   const tables = await env.DB.prepare(
@@ -22,13 +29,7 @@ test('forward policy migration preserves populated 5.6 data, accounting, indexes
   const previous = env.TEST_MIGRATIONS.filter((m) => m.name < '0009');
   await applyD1Migrations(env.DB, previous);
   const plan = await seedDatabase(env.DB);
-  const service = new SyntheticGenerationPrototype(env.DB, {
-    write: async () => {
-      throw new Error('Migration must never call a writer');
-    },
-  });
-  const request = await service.start(plan);
-  const lease = (await service.claim(OWNER, request))!;
+  const { requestId: request, attemptId } = await seedHistoricalRequest(env.DB, plan);
   const dispatch = crypto.randomUUID();
   await env.DB.batch([
     sql(
@@ -38,7 +39,7 @@ test('forward policy migration preserves populated 5.6 data, accounting, indexes
       dispatch,
       OWNER,
       request,
-      lease.attemptId,
+      attemptId,
       HASH,
       HASH,
       HASH,

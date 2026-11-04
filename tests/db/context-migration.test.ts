@@ -1,8 +1,13 @@
 import { env } from 'cloudflare:workers';
 import { applyD1Migrations } from 'cloudflare:test';
 import { expect, test } from 'vitest';
-import { OWNER, OTHER, seedDatabase, addContext } from '../fixtures/database.ts';
-import { SyntheticGenerationPrototype } from '../../src/worker/db/prototype.ts';
+import {
+  OWNER,
+  OTHER,
+  seedDatabase,
+  addContext,
+  seedHistoricalRequest,
+} from '../fixtures/database.ts';
 
 test('0018 preserves existing grants and accepts owner-scoped exact revisit identities with accounting', async () => {
   const db = env.MIGRATION_DB;
@@ -12,12 +17,7 @@ test('0018 preserves existing grants and accepts owner-scoped exact revisit iden
   );
   const plan = await addContext(db, await seedDatabase(db));
   const old = await db.prepare('SELECT * FROM context_grants').first();
-  const generation = new SyntheticGenerationPrototype(db, {
-    write: async () => {
-      throw new Error('provider must not be called');
-    },
-  });
-  const requestId = await generation.start(plan);
+  const { requestId } = await seedHistoricalRequest(db, plan);
   const oldContext = await db
     .prepare('SELECT * FROM generation_context WHERE request_id=?')
     .bind(requestId)

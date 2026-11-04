@@ -110,7 +110,7 @@ export class RequestState {
           ),
           ...this.base.stopStatements(
             session.subjectId,
-            snapshot.sessionId,
+            { requestIds: 'SELECT ?', values: [id] },
             'cancelled',
             'CANCELLED',
           ),
@@ -131,16 +131,22 @@ export class RequestState {
 }
 
 export type StopState = 'blocked' | 'failed' | 'expired' | 'cancelled';
+/** A session ID or a trusted server-built SELECT of request IDs with bound values. */
+export type StopScope = string | { requestIds: string; values: (string | number)[] };
+export function stopFilter(owner: string, scope?: StopScope) {
+  if (typeof scope === 'string') return { filter: ' AND session_id=?', args: [owner, scope] };
+  if (scope) return { filter: ` AND id IN (${scope.requestIds})`, args: [owner, ...scope.values] };
+  return { filter: '', args: [owner] };
+}
 /** Statements used by all stop paths; callers include their own authorization/offline fence. */
 export function stoppedEvents(
   db: D1Database,
   owner: string,
-  sessionId: string | undefined,
+  scope: StopScope | undefined,
   state: StopState,
   code: ErrorCode,
 ) {
-  const filter = sessionId ? ' AND session_id=?' : '';
-  const args = sessionId ? [owner, sessionId] : [owner];
+  const { filter, args } = stopFilter(owner, scope);
   return [
     q(
       db,

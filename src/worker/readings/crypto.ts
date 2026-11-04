@@ -136,9 +136,13 @@ export class RecordCrypto {
       owner,
     ).first<number>('key_version');
     if (current === null) throw new Error('Unavailable account key');
+    return this.hashVersion(owner, purpose, value, current);
+  }
+  /** A caller that fences this exact key version can hash a bounded group without a D1 read per item. */
+  async hashVersion(owner: string, purpose: string, value: unknown, version: number) {
     const base = await crypto.subtle.importKey(
       'raw',
-      await this.key(owner, 'index', current),
+      await this.key(owner, 'index', version),
       'HKDF',
       false,
       ['deriveKey'],

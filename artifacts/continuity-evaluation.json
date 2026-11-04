@@ -1,0 +1,90 @@
+{
+  "version": "reflection-continuity-evaluation.v1",
+  "profile": "continuity-local",
+  "sourceDigest": "45fcfcd68b60dd2ca4f47784f9715f446f114f1ae489aa25cb260cd6e4f1d832",
+  "corpusHash": "a63db3ae51c38af06e0f4d9884291e5ccfdd72455c909b7b7bc3a535b400b46b",
+  "policyHash": "1509e6d9ded19ebde1f20cb0b44dff5193e48dbb00af90e6d6f98d52bfd69cb8",
+  "qualificationEligible": false,
+  "liveCalls": 0,
+  "cases": [
+    {
+      "id": "quiet",
+      "result": "accepted-fixture",
+      "canonVersion": 1,
+      "contentHash": "77cf7b6b9378b09a87798e6631712da84804848861715bda9ee9abdc47b7c79e",
+      "packet": {
+        "transmissionHash": "bfd02d2fe99038dd73bc6e5f984fb3c7e8f53ff17a61c068fce15a123bdab639",
+        "receiptHash": "376637063186259b1b797ee550034d13b634271b159d11dca9bbf808137a3799",
+        "payloadBytes": 3914,
+        "estimatedInputTokens": 4170
+      }
+    },
+    {
+      "id": "disagreement",
+      "result": "accepted-fixture",
+      "canonVersion": 2,
+      "contentHash": "9b54868413800545a76451a58d7f4267b58ce3f0d5c6d94379579ca57acf78ab",
+      "packet": {
+        "transmissionHash": "ff47b16b384baf636b0013b0b9c2a47c5c0301c8d8ae810577cd58e549f35a75",
+        "receiptHash": "a64d7a00b04dba00d7397672924c8ace72a5347e037993b19a24d13bd11fd683",
+        "payloadBytes": 7339,
+        "estimatedInputTokens": 7595
+      }
+    },
+    {
+      "id": "changed",
+      "result": "accepted-fixture",
+      "canonVersion": 2,
+      "contentHash": "9b54868413800545a76451a58d7f4267b58ce3f0d5c6d94379579ca57acf78ab",
+      "packet": {
+        "transmissionHash": "576f13c26a757b3219afdac77cf65e5cf15bd9ae991daa2184f89f49e21ffc78",
+        "receiptHash": "4af58540d5cfc22e970868038c08d93ce628131ec795c84c7afd1da70333272a",
+        "payloadBytes": 7339,
+        "estimatedInputTokens": 7595
+      }
+    },
+    {
+      "id": "declined",
+      "result": "accepted-fixture",
+      "canonVersion": 1,
+      "contentHash": "77cf7b6b9378b09a87798e6631712da84804848861715bda9ee9abdc47b7c79e",
+      "packet": {
+        "transmissionHash": "96b0cb31043048874347bafac7b29d1f9d188267065ba726914ae33e9cd4dac3",
+        "receiptHash": "6eec395c86e9c00ad4288ce5330efa0525e00830c2ab1a7571f0b387a2fdd789",
+        "payloadBytes": 3827,
+        "estimatedInputTokens": 4083
+      }
+    },
+    {
+      "id": "hostile",
+      "result": "accepted-fixture",
+      "canonVersion": 2,
+      "contentHash": "9b54868413800545a76451a58d7f4267b58ce3f0d5c6d94379579ca57acf78ab",
+      "packet": {
+        "transmissionHash": "cad44a77d6189f010171aa24cb0a15a03031ca21cd4d4963a08c09611a07a7db",
+        "receiptHash": "7d02be97f324283802c3cf3c401bfcd032e139dadf92e4a457b73a3bc1725451",
+        "payloadBytes": 7357,
+        "estimatedInputTokens": 7613
+      }
+    },
+    {
+      "id": "missing-parent",
+      "result": "CONTENT_UNAVAILABLE",
+      "canonVersion": 1,
+      "contentHash": "77cf7b6b9378b09a87798e6631712da84804848861715bda9ee9abdc47b7c79e",
+      "packet": null
+    },
+    {
+      "id": "failed-provenance",
+      "result": "CONTENT_CHANGED",
+      "canonVersion": 2,
+      "contentHash": "9b54868413800545a76451a58d7f4267b58ce3f0d5c6d94379579ca57acf78ab",
+      "packet": {
+        "transmissionHash": "f280786593cb22887dd707118a4566998dd062808fb503f36efcb0453f275124",
+        "receiptHash": "4b2cdb8aaf145b22fb6df2d9020f8d3a969fc880689460f7edab4390d299f7f4",
+        "payloadBytes": 7296,
+        "estimatedInputTokens": 7552
+      }
+    }
+  ]
+}

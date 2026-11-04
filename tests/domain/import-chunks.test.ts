@@ -1,4 +1,5 @@
 import { expect, test } from 'vitest';
+import { largeImportFamilyDocument } from '../fixtures/imports/large-family.ts';
 import { parseImport, parseImportFile } from '../../src/domain/imports/parse.ts';
 import {
   buildImportGroups,
@@ -11,21 +12,7 @@ import { rawHash } from '../../src/domain/imports/legacy.ts';
 const source = { namespaceId: '11111111-1111-4111-8111-111111111111', revision: 'original' };
 const groupId = '22222222-2222-4222-8222-222222222222';
 test('a large selected family spans bounded previews without losing identity, lexical text or ordering', async () => {
-  const document = JSON.stringify({
-    exportedAt: '2026-10-26T00:00:00Z',
-    entryCount: 1,
-    entries: [
-      {
-        id: 'root',
-        personalReading: 'Root',
-        followUps: Array.from({ length: 101 }, (_, i) => ({
-          turnNumber: i + 1,
-          question: `Q${i}`,
-          answer: '😀\\"'.repeat(1100),
-        })),
-      },
-    ],
-  });
+  const document = largeImportFamilyDocument();
   const file = await parseImportFile({
     format: 'tarot-json',
     source,

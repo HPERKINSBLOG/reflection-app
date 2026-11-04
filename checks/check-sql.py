@@ -21,7 +21,7 @@ def seed():
  values('request',?,'session','intent','basis','initial','payload','validating',1,'lease',5000,0,1,1,?,1,?,'cipher','cipher','plan',0,99999)""",(A,H,POL))
  d.execute("UPDATE generation_requests SET lease_expires_at=CAST(unixepoch('subsec')*1000 AS INTEGER)+60000, expires_at=CAST(unixepoch('subsec')*1000 AS INTEGER)+180000")
  return d
-params={'request_id':'request','owner_id':A,'key_version':1,'run_epoch':1,'lease_token':'lease','expected_state':'validating','plan_hmac':'plan','context_count':0}
+params={'request_id':'request','owner_id':A,'key_version':1,'run_epoch':1,'lease_token':'lease','expected_state':'validating','plan_hmac':'plan','context_count':0,'expected_context':'[]','parent_edition_id':None}
 def ok(name,f):f();checks.append(name)
 def rejects(d,sql,args=()):
  try:d.execute(sql,args)
@@ -74,15 +74,17 @@ assert d.execute('select count(*) from reading_editions').fetchone()[0]==0;check
 # Parent and selected source use content A while new request uses B: both must fail after A withdrawal.
 for relation in ('parent','selected'):
  d=seed()
+ d.execute("update reading_sessions set status='saved', saved_at=1, retention_expires_at=NULL")
  d.execute("insert into reading_editions values('old',?,'session',1,'request','basis',NULL,'accepted','model','cipher',1,?,0,NULL)",(A,H))
  d.execute("insert into content_editions(hash,state,bundle_json,reviewed_hash,reviewer_kind,reviewer_id,rights_status,created_at,approved_at) values(?,'approved','{}',?,'human_approved','synthetic','cleared',0,0)",(H2,H2))
  d.execute('update generation_requests set content_hash=?',(H2,))
  if relation=='parent':d.execute("update generation_requests set operation='followup',parent_edition_id='old'")
  else:
   d.execute("insert into context_grants(id,owner_id,edition_id,state,created_at,updated_at) values('grant',?,'old','allowed',0,0)",(A,))
-  d.execute("insert into generation_context values('request',?,0,'grant',1,'cipher','fragment',1)",(A,))
+  d.execute("insert into generation_context values('request',?,0,'grant',1,'cipher',?,1)",(A,H))
   d.execute('update generation_requests set context_count=1')
- p={**params,'context_count':1 if relation=='selected' else 0};d.execute(guard,p)
+ selection={'grantId':'grant','grantRevision':1,'fragmentHmac':H,'sourceKind':'edition','sourceId':'old','sourceRevision':1}
+ p={**params,**({'context_count':1,'expected_context':json.dumps([selection])} if relation=='selected' else {'parent_edition_id':'old'})};d.execute(guard,p)
  d.execute("update content_editions set state='withdrawn' where hash=?",(H,));rejects(d,guard,p);checks.append(relation+' old-content withdrawal guarded')
  d.execute('delete from accounts where id=?',(A,));assert not d.execute('pragma foreign_key_check').fetchall();checks.append(relation+' populated account cascade')
 d=seed();d.execute("insert into quota_buckets values(?,'day:2026-10-26',3,2,1)",(A,));rejects(d,'update quota_buckets set held=held+1');checks.append('quota bound enforced')

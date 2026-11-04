@@ -1,5 +1,13 @@
 # Reflection design QA
 
+## November 3 — Entry, saved readings and account deletion
+
+Saved readings distinguishes an unavailable list from a confirmed empty one and can retry a failed page. The reading form can recheck the service while keeping the question and photo in memory. It places the required English confirmation next to the question and groups photo controls under **Use my own spread**.
+
+The welcome copy introduces the tarot reading and return visit. Opening a saved question creates a history entry for that edition. **Revisit notes** beside the question focuses the dated notes. After account deletion, the receipt precedes account access and its heading receives focus.
+
+The browser regressions cover these transitions in [interface clarity](tests/browser/interface-clarity.spec.ts), [runtime discovery](tests/browser/live-mode.spec.ts), [withdrawn editions](tests/browser/revisit-notes.spec.ts) and [deletion receipts](tests/browser/privacy.spec.ts).
+
 ## November 1 — Reflection Paper and Evening system
 
 The owner's [editable Reflection library](https://www.figma.com/design/a0u0Ok74iKTMjp1L5osRnU?node-id=3-347) now supplies the exact eight-color palette, typography, shared controls and theme behavior. This increment supersedes the earlier Solstice palette guidance. [Implementation and component guide](docs/design/reflection-system.md).

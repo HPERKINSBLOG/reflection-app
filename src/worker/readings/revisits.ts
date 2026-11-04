@@ -7,6 +7,7 @@ import type { Session } from '../identity/types.ts';
 import { statement as q } from '../db/core.ts';
 import { encryptedBytes } from './crypto.ts';
 import { iso, type RecordBase, RecordError } from './base.ts';
+import { revokeGrants } from './context-grant.ts';
 
 type Input = z.infer<typeof apiSchemas.RevisitWrite>;
 type Update = z.infer<typeof apiSchemas.RevisitUpdate>;
@@ -370,6 +371,7 @@ export class Revisits {
           account.key_version,
           Date.parse(current.updatedAt),
         ),
+        ...revokeGrants(this.base, session.subjectId, 'revisit_id', id),
         q(
           this.base.db,
           'UPDATE revisits SET current_revision=?,note_enc=?,key_version=?,updated_at=? WHERE owner_id=? AND id=? AND current_revision=? AND deleted_at IS NULL',

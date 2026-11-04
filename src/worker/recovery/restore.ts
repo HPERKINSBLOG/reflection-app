@@ -1,4 +1,5 @@
 import { ACCOUNT_FIELD_HANDLERS } from './private-fields.ts';
+import { abandonImportRekeyEntries } from './account-rekey.ts';
 import type { ApplicationRuntime } from '../runtime/application.ts';
 import type { HostedCoordinator, OfflineContext } from './hosted-coordinator.ts';
 import type { ProtectedBackupInventory } from './backup-inventory.ts';
@@ -404,6 +405,20 @@ export class OfflineRestore {
       q(this.env.DB, 'DELETE FROM auth_challenges'),
       q(this.env.DB, 'DELETE FROM export_tickets'),
       q(this.env.DB, 'DELETE FROM idempotency_keys'),
+      ...(await abandonImportRekeyEntries(this.env.DB)),
+      q(
+        this.env.DB,
+        "DELETE FROM import_staging WHERE group_id IN (SELECT id FROM import_groups WHERE state IN('staged','committing'))",
+      ),
+      q(
+        this.env.DB,
+        "UPDATE import_items SET body_enc=NULL,result_enc=NULL WHERE group_id IN (SELECT id FROM import_groups WHERE state IN('staged','committing'))",
+      ),
+      q(
+        this.env.DB,
+        "UPDATE import_groups SET state='expired',preview_hash=NULL,lease_token=NULL,lease_until=NULL WHERE state IN('staged','committing')",
+      ),
+
       q(
         this.env.DB,
         `UPDATE context_grants SET state='revoked',revision=revision+1,updated_at=${DB_NOW} WHERE state='allowed'`,

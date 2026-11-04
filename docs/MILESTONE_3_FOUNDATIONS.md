@@ -1,6 +1,6 @@
 # Milestone 3 foundations — C1 and P1
 
-Implemented locally on 2026-11-02 using Node 26.12.1. This increment supplies contracts, a dormant metadata migration and pure import helpers. Context/import runtime creation remains disabled until the later privacy and persistence tasks are complete. D1 is still open before C4; D8 has local transport evidence but still needs actual D1 publication/erasure proof before P2 persistence is frozen.
+Implemented locally on 2026-11-02 using Node 26.12.1. This increment supplies contracts, a dormant metadata migration and pure import helpers. Context/import runtime creation remains disabled until the later privacy and persistence tasks are complete. At the time of this run the follow-up retention decision was open. D8 has local transport evidence and still needs actual database publication and erasure proof before P2 persistence is frozen.
 
 ## Continuity contracts
 
@@ -32,4 +32,8 @@ The [current foundation receipt](../artifacts/m3-foundations/summary.json) recor
 
 ## Handoff
 
-C2 must complete every context-copy lifecycle before exposing grant/preview routes. P2 must complete encrypted import preview, staging, group publication, alias recovery, deletion/rekey/restore and expiry coverage. Source-revision/new-namespace recovery remains subject to authoritative owned alias/tombstone checks there. D8 remains open until the real D1 transaction/visibility path passes, including groups spanning previews and child deletion with surviving parents. C4 retention behavior still requires D1's answer.
+C2 must complete every context-copy lifecycle before exposing grant/preview routes. P2 must complete encrypted import preview, staging, group publication, alias recovery, deletion/rekey/restore and expiry coverage. Source-revision/new-namespace recovery remains subject to authoritative owned alias/tombstone checks there. D8 remains open until the real D1 transaction/visibility path passes, including groups spanning previews and child deletion with surviving parents.
+
+The owner resolved follow-up retention on 2026-11-03, after the foundation run. C4 must keep accepted follow-ups automatically with the saved original and erase them together when the reader deletes it. [Decision D1](MILESTONE_3_PREPARATION.md#decisions-and-proposed-defaults)
+
+The later local implementation and integrated acceptance evidence are recorded in the [Milestone 3 results](MILESTONE_3_RESULTS.md).

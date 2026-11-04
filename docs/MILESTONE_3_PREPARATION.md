@@ -1,6 +1,6 @@
 # Milestone 3 preparation
 
-Status: C1/P1 foundations implemented locally on 2026-11-02; see [foundation evidence and handoff](MILESTONE_3_FOUNDATIONS.md). Follow-up retention (D1) remains an open product choice before C4. D8 has local parser/transport proof and remains open for actual D1 atomic publication and erasure proof before P2 persistence is frozen. Remaining workflows and production qualification are outstanding.
+C1/P1 foundations were implemented locally on 2026-11-02. The owner confirmed follow-up retention (D1) on 2026-11-03. D8 passed the local D1 publication and erasure experiment before migration 0019. [Foundation evidence and handoff](MILESTONE_3_FOUNDATIONS.md)
 
 Milestone 3 extends Reflection with deliberate, bounded use of selected context, follow-ups tied to an exact saved edition, and supported legacy/portable imports. Dated revisit notes were brought forward and are already implemented. Ordinary saved history, exact reopening, initial reflections, recovery, export and deletion are existing regression requirements.
 
@@ -21,7 +21,7 @@ These results establish the preceding application snapshot, not Milestone 3 impl
 | Privacy and portability | Ciphertext registry includes dormant context/import families | `ReadingExports.page()` refuses accounts with grants/import identities; erasure also refuses unsupported copies. Complete family support before enabling creation. |
 | Follow-ups | Generic v1 plan and synthetic publication prototype cover parent/context guards | `ReadingGeneration.start()` rejects a parent or selection. `PreparedPlanV2` and `buildPlanV2()` require initial requests with no selected context. |
 | Imports | P1 implements pure bounded adapters, independent nested selection, manifest chunks and cancellation sequencing, with synthetic fixtures | Persistent preview/commit/erasure and imported-record UI remain P2/P3 work. Pure tests do not establish encrypted lifecycle behavior. |
-| Portable identity | Native exports currently use `snapshot-<data revision>` as the source revision | P2 must make record identity stable across export snapshots and reconcile own-account native records before creating copies. Snapshot metadata is not dataset identity. |
+| Portable identity | Native exports use `native-v1` and record-specific revisions | P2 reconciles older `snapshot-*` aliases against exact owned records and keeps the data snapshot separate from dataset identity. |
 | Design system | Paper/Evening tokens, Newsreader/Figtree/Outfit, shared controls and full theme tests | Reuse the system for all new states; no new palette or competing component library. |
 | Production | All ten qualification entries remain pending | Keep hosted/provider/custody/operations qualification separate from this local implementation milestone. |
 
@@ -29,20 +29,31 @@ Code authorities: [`src/contracts/index.ts`](../src/contracts/index.ts), [`gener
 
 ## Decisions and proposed defaults
 
-| ID | Proposed choice | Basis and disposition |
+| ID | Decision or proposal | Basis and disposition |
 | --- | --- | --- |
-| D1 — follow-up retention | A follow-up is a new immutable edition of the **same saved reading/session**, with shared save state and family deletion. No separate child-save promise. | Matches the architecture, database and existing session erasure. An older visual design proposes independent children. An owner clarification is pending; do not implement the conflicting retention behavior by assumption. |
+| D1 — follow-up retention | Each accepted follow-up is automatically kept as an immutable edition of the original saved reading. Save and Delete apply to the reading as a whole. Deleting the original deletes all follow-ups, including those based on earlier follow-ups. | Confirmed by the owner on 2026-11-03. C4 will use the existing session as the boundary for saving and deletion. |
 | D2 — eligible context | Exact owned available reading editions, current reflection revisions, and current revisit-note revisions. Start empty; grants establish eligibility only. A new revision requires a new preview/acknowledgement. | Revisit support is a proposed extension of the existing two-kind grant contract. Include storage, guard, export and erasure coverage in the same increment. Historical notes remain exportable but are not automatically eligible for new sharing. |
 | D3 — excerpt policy | At most 3 distinct sources, 1,200 Unicode code points per excerpt, 3,000 total. No silent truncation. Photos, filenames, stance and unselected history are excluded from this text-context increment. | Existing selected-context bounds; explicitly reconcile Zod UTF-16 string limits with the documented code-point offsets. Larger notes need an explicit chosen range. |
 | D4 — parent and source edition | Pin the parent's exact accepted draw and eligible source snapshot; disclose “No new draw.” Reuse facts and canon, not unselected parent questions, interpretations or private provenance. Never silently switch source editions. | Cover native v1/v2 parents explicitly; missing source evidence blocks the follow-up rather than inventing v2 metadata. Independently check parent, captured content and selected sources. The generic parent-A/content-B withdrawal race remains mandatory even if the first UI only reuses A. |
 | D5 — writer version | Introduce a separately versioned continuity plan/prompt/validator/policy. Preserve existing v1/v2 decoding and historical receipts. Do not widen v2 silently or treat its question analysis as permission to share history. | Current v2 explicitly rejects these features. Exact new wire discriminants and schema compatibility are frozen in the first implementation task. |
 | D6 — import formats | Required: `reflection-import.v1`, `reflection-export.v1` and the documented Tarot adapter. Bounded Patternlike 0.7.0/0.8.0 support needs versioned fixtures and inspected field allowlists. Native `pixel-json` stays explicitly unsupported. | Existing migration specification. No real accounts, live legacy export access or invented source fields are needed for synthetic qualification. Unsupported adapter capability must remain visible. |
 | D7 — permission and activation | Preview itself sends nothing. A submission-specific acknowledgement binds the complete reviewed selections and current permission. Revocation is distinct from erasing retained copies. Live continuity remains disabled until its separate provider qualification is recorded. | Existing consent architecture; final recipient/retention copy must be accurate for the configured provider. No zero-retention claim, human-review gate, geography policy or age gate is introduced. |
-| D8 — bounded import assembly | Selected-unit chunks preserve identities and exact scoped raw values; one group per commit, with no server queue of later groups. Groups may span bounded previews. | Local fixtures now cover large pages, mixed sources and 102-unit families. P2 still needs actual D1 publication, erasure and reconciliation proof before freezing persistence. |
+| D8 — bounded import assembly | Selected-unit chunks preserve identities and exact scoped raw values; one group per commit, with no server queue of later groups. Groups may span bounded previews. | Local D1 published a 102-unit group across 11 encrypted previews in one transaction. The injected interruption exposed zero records. Independent child erasure preserved its parent. [Executed cases](../tests/db/import-atomicity.test.ts) |
 
-D1 is the only outstanding owner choice. D2–D7 are proposed implementation defaults; D8 is a technical proof obligation. If independent follow-up records are chosen, revise the schema, retention, export, erasure and UI tasks together. Reviewing this package does not record an answer to D1.
+D1 is the owner's confirmed retention decision. The following implementation choices apply to local Milestone 3. The local D1 experiment closes D8.
+
+| Decision | Implementation contract |
+| --- | --- |
+| D2 | `Grant.source` names an owned saved edition or the current authored revision. A grant names eligibility. A new reflection or note revision needs its own grant and preview. |
+| D3 | `contextExcerpt` applies exact code-point offsets to server-derived text. `assertContextBounds` enforces three distinct sources, 1,200 code points per source and 3,000 total. Stance, photographs and filenames are outside this projection. |
+| D4 | `StartRequest.parentEditionId` pins the owned saved native edition. Follow-ups reuse its draw and eligible source material, and inherit the family's save and delete state. The parent's private writing needs a separate selection. |
+| D5 | `CONTINUITY_VERSIONS` reserves the v3 plan, candidate, accepted record, writer packet and policy. Existing v1/v2 decoders and receipts retain their original interpretation. |
+| D6 | The P1 import adapters accept the canonical import/export formats, Tarot journals and the documented Patternlike 0.7.0/0.8.0 projections. Native Pixel files return an unsupported-format result. Imported permissions are historical. |
+| D7 | `ContextPreviewWrite`, `ContextPreview` and the optional `StartRequest.contextAcknowledgement` separate eligibility, review and a single authorized submission. The keyed binding includes the reader, authentication epoch, intent, question, parent, permission revision, ranges and text hashes. Preview is local to the service. Live v3 dispatch requires a separately authorized evaluation. |
 
 ## Delivery sequence
+
+Track the remaining tasks, their dependencies, and the evidence needed to close each phase in the [Milestone 3 completion checklist](MILESTONE_3_CHECKLIST.md).
 
 1. **Freeze contracts and complete context privacy support.** Define revision-safe source identities, preview acknowledgement and complete export/erasure/restore support. Do not expose a grant-creation route that breaks existing export or deletion.
 2. **Deliver context selection and control.** Eligibility, complete excerpt review, remove/revoke, conflict handling and explicit per-request acknowledgement. No generation is enabled by creating a grant.
@@ -60,7 +71,7 @@ The two tracks share erasure, export and account snapshot infrastructure. Portab
 | Work | Prerequisite | Independently reviewable result |
 | --- | --- | --- |
 | C1 → C2 → C3 | Current source baseline; D2–D7 frozen as contracts | Context bounds, complete context privacy support, preview UI and synthetic writer projection. Import families may remain disabled. |
-| C4 → C5 | C1–C3; D1 resolved before C4 retention behavior | Exact-parent requests and continuity evidence. Live policy activation is separate from synthetic success. |
+| C4 → C5 | Complete C1–C3 and apply the confirmed D1 retention decision. | Exact-parent requests and continuity evidence. Live policy activation is separate from synthetic success. |
 | P1 | Existing portable contracts; no continuity UI dependency | Versioned fixtures, pure adapters and the D8 transport/group proof. |
 | P2 → P3 | P1 and C2 privacy integration points | Import persistence with complete lifecycle support, review/resume UI and exact reopening. |
 | P4 | Both implemented tracks | One final source-matched verification package covering the integrated milestone. |
@@ -82,7 +93,7 @@ C2 owns context copies; P2 extends the same lifecycle to import copies. Neither 
 
 ## Acceptance checklist
 
-All unchecked items are future implementation evidence, not completed work.
+Executed local evidence for these acceptance rows is recorded in the [Milestone 3 results](MILESTONE_3_RESULTS.md).
 
 | ID | Required proof | Owning plan/task |
 | --- | --- | --- |
@@ -92,6 +103,7 @@ All unchecked items are future implementation evidence, not completed work.
 | M3-F01 / R10, A11 | Exact parent edition, reused basis/source snapshot, no redraw, no parent mutation, no implicit context; concurrent follow-ups receive distinct bounded edition numbers | Continuity C4 |
 | M3-F02 / A11 | Parent A withdrawn while a request captures B blocks publication; old reflection/note revisions, deleted/unsaved parents and imported unknown-method parents are rejected accurately | Continuity C4 |
 | M3-F03 | Quiet/disagree/changed-context/declined-sharing sequences meet the independently frozen continuity corpus; existing v1/v2 receipts remain readable | Continuity C3/C5 |
+| M3-F04 | Follow-ups reopen without a separate save. One deletion of the original removes all follow-up content from history, direct links and subsequent exports. A pending request, retry or restore cannot bring it back. | Continuity C4/C5 |
 | M3-I01 / R11, A12 | Canonical/Tarot/versioned bounded Patternlike fixtures parse without writes or egress; unknown native Pixel format is rejected; invalid markup remains inert text | Portability P1 |
 | M3-I02 / A12 | Stable native/exported identity across snapshots; same identity/content duplicates across chunks; own-account native records are reconciled; changed content needs a confirmed revision; erased entities need a confirmed new namespace | Portability P2 |
 | M3-I03 / A12 | Large/mixed-source exports and groups spanning previews retain all selected records; group visibility is atomic; partial success, interruption, expiry and lost acknowledgement reconcile through status; no guessed parents or ownership | Portability P1–P3 |
@@ -99,14 +111,15 @@ All unchecked items are future implementation evidence, not completed work.
 | M3-U01 | Paper/Evening at 320/390/768/1280, keyboard, native Chromium zoom, supported forced colors, offline/conflict/session-expiry flows and no private browser persistence | Both UI tasks |
 | M3-Q01 | Current full verification and cross-engine reports, no skipped/flaky cases, exact source and artifact hashes, migration compatibility and explicit local/hosted boundaries | Continuity C5; Portability P4 |
 
-- [ ] D1 and the remaining proposed product/permission defaults are resolved in a reviewed implementation contract.
-- [ ] D8 has a concrete bounded transport/group contract and passing adversarial fixtures before persistence implementation; format/version changes, if needed, are recorded explicitly.
-- [ ] Every acceptance row has linked executed evidence, including adverse/race cases.
-- [ ] Context/import creation is enabled only with complete export and erasure coverage.
-- [ ] New continuity writer policy has independent qualification; prior v2 evaluation is not reused as proof.
-- [ ] Native Pixel remains explicitly unsupported unless a verified adapter is separately added.
-- [ ] Any revised schema/private-copy lifecycle has fresh local restore/rekey/accounting proof and a documented hosted rollout/restore requirement.
-- [ ] `qualification/acceptance.json` retains honest statuses; local Milestone 3 completion does not assert production readiness.
+- [x] The owner confirmed the shared save and delete policy for follow-ups (D1).
+- [x] Review the remaining proposed product and permission defaults in the implementation contract.
+- [x] D8 has a concrete bounded transport/group contract and passing adversarial fixtures before persistence implementation; format/version changes, if needed, are recorded explicitly.
+- [x] Each of the 13 acceptance rows links to executed local evidence. [Milestone 3 results](MILESTONE_3_RESULTS.md)
+- [x] Context/import creation is enabled only with complete export and erasure coverage.
+- [x] The continuity writer passed its independently frozen synthetic cases. Live v3 qualification remains a separate gate. [Evaluation receipt](../artifacts/continuity-evaluation.json)
+- [x] Native Pixel remains explicitly unsupported unless a verified adapter is separately added.
+- [x] Any revised schema/private-copy lifecycle has fresh local restore/rekey/accounting proof and a documented hosted rollout/restore requirement.
+- [x] `qualification/acceptance.json` retains honest statuses; local Milestone 3 completion does not assert production readiness.
 
 ## Reference precedence
 

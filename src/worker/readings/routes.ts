@@ -3,10 +3,13 @@ import { z } from 'zod';
 import { apiSchemas, Id } from '../../contracts/index.ts';
 import { IdentityError } from '../identity/types.ts';
 import { localIdentity, type IdentityBindings } from '../identity/routes.ts';
+import { IMPORT_LIMITS } from '../../contracts/import-policy.ts';
+import { importRoute } from './import-routes.ts';
 import { RequestState } from './request-state.ts';
 import { generationService, type GenerationFactory } from './runtime.ts';
 import { RecordBase, RecordError } from './base.ts';
 import { ReadingRecords } from './records.ts';
+import { ContextRecords } from './context.ts';
 import { Revisits } from './revisits.ts';
 import { Reflections } from './reflections.ts';
 import { ReadingExports } from './export.ts';
@@ -25,6 +28,13 @@ const messages: Record<string, string> = {
   FORBIDDEN: 'Save and acknowledge your complete recovery kit before starting a reading.',
   NOT_FOUND: 'This record was not found.',
   CONTENT_UNAVAILABLE: 'This reading is no longer available.',
+  IMPORT_INVALID:
+    'This import could not be validated. Review the source format and selected records.',
+  INPUT_TOO_LARGE: 'This request is too large. Use a smaller selection and review it again.',
+  CONTEXT_CHANGED:
+    'An excerpt or permission changed. Review the current text and confirm it again.',
+  FOLLOWUP_LIMIT_EXCEEDED:
+    'This reading already has 50 follow-ups. Start a new reading to continue.',
   CONFLICT: 'This record changed. Refresh it before trying again; keep your unsaved text.',
   PRECONDITION_REQUIRED: 'Refresh this record before making a change.',
   IDEMPOTENCY_MISMATCH: 'This action identifier was already used for different content.',
@@ -51,7 +61,7 @@ export function recordResponse(body: unknown, status = 200, revision?: number) {
     },
   });
 }
-async function readBody(request: Request) {
+async function readBody(request: Request, limit: number) {
   const reader = request.body?.getReader();
   if (!reader) throw new RecordError(400, 'BAD_INPUT');
   const chunks: Uint8Array[] = [];
@@ -60,7 +70,7 @@ async function readBody(request: Request) {
     const { done, value } = await reader.read();
     if (done) break;
     total += value.length;
-    if (total > 256 * 1024) {
+    if (total > limit) {
       await reader.cancel();
       throw new RecordError(413, 'INPUT_TOO_LARGE');
     }
@@ -136,7 +146,9 @@ export async function readingRoute(
       mutate ? 30 : 120,
       60_000,
     );
-    const body = mutate ? await readBody(request) : undefined;
+    const body = mutate
+      ? await readBody(request, path === '/imports' ? IMPORT_LIMITS.bodyBytes : 256 * 1024)
+      : undefined;
     const key = () => Id.parse(request.headers.get('Idempotency-Key'));
     const revision = () => {
       const value = request.headers.get('If-Match');
@@ -150,6 +162,44 @@ export async function readingRoute(
         .parse(Number(value.slice(1, -1)));
     };
     const match = (pattern: RegExp) => path.match(pattern);
+    if (path === '/imports' || path.startsWith('/imports/')) {
+      const reply = await importRoute(
+        base,
+        session,
+        method,
+        path,
+        url.searchParams.get('cursor'),
+        body,
+        key,
+      );
+      if (reply) return recordResponse(reply.value, reply.status);
+    }
+    const context = new ContextRecords(base.db, identity);
+    if (method === 'POST' && path === '/context-grants') {
+      const grant = await context.grant(session, key(), apiSchemas.GrantWrite.parse(body).source);
+      return recordResponse(grant, 201, grant.revision);
+    }
+    if (method === 'GET' && path === '/context-grants') {
+      const editionId = Id.nullable().parse(url.searchParams.get('editionId'));
+      return recordResponse(
+        await context.list(
+          session,
+          url.searchParams.get('cursor'),
+          Number(url.searchParams.get('limit') ?? 20),
+          editionId,
+        ),
+      );
+    }
+    const grantMatch = match(/^\/context-grants\/([^/]+)$/);
+    if (method === 'DELETE' && grantMatch) {
+      apiSchemas.Empty.parse(body);
+      const grant = await context.revoke(session, Id.parse(grantMatch[1]), revision(), key());
+      return recordResponse(grant, 200, grant.revision);
+    }
+    if (method === 'POST' && path === '/context-preview')
+      return recordResponse(
+        await context.preview(session, apiSchemas.ContextPreviewWrite.parse(body)),
+      );
     if (method === 'PUT' && path === '/permissions/model') {
       const input = apiSchemas.PermissionWrite.parse(body),
         value = await records.permission(session, input.modelAllowed, revision(), key());
@@ -215,6 +265,17 @@ export async function readingRoute(
       return recordResponse(value, 200, value.revision);
     }
     const readingMatch = match(/^\/readings\/([^/]+)$/);
+    if (method === 'DELETE' && readingMatch)
+      return recordResponse(
+        await erasure.removeImportedEdition(
+          session,
+          Id.parse(readingMatch[1]),
+          revision(),
+          key(),
+          apiSchemas.DeleteRequest.parse(body),
+        ),
+        202,
+      );
     if (method === 'GET' && readingMatch)
       return recordResponse(await records.reading(session, Id.parse(readingMatch[1])));
     const createReflection = match(/^\/sessions\/([^/]+)\/reflections$/);

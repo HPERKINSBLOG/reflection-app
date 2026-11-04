@@ -218,12 +218,22 @@ export async function runEvaluationCli(
         'provider:evaluate -- --dry-run --profile independent-context-fast-xhigh --source-bundle /protected/sources.json',
         'provider:evaluate -- --dry-run --profile reading-v2-development-fast-xhigh',
         'provider:evaluate -- --dry-run --profile reading-v2-editorial-fast-xhigh',
+        'provider:evaluate -- --dry-run --profile continuity-local',
         'provider:evaluate -- --execute --permit /protected/permit.json [--resume]',
         'provider:evaluate -- --purge-expired',
       ],
       scope: 'offline-evaluation-only',
       qualificationEligible: false,
     };
+  if (
+    argv.length === 3 &&
+    argv[0] === '--dry-run' &&
+    argv[1] === '--profile' &&
+    argv[2] === 'continuity-local'
+  ) {
+    const { evaluateContinuityLocally } = await import('./provider-evaluation-v3.ts');
+    return evaluateContinuityLocally();
+  }
   const stateDirectory =
     env.REFLECTION_EVALUATION_STATE_DIR ??
     join(homedir(), '.local/state/reflection-provider-evaluation');

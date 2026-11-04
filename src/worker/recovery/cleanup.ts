@@ -1,6 +1,8 @@
 import type { Env } from '../index.ts';
 import type { Checkpoint, IdentitySecrets } from '../identity/crypto.ts';
 import { erasedRevisitEligible } from '../maintenance/retention.ts';
+import { ImportCopies } from '../readings/import-copies.ts';
+import { ContextCopies } from '../readings/context-copies.ts';
 import { assertion } from '../identity/checkpoint.ts';
 import { statement as q, DB_NOW } from '../db/core.ts';
 import { sha256Json } from '../../domain/json.ts';
@@ -401,6 +403,9 @@ export class OfflineCleanup {
         'generation_context',
         'generation_requests',
         'idempotency_keys',
+        'import_groups',
+        'import_staging',
+        'import_copy_sources',
         'import_batches',
         'import_identities',
         'import_items',
@@ -426,17 +431,15 @@ export class OfflineCleanup {
           throw new Error('Account family is not erased');
       return;
     }
-    // Milestone 3 copies are not supported by this local cleanup. Absence of the source is
-    // insufficient proof: independently reject any unqualified copy family for its owner.
-    for (const table of [
-      'import_batches',
-      'import_items',
-      'import_identities',
-      'generation_context',
-      'context_grants',
-    ])
-      if (await q(db, `SELECT 1 FROM ${table} WHERE owner_id=? LIMIT 1`, owner).first())
-        throw new Error('Unsupported erasure copy family');
+    try {
+      await new ContextCopies(this.restore.base, target).erased().run();
+      await (await ImportCopies.find(this.restore.base, target)).erased().run();
+    } catch (error) {
+      if (error instanceof Error && /CHECK constraint/.test(error.message))
+        throw new Error('Context copies are not erased');
+      throw error;
+    }
+    if (target.scope === 'context_copy') return;
     if (target.scope === 'revisit') {
       if (
         (await q(

@@ -54,6 +54,7 @@ export async function identityRoute(
   request: Request,
   env: IdentityBindings,
   supplied?: IdentityService,
+  continuityReady = false,
 ): Promise<Response | null> {
   const path = new URL(request.url).pathname.replace('/api/v1', '');
   if (path !== '/me' && !path.startsWith('/auth/')) return null;
@@ -180,7 +181,11 @@ export async function identityRoute(
       sessionToken = jar.get('__Host-session');
     const session = () => service.sessions.get(sessionToken);
     if (request.method === 'GET') {
-      if (path === '/me') return reply(await service.sessions.view(await session()));
+      if (path === '/me')
+        return reply({
+          ...(await service.sessions.view(await session())),
+          ...(continuityReady ? { continuityReady } : {}),
+        });
       if (path === '/auth/credentials') return reply(await service.credentials(await session()));
       return reply({ error: 'NOT_FOUND' }, 404, 'NOT_FOUND');
     }

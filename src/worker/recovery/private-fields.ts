@@ -1,4 +1,5 @@
 import { Ciphertext } from '../../contracts/index.ts';
+import { importFields } from '../readings/import-fields.ts';
 import type { RecordFieldIdentity } from '../readings/crypto.ts';
 
 export interface AccountPrivateField {
@@ -21,6 +22,7 @@ function account(
   keyColumns: readonly string[],
   parts: readonly string[],
   expression: string,
+  immutableRevision?: number,
 ): AccountPrivateField {
   return {
     family: 'account-data',
@@ -37,12 +39,15 @@ function account(
           throw new Error('Encrypted field identity unavailable');
         return String(value);
       });
+      const { aadRevision } = Ciphertext.parse(JSON.parse(ciphertext));
+      if (immutableRevision !== undefined && aadRevision !== immutableRevision)
+        throw new Error('Encrypted field revision mismatch');
       return {
         ownerId: row.owner_id,
         table,
         column,
         recordId: ids.join(':'),
-        aadRevision: Ciphertext.parse(JSON.parse(ciphertext)).aadRevision,
+        aadRevision,
       };
     },
   };
@@ -56,6 +61,7 @@ export const PRIVATE_FIELD_HANDLERS: readonly (AccountPrivateField | RecoveryPri
     ['request_id', 'ordinal'],
     ['request_id', 'ordinal'],
     'request_id || : || ordinal',
+    1,
   ),
   account('generation_requests', 'input_enc', ['id'], ['id'], 'id'),
   account('generation_requests', 'plan_enc', ['id'], ['id'], 'id'),
@@ -73,6 +79,33 @@ export const PRIVATE_FIELD_HANDLERS: readonly (AccountPrivateField | RecoveryPri
     ['batch_id', 'item_index'],
     'batch_id || : || item_index',
   ),
+  account(
+    'import_items',
+    'result_enc',
+    ['batch_id', 'item_index'],
+    ['batch_id', 'item_index'],
+    'batch_id || : || item_index',
+  ),
+  {
+    family: 'account-data',
+    table: 'import_staging',
+    column: 'field_enc',
+    keyColumns: ['group_id', 'ordinal', 'kind'],
+    aadRule:
+      '[env,destination(kind).table,destination(kind).column,owner_id,target_id,envelope.aadRevision,1,envelope.keyVersion]',
+    identity(row, ciphertext) {
+      const destination = importFields[row.kind as keyof typeof importFields];
+      if (!destination || typeof row.owner_id !== 'string' || typeof row.target_id !== 'string')
+        throw new Error('Invalid staged destination');
+      return {
+        ownerId: row.owner_id,
+        table: destination[0],
+        column: destination[1],
+        recordId: row.target_id,
+        aadRevision: Ciphertext.parse(JSON.parse(ciphertext)).aadRevision,
+      };
+    },
+  },
   account('provider_dispatches', 'provider_response_id_enc', ['id'], ['id'], 'id'),
   account('provider_dispatches', 'transmission_enc', ['id'], ['id'], 'id'),
   account('provider_dispatches', 'candidate_enc', ['id'], ['id'], 'id'),

@@ -1,0 +1,1487 @@
+
+> reflection-app@0.1.0 verify
+> tsx scripts/verify.ts
+
+
+[verify] format and lint
+scripts/hosted-qualify.ts:326:5 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Template literals are preferred over string concatenation.
+
+    324 │   writeFileSync(
+    325 │     receiptFile,
+  > 326 │     JSON.stringify({
+        │     ^^^^^^^^^^^^^^^^
+  > 327 │       status: 'started',
+  > 328 │       scope: 'operator-harness',
+  > 329 │       productionActivationAllowed: false,
+  > 330 │     }) + '\n',
+        │     ^^^^^^^^^
+    331 │     { flag: 'wx', mode: 0o600 },
+    332 │   );
+
+  i Template literals are easier to read than a chain of + operators and quotes, and they avoid mistakes with spaces and escaped quotes.
+
+  i Unsafe fix: Use a template literal.
+
+    324 324 │     writeFileSync(
+    325 325 │       receiptFile,
+    326     │ - ····JSON.stringify({
+        326 │ + ····`${JSON.stringify({
+    327 327 │         status: 'started',
+    328 328 │         scope: 'operator-harness',
+    329 329 │         productionActivationAllowed: false,
+    330     │ - ····})·+·'\n',
+        330 │ + ····})}\n`,
+    331 331 │       { flag: 'wx', mode: 0o600 },
+    332 332 │     );
+
+
+scripts/hosted-qualify.ts:343:32 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Template literals are preferred over string concatenation.
+
+    341 │       ),
+    342 │       receipt = await runHostedQualification(target, request.scenario);
+  > 343 │     writeFileSync(receiptFile, JSON.stringify(receipt, null, 2) + '\n', { mode: 0o600 });
+        │                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    344 │     return receipt;
+    345 │   } catch {
+
+  i Template literals are easier to read than a chain of + operators and quotes, and they avoid mistakes with spaces and escaped quotes.
+
+  i Unsafe fix: Use a template literal.
+
+    341 341 │         ),
+    342 342 │         receipt = await runHostedQualification(target, request.scenario);
+    343     │ - ····writeFileSync(receiptFile,·JSON.stringify(receipt,·null,·2)·+·'\n',·{·mode:·0o600·});
+        343 │ + ····writeFileSync(receiptFile,·`${JSON.stringify(receipt,·null,·2)}\n`,·{·mode:·0o600·});
+    344 344 │       return receipt;
+    345 345 │     } catch {
+
+
+scripts/hosted-qualify.ts:348:7 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Template literals are preferred over string concatenation.
+
+    346 │     writeFileSync(
+    347 │       receiptFile,
+  > 348 │       JSON.stringify({
+        │       ^^^^^^^^^^^^^^^^
+  > 349 │         status: 'failed',
+  > 350 │         scope: 'operator-harness',
+  > 351 │         offlineVerified: false,
+  > 352 │         productionActivationAllowed: false,
+  > 353 │       }) + '\n',
+        │       ^^^^^^^^^
+    354 │       { mode: 0o600 },
+    355 │     );
+
+  i Template literals are easier to read than a chain of + operators and quotes, and they avoid mistakes with spaces and escaped quotes.
+
+  i Unsafe fix: Use a template literal.
+
+    346 346 │       writeFileSync(
+    347 347 │         receiptFile,
+    348     │ - ······JSON.stringify({
+        348 │ + ······`${JSON.stringify({
+    349 349 │           status: 'failed',
+    350 350 │           scope: 'operator-harness',
+    351 351 │           offlineVerified: false,
+    352 352 │           productionActivationAllowed: false,
+    353     │ - ······})·+·'\n',
+        353 │ + ······})}\n`,
+    354 354 │         { mode: 0o600 },
+    355 355 │       );
+
+
+scripts/hosted-release.ts:217:33 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Template literals are preferred over string concatenation.
+
+    215 │     `https://api.cloudflare.com/client/v4/accounts/${target.accountId}/builds/builds/${buildId}`,
+    216 │     {
+  > 217 │       headers: { Authorization: 'Bearer ' + process.env.CLOUDFLARE_API_TOKEN },
+        │                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    218 │       signal: AbortSignal.timeout(10000),
+    219 │     },
+
+  i Template literals are easier to read than a chain of + operators and quotes, and they avoid mistakes with spaces and escaped quotes.
+
+  i Unsafe fix: Use a template literal.
+
+    215 215 │       `https://api.cloudflare.com/client/v4/accounts/${target.accountId}/builds/builds/${buildId}`,
+    216 216 │       {
+    217     │ - ······headers:·{·Authorization:·'Bearer·'·+·process.env.CLOUDFLARE_API_TOKEN·},
+        217 │ + ······headers:·{·Authorization:·`Bearer·${process.env.CLOUDFLARE_API_TOKEN}`·},
+    218 218 │         signal: AbortSignal.timeout(10000),
+    219 219 │       },
+
+
+scripts/hosted-release.ts:268:51 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Template literals are preferred over string concatenation.
+
+    266 │   const { unlinkSync } = await import('node:fs');
+    267 │   unlinkSync(resolve(output, 'build.json'));
+  > 268 │   writeFileSync(resolve(output, 'wrangler.json'), JSON.stringify(config, null, 2) + '\n');
+        │                                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    269 │   const artifactDigest = hostedArtifactDigest(output),
+    270 │     configurationDigest = hostedConfigurationDigest(target),
+
+  i Template literals are easier to read than a chain of + operators and quotes, and they avoid mistakes with spaces and escaped quotes.
+
+  i Unsafe fix: Use a template literal.
+
+    266 266 │     const { unlinkSync } = await import('node:fs');
+    267 267 │     unlinkSync(resolve(output, 'build.json'));
+    268     │ - ··writeFileSync(resolve(output,·'wrangler.json'),·JSON.stringify(config,·null,·2)·+·'\n');
+        268 │ + ··writeFileSync(resolve(output,·'wrangler.json'),·`${JSON.stringify(config,·null,·2)}\n`);
+    269 269 │     const artifactDigest = hostedArtifactDigest(output),
+    270 270 │       configurationDigest = hostedConfigurationDigest(target),
+
+
+scripts/hosted-release.ts:292:52 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Template literals are preferred over string concatenation.
+
+    290 │     check,
+    291 │   };
+  > 292 │   writeFileSync(resolve(output, 'candidate.json'), JSON.stringify(candidate, null, 2) + '\n');
+        │                                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    293 │   return candidate;
+    294 │ }
+
+  i Template literals are easier to read than a chain of + operators and quotes, and they avoid mistakes with spaces and escaped quotes.
+
+  i Unsafe fix: Use a template literal.
+
+    290 290 │       check,
+    291 291 │     };
+    292     │ - ··writeFileSync(resolve(output,·'candidate.json'),·JSON.stringify(candidate,·null,·2)·+·'\n');
+        292 │ + ··writeFileSync(resolve(output,·'candidate.json'),·`${JSON.stringify(candidate,·null,·2)}\n`);
+    293 293 │     return candidate;
+    294 294 │   }
+
+
+scripts/key-retire.ts:29:23 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Template literals are preferred over string concatenation.
+
+    27 │   const fd = openSync(path, 'wx', 0o600);
+    28 │   try {
+  > 29 │     writeFileSync(fd, canonicalJson(value) + '\n');
+       │                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    30 │   } finally {
+    31 │     closeSync(fd);
+
+  i Template literals are easier to read than a chain of + operators and quotes, and they avoid mistakes with spaces and escaped quotes.
+
+  i Unsafe fix: Use a template literal.
+
+     27  27 │     const fd = openSync(path, 'wx', 0o600);
+     28  28 │     try {
+     29     │ - ····writeFileSync(fd,·canonicalJson(value)·+·'\n');
+         29 │ + ····writeFileSync(fd,·`${canonicalJson(value)}\n`);
+     30  30 │     } finally {
+     31  31 │       closeSync(fd);
+
+
+scripts/key-retire.ts:144:5 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Template literals are preferred over string concatenation.
+
+    142 │   writeFileSync(
+    143 │     fd,
+  > 144 │     canonicalJson({
+        │     ^^^^^^^^^^^^^^^
+  > 145 │       status: 'started',
+  > 146 │       operationId: plan.operationId,
+  > 147 │       requiresOffline: true,
+  > 148 │       offlineVerified: false,
+  > 149 │     }) + '\n',
+        │     ^^^^^^^^^
+    150 │   );
+    151 │   closeSync(fd);
+
+  i Template literals are easier to read than a chain of + operators and quotes, and they avoid mistakes with spaces and escaped quotes.
+
+  i Unsafe fix: Use a template literal.
+
+    142 142 │     writeFileSync(
+    143 143 │       fd,
+    144     │ - ····canonicalJson({
+        144 │ + ····`${canonicalJson({
+    145 145 │         status: 'started',
+    146 146 │         operationId: plan.operationId,
+    147 147 │         requiresOffline: true,
+    148 148 │         offlineVerified: false,
+    149     │ - ····})·+·'\n',
+        149 │ + ····})}\n`,
+    150 150 │     );
+    151 151 │     closeSync(fd);
+
+
+scripts/key-retire.ts:187:37 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Template literals are preferred over string concatenation.
+
+    185 │     if (!executed) throw new Error('Fenced retirement did not run');
+    186 │     if ('candidate' in executed) {
+  > 187 │       writeFileSync(candidatePath!, canonicalJson(executed.candidate) + '\n', { mode: 0o600 });
+        │                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    188 │       writeFileSync(receiptPath, canonicalJson(executed.receipt) + '\n', { mode: 0o600 });
+    189 │       return executed.receipt;
+
+  i Template literals are easier to read than a chain of + operators and quotes, and they avoid mistakes with spaces and escaped quotes.
+
+  i Unsafe fix: Use a template literal.
+
+    185 185 │       if (!executed) throw new Error('Fenced retirement did not run');
+    186 186 │       if ('candidate' in executed) {
+    187     │ - ······writeFileSync(candidatePath!,·canonicalJson(executed.candidate)·+·'\n',·{·mode:·0o600·});
+        187 │ + ······writeFileSync(candidatePath!,·`${canonicalJson(executed.candidate)}\n`,·{·mode:·0o600·});
+    188 188 │         writeFileSync(receiptPath, canonicalJson(executed.receipt) + '\n', { mode: 0o600 });
+    189 189 │         return executed.receipt;
+
+
+scripts/key-retire.ts:188:34 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Template literals are preferred over string concatenation.
+
+    186 │     if ('candidate' in executed) {
+    187 │       writeFileSync(candidatePath!, canonicalJson(executed.candidate) + '\n', { mode: 0o600 });
+  > 188 │       writeFileSync(receiptPath, canonicalJson(executed.receipt) + '\n', { mode: 0o600 });
+        │                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    189 │       return executed.receipt;
+    190 │     }
+
+  i Template literals are easier to read than a chain of + operators and quotes, and they avoid mistakes with spaces and escaped quotes.
+
+  i Unsafe fix: Use a template literal.
+
+    186 186 │       if ('candidate' in executed) {
+    187 187 │         writeFileSync(candidatePath!, canonicalJson(executed.candidate) + '\n', { mode: 0o600 });
+    188     │ - ······writeFileSync(receiptPath,·canonicalJson(executed.receipt)·+·'\n',·{·mode:·0o600·});
+        188 │ + ······writeFileSync(receiptPath,·`${canonicalJson(executed.receipt)}\n`,·{·mode:·0o600·});
+    189 189 │         return executed.receipt;
+    190 190 │       }
+
+
+scripts/key-retire.ts:191:32 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Template literals are preferred over string concatenation.
+
+    189 │       return executed.receipt;
+    190 │     }
+  > 191 │     writeFileSync(receiptPath, canonicalJson(executed) + '\n', { mode: 0o600 });
+        │                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    192 │     return executed;
+    193 │   } catch {
+
+  i Template literals are easier to read than a chain of + operators and quotes, and they avoid mistakes with spaces and escaped quotes.
+
+  i Unsafe fix: Use a template literal.
+
+    189 189 │         return executed.receipt;
+    190 190 │       }
+    191     │ - ····writeFileSync(receiptPath,·canonicalJson(executed)·+·'\n',·{·mode:·0o600·});
+        191 │ + ····writeFileSync(receiptPath,·`${canonicalJson(executed)}\n`,·{·mode:·0o600·});
+    192 192 │       return executed;
+    193 193 │     } catch {
+
+
+scripts/key-retire.ts:196:7 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Template literals are preferred over string concatenation.
+
+    194 │     writeFileSync(
+    195 │       receiptPath,
+  > 196 │       canonicalJson({
+        │       ^^^^^^^^^^^^^^^
+  > 197 │         status: 'failed',
+         ...
+  > 202 │         destroysOfflineCopies: false,
+  > 203 │       }) + '\n',
+        │       ^^^^^^^^^
+    204 │       { mode: 0o600 },
+    205 │     );
+
+  i Template literals are easier to read than a chain of + operators and quotes, and they avoid mistakes with spaces and escaped quotes.
+
+  i Unsafe fix: Use a template literal.
+
+    194 194 │       writeFileSync(
+    195 195 │         receiptPath,
+    196     │ - ······canonicalJson({
+        196 │ + ······`${canonicalJson({
+    197 197 │           status: 'failed',
+    198 198 │           operationId: plan.operationId,
+    ······· │
+    201 201 │           installsSecrets: false,
+    202 202 │           destroysOfflineCopies: false,
+    203     │ - ······})·+·'\n',
+        203 │ + ······})}\n`,
+    204 204 │         { mode: 0o600 },
+    205 205 │       );
+
+
+scripts/key-rotate-account.ts:99:23 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Template literals are preferred over string concatenation.
+
+     97 │   const fd = openSync(receiptPath, 'wx', 0o600);
+     98 │   try {
+   > 99 │     writeFileSync(fd, JSON.stringify({ ...audit, status: 'started' }) + '\n');
+        │                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    100 │     closeSync(fd);
+    101 │   } catch (error) {
+
+  i Template literals are easier to read than a chain of + operators and quotes, and they avoid mistakes with spaces and escaped quotes.
+
+  i Unsafe fix: Use a template literal.
+
+     97  97 │     const fd = openSync(receiptPath, 'wx', 0o600);
+     98  98 │     try {
+     99     │ - ····writeFileSync(fd,·JSON.stringify({·...audit,·status:·'started'·})·+·'\n');
+         99 │ + ····writeFileSync(fd,·`${JSON.stringify({·...audit,·status:·'started'·})}\n`);
+    100 100 │       closeSync(fd);
+    101 101 │     } catch (error) {
+
+
+scripts/key-rotate-account.ts:132:32 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Template literals are preferred over string concatenation.
+
+    130 │       completedAt: new Date().toISOString(),
+    131 │     };
+  > 132 │     writeFileSync(receiptPath, JSON.stringify(receipt, null, 2) + '\n', { mode: 0o600 });
+        │                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    133 │     return receipt;
+    134 │   } catch {
+
+  i Template literals are easier to read than a chain of + operators and quotes, and they avoid mistakes with spaces and escaped quotes.
+
+  i Unsafe fix: Use a template literal.
+
+    130 130 │         completedAt: new Date().toISOString(),
+    131 131 │       };
+    132     │ - ····writeFileSync(receiptPath,·JSON.stringify(receipt,·null,·2)·+·'\n',·{·mode:·0o600·});
+        132 │ + ····writeFileSync(receiptPath,·`${JSON.stringify(receipt,·null,·2)}\n`,·{·mode:·0o600·});
+    133 133 │       return receipt;
+    134 134 │     } catch {
+
+
+scripts/key-rotate-account.ts:137:7 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Template literals are preferred over string concatenation.
+
+    135 │     writeFileSync(
+    136 │       receiptPath,
+  > 137 │       JSON.stringify({
+        │       ^^^^^^^^^^^^^^^^
+  > 138 │         ...audit,
+  > 139 │         status: 'failed',
+  > 140 │         requiresOffline: true,
+  > 141 │         offlineVerified: false,
+  > 142 │       }) + '\n',
+        │       ^^^^^^^^^
+    143 │       { mode: 0o600 },
+    144 │     );
+
+  i Template literals are easier to read than a chain of + operators and quotes, and they avoid mistakes with spaces and escaped quotes.
+
+  i Unsafe fix: Use a template literal.
+
+    135 135 │       writeFileSync(
+    136 136 │         receiptPath,
+    137     │ - ······JSON.stringify({
+        137 │ + ······`${JSON.stringify({
+    138 138 │           ...audit,
+    139 139 │           status: 'failed',
+    140 140 │           requiresOffline: true,
+    141 141 │           offlineVerified: false,
+    142     │ - ······})·+·'\n',
+        142 │ + ······})}\n`,
+    143 143 │         { mode: 0o600 },
+    144 144 │       );
+
+
+scripts/recovery-resume.ts:118:23 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Template literals are preferred over string concatenation.
+
+    116 │   const fd = openSync(receiptPath, 'wx', 0o600);
+    117 │   try {
+  > 118 │     writeFileSync(fd, JSON.stringify({ ...audit, status: 'started' }) + '\n');
+        │                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    119 │     closeSync(fd);
+    120 │   } catch (error) {
+
+  i Template literals are easier to read than a chain of + operators and quotes, and they avoid mistakes with spaces and escaped quotes.
+
+  i Unsafe fix: Use a template literal.
+
+    116 116 │     const fd = openSync(receiptPath, 'wx', 0o600);
+    117 117 │     try {
+    118     │ - ····writeFileSync(fd,·JSON.stringify({·...audit,·status:·'started'·})·+·'\n');
+        118 │ + ····writeFileSync(fd,·`${JSON.stringify({·...audit,·status:·'started'·})}\n`);
+    119 119 │       closeSync(fd);
+    120 120 │     } catch (error) {
+
+
+scripts/recovery-resume.ts:157:32 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Template literals are preferred over string concatenation.
+
+    155 │       completedAt: new Date().toISOString(),
+    156 │     };
+  > 157 │     writeFileSync(receiptPath, JSON.stringify(receipt, null, 2) + '\n', { mode: 0o600 });
+        │                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    158 │     return receipt;
+    159 │   } catch {
+
+  i Template literals are easier to read than a chain of + operators and quotes, and they avoid mistakes with spaces and escaped quotes.
+
+  i Unsafe fix: Use a template literal.
+
+    155 155 │         completedAt: new Date().toISOString(),
+    156 156 │       };
+    157     │ - ····writeFileSync(receiptPath,·JSON.stringify(receipt,·null,·2)·+·'\n',·{·mode:·0o600·});
+        157 │ + ····writeFileSync(receiptPath,·`${JSON.stringify(receipt,·null,·2)}\n`,·{·mode:·0o600·});
+    158 158 │       return receipt;
+    159 159 │     } catch {
+
+
+scripts/recovery-resume.ts:162:7 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Template literals are preferred over string concatenation.
+
+    160 │     writeFileSync(
+    161 │       receiptPath,
+  > 162 │       JSON.stringify({
+        │       ^^^^^^^^^^^^^^^^
+  > 163 │         ...audit,
+  > 164 │         status: 'failed',
+  > 165 │         requiresOffline: true,
+  > 166 │         offlineVerified: false,
+  > 167 │       }) + '\n',
+        │       ^^^^^^^^^
+    168 │       { mode: 0o600 },
+    169 │     );
+
+  i Template literals are easier to read than a chain of + operators and quotes, and they avoid mistakes with spaces and escaped quotes.
+
+  i Unsafe fix: Use a template literal.
+
+    160 160 │       writeFileSync(
+    161 161 │         receiptPath,
+    162     │ - ······JSON.stringify({
+        162 │ + ······`${JSON.stringify({
+    163 163 │           ...audit,
+    164 164 │           status: 'failed',
+    165 165 │           requiresOffline: true,
+    166 166 │           offlineVerified: false,
+    167     │ - ······})·+·'\n',
+        167 │ + ······})}\n`,
+    168 168 │         { mode: 0o600 },
+    169 169 │       );
+
+
+tests/tooling/provider-source-diagnostic.test.ts:164:19 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━
+
+  i Template literals are preferred over string concatenation.
+
+    162 │   const value = bundle();
+    163 │   for (const source of value.sources.filter((s) => s.caseId === 'A07-2'))
+  > 164 │     source.text = prefix + 'The same interpretation for every position.';
+        │                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    165 │   await expect(prepareEvaluation(profile, value)).rejects.toThrow(
+    166 │     'Duplicate diagnostic source text',
+
+  i Template literals are easier to read than a chain of + operators and quotes, and they avoid mistakes with spaces and escaped quotes.
+
+  i Unsafe fix: Use a template literal.
+
+    162 162 │     const value = bundle();
+    163 163 │     for (const source of value.sources.filter((s) => s.caseId === 'A07-2'))
+    164     │ - ····source.text·=·prefix·+·'The·same·interpretation·for·every·position.';
+        164 │ + ····source.text·=·`${prefix}The·same·interpretation·for·every·position.`;
+    165 165 │     await expect(prepareEvaluation(profile, value)).rejects.toThrow(
+    166 166 │       'Duplicate diagnostic source text',
+
+
+scripts/hosted-qualify.ts:219:7 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Change to an optional chain.
+
+    217 │   const grant = grants.get(target),
+    218 │     scenario = HostedScenario.parse(scenarioInput);
+  > 219 │   if (!grant || !grant.authorization.allowedScenarios.includes(scenario))
+        │       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    220 │     throw new Error('Explicit scenario authorization required');
+    221 │   current(grant);
+
+  i An optional chain is shorter, and it avoids repeating the same expression in each check.
+
+  i Unsafe fix: Change to an optional chain.
+
+    217 217 │     const grant = grants.get(target),
+    218 218 │       scenario = HostedScenario.parse(scenarioInput);
+    219     │ - ··if·(!grant·||·!grant.authorization.allowedScenarios.includes(scenario))
+        219 │ + ··if·(!grant?.authorization.allowedScenarios.includes(scenario))
+    220 220 │       throw new Error('Explicit scenario authorization required');
+    221 221 │     current(grant);
+
+
+The number of diagnostics exceeds the limit allowed. Use --max-diagnostics to increase it.
+Diagnostics not shown: 170.
+Checked 341 files in 344ms. No fixes applied.
+Found 3 warnings.
+Found 187 infos.
+
+[verify] strict TypeScript
+
+[verify] generated schema drift
+All generated schemas/source projections match their authorities.
+
+[verify] publication guard drift
+
+[verify] contract and reference checks
+Erasure reference checks passed: missing D1 job, exact revision/owner, retained older keys, authenticated completion chain, pending replay and repeated deadline extension. No D1/R2 service exercised.
+Import/history reference checks passed: duplicate, changed revision, colliding datasets, erased-alias/re-import confirmation, stable exported identity, and long/Unicode question preservation. No application handlers exercised.
+Contract schemas and representative payloads passed; 60 corpus records well formed; AES-GCM AAD property passed. No semantic validator/provider exercised.
+
+[verify] private field coverage
+{"tables": 44, "columns": 424, "coverage": "complete", "storageTriggers": 112}
+
+[verify] SQLite constraints
+{
+  "sqlite": "3.46.1",
+  "tables": 44,
+  "columns": 424,
+  "checks": [
+    "valid current publication guard",
+    "revoked permission",
+    "cancelled request",
+    "stale run",
+    "expired lease",
+    "expired absolute request",
+    "key rotation",
+    "account deletion",
+    "content withdrawn",
+    "missing selected row",
+    "stale worker timestamp cannot authorize expired publication",
+    "deadline equality rejects publication",
+    "execution-time expiry rolls back a preceding edition insert",
+    "null reviewed hash rejected",
+    "cross-owner basis FK rejected",
+    "duplicate intent rejected",
+    "failed statement rolls back preceding edition in SQLite transaction",
+    "parent old-content withdrawal guarded",
+    "parent populated account cascade",
+    "selected old-content withdrawal guarded",
+    "selected populated account cascade",
+    "quota bound enforced",
+    "erased import alias rejects retained private body or entity link",
+    "detached erased alias survives source deletion",
+    "erased source key still prevents duplicate alias insertion",
+    "exact registry/table/column coverage"
+  ],
+  "count": 26
+}
+
+[verify] OpenAPI
+OpenAPI syntax/schema/references validated; 45 unique operations. This does not prove handler behavior.
+
+[verify] domain and verification behavior
+
+ RUN  v5.0.5 /tmp/reflection-push-Sq7rPY/source
+
+ ✓ tests/tooling/reading-operators.test.ts (1 test) 4063ms
+   ✓ explicit operator commands activate and reconcile persistent local D1 without enabling generation 4062ms
+ ✓ tests/tooling/key-rotation.test.ts (4 tests) 5028ms
+   ✓ operator config validation is executable, read-only, and reports key IDs without key material 451ms
+   ✓ operator rejects dropping keys, malformed secrets, and remote modes without echoing submitted input 786ms
+   ✓ standalone local operator rewraps persistent D1 keys and writes a redacted audit receipt 3530ms
+ ✓ tests/tooling/provider-prompt-comparison.test.ts (4 tests) 3083ms
+   ✓ prompt comparison freezes twelve fresh calls with all data and settings fixed across prompt arms 858ms
+   ✓ comparison permit cannot substitute source content, prompt policy, purpose or budget 534ms
+   ✓ CLI selects each arm’s strict transport policy and resumes without redispatch (crash=false) 877ms
+   ✓ CLI selects each arm’s strict transport policy and resumes without redispatch (crash=true) 813ms
+ ✓ tests/tooling/provider-source-diagnostic.test.ts (5 tests) 2915ms
+   ✓ source diagnostic dry run freezes twelve calls with only selected source text varied 845ms
+   ✓ editing one passage changes only its three condition payloads and invalidates prior binding 506ms
+   ✓ diagnostic rejects missing, misbound, duplicate, oversized, or falsely human-approved source bundles 750ms
+   ✓ diagnostic binds a new capped permit and crash recovery never repeats an uncertain attempt 550ms
+ ✓ tests/tooling/provider-independent-contexts.test.ts (3 tests) 1864ms
+   ✓ fresh-context probe uses four new questions once with unchanged source/draw/schema bindings 814ms
+   ✓ mechanical validation uses the new supplied facts instead of the old sparse question 520ms
+   ✓ independent probe permit rejects extra spending and unrelated policy or purpose 529ms
+ ✓ tests/tooling/provider-continuity.test.ts (1 test) 1364ms
+   ✓ local continuity evidence binds its independent corpus, writer policy, captured packets and adverse results 1363ms
+ ✓ tests/tooling/package.test.ts (2 tests) 838ms
+   ✓ the ZIP is reproducible, includes verification evidence, and excludes local data and secrets 495ms
+   ✓ completed-milestone packaging refuses pending qualification and stale verification 343ms
+ ✓ tests/domain/safety-v2.test.ts (44 tests) 1773ms
+ ✓ tests/tooling/content-activation.test.ts (2 tests) 721ms
+   ✓ help requires no credentials and draft check cannot grant approval 412ms
+   ✓ review packet exposes exact readable draft, hash changes and all 156 sources without granting approval 308ms
+ ✓ tests/tooling/provider-review-contract.test.ts (2 tests) 568ms
+ ✓ tests/domain/import-chunks.test.ts (7 tests) 631ms
+   ✓ a large selected family spans bounded previews without losing identity, lexical text or ordering 436ms
+ ✓ tests/domain/plan.test.ts (34 tests) 585ms
+ ✓ tests/tooling/local-live.test.ts (3 tests) 588ms
+   ✓ the live runtime opens the same D1 store that Wrangler migrations use 582ms
+ ✓ tests/tooling/provider-reconcile.test.ts (1 test) 616ms
+   ✓ operator checks receipt import and evidence without opening storage or exposing response IDs 615ms
+ ✓ tests/tooling/gates.test.ts (7 tests) 607ms
+ ✓ tests/tooling/key-retirement.test.ts (2 tests) 613ms
+   ✓ retirement help separates protected candidate preparation from secret installation 360ms
+ ✓ tests/tooling/content-v2.test.ts (4 tests) 519ms
+ ✓ tests/domain/context-v2.test.ts (10 tests) 370ms
+ ✓ tests/tooling/runtime-config.test.ts (2 tests) 387ms
+ ✓ tests/tooling/provider-evaluation.test.ts (38 tests) 14739ms
+   ✓ dry run freezes 240 grouped cases and 200 baseline slots without network or credentials 6978ms
+   ✓ human-review profile freezes only the 20 explicitly requested prompts without calling the provider 2596ms
+   ✓ fast xhigh review preserves the same 20 prompts and draws with a separately bound policy and budget 869ms
+   ✓ fast evaluation binds the policy and cannot reuse standard or application authorization 307ms
+   ✓ fast unknown calls retain the larger reservation after recovery and are never resent 322ms
+   ✓ fast journal reconciles actual premium costs and halts if the returned tier changes 555ms
+   ✓ SIGKILL after reserved leaves liability and the original attempt is never resent 452ms
+   ✓ SIGKILL after returned leaves liability and the original attempt is never resent 393ms
+ ✓ tests/tooling/account-rekey.test.ts (3 tests) 392ms
+ ✓ tests/domain/render.test.ts (13 tests) 440ms
+ ✓ tests/domain/openai-provider.test.ts (43 tests) 323ms
+ ✓ tests/domain/continuity-writer.test.ts (3 tests) 289ms
+ ✓ tests/tooling/openapi-inputs.test.ts (1 test) 303ms
+   ✓ OpenAPI revisit request schemas permit omitted stance while response schemas require it 302ms
+ ✓ tests/tooling/provider-v2-editorial.test.ts (2 tests) 330ms
+ ✓ tests/tooling/l7-proposal.test.ts (2 tests) 182ms
+ ✓ tests/domain/writer-v2.test.ts (4 tests) 270ms
+ ✓ tests/domain/writer-v2-transport.test.ts (2 tests) 179ms
+ ✓ tests/domain/provider-policy.test.ts (25 tests) 74ms
+ ✓ tests/domain/imported-native-detail.test.ts (1 test) 94ms
+ ✓ tests/domain/reviewed-copy.test.ts (1 test) 48ms
+ ✓ tests/domain/imports.test.ts (15 tests) 53ms
+ ✓ tests/domain/provider-qualification.test.ts (15 tests) 44ms
+ ✓ tests/domain/draw.test.ts (14 tests) 37ms
+ ✓ tests/tooling/card-names.test.ts (1 test) 33ms
+ ✓ tests/domain/meta-vision.test.ts (5 tests) 33ms
+ ✓ tests/tooling/hosted-qualification.test.ts (11 tests) 21ms
+ ✓ tests/tooling/hosted-release.test.ts (11 tests) 19ms
+ ✓ tests/domain/revisit-contracts.test.ts (5 tests) 12ms
+ ✓ tests/tooling/qualification.test.ts (7 tests) 21ms
+ ✓ tests/tooling/monitoring.test.ts (7 tests) 11ms
+ ✓ tests/domain/context-selection.test.ts (6 tests) 12ms
+ ✓ tests/tooling/provider-editorial-review.test.ts (8 tests) 12ms
+ ✓ tests/domain/runtime-config.test.ts (15 tests) 10ms
+ ✓ tests/tooling/evidence.test.ts (3 tests) 10ms
+ ✓ tests/tooling/release.test.ts (1 test) 9ms
+ ✓ tests/domain/provider.test.ts (11 tests) 7ms
+ ✓ tests/tooling/private-fields.test.ts (1 test) 3ms
+ ✓ tests/domain/provider-cost.test.ts (13 tests) 11ms
+ ✓ tests/domain/recovery-coordination.test.ts (2 tests) 5ms
+ ✓ tests/tooling/private-files.test.ts (4 tests) 4ms
+ ✓ tests/domain/safety-admission.test.ts (2 tests) 3ms
+ ✓ tests/tooling/recovery-resume.test.ts (2 tests) 6ms
+ ✓ tests/tooling/key-inventory.test.ts (1 test) 4ms
+ ✓ tests/tooling/environment.test.ts (3 tests) 3ms
+ ✓ tests/domain/passkey-errors.test.ts (3 tests) 2ms
+
+ Test Files  57 passed (57)
+      Tests  442 passed (442)
+   Start at  01:30:30
+   Duration  18.02s (tests 90%, import 7%, transform 2%, setup 1%)
+
+    Isolate  57 workers spawned · ~62ms startup each (spawn + environment, per file)
+             at least ~1.11s faster with isolate: false — reuses workers across files instead of one per file
+
+JSON report written to /tmp/reflection-push-Sq7rPY/source/artifacts/domain-tests.json
+[verify] confirmed 442 executed tests across 57 files; zero skipped
+
+[verify] workerd D1 batches
+
+ RUN  v5.0.5 /tmp/reflection-push-Sq7rPY/source
+
+ ✓ tests/db/generation-recovery.test.ts (72 tests) 9483ms
+ ✓ tests/db/recovery-cleanup.test.ts (27 tests) 9595ms
+   ✓ expired erasure evidence is purged only after a verified new backup and earlier snapshots cannot reopen 409ms
+   ✓ cleanup inventories all pages of a long authenticated pass chain 557ms
+   ✓ a failed cleanup journal write preserves evidence and rolls back the unannounced epoch 322ms
+   ✓ an over-bound chain stays whole while another eligible group is purged 2514ms
+   ✓ cleanup removes eligible note shells before exact job evidence and its undo restores both after backup failure 806ms
+   ✓ session cleanup independently rejects archived note content behind an empty current tombstone 302ms
+stdout | tests/db/qualified-generation.test.ts > HTTP and scheduled recovery use the same injected dependencies; absent credentials still allow record access
+{"event":"maintenance_health","pendingGeneration":0,"oldestGenerationMs":0,"pendingSecurity":0,"oldestSecurityMs":0,"pendingErasure":0,"oldestErasureMs":0,"unknownProviderCosts":0,"unknownLiabilityMicrousd":0,"dailySpendMicrousd":2810,"monthlySpendMicrousd":2810,"dailyLimitMicrousd":10000000,"monthlyLimitMicrousd":100000000,"alerts":[]}
+
+ ✓ tests/db/qualified-generation.test.ts (28 tests) 10750ms
+   ✓ dispatch barrier fences qualification-expiry with one quota release and no stale edition 3041ms
+   ✓ publish barrier fences qualification-expiry with one quota release and no stale edition 3040ms
+uncaught exception; source = Uncaught (in promise); stack = Error: Environment is offline
+    at /tmp/reflection-push-Sq7rPY/source/src/worker/recovery/hosted-coordinator.ts:282:48
+    at OfflineControl.registerWriter (/tmp/reflection-push-Sq7rPY/source/src/worker/recovery/hosted-coordinator.ts:280:29)
+uncaught exception; source = Uncaught (in promise); stack = Error: Environment is offline
+    at /tmp/reflection-push-Sq7rPY/source/src/worker/recovery/hosted-coordinator.ts:282:48
+    at OfflineControl.registerWriter (/tmp/reflection-push-Sq7rPY/source/src/worker/recovery/hosted-coordinator.ts:280:29)
+uncaught exception; source = Uncaught (in promise); stack = Error: Environment is offline
+    at /tmp/reflection-push-Sq7rPY/source/src/worker/recovery/hosted-coordinator.ts:282:48
+    at OfflineControl.registerWriter (/tmp/reflection-push-Sq7rPY/source/src/worker/recovery/hosted-coordinator.ts:280:29)
+uncaught exception; source = Uncaught (in promise); stack = Error: Offline lease unavailable
+    at OfflineControl.#current (/tmp/reflection-push-Sq7rPY/source/src/worker/recovery/hosted-coordinator.ts:274:13)
+    at OfflineControl.assertCurrent (/tmp/reflection-push-Sq7rPY/source/src/worker/recovery/hosted-coordinator.ts:330:10)
+    at OfflineControl.beginOffline (/tmp/reflection-push-Sq7rPY/source/src/worker/recovery/hosted-coordinator.ts:339:5)
+ ✓ tests/db/revisit-records.test.ts (24 tests) 6426ms
+   ✓ 100th active note succeeds and 101st fails atomically 783ms
+   ✓ 100th revision succeeds and 101st fails without consuming a revision or receipt 1086ms
+   ✓ concurrent creates at 99 active notes admit only one final note 778ms
+ ✓ tests/db/follow-up.test.ts (14 tests) 7412ms
+   ✓ a confirmed initial selection reaches only the intercepted writer and is sealed with immutable fragment identity 310ms
+   ✓ an original and two generations share one save and one erase, preserving unrelated history 612ms
+   ✓ simultaneous follow-ups keep distinct numbers and retries join the pinned requests 301ms
+   ✓ the fifty-first follow-up is rejected without a new request or a second basis 3626ms
+   ✓ a saved v1 parent reuses its superseded eligible source and the exact original draw after a newer source activates 301ms
+uncaught exception; source = Uncaught (in promise); stack = Error: Environment is offline
+    at /tmp/reflection-push-Sq7rPY/source/src/worker/recovery/hosted-coordinator.ts:282:48
+    at OfflineControl.registerWriter (/tmp/reflection-push-Sq7rPY/source/src/worker/recovery/hosted-coordinator.ts:280:29)
+uncaught exception; source = Uncaught (in promise); stack = Error: Environment is offline
+    at /tmp/reflection-push-Sq7rPY/source/src/worker/recovery/hosted-coordinator.ts:282:48
+    at OfflineControl.registerWriter (/tmp/reflection-push-Sq7rPY/source/src/worker/recovery/hosted-coordinator.ts:280:29)
+ ✓ tests/db/account-rekey.test.ts (12 tests) 6711ms
+   ✓ bounded replacement resumes in fresh instances, preserves exact values and stable index, and retains both wrapped versions 1234ms
+   ✓ loss between archived and current note rewrites resumes without rewriting completed ciphertext 870ms
+   ✓ database snapshots taken before replacement restore and preserve exact values 715ms
+   ✓ database snapshots taken during replacement restore and preserve exact values 1066ms
+   ✓ database snapshots taken after replacement restore and preserve exact values 976ms
+   ✓ pending erasure work must be flushed before any data-key replacement 371ms
+uncaught exception; source = Uncaught (in promise); stack = Error: Environment is offline
+    at /tmp/reflection-push-Sq7rPY/source/src/worker/recovery/hosted-coordinator.ts:282:48
+    at OfflineControl.registerWriter (/tmp/reflection-push-Sq7rPY/source/src/worker/recovery/hosted-coordinator.ts:280:29)
+stderr | tests/db/privacy-restore.test.ts > a stale D1 snapshot cannot revive erased content, spent recovery codes, removed credentials, consent or pre-dispatch work
+{"event":"identity_failure","correlationId":"e162d450-2b9c-4f27-b260-78ba727d3b80","status":401,"code":"AUTH_FAILED","path":"/auth/authenticate"}
+
+stderr | tests/db/privacy-restore.test.ts > a stale D1 snapshot cannot revive erased content, spent recovery codes, removed credentials, consent or pre-dispatch work
+{"event":"identity_failure","correlationId":"49e92963-747c-4f07-9994-dcb5a97ef979","status":401,"code":"RECOVERY_FAILED","path":"/auth/recover"}
+
+uncaught exception; source = Uncaught (in promise); stack = Error: Offline lease unavailable
+    at OfflineControl.#current (/tmp/reflection-push-Sq7rPY/source/src/worker/recovery/hosted-coordinator.ts:274:13)
+    at OfflineControl.assertCurrent (/tmp/reflection-push-Sq7rPY/source/src/worker/recovery/hosted-coordinator.ts:330:10)
+    at OfflineControl.beginOffline (/tmp/reflection-push-Sq7rPY/source/src/worker/recovery/hosted-coordinator.ts:339:5)
+ ✓ tests/db/privacy-restore.test.ts (14 tests) 4241ms
+   ✓ a stale D1 snapshot cannot revive erased content, spent recovery codes, removed credentials, consent or pre-dispatch work 821ms
+   ✓ restore processes every ledger page and exhausts uncertain spend rather than resetting it 785ms
+   ✓ session erasure replay removes current and historical notes on two stale restores 415ms
+ ✓ tests/db/revisit-privacy.test.ts (22 tests) 5821ms
+   ✓ two restore passes from before create cannot revive an erased note or shorten deadlines 330ms
+   ✓ two restore passes from before edit cannot revive an erased note or shorten deadlines 392ms
+   ✓ two restore passes from before delete cannot revive an erased note or shorten deadlines 380ms
+   ✓ export pagination includes more than one hundred note snapshots exactly once 1131ms
+ ✓ tests/db/key-retirement.test.ts (15 tests) 5502ms
+   ✓ an authenticated unreferenced environment bundle produces an idempotent protected candidate without installing secrets 437ms
+   ✓ unreferenced old account-DEK wraps retire atomically after complete replacement and keep the stable index intact 401ms
+   ✓ a synthetic candidate supports all three backup formats, exact reads/export, same-kit recovery and retained deletion receipts 1000ms
+   ✓ account-DEK retirement refuses to replace a changed stable index key 796ms
+stdout | tests/db/spread-photo.test.ts > recovery after before-spread-dispatch never repeats an authorized image transmission
+{"event":"maintenance_health","pendingGeneration":0,"oldestGenerationMs":0,"pendingSecurity":0,"oldestSecurityMs":0,"pendingErasure":0,"oldestErasureMs":0,"unknownProviderCosts":0,"unknownLiabilityMicrousd":0,"dailySpendMicrousd":4675,"monthlySpendMicrousd":4675,"dailyLimitMicrousd":10000000,"monthlyLimitMicrousd":100000000,"alerts":[]}
+
+stdout | tests/db/spread-photo.test.ts > recovery after after-spread-dispatch never repeats an authorized image transmission
+{"event":"maintenance_health","pendingGeneration":0,"oldestGenerationMs":0,"pendingSecurity":0,"oldestSecurityMs":0,"pendingErasure":0,"oldestErasureMs":0,"unknownProviderCosts":1,"unknownLiabilityMicrousd":1328128,"dailySpendMicrousd":1328128,"monthlySpendMicrousd":1328128,"dailyLimitMicrousd":10000000,"monthlyLimitMicrousd":100000000,"alerts":["PROVIDER_COST_UNKNOWN"]}
+
+stdout | tests/db/spread-photo.test.ts > recovery after before-spread-basis never repeats an authorized image transmission
+{"event":"maintenance_health","pendingGeneration":0,"oldestGenerationMs":0,"pendingSecurity":0,"oldestSecurityMs":0,"pendingErasure":0,"oldestErasureMs":0,"unknownProviderCosts":0,"unknownLiabilityMicrousd":0,"dailySpendMicrousd":1675,"monthlySpendMicrousd":1675,"dailyLimitMicrousd":10000000,"monthlyLimitMicrousd":100000000,"alerts":[]}
+
+stdout | tests/db/spread-photo.test.ts > recovery after after-spread-basis never repeats an authorized image transmission
+{"event":"maintenance_health","pendingGeneration":0,"oldestGenerationMs":0,"pendingSecurity":0,"oldestSecurityMs":0,"pendingErasure":0,"oldestErasureMs":0,"unknownProviderCosts":0,"unknownLiabilityMicrousd":0,"dailySpendMicrousd":4675,"monthlySpendMicrousd":4675,"dailyLimitMicrousd":10000000,"monthlyLimitMicrousd":100000000,"alerts":[]}
+
+stdout | tests/db/spread-photo.test.ts > session erasure detaches recognition cost metadata and removes its photo
+{"event":"maintenance_health","pendingGeneration":0,"oldestGenerationMs":0,"pendingSecurity":0,"oldestSecurityMs":0,"pendingErasure":0,"oldestErasureMs":0,"unknownProviderCosts":1,"unknownLiabilityMicrousd":1328128,"dailySpendMicrousd":1331128,"monthlySpendMicrousd":1331128,"dailyLimitMicrousd":10000000,"monthlyLimitMicrousd":100000000,"alerts":["PROVIDER_COST_UNKNOWN"]}
+
+ ✓ tests/db/imports.test.ts (16 tests) 3611ms
+   ✓ the import service stages 102 units across 11 uploads, returns bounded durable outcomes and accepts the lost-ack retry 1499ms
+   ✓ the daily group limit counts logical submissions while allowing more chunks and retrying an existing group 1000ms
+ ✓ tests/db/spread-photo.test.ts (21 tests) 3834ms
+ ✓ tests/db/reading-interleavings.test.ts (9 tests) 3291ms
+   ✓ retention expiry between export pages invalidates the whole snapshot 1150ms
+   ✓ an unsaved reading expiring after decryption is not released from the read boundary 430ms
+   ✓ authentication expiring after reflection encryption rolls back the write 443ms
+   ✓ an open session expiring after export decryption invalidates the page 438ms
+ ✓ tests/db/context-grants.test.ts (12 tests) 2416ms
+ ✓ tests/db/retention.test.ts (14 tests) 2527ms
+   ✓ a bounded failed-body batch cannot drift into a different owner after nulling its first page 309ms
+ ✓ tests/db/context-privacy.test.ts (8 tests) 2855ms
+   ✓ whole-note erasure traverses selections of derived editions and leaves independent excerpts, originals and cost liability intact at capacity 462ms
+   ✓ copy-only replay erases an exact absent historical revision and its downstream provenance after each stale restore 479ms
+   ✓ session deletion removes its owned copies and preserves unrelated accounts 374ms
+   ✓ account deletion removes its owned copies and preserves unrelated accounts 380ms
+ ✓ tests/db/key-inventory.test.ts (9 tests) 2124ms
+   ✓ two authenticated inventories include live wraps and lifelong checkpoints while an unused retained key stays unreferenced 306ms
+ ✓ tests/db/cleanup-review-regressions.test.ts (11 tests) 1889ms
+   ✓ cleanup backup excludes an already admitted generation failure writer 503ms
+ ✓ tests/db/prototype.test.ts (41 tests) 2014ms
+   ✓ clock-only passage across lease_expires_at after eligibility sampling rolls publication back 554ms
+   ✓ clock-only passage across expires_at after eligibility sampling rolls publication back 557ms
+uncaught exception; source = Uncaught (in promise); stack = Error: Environment is offline
+    at /tmp/reflection-push-Sq7rPY/source/src/worker/recovery/hosted-coordinator.ts:282:48
+    at OfflineControl.registerWriter (/tmp/reflection-push-Sq7rPY/source/src/worker/recovery/hosted-coordinator.ts:280:29)
+uncaught exception; source = Uncaught (in promise); stack = Error: Environment is offline
+    at /tmp/reflection-push-Sq7rPY/source/src/worker/recovery/hosted-coordinator.ts:282:48
+    at OfflineControl.registerWriter (/tmp/reflection-push-Sq7rPY/source/src/worker/recovery/hosted-coordinator.ts:280:29)
+uncaught exception; source = Uncaught (in promise); stack = Error: Environment is offline
+    at /tmp/reflection-push-Sq7rPY/source/src/worker/recovery/hosted-coordinator.ts:282:48
+    at OfflineControl.registerWriter (/tmp/reflection-push-Sq7rPY/source/src/worker/recovery/hosted-coordinator.ts:280:29)
+uncaught exception; source = Uncaught (in promise); stack = Error: Environment is offline
+    at /tmp/reflection-push-Sq7rPY/source/src/worker/recovery/hosted-coordinator.ts:282:48
+    at OfflineControl.registerWriter (/tmp/reflection-push-Sq7rPY/source/src/worker/recovery/hosted-coordinator.ts:280:29)
+uncaught exception; source = Uncaught (in promise); stack = Error: Environment is offline
+    at /tmp/reflection-push-Sq7rPY/source/src/worker/recovery/hosted-coordinator.ts:282:48
+    at OfflineControl.registerWriter (/tmp/reflection-push-Sq7rPY/source/src/worker/recovery/hosted-coordinator.ts:280:29)
+stdout | tests/db/reading-record-actions.test.ts > R2 interruption keeps deletion fenced and scheduled maintenance completes it after recovery
+{"event":"maintenance_health","pendingGeneration":0,"oldestGenerationMs":0,"pendingSecurity":0,"oldestSecurityMs":0,"pendingErasure":0,"oldestErasureMs":0,"unknownProviderCosts":0,"unknownLiabilityMicrousd":0,"dailySpendMicrousd":0,"monthlySpendMicrousd":0,"dailyLimitMicrousd":10000000,"monthlyLimitMicrousd":100000000,"alerts":[]}
+
+ ✓ tests/db/runtime-boundaries.test.ts (14 tests) 1622ms
+   ✓ protected qualification bootstrap authenticates bytes and target identity: valid 453ms
+ ✓ tests/db/hosted-restore-inventory.test.ts (7 tests) 1828ms
+stdout | tests/db/reading-record-actions.test.ts > scheduled expiry erases unsaved content while a saved reading survives
+{"event":"maintenance_health","pendingGeneration":0,"oldestGenerationMs":0,"pendingSecurity":0,"oldestSecurityMs":0,"pendingErasure":0,"oldestErasureMs":0,"unknownProviderCosts":0,"unknownLiabilityMicrousd":0,"dailySpendMicrousd":0,"monthlySpendMicrousd":0,"dailyLimitMicrousd":10000000,"monthlyLimitMicrousd":100000000,"alerts":[]}
+
+ ✓ tests/db/reading-record-actions.test.ts (9 tests) 1798ms
+ ✓ tests/db/import-atomicity.test.ts (2 tests) 1162ms
+   ✓ 102 selected records across 11 encrypted previews become visible in one D1 publication 1020ms
+ ✓ tests/db/local-live.test.ts (12 tests) 1508ms
+   ✓ live-local Start uses the provider and saves exact output 306ms
+ ✓ tests/db/request-lifecycle.test.ts (12 tests) 1828ms
+ ✓ tests/db/import-privacy.test.ts (4 tests) 1232ms
+   ✓ one imported child is erased across preview, staging, alias and body at capacity, and a stale backup cannot bring it back 432ms
+   ✓ erasing an imported edition follows explicitly copied authored and session fields while preserving independent revisions and annotations 349ms
+stderr | tests/db/privacy-review-regressions.test.ts > a delayed checkpoint writer cannot recreate credential payloads after complete account deletion
+{"event":"identity_failure","correlationId":"149b624d-073e-4c3b-bc13-219cd7e38783","status":503,"code":"DEPENDENCY_UNAVAILABLE","path":"/auth/recovery/ack"}
+
+stdout | tests/db/privacy-review-regressions.test.ts > interrupted checkpoint retirement keeps deletion pending until durable markers and account erasure complete
+{"event":"maintenance_health","pendingGeneration":0,"oldestGenerationMs":0,"pendingSecurity":0,"oldestSecurityMs":0,"pendingErasure":0,"oldestErasureMs":0,"unknownProviderCosts":0,"unknownLiabilityMicrousd":0,"dailySpendMicrousd":0,"monthlySpendMicrousd":0,"dailyLimitMicrousd":null,"monthlyLimitMicrousd":null,"alerts":[]}
+
+ ✓ tests/db/privacy-review-regressions.test.ts (6 tests) 1095ms
+ ✓ tests/db/import-targets.test.ts (3 tests) 1162ms
+   ✓ exact note replay reaches encrypted group outcomes after its local rows and aliases are lost, preserving other revisions unless the whole note was erased 437ms
+   ✓ whole note replay reaches encrypted group outcomes after its local rows and aliases are lost, preserving other revisions unless the whole note was erased 446ms
+stderr | tests/db/identity.test.ts > wrong browser, origin, user verification and replay fail before account creation
+{"event":"identity_failure","correlationId":"560bd9ca-f4c7-4dd2-8176-7a302b887a2e","status":401,"code":"CHALLENGE_MISSING","path":"/auth/register"}
+
+stderr | tests/db/identity.test.ts > wrong browser, origin, user verification and replay fail before account creation
+{"event":"identity_failure","correlationId":"77efff1b-5a6c-46b6-8694-46cb7e2239c4","status":403,"code":"FORBIDDEN","path":"/auth/register"}
+
+stderr | tests/db/identity.test.ts > wrong browser, origin, user verification and replay fail before account creation
+{"event":"identity_failure","correlationId":"0d0bb887-47c0-4e49-8be8-70789f490a72","status":401,"code":"PASSKEY_VERIFICATION_REQUIRED","path":"/auth/register"}
+
+stderr | tests/db/identity.test.ts > wrong browser, origin, user verification and replay fail before account creation
+{"event":"identity_failure","correlationId":"24e94b99-c7fa-4a50-bb5c-cccdeef2248b","status":401,"code":"AUTH_FAILED","path":"/auth/register"}
+
+stderr | tests/db/identity.test.ts > login checks subject and signature counters, and logout invalidates the session
+{"event":"identity_failure","correlationId":"1420aea3-dcc2-41e8-a83d-6a5e58614abe","status":401,"code":"AUTH_FAILED","path":"/auth/authenticate"}
+
+stderr | tests/db/identity.test.ts > kit recovery alone grants no account access until replacement passkey enrollment; keys survive
+{"event":"identity_failure","correlationId":"2b4d2f12-8ea1-445f-9009-2fbc9aae437f","status":401,"code":"RECOVERY_FAILED","path":"/auth/recover"}
+
+stderr | tests/db/identity.test.ts > kit recovery alone grants no account access until replacement passkey enrollment; keys survive
+{"event":"identity_failure","correlationId":"56ec1d0c-2cd2-405e-9d39-ff84ebc302e5","status":401,"code":"AUTH_FAILED","path":"/auth/authenticate"}
+
+stderr | tests/db/identity.test.ts > CSRF, expiry and stale recovery challenges fail closed
+{"event":"identity_failure","correlationId":"c57ac9a8-f208-43a5-ae32-524a65cbda65","status":403,"code":"FORBIDDEN","path":"/auth/recovery/ack"}
+
+stderr | tests/db/identity.test.ts > CSRF, expiry and stale recovery challenges fail closed
+{"event":"identity_failure","correlationId":"c8c760bb-6228-4fc0-aa32-73e156e6079b","status":401,"code":"CHALLENGE_EXPIRED","path":"/auth/register"}
+
+stderr | tests/db/identity.test.ts > identity errors use the published envelope and never include credential details
+{"event":"identity_failure","correlationId":"1f21ae9e-41e0-4563-b7a3-4fdcbadbeb42","status":401,"code":"RECOVERY_FAILED","path":"/auth/recover"}
+
+stderr | tests/db/identity.test.ts > registration failures name the actionable cause while staying in the generic envelope
+{"event":"identity_failure","correlationId":"66db9ca7-6523-477d-af86-eddc3f6a4c71","status":401,"code":"CHALLENGE_MISSING","path":"/auth/register"}
+
+stderr | tests/db/identity.test.ts > registration failures name the actionable cause while staying in the generic envelope
+{"event":"identity_failure","correlationId":"b0375796-134a-43ea-bcc1-9c8c37638b08","status":401,"code":"CHALLENGE_EXPIRED","path":"/auth/register"}
+
+stderr | tests/db/identity.test.ts > registration failures name the actionable cause while staying in the generic envelope
+{"event":"identity_failure","correlationId":"126062c8-172e-4a92-92f5-3b8481df13c0","status":401,"code":"PASSKEY_NOT_DISCOVERABLE","path":"/auth/register"}
+
+stderr | tests/db/identity.test.ts > registration failures name the actionable cause while staying in the generic envelope
+{"event":"identity_failure","correlationId":"87910ebd-16c1-49a1-ab6c-0f58e14bdbb0","status":401,"code":"PASSKEY_VERIFICATION_REQUIRED","path":"/auth/register"}
+
+stderr | tests/db/identity.test.ts > registration failures name the actionable cause while staying in the generic envelope
+{"event":"identity_failure","correlationId":"9fe06187-0fed-4862-9c0c-cf48cbcdea5c","status":401,"code":"CHALLENGE_USED","path":"/auth/register"}
+
+stderr | tests/db/identity.test.ts > rate limits deny new challenges and do not store raw addresses
+{"event":"identity_failure","correlationId":"4a438906-a533-45a9-8f81-4540b05fb27e","status":429,"code":"RATE_LIMITED","path":"/auth/options"}
+
+stderr | tests/db/identity.test.ts > session expiry and positive authenticator counter rollback deny authentication
+{"event":"identity_failure","correlationId":"d8896aeb-081d-49ab-83b4-c13526cf4643","status":401,"code":"AUTH_FAILED","path":"/auth/authenticate"}
+
+stderr | tests/db/identity.test.ts > rotating a kit invalidates every prior handle/code and requires recent authentication
+{"event":"identity_failure","correlationId":"b43ef284-4093-4076-882f-9dbe84c3602b","status":401,"code":"RECOVERY_FAILED","path":"/auth/recover"}
+
+stderr | tests/db/identity.test.ts > rotating a kit invalidates every prior handle/code and requires recent authentication
+{"event":"identity_failure","correlationId":"8525c072-5f4d-48db-a548-636723c2157a","status":401,"code":"REAUTH_REQUIRED","path":"/auth/recovery-codes"}
+
+stdout | tests/db/identity.test.ts > scheduled maintenance removes expired auth/rate records without changing active accounts
+{"event":"maintenance_health","pendingGeneration":0,"oldestGenerationMs":0,"pendingSecurity":0,"oldestSecurityMs":0,"pendingErasure":0,"oldestErasureMs":0,"unknownProviderCosts":0,"unknownLiabilityMicrousd":0,"dailySpendMicrousd":0,"monthlySpendMicrousd":0,"dailyLimitMicrousd":null,"monthlyLimitMicrousd":null,"alerts":[]}
+
+stderr | tests/db/identity.test.ts > concurrent use of the same recovery code consumes it once and issues no full session
+{"event":"identity_failure","correlationId":"339d1495-d188-4e0f-ab5f-73de837f80de","status":401,"code":"AUTH_FAILED","path":"/auth/recover"}
+
+stdout | tests/db/privacy-erasure.test.ts > an account deletion interrupted before durable intent remains fenced and maintenance completes the same receipt
+{"event":"maintenance_health","pendingGeneration":0,"oldestGenerationMs":0,"pendingSecurity":0,"oldestSecurityMs":0,"pendingErasure":0,"oldestErasureMs":0,"unknownProviderCosts":0,"unknownLiabilityMicrousd":0,"dailySpendMicrousd":0,"monthlySpendMicrousd":0,"dailyLimitMicrousd":null,"monthlyLimitMicrousd":null,"alerts":[]}
+
+ ✓ tests/db/privacy-erasure.test.ts (6 tests) 1113ms
+ ✓ tests/db/identity.test.ts (14 tests) 980ms
+   ✓ database-clock expiry after WebAuthn verification rolls back registration without changing its deadline 516ms
+ ✓ tests/db/readings.test.ts (5 tests) 970ms
+uncaught exception; source = Uncaught (in promise); stack = Error: Environment is offline
+    at /tmp/reflection-push-Sq7rPY/source/src/worker/recovery/hosted-coordinator.ts:282:48
+    at OfflineControl.registerWriter (/tmp/reflection-push-Sq7rPY/source/src/worker/recovery/hosted-coordinator.ts:280:29)
+uncaught exception; source = Uncaught (in promise); stack = Error: Environment is offline
+    at /tmp/reflection-push-Sq7rPY/source/src/worker/recovery/hosted-coordinator.ts:282:48
+    at OfflineControl.registerWriter (/tmp/reflection-push-Sq7rPY/source/src/worker/recovery/hosted-coordinator.ts:280:29)
+uncaught exception; source = Uncaught (in promise); stack = Error: Environment is offline
+    at /tmp/reflection-push-Sq7rPY/source/src/worker/recovery/hosted-coordinator.ts:282:48
+    at OfflineControl.registerWriter (/tmp/reflection-push-Sq7rPY/source/src/worker/recovery/hosted-coordinator.ts:280:29)
+stderr | tests/db/maintenance-driver.test.ts > hosted HTTP and scheduled writers honor the independent fence even after database rollback
+{"event":"maintenance_failed"}
+
+uncaught exception; source = Uncaught (in promise); stack = Error: Environment is offline
+    at /tmp/reflection-push-Sq7rPY/source/src/worker/recovery/hosted-coordinator.ts:282:48
+    at OfflineControl.registerWriter (/tmp/reflection-push-Sq7rPY/source/src/worker/recovery/hosted-coordinator.ts:280:29)
+ ✓ tests/db/maintenance-driver.test.ts (5 tests) 921ms
+ ✓ tests/db/storage-accounting.test.ts (7 tests) 890ms
+uncaught exception; source = Uncaught (in promise); stack = Error: Recovery validation required
+    at OfflineControl.#resume (/tmp/reflection-push-Sq7rPY/source/src/worker/recovery/hosted-coordinator.ts:502:13)
+    at OfflineControl.resume (/tmp/reflection-push-Sq7rPY/source/src/worker/recovery/hosted-coordinator.ts:387:7)
+uncaught exception; source = Uncaught (in promise); stack = Error: Environment is offline
+    at /tmp/reflection-push-Sq7rPY/source/src/worker/recovery/hosted-coordinator.ts:282:48
+    at OfflineControl.registerWriter (/tmp/reflection-push-Sq7rPY/source/src/worker/recovery/hosted-coordinator.ts:280:29)
+ ✓ tests/db/recovery-validation.test.ts (2 tests) 914ms
+   ✓ signed recovery validation produced from a complete inventory resumes ingress with generation off 358ms
+   ✓ recovery validation with the wrong validator key leaves the environment offline 481ms
+stderr | tests/db/identity-account-controls.test.ts > new enrollment alone does not authorize adding another passkey or removing one
+{"event":"identity_failure","correlationId":"da0f9a64-fecb-4637-8b85-eed867afcbc1","status":401,"code":"REAUTH_REQUIRED","path":"/auth/options"}
+
+stderr | tests/db/identity-account-controls.test.ts > new enrollment alone does not authorize adding another passkey or removing one
+{"event":"identity_failure","correlationId":"34bddfd9-8bfd-4347-a0ac-d61045058712","status":401,"code":"REAUTH_REQUIRED","path":"/auth/credentials/Sb-Ee10gsh4yHzQ2rYvDGWvtPK7x864TCa828aems10"}
+
+stderr | tests/db/identity-account-controls.test.ts > additional enrollment rechecks CSRF, recent existing-passkey authentication, and live session at finish
+{"event":"identity_failure","correlationId":"ee20941b-2de4-4730-885d-aebc6ae4596c","status":403,"code":"FORBIDDEN","path":"/auth/register"}
+
+stderr | tests/db/identity-account-controls.test.ts > additional enrollment rechecks CSRF, recent existing-passkey authentication, and live session at finish
+{"event":"identity_failure","correlationId":"674218ac-d1a2-420a-817f-28acbe7a64da","status":401,"code":"REAUTH_REQUIRED","path":"/auth/register"}
+
+stderr | tests/db/identity-account-controls.test.ts > additional enrollment rechecks CSRF, recent existing-passkey authentication, and live session at finish
+{"event":"identity_failure","correlationId":"00a00578-7997-41ac-8b2e-7b1849160927","status":401,"code":"REAUTH_REQUIRED","path":"/auth/register"}
+
+ ✓ tests/db/content-activation.test.ts (16 tests) 762ms
+stderr | tests/db/identity-account-controls.test.ts > removal is owned, recent, preserves recovery, protects the final factor, and rotates the caller session
+{"event":"identity_failure","correlationId":"a1f7a890-1fae-487a-b62d-c66c4c969bd0","status":404,"code":"NOT_FOUND","path":"/auth/credentials/XkHMwiY3YO60KLdoROF-CWIvi-vVNzkckmjmArYP0-8"}
+
+stderr | tests/db/identity-account-controls.test.ts > removal is owned, recent, preserves recovery, protects the final factor, and rotates the caller session
+{"event":"identity_failure","correlationId":"2624a10c-b77d-4dac-8262-ee6b91c21ddd","status":404,"code":"NOT_FOUND","path":"/auth/credentials/pl_ExN9tD4PxOI-nkGAm2JipzmFFWusU1f5IhFHNwro"}
+
+stderr | tests/db/identity-account-controls.test.ts > removal is owned, recent, preserves recovery, protects the final factor, and rotates the caller session
+{"event":"identity_failure","correlationId":"1db7eae6-c5aa-4508-8835-0a0c7c7b9c29","status":409,"code":"LAST_CREDENTIAL","path":"/auth/credentials/62NMefeE1zgIx2Jq2Vwssf7B_i8UBFGJFwnlTwEtH78"}
+
+stderr | tests/db/identity-account-controls.test.ts > removal is owned, recent, preserves recovery, protects the final factor, and rotates the caller session
+{"event":"identity_failure","correlationId":"17a12c6b-1f18-4f1a-88c7-12d1ef643a15","status":401,"code":"AUTH_FAILED","path":"/auth/authenticate"}
+
+stderr | tests/db/identity-account-controls.test.ts > concurrent additions cannot exceed ten passkeys and a full account cannot start enrollment
+{"event":"identity_failure","correlationId":"7e2bd2d1-5aa8-4f28-a739-3e1b5c7578f4","status":401,"code":"AUTH_FAILED","path":"/auth/register"}
+
+stderr | tests/db/identity-account-controls.test.ts > concurrent additions cannot exceed ten passkeys and a full account cannot start enrollment
+{"event":"identity_failure","correlationId":"a7b18f7e-db9d-413b-80d1-9c0a5bf36dd4","status":409,"code":"CREDENTIAL_LIMIT","path":"/auth/options"}
+
+stderr | tests/db/identity-account-controls.test.ts > a credential already owned by another account cannot fence or merge the enrollment account
+{"event":"identity_failure","correlationId":"8989451d-5179-4153-b4a5-cd332979f981","status":409,"code":"CREDENTIAL_EXISTS","path":"/auth/register"}
+
+stderr | tests/db/identity-account-controls.test.ts > checkpoint outage never acknowledges enrollment or grants its replacement session and maintenance resumes it
+{"event":"identity_failure","correlationId":"4d030991-fb56-4bbe-9390-1afee1805206","status":503,"code":"DEPENDENCY_UNAVAILABLE","path":"/auth/register"}
+
+stderr | tests/db/identity-account-controls.test.ts > logout-all requires CSRF and atomically revokes every session and owned challenge
+{"event":"identity_failure","correlationId":"98f75e27-b04f-401b-a0ce-5d8e4dea240f","status":403,"code":"FORBIDDEN","path":"/auth/logout-all"}
+
+stderr | tests/db/identity-account-controls.test.ts > logout-all requires CSRF and atomically revokes every session and owned challenge
+{"event":"identity_failure","correlationId":"de00d457-8e40-4da2-8ab3-9ced4c656f91","status":401,"code":"CHALLENGE_MISSING","path":"/auth/register"}
+
+stderr | tests/db/identity-account-controls.test.ts > five failed kit checks block both that handle and that IP without storing the secrets
+{"event":"identity_failure","correlationId":"af390357-8364-4661-be7c-a3f35d220ff4","status":401,"code":"RECOVERY_FAILED","path":"/auth/recover"}
+
+stderr | tests/db/identity-account-controls.test.ts > five failed kit checks block both that handle and that IP without storing the secrets
+{"event":"identity_failure","correlationId":"c485e5b2-8a12-4277-9a69-d38437b65fa9","status":401,"code":"RECOVERY_FAILED","path":"/auth/recover"}
+
+stderr | tests/db/identity-account-controls.test.ts > five failed kit checks block both that handle and that IP without storing the secrets
+{"event":"identity_failure","correlationId":"8f7583cd-0550-496e-8c70-6154cc72b7da","status":401,"code":"RECOVERY_FAILED","path":"/auth/recover"}
+
+stderr | tests/db/identity-account-controls.test.ts > five failed kit checks block both that handle and that IP without storing the secrets
+{"event":"identity_failure","correlationId":"d29bb840-7e5a-4c34-bccb-9694cad29a49","status":401,"code":"RECOVERY_FAILED","path":"/auth/recover"}
+
+ ✓ tests/db/key-rotation-operator.test.ts (8 tests) 592ms
+stderr | tests/db/identity-account-controls.test.ts > five failed kit checks block both that handle and that IP without storing the secrets
+{"event":"identity_failure","correlationId":"a0f67234-c939-4e8a-b74e-97d8069b82a1","status":401,"code":"RECOVERY_FAILED","path":"/auth/recover"}
+
+stderr | tests/db/identity-account-controls.test.ts > five failed kit checks block both that handle and that IP without storing the secrets
+{"event":"identity_failure","correlationId":"dd6b3ff7-29f9-499a-a6f2-3f64825296ad","status":429,"code":"RATE_LIMITED","path":"/auth/recover"}
+
+stderr | tests/db/identity-account-controls.test.ts > five failed kit checks block both that handle and that IP without storing the secrets
+{"event":"identity_failure","correlationId":"2539d204-0965-4ee4-a0b5-b97dbc5738e8","status":429,"code":"RATE_LIMITED","path":"/auth/recover"}
+
+stderr | tests/db/identity-account-controls.test.ts > credential removal accepts the published bodyless DELETE and rejects an expired passkey assertion
+{"event":"identity_failure","correlationId":"ff8eb674-5f97-464e-baea-be2d44f1b78c","status":401,"code":"REAUTH_REQUIRED","path":"/auth/credentials/ZcFiWP4Yc5RJuIQUrZfYScTyGHXChBtvExs9It5e8wY"}
+
+stderr | tests/db/identity-account-controls.test.ts > a recovery checkpoint dependency failure does not consume the failure budget
+{"event":"identity_failure","correlationId":"08294370-96c2-46e6-9518-043662ac78aa","status":503,"code":"DEPENDENCY_UNAVAILABLE","path":"/auth/recover"}
+
+ ✓ tests/db/identity-account-controls.test.ts (13 tests) 662ms
+ ✓ tests/db/reading-v2.test.ts (3 tests) 527ms
+ ✓ tests/db/maintenance-health.test.ts (4 tests) 512ms
+ ✓ tests/db/context-fences.test.ts (25 tests) 575ms
+ ✓ tests/db/data-key-versions.test.ts (3 tests) 497ms
+   ✓ new readings and reflections use current v2 while exact v1 readings and exports remain readable 318ms
+ ✓ tests/db/context-export.test.ts (2 tests) 425ms
+   ✓ export pages include historical eligibility and the exact encrypted excerpt of a request 304ms
+ ✓ tests/db/import-roundtrip.test.ts (2 tests) 463ms
+ ✓ tests/db/key-rotation.test.ts (6 tests) 424ms
+uncaught exception; source = Uncaught (in promise); stack = Error: Offline lease unavailable
+    at OfflineControl.#current (/tmp/reflection-push-Sq7rPY/source/src/worker/recovery/hosted-coordinator.ts:274:13)
+    at OfflineControl.assertCurrent (/tmp/reflection-push-Sq7rPY/source/src/worker/recovery/hosted-coordinator.ts:330:10)
+uncaught exception; source = Uncaught (in promise); stack = Error: Environment is offline
+    at /tmp/reflection-push-Sq7rPY/source/src/worker/recovery/hosted-coordinator.ts:282:48
+    at OfflineControl.registerWriter (/tmp/reflection-push-Sq7rPY/source/src/worker/recovery/hosted-coordinator.ts:280:29)
+uncaught exception; source = Uncaught (in promise); stack = Error: Offline operation already active
+    at /tmp/reflection-push-Sq7rPY/source/src/worker/recovery/hosted-coordinator.ts:312:15
+    at OfflineControl.acquire (/tmp/reflection-push-Sq7rPY/source/src/worker/recovery/hosted-coordinator.ts:304:29)
+uncaught exception; source = Uncaught (in promise); stack = Error: Environment is offline
+    at /tmp/reflection-push-Sq7rPY/source/src/worker/recovery/hosted-coordinator.ts:282:48
+    at OfflineControl.registerWriter (/tmp/reflection-push-Sq7rPY/source/src/worker/recovery/hosted-coordinator.ts:280:29)
+uncaught exception; source = Uncaught (in promise); stack = Error: Recovery validation required
+    at OfflineControl.#resume (/tmp/reflection-push-Sq7rPY/source/src/worker/recovery/hosted-coordinator.ts:481:47)
+    at OfflineControl.resume (/tmp/reflection-push-Sq7rPY/source/src/worker/recovery/hosted-coordinator.ts:387:7)
+uncaught exception; source = Uncaught (in promise); stack = Error: Offline lease unavailable
+    at OfflineControl.#current (/tmp/reflection-push-Sq7rPY/source/src/worker/recovery/hosted-coordinator.ts:274:13)
+    at OfflineControl.assertCurrent (/tmp/reflection-push-Sq7rPY/source/src/worker/recovery/hosted-coordinator.ts:330:10)
+uncaught exception; source = Uncaught (in promise); stack = Error: Offline lease unavailable
+    at OfflineControl.#current (/tmp/reflection-push-Sq7rPY/source/src/worker/recovery/hosted-coordinator.ts:274:13)
+    at OfflineControl.assertCurrent (/tmp/reflection-push-Sq7rPY/source/src/worker/recovery/hosted-coordinator.ts:330:10)
+    at OfflineControl.beginOffline (/tmp/reflection-push-Sq7rPY/source/src/worker/recovery/hosted-coordinator.ts:339:5)
+uncaught exception; source = Uncaught (in promise); stack = Error: Offline lease unavailable
+    at OfflineControl.#current (/tmp/reflection-push-Sq7rPY/source/src/worker/recovery/hosted-coordinator.ts:274:13)
+    at OfflineControl.assertCurrent (/tmp/reflection-push-Sq7rPY/source/src/worker/recovery/hosted-coordinator.ts:330:10)
+    at OfflineControl.complete (/tmp/reflection-push-Sq7rPY/source/src/worker/recovery/hosted-coordinator.ts:362:5)
+uncaught exception; source = Uncaught (in promise); stack = Error: Offline operation already active
+    at /tmp/reflection-push-Sq7rPY/source/src/worker/recovery/hosted-coordinator.ts:312:15
+    at OfflineControl.acquire (/tmp/reflection-push-Sq7rPY/source/src/worker/recovery/hosted-coordinator.ts:304:29)
+uncaught exception; source = Uncaught (in promise); stack = Error: Offline lease unavailable
+    at OfflineControl.#current (/tmp/reflection-push-Sq7rPY/source/src/worker/recovery/hosted-coordinator.ts:274:13)
+    at OfflineControl.assertCurrent (/tmp/reflection-push-Sq7rPY/source/src/worker/recovery/hosted-coordinator.ts:330:10)
+uncaught exception; source = Uncaught (in promise); stack = Error: Offline control unavailable
+    at OfflineControl.#authenticate (/tmp/reflection-push-Sq7rPY/source/src/worker/recovery/hosted-coordinator.ts:125:13)
+    at OfflineControl.acquire (/tmp/reflection-push-Sq7rPY/source/src/worker/recovery/hosted-coordinator.ts:302:5)
+uncaught exception; source = Uncaught (in promise); stack = ZodError: [
+  {
+    "origin": "string",
+    "code": "invalid_format",
+    "format": "regex",
+    "pattern": "/^[a-f0-9]{64}$/",
+    "path": [],
+    "message": "Invalid string: must match pattern /^[a-f0-9]{64}$/"
+  }
+]
+    at OfflineControl.complete (/tmp/reflection-push-Sq7rPY/source/src/worker/recovery/hosted-coordinator.ts:363:10)
+uncaught exception; source = Uncaught (in promise); stack = Error: Offline lease unavailable
+    at OfflineControl.#current (/tmp/reflection-push-Sq7rPY/source/src/worker/recovery/hosted-coordinator.ts:274:13)
+    at OfflineControl.assertCurrent (/tmp/reflection-push-Sq7rPY/source/src/worker/recovery/hosted-coordinator.ts:330:10)
+uncaught exception; source = Uncaught (in promise); stack = Error: Environment is offline
+    at /tmp/reflection-push-Sq7rPY/source/src/worker/recovery/hosted-coordinator.ts:282:48
+    at OfflineControl.registerWriter (/tmp/reflection-push-Sq7rPY/source/src/worker/recovery/hosted-coordinator.ts:280:29)
+uncaught exception; source = Uncaught (in promise); stack = Error: Recovery validation required
+    at OfflineControl.#resume (/tmp/reflection-push-Sq7rPY/source/src/worker/recovery/hosted-coordinator.ts:528:13)
+    at OfflineControl.resume (/tmp/reflection-push-Sq7rPY/source/src/worker/recovery/hosted-coordinator.ts:387:7)
+uncaught exception; source = Uncaught (in promise); stack = Error: Offline lease unavailable
+    at OfflineControl.#current (/tmp/reflection-push-Sq7rPY/source/src/worker/recovery/hosted-coordinator.ts:274:13)
+    at OfflineControl.assertCurrent (/tmp/reflection-push-Sq7rPY/source/src/worker/recovery/hosted-coordinator.ts:330:10)
+uncaught exception; source = Uncaught (in promise); stack = ZodError: [
+  {
+    "expected": "object",
+    "code": "invalid_type",
+    "path": [
+      "document"
+    ],
+    "message": "Invalid input: expected object, received undefined"
+  },
+  {
+    "expected": "string",
+    "code": "invalid_type",
+    "path": [
+      "signature"
+    ],
+    "message": "Invalid input: expected string, received undefined"
+  },
+  {
+    "code": "unrecognized_keys",
+    "keys": [
+      "version",
+      "producer",
+      "status",
+      "environmentId",
+      "operationId",
+      "epoch",
+      "sourceDigest",
+      "configurationDigest",
+      "backupInventoryDigest",
+      "recoveryValidationDigest",
+      "financialReconciliationDigest",
+      "validatedAt",
+      "generation"
+    ],
+    "path": [],
+    "message": "Unrecognized keys: \"version\", \"producer\", \"status\", \"environmentId\", \"operationId\", \"epoch\", \"sourceDigest\", \"configurationDigest\", \"backupInventoryDigest\", \"recoveryValidationDigest\", \"financialReconciliationDigest\", \"validatedAt\", \"generation\""
+  }
+]
+    at OfflineControl.#resume (/tmp/reflection-push-Sq7rPY/source/src/worker/recovery/hosted-coordinator.ts:485:47)
+    at OfflineControl.resume (/tmp/reflection-push-Sq7rPY/source/src/worker/recovery/hosted-coordinator.ts:387:7)
+uncaught exception; source = Uncaught (in promise); stack = Error: Environment is offline
+    at /tmp/reflection-push-Sq7rPY/source/src/worker/recovery/hosted-coordinator.ts:282:48
+    at OfflineControl.registerWriter (/tmp/reflection-push-Sq7rPY/source/src/worker/recovery/hosted-coordinator.ts:280:29)
+uncaught exception; source = Uncaught (in promise); stack = Error: Recovery validation required
+    at OfflineControl.#resume (/tmp/reflection-push-Sq7rPY/source/src/worker/recovery/hosted-coordinator.ts:514:13)
+    at OfflineControl.resume (/tmp/reflection-push-Sq7rPY/source/src/worker/recovery/hosted-coordinator.ts:387:7)
+uncaught exception; source = Uncaught (in promise); stack = Error: Environment is offline
+    at /tmp/reflection-push-Sq7rPY/source/src/worker/recovery/hosted-coordinator.ts:282:48
+    at OfflineControl.registerWriter (/tmp/reflection-push-Sq7rPY/source/src/worker/recovery/hosted-coordinator.ts:280:29)
+uncaught exception; source = Uncaught (in promise); stack = Error: Offline mutation already running
+    at /tmp/reflection-push-Sq7rPY/source/src/worker/recovery/hosted-coordinator.ts:344:32
+    at OfflineControl.beginOffline (/tmp/reflection-push-Sq7rPY/source/src/worker/recovery/hosted-coordinator.ts:340:22)
+uncaught exception; source = Uncaught (in promise); stack = Error: Offline operation is complete
+    at /tmp/reflection-push-Sq7rPY/source/src/worker/recovery/hosted-coordinator.ts:343:53
+    at OfflineControl.beginOffline (/tmp/reflection-push-Sq7rPY/source/src/worker/recovery/hosted-coordinator.ts:340:22)
+uncaught exception; source = Uncaught (in promise); stack = Error: Environment is offline
+    at /tmp/reflection-push-Sq7rPY/source/src/worker/recovery/hosted-coordinator.ts:282:48
+    at OfflineControl.registerWriter (/tmp/reflection-push-Sq7rPY/source/src/worker/recovery/hosted-coordinator.ts:280:29)
+uncaught exception; source = Uncaught (in promise); stack = Error: Independent quiescence signature required
+    at OfflineControl.reconcileRegistrations (/tmp/reflection-push-Sq7rPY/source/src/worker/recovery/hosted-coordinator.ts:211:13)
+uncaught exception; source = Uncaught (in promise); stack = Error: Offline lease unavailable
+    at OfflineControl.#current (/tmp/reflection-push-Sq7rPY/source/src/worker/recovery/hosted-coordinator.ts:274:13)
+    at OfflineControl.assertCurrent (/tmp/reflection-push-Sq7rPY/source/src/worker/recovery/hosted-coordinator.ts:330:10)
+uncaught exception; source = Uncaught (in promise); stack = Error: Environment is offline
+    at /tmp/reflection-push-Sq7rPY/source/src/worker/recovery/hosted-coordinator.ts:282:48
+    at OfflineControl.registerWriter (/tmp/reflection-push-Sq7rPY/source/src/worker/recovery/hosted-coordinator.ts:280:29)
+uncaught exception; source = Uncaught (in promise); stack = Error: Stale or incomplete quiescence proof
+    at OfflineControl.reconcileRegistrations (/tmp/reflection-push-Sq7rPY/source/src/worker/recovery/hosted-coordinator.ts:224:13)
+uncaught exception; source = Uncaught (in promise); stack = Error: Independent quiescence signature required
+    at OfflineControl.reconcileRegistrations (/tmp/reflection-push-Sq7rPY/source/src/worker/recovery/hosted-coordinator.ts:211:13)
+uncaught exception; source = Uncaught (in promise); stack = Error: Offline lease unavailable
+    at OfflineControl.#current (/tmp/reflection-push-Sq7rPY/source/src/worker/recovery/hosted-coordinator.ts:274:13)
+    at OfflineControl.assertCurrent (/tmp/reflection-push-Sq7rPY/source/src/worker/recovery/hosted-coordinator.ts:330:10)
+uncaught exception; source = Uncaught (in promise); stack = Error: Environment is offline
+    at /tmp/reflection-push-Sq7rPY/source/src/worker/recovery/hosted-coordinator.ts:282:48
+    at OfflineControl.registerWriter (/tmp/reflection-push-Sq7rPY/source/src/worker/recovery/hosted-coordinator.ts:280:29)
+uncaught exception; source = Uncaught (in promise); stack = Error: Stale or incomplete quiescence proof
+    at OfflineControl.reconcileRegistrations (/tmp/reflection-push-Sq7rPY/source/src/worker/recovery/hosted-coordinator.ts:224:13)
+uncaught exception; source = Uncaught (in promise); stack = Error: Offline operation already active
+    at /tmp/reflection-push-Sq7rPY/source/src/worker/recovery/hosted-coordinator.ts:312:15
+    at OfflineControl.acquire (/tmp/reflection-push-Sq7rPY/source/src/worker/recovery/hosted-coordinator.ts:304:29)
+uncaught exception; source = Uncaught (in promise); stack = Error: D1_ERROR: CHECK constraint failed: ok = 1: SQLITE_CONSTRAINT (extended: SQLITE_CONSTRAINT_CHECK)
+    at D1DatabaseSessionAlwaysPrimary._sendOrThrow (cloudflare-internal:d1-api:193:19)
+    at async cloudflare-internal:d1-api:142:19
+    at OfflineControl.#resume (/tmp/reflection-push-Sq7rPY/source/src/worker/recovery/hosted-coordinator.ts:536:5)
+    at OfflineControl.resume (/tmp/reflection-push-Sq7rPY/source/src/worker/recovery/hosted-coordinator.ts:387:7)
+uncaught exception; source = Uncaught (in promise); stack = Error: Offline lease unavailable
+    at OfflineControl.#current (/tmp/reflection-push-Sq7rPY/source/src/worker/recovery/hosted-coordinator.ts:274:13)
+    at OfflineControl.assertCurrent (/tmp/reflection-push-Sq7rPY/source/src/worker/recovery/hosted-coordinator.ts:330:10)
+uncaught exception; source = Uncaught (in promise); stack = Error: Offline lease unavailable
+    at OfflineControl.#current (/tmp/reflection-push-Sq7rPY/source/src/worker/recovery/hosted-coordinator.ts:274:13)
+    at OfflineControl.assertCurrent (/tmp/reflection-push-Sq7rPY/source/src/worker/recovery/hosted-coordinator.ts:330:10)
+uncaught exception; source = Uncaught (in promise); stack = Error: Environment is offline
+    at /tmp/reflection-push-Sq7rPY/source/src/worker/recovery/hosted-coordinator.ts:282:48
+    at OfflineControl.registerWriter (/tmp/reflection-push-Sq7rPY/source/src/worker/recovery/hosted-coordinator.ts:280:29)
+uncaught exception; source = Uncaught (in promise); stack = Error: Offline operation cannot be aborted
+    at OfflineControl.#abandoned (/tmp/reflection-push-Sq7rPY/source/src/worker/recovery/hosted-coordinator.ts:406:13)
+    at /tmp/reflection-push-Sq7rPY/source/src/worker/recovery/hosted-coordinator.ts:419:12
+    at OfflineControl.abort (/tmp/reflection-push-Sq7rPY/source/src/worker/recovery/hosted-coordinator.ts:417:22)
+uncaught exception; source = Uncaught (in promise); stack = Error: Environment is offline
+    at /tmp/reflection-push-Sq7rPY/source/src/worker/recovery/hosted-coordinator.ts:282:48
+    at OfflineControl.registerWriter (/tmp/reflection-push-Sq7rPY/source/src/worker/recovery/hosted-coordinator.ts:280:29)
+ ✓ tests/db/offline-coordination.test.ts (17 tests) 486ms
+uncaught exception; source = Uncaught (in promise); stack = Error: Environment is offline
+    at /tmp/reflection-push-Sq7rPY/source/src/worker/recovery/hosted-coordinator.ts:282:48
+    at OfflineControl.registerWriter (/tmp/reflection-push-Sq7rPY/source/src/worker/recovery/hosted-coordinator.ts:280:29)
+ ✓ tests/db/hosted-restore.test.ts (2 tests) 514ms
+   ✓ hosted restore uses configured identity/content, reestablishes the independent epoch and leaves ingress closed 431ms
+stderr | tests/db/identity-credential-reservation.test.ts > competing enrollment reserves one credential ID before either checkpoint can become durable
+{"event":"identity_failure","correlationId":"6b843e6c-22c7-43d7-beaf-fc9e821e3073","status":401,"code":"AUTH_FAILED","path":"/auth/register"}
+
+stderr | tests/db/identity-credential-reservation.test.ts > a register credential reservation stays unusable until its checkpoint is durable
+{"event":"identity_failure","correlationId":"a4686d50-95e3-42b1-94b1-7ccb3e7195fc","status":503,"code":"DEPENDENCY_UNAVAILABLE","path":"/auth/register"}
+
+stderr | tests/db/identity-credential-reservation.test.ts > a register credential reservation stays unusable until its checkpoint is durable
+{"event":"identity_failure","correlationId":"657559a6-20be-4696-964a-21fbbcd20b6e","status":401,"code":"AUTH_FAILED","path":"/auth/authenticate"}
+
+stderr | tests/db/identity-credential-reservation.test.ts > a add credential reservation stays unusable until its checkpoint is durable
+{"event":"identity_failure","correlationId":"47a6723f-29ea-42ac-8256-9f81c4caf6f8","status":503,"code":"DEPENDENCY_UNAVAILABLE","path":"/auth/register"}
+
+stderr | tests/db/identity-credential-reservation.test.ts > a add credential reservation stays unusable until its checkpoint is durable
+{"event":"identity_failure","correlationId":"21bf580b-da14-4dc6-8ac4-e4fc73a6c66a","status":401,"code":"AUTH_FAILED","path":"/auth/authenticate"}
+
+stderr | tests/db/identity-credential-reservation.test.ts > a add credential reservation stays unusable until its checkpoint is durable
+{"event":"identity_failure","correlationId":"361f2be7-8ed7-44b7-a4f1-355c11c9bcc6","status":503,"code":"DEPENDENCY_UNAVAILABLE","path":"/auth/credentials"}
+
+stderr | tests/db/identity-credential-reservation.test.ts > a recover credential reservation stays unusable until its checkpoint is durable
+{"event":"identity_failure","correlationId":"85fda4dd-2b42-42ca-8210-9f3719aa83f4","status":503,"code":"DEPENDENCY_UNAVAILABLE","path":"/auth/register"}
+
+stderr | tests/db/identity-credential-reservation.test.ts > a recover credential reservation stays unusable until its checkpoint is durable
+{"event":"identity_failure","correlationId":"d35b62ac-82a5-45cd-a197-c187f277f70e","status":401,"code":"AUTH_FAILED","path":"/auth/authenticate"}
+
+ ✓ tests/db/identity-credential-reservation.test.ts (4 tests) 302ms
+ ✓ tests/db/import-export.test.ts (1 test) 289ms
+ ✓ tests/db/context-routes.test.ts (1 test) 306ms
+ ✓ tests/db/context-compatibility.test.ts (1 test) 251ms
+ ✓ tests/db/import-routes.test.ts (1 test) 207ms
+ ✓ tests/db/provider-cost.test.ts (9 tests) 239ms
+stdout | tests/db/identity-checkpoint.test.ts > R2 failure leaves reserved credentials unusable behind a resumable fence without granting sessions
+{"event":"maintenance_health","pendingGeneration":0,"oldestGenerationMs":0,"pendingSecurity":0,"oldestSecurityMs":0,"pendingErasure":0,"oldestErasureMs":0,"unknownProviderCosts":0,"unknownLiabilityMicrousd":0,"dailySpendMicrousd":0,"monthlySpendMicrousd":0,"dailyLimitMicrousd":null,"monthlyLimitMicrousd":null,"alerts":[]}
+
+ ✓ tests/db/identity-checkpoint.test.ts (6 tests) 184ms
+ ✓ tests/db/backup-inventory.test.ts (7 tests) 97ms
+ ✓ tests/db/integration.test.ts (1 test) 150ms
+ ✓ tests/db/provider-policy-migration.test.ts (1 test) 87ms
+ ✓ tests/db/revisit-migration.test.ts (1 test) 88ms
+ ✓ tests/db/import-migration.test.ts (1 test) 84ms
+ ✓ tests/db/context-migration.test.ts (1 test) 86ms
+ ✓ tests/db/scaffold.test.ts (2 tests) 80ms
+ ✓ tests/db/provider-qualification.test.ts (1 test) 6ms
+ ✓ tests/db/provider-cost-migration.test.ts (1 test) 59ms
+uncaught exception; source = Uncaught (in promise); stack = Error: Offline lease unavailable
+    at OfflineControl.#current (/tmp/reflection-push-Sq7rPY/source/src/worker/recovery/hosted-coordinator.ts:274:13)
+    at OfflineControl.assertCurrent (/tmp/reflection-push-Sq7rPY/source/src/worker/recovery/hosted-coordinator.ts:330:10)
+ ✓ tests/db/writer-quiescence.test.ts (2 tests) 14ms
+
+ Test Files  62 passed (62)
+      Tests  619 passed (619)
+   Start at  01:30:48
+   Duration  66.41s (tests 68%, transform 20%, import 12%)
+
+    Isolate  62 workers spawned · ~362ms startup each (spawn + environment, per file)
+             at least ~7.12s faster with isolate: false — reuses workers across files instead of one per file
+
+JSON report written to /tmp/reflection-push-Sq7rPY/source/artifacts/db-tests.json
+[verify] confirmed 619 executed tests across 62 files; zero skipped
+
+[verify] client production build
+[36mvite v8.3.5 [32mbuilding client environment for production...[36m[39m
+transforming...
+✓ 187 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/client/index.html                                                0.41 kB │ gzip:   0.28 kB
+dist/client/assets/mobile-corner-80-mXqp_oyF.webp                     7.13 kB
+dist/client/assets/figtree-latin-ext-wght-normal-DCwSJGxG.woff2      10.28 kB
+dist/client/assets/figtree-latin-ext-wght-italic-Q0qr0lrZ.woff2      10.37 kB
+dist/client/assets/account-sprig-160-BYW84haY.webp                   10.96 kB
+dist/client/assets/outfit-latin-ext-wght-normal-DdQaqQDo.woff2       14.80 kB
+dist/client/assets/spiral-bloom-DP-0uNhx.svg                         17.48 kB │ gzip:   7.28 kB
+dist/client/assets/figtree-latin-wght-normal-D_ZTVpCC.woff2          20.15 kB
+dist/client/assets/figtree-latin-wght-italic-BEAWuiTz.woff2          20.92 kB
+dist/client/assets/mobile-corner-160-DxtimyD_.webp                   21.63 kB
+dist/client/assets/spread-ribbon-320-B7scGEBE.webp                   27.47 kB
+dist/client/assets/outfit-latin-wght-normal-Bc-8i84L.woff2           32.29 kB
+dist/client/assets/account-sprig-320-C7sWf4hU.webp                   33.30 kB
+dist/client/assets/jetbrains-mono-latin-wght-normal-B9CIFXIH.woff2   40.40 kB
+dist/client/assets/mobile-corner-240-DUksp57g.webp                   42.88 kB
+dist/client/assets/three-card-spread-320-CsWohK6j.webp               49.36 kB
+dist/client/assets/study-return-C9F7wGev.jpg                         52.31 kB
+dist/client/assets/study-stillness-Ci_sHAXQ.jpg                      58.92 kB
+dist/client/assets/study-tension-dp-MHMAq.jpg                        73.11 kB
+dist/client/assets/study-possibility-BQcKT-wb.jpg                    75.26 kB
+dist/client/assets/study-inquiry-CqDDKxCr.jpg                        83.80 kB
+dist/client/assets/spread-ribbon-640-KHSCiQ27.webp                   85.66 kB
+dist/client/assets/account-sprig-560-BvX-PKxo.webp                   86.40 kB
+dist/client/assets/newsreader-latin-ext-opsz-normal-BQn1nviT.woff2   86.60 kB
+dist/client/assets/study-perspective-DhFS8mrh.jpg                    88.89 kB
+dist/client/assets/newsreader-latin-opsz-normal-s-izfB6B.woff2      132.00 kB
+dist/client/assets/three-card-spread-640-D6MoPW0H.webp              160.38 kB
+dist/client/assets/spread-ribbon-960-iTMsAU63.webp                  178.84 kB
+dist/client/assets/index-CMsfjTUG.css                                47.43 kB │ gzip:   9.37 kB
+dist/client/assets/index-DPThcFe_.js                                496.56 kB │ gzip: 148.82 kB
+
+[32m✓ built in 136ms[39m
+
+[verify] Worker dry-run build
+
+ ⛅️ wrangler 4.153.0
+────────────────────
+✨ Read 31 files from the assets directory /tmp/reflection-push-Sq7rPY/source/dist/client
+Total Upload: 2424.67 KiB / gzip: 422.48 KiB
+Your Worker has access to the following bindings:
+Binding                            Resource
+env.DB (reflection-local)          D1 Database
+env.ASSETS                         Assets
+
+--dry-run: exiting now.
+
+[verify] identity and saved-reading browser journeys
+
+Running 147 tests using 2 workers
+
+  ✓    2 tests/browser/design-system.spec.ts:16:1 › exact palette, local typography and responsive Paper and Evening landing (739ms)
+  ✓    3 tests/browser/design-system.spec.ts:68:1 › theme follows System, persists explicit choices and synchronizes tabs (331ms)
+  ✓    4 tests/browser/design-system.spec.ts:93:1 › theme control works when preference storage is unavailable (128ms)
+  ✓    5 tests/browser/design-system.spec.ts:108:1 › changing themes preserves the in-memory reading draft and field description (618ms)
+  ✓    6 tests/browser/identity-account-controls.spec.ts:11:1 › a signed-in person adds a passkey, removes the old one, and signs out every session (1.1s)
+  ✓    7 tests/browser/identity-account-controls.spec.ts:94:1 › an ended session clears the workspace and announces signing in again as a notice (443ms)
+  ✓    8 tests/browser/identity-account-controls.spec.ts:114:1 › account settings appear only on the account page, never beside the readings (550ms)
+  ✓    9 tests/browser/identity-account-controls.spec.ts:153:1 › an unsaved reflection asks before the account page closes it, from the link or browser Back (3.3s)
+  ✓   10 tests/browser/identity-account-controls.spec.ts:190:1 › an unsaved question asks before the account page and Back to readings returns to the form (616ms)
+  ✓   11 tests/browser/identity-account-controls.spec.ts:221:3 › an unsaved photo ready asks before account navigation even without a question (626ms)
+  ✓    1 tests/browser/follow-up.spec.ts:19:1 › follow-ups keep their exact parents, questions and saved family across reload and deletion (9.1s)
+  ✓   12 tests/browser/identity-account-controls.spec.ts:221:3 › an unsaved photo preparing asks before account navigation even without a question (701ms)
+  ✓   14 tests/browser/identity-account-controls.spec.ts:267:3 › account navigation by link asks before discarding a question hidden in history (988ms)
+  ✓   15 tests/browser/identity-account-controls.spec.ts:267:3 › account navigation by Back asks before discarding a question hidden in history (843ms)
+  ✓   16 tests/browser/identity-account-controls.spec.ts:311:5 › account navigation by Back returns to the current form (549ms)
+  ✓   13 tests/browser/follow-up.spec.ts:100:1 › concurrent family deletion returns to the follow-up draft and reconnect never resubmits it (3.2s)
+  ✓   18 tests/browser/follow-up.spec.ts:139:1 › a revoked source reports confirmed pre-dispatch or possible prior sending from the request events (611ms)
+  ✓   19 tests/browser/identity.spec.ts:20:1 › complete downloaded kit recovers the same account in a new browser without the original passkey (1.5s)
+  ✓   17 tests/browser/identity-account-controls.spec.ts:311:5 › account navigation by Back returns to the current reading (3.0s)
+  ✓   20 tests/browser/identity.spec.ts:130:1 › cross-tab invalidation prevents a delayed registration response from restoring a kit (457ms)
+  ✓   21 tests/browser/identity-account-controls.spec.ts:311:5 › account navigation by Forward returns to the current form (482ms)
+  ✓   22 tests/browser/identity.spec.ts:164:1 › a transient session-refresh error preserves the newly issued one-time kit (465ms)
+  ✓   24 tests/browser/identity.spec.ts:180:1 › the local maintenance driver invokes the running Worker scheduled handler (144ms)
+  ✓   25 tests/browser/identity.spec.ts:185:1 › an explicitly invalidated session clears a replacement kit after rotation (573ms)
+  ✓   23 tests/browser/identity-account-controls.spec.ts:311:5 › account navigation by Forward returns to the current reading (3.0s)
+  ✓   26 tests/browser/imports.spec.ts:8:1 › review, interrupted commit, resume and exact reopen of an imported Tarot reading with AI off (2.5s)
+  ✓   27 tests/browser/identity-account-controls.spec.ts:356:1 › a session check keeps the reading workspace visible and its draft intact while blocking interaction (601ms)
+  ✓   28 tests/browser/imports.spec.ts:126:1 › versioned Patternlike files, native Pixel and invalid input are distinguishable before staging (639ms)
+  ✓   29 tests/browser/identity-account-controls.spec.ts:393:1 › cancelling the passkey prompt leaves credentials unchanged and account controls usable (589ms)
+  ✓   31 tests/browser/identity-account-controls.spec.ts:415:1 › a failed recovery-kit replacement keeps the freshly authenticated account controls usable (628ms)
+  ✓   30 tests/browser/imports.spec.ts:159:1 › a staged group reopens by ID after reload and shows its original selection before confirmation (950ms)
+  ✓   33 tests/browser/imports.spec.ts:186:1 › changed journal content needs an explicit new source revision and expired review clears private file state (1.1s)
+  ✓   34 tests/browser/imports.spec.ts:240:1 › an imported deletion reopens as the recorded unavailable edition without offering a follow-up (909ms)
+  ✓   35 tests/browser/journey-accessibility.spec.ts:9:1 › keyboard photo attachment and removal announce their outcomes without submitting (513ms)
+  ✓   32 tests/browser/interface-clarity.spec.ts:7:1 › saved history distinguishes loading, failure and a successful retry (3.0s)
+  ✓   37 tests/browser/interface-clarity.spec.ts:41:1 › sign-in keeps one environment notice and drops repeated chrome (144ms)
+  ✓   38 tests/browser/interface-clarity.spec.ts:53:1 › the new-reading form keeps transmission limits without build jargon (550ms)
+  ✓   36 tests/browser/journey-accessibility.spec.ts:45:1 › keyboard reading deletion keeps focus through confirmation, cancellation and return (2.9s)
+  ✓   39 tests/browser/interface-clarity.spec.ts:85:1 › saved readings are listed by date and question without a decorative thumbnail (3.1s)
+  ✓   40 tests/browser/journey-cross-browser.spec.ts:8:1 › keyboard upload, processing, save, reflection, Account and exact return journey (1.6s)
+  ✓   41 tests/browser/interface-clarity.spec.ts:115:1 › browser Back returns from a saved reading to its list and Forward reopens it (3.3s)
+  ✓   42 tests/browser/journey-forced-colors.spec.ts:6:3 › forced colors with light preference: controls and exact saved return (14.8s)
+  ✓   43 tests/browser/journey-layout.spec.ts:19:5 › 320px light: full journey, long content and enlarged layout (12.3s)
+  ✓   45 tests/browser/journey-layout.spec.ts:19:5 › 320px dark: full journey, long content and enlarged layout (12.5s)
+  ✓   44 tests/browser/journey-forced-colors.spec.ts:6:3 › forced colors with dark preference: controls and exact saved return (14.6s)
+  ✓   46 tests/browser/journey-layout.spec.ts:19:5 › 390px light: full journey, long content and enlarged layout (12.4s)
+  ✓   48 tests/browser/journey-layout.spec.ts:19:5 › 390px dark: full journey, long content and enlarged layout (12.5s)
+  ✓   47 tests/browser/journey-native-zoom.spec.ts:18:3 › native Chromium 200% page zoom: light read, save, reflect and return (29.2s)
+  ✓   49 tests/browser/journey-layout.spec.ts:19:5 › 768px light: full journey, long content and enlarged layout (13.5s)
+  ✓   51 tests/browser/journey-layout.spec.ts:19:5 › 768px dark: full journey, long content and enlarged layout (13.5s)
+  ✓   50 tests/browser/journey-native-zoom.spec.ts:18:3 › native Chromium 200% page zoom: dark read, save, reflect and return (29.5s)
+  ✓   53 tests/browser/live-mode.spec.ts:12:1 › retrying the reading connection keeps the question and photo in the open form (654ms)
+  ✓   54 tests/browser/live-mode.spec.ts:41:1 › failed runtime discovery never describes a possible live call as simulation (369ms)
+  ✓   55 tests/browser/live-mode.spec.ts:62:3 › live-local makes provider disclosure clear before enabling AI or submitting a question (612ms)
+  ✓   56 tests/browser/live-mode.spec.ts:62:3 › live-preview makes provider disclosure clear before enabling AI or submitting a question (666ms)
+  ✓   57 tests/browser/live-mode.spec.ts:62:3 › production makes provider disclosure clear before enabling AI or submitting a question (575ms)
+  ✓   58 tests/browser/live-mode.spec.ts:123:1 › explicit hosted synthetic readiness retains simulation disclosure (785ms)
+  ✓   59 tests/browser/live-mode.spec.ts:149:1 › unavailable hosted synthetic generation retains its environment without enabling readings (563ms)
+  ✓   52 tests/browser/journey-layout.spec.ts:19:5 › 1280px light: full journey, long content and enlarged layout (14.3s)
+  ✓   60 tests/browser/live-mode.spec.ts:176:3 › saved simulation attribution stays neutral while runtime discovery is pending (3.3s)
+  ✓   62 tests/browser/live-mode.spec.ts:176:3 › saved simulation attribution stays neutral while runtime discovery is failed (3.1s)
+  ✓   63 tests/browser/privacy.spec.ts:11:1 › erase an old reflection revision with consent off while keeping current text and an unsubmitted draft (3.6s)
+  ✓   64 tests/browser/privacy.spec.ts:66:3 › account deletion keeps a usable downloadable receipt after sign-out (3.4s)
+  ✓   61 tests/browser/journey-layout.spec.ts:19:5 › 1280px dark: full journey, long content and enlarged layout (13.7s)
+  ✓   66 tests/browser/journey-layout.spec.ts:259:1 › 2x mobile illustration delivery uses transparent variants, not full-size originals (946ms)
+  ✓   65 tests/browser/privacy.spec.ts:66:3 › account deletion keeps a usable downloadable receipt after a lost response (3.3s)
+  ✓   68 tests/browser/request-lifecycle.spec.ts:29:1 › lost Start acknowledgement then reload reopens the same request without another Start (1.1s)
+  ✓   69 tests/browser/request-lifecycle.spec.ts:61:1 › an unreceived Start after reload explains the uncertainty and allows a deliberate new draft (722ms)
+  ✓   67 tests/browser/readings.spec.ts:50:1 › source headings preserve launch-deck names, card codes and orientations while capitalizing only the position (3.1s)
+  ✓   70 tests/browser/request-lifecycle.spec.ts:81:1 › a lost Save response is reconciled by reloading the same accepted reading (3.1s)
+  ✓   71 tests/browser/readings.spec.ts:113:1 › card names match the deck edition beside unchanged facts and unknown decks fall back to codes (3.1s)
+  ✓   72 tests/browser/request-lifecycle.spec.ts:108:1 › accepted completion refreshes displayed allowance even when progress unmounts during refresh (2.9s)
+  ✓   74 tests/browser/request-lifecycle.spec.ts:136:1 › explicit Start retry preserves its body and key and joins the original reading (800ms)
+  ✓   73 tests/browser/readings.spec.ts:156:1 › a failed workspace action announces an error and keeps the reading draft (2.9s)
+  ✓   75 tests/browser/request-lifecycle.spec.ts:163:1 › signing in to an owned request URL resumes the unsaved reading with no new Start (3.2s)
+  ✓   76 tests/browser/readings.spec.ts:179:1 › save, sign in, recover from the downloaded kit, and manage the same reading with AI consent off (5.2s)
+  ✓   77 tests/browser/request-lifecycle.spec.ts:183:1 › a delayed status cannot reopen a view after leaving progress; explicit resume can (2.9s)
+  ✓   78 tests/browser/readings.spec.ts:328:1 › Save reading keeps an unsaved reflection draft and conflicting edits keep the local text (3.3s)
+  ✓   79 tests/browser/request-lifecycle.spec.ts:212:1 › reading inspection has semantic labels, keyboard source expansion and completion focus (3.3s)
+  ✓   81 tests/browser/request-lifecycle.spec.ts:333:3 › account navigation retains a pending request in history when returning by link (1.1s)
+  ✓   82 tests/browser/request-lifecycle.spec.ts:333:3 › account navigation retains a pending request in history when returning by Back (1.0s)
+  ✓   80 tests/browser/readings.spec.ts:391:1 › a delayed reading response cannot repopulate private content after cross-tab sign-out (3.2s)
+  ✓   83 tests/browser/request-lifecycle.spec.ts:382:1 › account navigation by browser Back retains the canonical progress address (1.0s)
+  ✓   85 tests/browser/request-lifecycle.spec.ts:409:1 › account navigation forgets its retained request after signing out (1.0s)
+  ✓   86 tests/browser/request-lifecycle.spec.ts:435:1 › cancel uses the observed revision and lost cancellation responses reconnect safely (807ms)
+  ✓   84 tests/browser/readings.spec.ts:427:1 › focus refresh keeps a dirty reflection at its original revision until explicitly reconciled (3.5s)
+  ✓   87 tests/browser/request-lifecycle.spec.ts:456:1 › revoking AI during progress keeps the stopped request and history available (1.1s)
+  ✓   89 tests/browser/request-lifecycle.spec.ts:488:3 › progress explains PROVIDER_REFUSAL without another generation (3.0s)
+  ✓   88 tests/browser/readings.spec.ts:524:1 › a lost deletion response keeps the original receipt and key for a safe retry (3.2s)
+  ✓   90 tests/browser/request-lifecycle.spec.ts:488:3 › progress explains EXPIRED without another generation (3.0s)
+  ✓   91 tests/browser/readings.spec.ts:563:3 › leaving a dirty reflection for Saved readings requires a local stay or discard choice (3.1s)
+  ✓   92 tests/browser/request-lifecycle.spec.ts:488:3 › progress explains PROVIDER_UNCERTAIN without another generation (3.1s)
+  ✓   93 tests/browser/readings.spec.ts:563:3 › leaving a dirty reflection for New reading requires a local stay or discard choice (3.1s)
+  ✓   94 tests/browser/request-lifecycle.spec.ts:488:3 › progress explains PROVIDER_UNAVAILABLE without another generation (3.1s)
+  ✓   95 tests/browser/readings.spec.ts:600:1 › a rejected deletion can be freshly confirmed against the updated reading revision (3.4s)
+  ✓   96 tests/browser/request-lifecycle.spec.ts:505:1 › explicit New reading after a stopped request uses a fresh identity for the same question (961ms)
+  ✓   97 tests/browser/readings.spec.ts:651:3 › reading attribution distinguishes OpenAI and prepared content: model (3.1s)
+  ✓   98 tests/browser/request-lifecycle.spec.ts:551:3 › browser Back fences a late status response and Forward can resume the request (2.8s)
+  ✓   99 tests/browser/readings.spec.ts:651:3 › reading attribution distinguishes OpenAI and prepared content: template (3.0s)
+  ✓  100 tests/browser/request-lifecycle.spec.ts:551:3 › browser Back fences a late reading response and Forward can resume the request (2.8s)
+  ✓  101 tests/browser/readings.spec.ts:678:1 › uploading an offline spread photo recognizes the 3 cards in one step and saves the photo with the reading (3.0s)
+  ✓  102 tests/browser/request-lifecycle.spec.ts:600:1 › browser Back keeps a dirty reflection until discard is explicitly confirmed (3.1s)
+  ✓  103 tests/browser/revisit-notes.spec.ts:52:1 › dated notes keep chronological server dates, edited dates, full text and the original reading separate (1.5s)
+  ✓  105 tests/browser/revisit-notes.spec.ts:89:1 › an offline initial note list stops loading and can be retried explicitly (1.3s)
+  ✓  106 tests/browser/revisit-notes.spec.ts:111:1 › lost create response retries the same intent once, preserves offline drafts, and stops retries after seven days (1.6s)
+  ✓  104 tests/browser/selected-context.spec.ts:38:1 › only the explicitly reviewed range is confirmed and an edit invalidates the acknowledgement (4.3s)
+  ✓  107 tests/browser/revisit-notes.spec.ts:168:3 › save/cancel: accepted create survives attempted cancellation and editor replacement (1.3s)
+  ✓  109 tests/browser/revisit-notes.spec.ts:168:3 › save/cancel: accepted update survives attempted cancellation and editor replacement (1.4s)
+  ✓  108 tests/browser/selected-context.spec.ts:123:1 › AI-off saved reading ownership permits grant inspection and revocation without a new request (3.5s)
+  ✓  110 tests/browser/revisit-notes.spec.ts:291:1 › conflicts keep the editable draft, require refreshed revision, and stale deletion needs new confirmation (1.9s)
+  ✓  111 tests/browser/spread-photo.spec.ts:41:1 › starting while image preparation is pending keeps the chosen photo (3.1s)
+  ✓  112 tests/browser/revisit-notes.spec.ts:349:1 › notes and saved history survive sign-in and downloaded-kit recovery with no extra generation (2.2s)
+  ✓  113 tests/browser/spread-photo.spec.ts:86:1 › the photo picker can replace and remove an attachment on mobile without starting a reading (870ms)
+  ✓  115 tests/browser/spread-photo.spec.ts:110:1 › the latest photo selection survives a slower previous read (731ms)
+  ✓  114 tests/browser/revisit-notes.spec.ts:410:1 › note drafts participate in Account, navigation, Back and reload guards; withdrawn readings retain exact note identity (1.8s)
+  ✓  116 tests/browser/spread-photo.spec.ts:125:1 › removing a photo invalidates an in-flight replacement (700ms)
+  ✓  117 tests/browser/revisit-notes.spec.ts:464:1 › session expiry removes private drafts and sign-in restores only saved notes (1.7s)
+  ✓  118 tests/browser/revisit-notes.spec.ts:502:1 › late note responses cannot repopulate Account or a different reading (3.8s)
+  ✓  119 tests/browser/revisit-notes.spec.ts:563:1 › legacy unsaved-parent notes show actual expiry and require the existing explicit Save reading action (1.3s)
+  ✓  120 tests/browser/revisit-notes.spec.ts:596:1 › chronological pagination keeps the active editor and authored whitespace intact (1.3s)
+  ✓  121 tests/browser/revisit-notes.spec.ts:631:1 › parent deletion during reading fetch clears a workspace with no reflections (3.2s)
+  ✓  122 tests/browser/revisit-notes.spec.ts:691:3 › reflection deletion race: remaining reflection (1.5s)
+  ✓  123 tests/browser/revisit-notes.spec.ts:691:3 › reflection deletion race: no remaining reflection (1.4s)
+  ✓  124 tests/browser/revisit-notes.spec.ts:691:3 › reflection deletion race: deleted parent (1.4s)
+  ✓  125 tests/browser/revisit-notes.spec.ts:845:1 › older request and latest history keep owned edition reflections across matching and new saves (2.1s)
+  ✓  126 tests/browser/revisit-notes.spec.ts:1001:1 › unavailable history never derives its URL from a truncated unrelated request list (1.9s)
+  ✓  127 tests/browser/revisit-notes.spec.ts:1087:1 › an older unavailable request keeps its exact edition, notes and URL through focus refresh and note edits (2.1s)
+  ✓  128 tests/browser/revisit-notes.spec.ts:1200:1 › an expired offline deletion reconciles notes and requires a fresh dated confirmation (1.5s)
+  ✓  129 tests/browser/revisit-notes.spec.ts:1238:1 › cancelling a deletion while editing does not replace the editor Cancel focus target (1.4s)
+  ✓  130 tests/browser/revisit-notes.spec.ts:1257:1 › review: acknowledged create retains its identity when a newer draft survives a failed list refresh (1.2s)
+  ✓  131 tests/browser/revisit-notes.spec.ts:1331:3 › review: delayed accepted deletion keeps its full receipt through editor begin (1.4s)
+  ✓  132 tests/browser/revisit-notes.spec.ts:1331:3 › review: delayed accepted deletion keeps its full receipt through editor cancel (1.4s)
+  ✓  133 tests/browser/revisit-notes.spec.ts:1400:3 › review: deletion restores adjacent focus independently of the active editor draft (1.3s)
+  ✓  134 tests/browser/revisit-notes.spec.ts:1400:3 › review: deletion restores add focus independently of the active editor draft (1.3s)
+  ✓  135 tests/browser/revisit-notes.spec.ts:1432:1 › review: an older list response cannot revive a note deleted by an independent action (1.4s)
+  ✓  136 tests/browser/revisit-notes.spec.ts:1472:3 › review: acknowledged create survives an older independent conflict refresh (1.5s)
+  ✓  137 tests/browser/revisit-notes.spec.ts:1472:3 › review: acknowledged update survives an older independent conflict refresh (1.4s)
+  ✓  138 tests/browser/revisit-notes.spec.ts:1557:3 › review round2: accepted deletion dominates a delayed PUT while preserving same-note editor ownership (1.5s)
+  ✓  139 tests/browser/revisit-notes.spec.ts:1557:3 › review round2: accepted deletion dominates a delayed PUT while preserving unrelated editor ownership (1.7s)
+  ✓  140 tests/browser/revisit-notes.spec.ts:1659:1 › review round2: accepted deletion suppresses a delayed saved-note refresh failure announcement (1.5s)
+  ✓  141 tests/browser/revisit-notes.spec.ts:1745:3 › FR-1: new STORAGE_LIMIT_EXCEEDED keeps actionable guidance and the unchanged draft intent (1.1s)
+  ✓  142 tests/browser/revisit-notes.spec.ts:1745:3 › FR-1: initial-page NOTE_LIMIT_EXCEEDED keeps actionable guidance and the unchanged draft intent (1.3s)
+  ✓  143 tests/browser/revisit-notes.spec.ts:1745:3 › FR-1: edit STORAGE_LIMIT_EXCEEDED keeps actionable guidance and the unchanged draft intent (1.3s)
+  ✓  144 tests/browser/revisit-notes.spec.ts:1745:3 › FR-1: edit REVISION_LIMIT_EXCEEDED keeps actionable guidance and the unchanged draft intent (1.2s)
+  ✓  145 tests/browser/revisit-notes.spec.ts:1745:3 › FR-1: new IDEMPOTENCY_MISMATCH keeps actionable guidance and the unchanged draft intent (1.2s)
+  ✓  146 tests/browser/revisit-notes.spec.ts:1832:1 › FR-1: a typed deletion idempotency rejection does not invent a changed note or discard confirmation (1.2s)
+  ✓  147 tests/browser/revisit-notes.spec.ts:1869:1 › undismissed deletion receipts survive later success, failure and same-proof retries (2.2s)
+
+  147 passed (4.2m)
+[verify] confirmed 147 executed tests across 18 files; zero skipped
+
+[verify] specification package links
+{
+  "required_files": 7,
+  "local_markdown_links": 48,
+  "json_files": 5,
+  "closed_model_objects": 7,
+  "result": "passed"
+}
+
+[verify] passed in 347.04s; artifacts/verify.json

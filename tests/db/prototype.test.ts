@@ -343,6 +343,11 @@ for (const kind of ['parent status', 'parent content', 'selected native content'
       newContent = 'd'.repeat(64);
     await sql(
       env.DB,
+      "UPDATE reading_sessions SET status='saved',saved_at=1,retention_expires_at=NULL WHERE id=?",
+      first.plan.sessionId,
+    ).run();
+    await sql(
+      env.DB,
       `INSERT INTO content_editions(hash,state,bundle_json,reviewed_hash,reviewer_kind,reviewer_id,rights_status,created_at,approved_at) VALUES (?,'approved','{}',?,'human_approved','synthetic','cleared',1,1)`,
       newContent,
       newContent,
@@ -365,7 +370,16 @@ for (const kind of ['parent status', 'parent content', 'selected native content'
       ).run();
       plan = {
         ...plan,
-        context: [{ grantId: grant, grantRevision: 1, fragmentHmac: first.plan.planHmac }],
+        context: [
+          {
+            grantId: grant,
+            grantRevision: 1,
+            fragmentHmac: first.plan.planHmac,
+            sourceKind: 'edition',
+            sourceId: parent,
+            sourceRevision: 1,
+          },
+        ],
       };
     }
     const requestId = await first.service.start(plan),

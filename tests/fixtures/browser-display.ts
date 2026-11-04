@@ -6,6 +6,8 @@ import {
   longFilename,
   longQuestion,
   noteJourneyStates,
+  continuityJourneyStates,
+  importReviewState,
   spreadPhotoPath,
 } from './browser-journey.ts';
 import { enableAi } from './browser-reading.ts';
@@ -157,6 +159,7 @@ export async function displayJourney(page: Page, capture: (state: string) => Pro
   await expect(english).not.toBeChecked();
   await page.keyboard.press('Space');
   const photo = page.getByLabel('Photo of your spread (optional)');
+  await page.locator('summary', { hasText: 'Use my own spread' }).press('Enter');
   await photo.setInputFiles({
     name: longFilename,
     mimeType: 'image/jpeg',
@@ -228,4 +231,15 @@ export async function displayJourney(page: Page, capture: (state: string) => Pro
   );
   await expect(stance).toHaveValue('resonates');
   expect(starts).toBe(1);
+  await enableAi(page);
+  await continuityJourneyStates(page, capture);
+  expect(starts).toBe(2);
+  await page.getByRole('link', { name: 'Account', exact: true }).click();
+  await page.getByRole('button', { name: 'Turn off AI readings', exact: true }).click();
+  await expect(
+    page.getByRole('heading', { name: 'AI readings are off', exact: true }),
+  ).toBeVisible();
+  await importReviewState(page, capture);
+  await page.getByRole('link', { name: 'Back to readings', exact: true }).click();
+  await expect(accepted.getByRole('heading', { name: longQuestion, exact: true })).toBeVisible();
 }
