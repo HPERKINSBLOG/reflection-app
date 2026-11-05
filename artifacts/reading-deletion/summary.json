@@ -1,0 +1,38 @@
+{
+  "sourceDigest": "440f4a2bedf25b3aa6d956d760d8d0c0fb00f83cd780cce8b000a2bb9de2b758",
+  "scope": "local synthetic verification and rendered deletion flow",
+  "commands": [
+    "npm run verify",
+    "npm run test:journey -- journey-cross-browser.spec.ts"
+  ],
+  "verificationFinishedAt": "2026-11-05T04:21:50.296Z",
+  "verificationStages": 14,
+  "executedTests": {
+    "domainAndTooling": 442,
+    "database": 625,
+    "chromium": 155,
+    "crossEngineKeyboardJourneys": 3
+  },
+  "skipped": 0,
+  "flaky": 0,
+  "visualCaptures": 20,
+  "visualWidths": [
+    320,
+    390,
+    1280
+  ],
+  "themes": [
+    "Paper",
+    "Evening"
+  ],
+  "forcedColors": true,
+  "liveProviderCalls": 0,
+  "reports": {
+    "verify.json": "b0ac319afb3689c87eb856ecb2ecc4355e22307a82908dab8d78394ecf9d1bed",
+    "domain-tests.json": "1ca684e8a50fd36bbe57324a363cec65a8df84830b763ccadf000f8fbcdf79a8",
+    "db-tests.json": "ae55a59b85cb158a216817a1d951380cdcbfb8c39c250aa79acef8f802b41efa",
+    "browser-tests.json": "c2a4d872f2a8696fdd6cde6c2611ed33222ab9969f6e9d0f463af0961cc9c2ad",
+    "cross-browser.json": "5f71274cc62b87e6d5e17fa29768833a1c90bd72fce4e649d3c78fcc86a11ca3",
+    "visual-evidence.json": "31374c2b650ed6483d97d6bb83601e86eabf6a977206a9ac1853350e5508ce8b"
+  }
+}

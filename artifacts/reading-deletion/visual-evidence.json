@@ -1,0 +1,222 @@
+[
+  {
+    "label": "paper-390",
+    "state": "entry",
+    "url": "http://localhost:8787/requests/2fa32d6c-c8f5-4b88-891c-805c8037bb91",
+    "viewport": 390,
+    "content": 390,
+    "assets": 6,
+    "appErrors": [],
+    "capture": "screens/paper-390-entry.png",
+    "sha256": "6928e6ed953d28567e28ae31ee7d715b106e9a30d540bed3b1309fa1edea16c3"
+  },
+  {
+    "label": "paper-390",
+    "state": "confirm",
+    "url": "http://localhost:8787/requests/2fa32d6c-c8f5-4b88-891c-805c8037bb91",
+    "viewport": 390,
+    "content": 390,
+    "assets": 1,
+    "appErrors": [],
+    "capture": "screens/paper-390-confirm.png",
+    "sha256": "ca0476ab092a97a6687dddfa9f50227412e1e5b7f19be31ed153e96f86784235"
+  },
+  {
+    "label": "paper-390",
+    "state": "deleting",
+    "url": "http://localhost:8787/requests/2fa32d6c-c8f5-4b88-891c-805c8037bb91",
+    "viewport": 390,
+    "content": 390,
+    "assets": 1,
+    "appErrors": [],
+    "capture": "screens/paper-390-deleting.png",
+    "sha256": "18c020f33ca18b30a6c869a69e77f9ceb775abde3888b8f74e0c9b7df943d3e0"
+  },
+  {
+    "label": "paper-390",
+    "state": "failed",
+    "url": "http://localhost:8787/requests/2fa32d6c-c8f5-4b88-891c-805c8037bb91",
+    "viewport": 390,
+    "content": 390,
+    "assets": 1,
+    "appErrors": [],
+    "capture": "screens/paper-390-failed.png",
+    "sha256": "5b66500c0fb9d19de814e2805a313657cae506095015fc065951a3269679e21f"
+  },
+  {
+    "label": "paper-390",
+    "state": "complete",
+    "url": "http://localhost:8787/",
+    "viewport": 390,
+    "content": 390,
+    "assets": 3,
+    "appErrors": [],
+    "capture": "screens/paper-390-complete.png",
+    "sha256": "d9643a33a1bc3dc3facf70333ed3e63f4c0d3e9baeea72634b24e35e2f9a6654"
+  },
+  {
+    "label": "evening-320",
+    "state": "entry",
+    "url": "http://localhost:8787/requests/5da950b6-e72c-4f06-b07e-ff13c9ffaf40",
+    "viewport": 320,
+    "content": 320,
+    "assets": 6,
+    "appErrors": [],
+    "capture": "screens/evening-320-entry.png",
+    "sha256": "bb441de79c03050e4ece3c68b0eb09fbae70a8cfc9d7c0da206f4a83b021bba2"
+  },
+  {
+    "label": "evening-320",
+    "state": "confirm",
+    "url": "http://localhost:8787/requests/5da950b6-e72c-4f06-b07e-ff13c9ffaf40",
+    "viewport": 320,
+    "content": 320,
+    "assets": 1,
+    "appErrors": [],
+    "capture": "screens/evening-320-confirm.png",
+    "sha256": "d70e3ea71e179d1742ab4a72190709bc9524756a14382577abe3b92299219af7"
+  },
+  {
+    "label": "evening-320",
+    "state": "deleting",
+    "url": "http://localhost:8787/requests/5da950b6-e72c-4f06-b07e-ff13c9ffaf40",
+    "viewport": 320,
+    "content": 320,
+    "assets": 1,
+    "appErrors": [],
+    "capture": "screens/evening-320-deleting.png",
+    "sha256": "c95226d0132e8e43468f782a7aa239213b898ed606a0b543cc47e1989eae95ae"
+  },
+  {
+    "label": "evening-320",
+    "state": "failed",
+    "url": "http://localhost:8787/requests/5da950b6-e72c-4f06-b07e-ff13c9ffaf40",
+    "viewport": 320,
+    "content": 320,
+    "assets": 1,
+    "appErrors": [],
+    "capture": "screens/evening-320-failed.png",
+    "sha256": "12b7111c878b7cf5ec7a76baf98b40ecb20de3a430953f6e324809414f1ff530"
+  },
+  {
+    "label": "evening-320",
+    "state": "complete",
+    "url": "http://localhost:8787/",
+    "viewport": 320,
+    "content": 320,
+    "assets": 3,
+    "appErrors": [],
+    "capture": "screens/evening-320-complete.png",
+    "sha256": "4847c031ae1d61682df1f01e3b316b4510bc65c3ebe74b49245436872dd74c0b"
+  },
+  {
+    "label": "paper-1280",
+    "state": "entry",
+    "url": "http://localhost:8787/requests/ac767978-3052-497c-8b9c-aba62cd840f3",
+    "viewport": 1280,
+    "content": 1280,
+    "assets": 7,
+    "appErrors": [],
+    "capture": "screens/paper-1280-entry.png",
+    "sha256": "7dcabd718db2bd949be57e1eaf9be11c758ae4a2e9079caa4a85f1e74c0a070a"
+  },
+  {
+    "label": "paper-1280",
+    "state": "confirm",
+    "url": "http://localhost:8787/requests/ac767978-3052-497c-8b9c-aba62cd840f3",
+    "viewport": 1280,
+    "content": 1280,
+    "assets": 1,
+    "appErrors": [],
+    "capture": "screens/paper-1280-confirm.png",
+    "sha256": "0e6a72696f415317d971e542ffb93ad707cf7a8a3e65e5a97f543bdc407e992f"
+  },
+  {
+    "label": "paper-1280",
+    "state": "deleting",
+    "url": "http://localhost:8787/requests/ac767978-3052-497c-8b9c-aba62cd840f3",
+    "viewport": 1280,
+    "content": 1280,
+    "assets": 1,
+    "appErrors": [],
+    "capture": "screens/paper-1280-deleting.png",
+    "sha256": "e44bf2b8aa28f510efdc2e193dd629352532d6d7836eaa4f94aec2b37c5f52f6"
+  },
+  {
+    "label": "paper-1280",
+    "state": "failed",
+    "url": "http://localhost:8787/requests/ac767978-3052-497c-8b9c-aba62cd840f3",
+    "viewport": 1280,
+    "content": 1280,
+    "assets": 1,
+    "appErrors": [],
+    "capture": "screens/paper-1280-failed.png",
+    "sha256": "4b6ae24695b1ad876c2d744edf5683f9957ca40044d9c7153eedb266adad2799"
+  },
+  {
+    "label": "paper-1280",
+    "state": "complete",
+    "url": "http://localhost:8787/",
+    "viewport": 1280,
+    "content": 1280,
+    "assets": 3,
+    "appErrors": [],
+    "capture": "screens/paper-1280-complete.png",
+    "sha256": "9294163925a8a6c876d2d1a2bfd55112b2c832c4567cec1f533decc1f9420ebe"
+  },
+  {
+    "label": "forced-390",
+    "state": "entry",
+    "url": "http://localhost:8787/requests/da53aacc-7367-45a2-9455-eb2843027dbf",
+    "viewport": 390,
+    "content": 390,
+    "assets": 6,
+    "appErrors": [],
+    "capture": "screens/forced-390-entry.png",
+    "sha256": "6b7b8fe12971a7053aca030df9bb8972ef4eea3431fb864b38ce3f96d42dca55"
+  },
+  {
+    "label": "forced-390",
+    "state": "confirm",
+    "url": "http://localhost:8787/requests/da53aacc-7367-45a2-9455-eb2843027dbf",
+    "viewport": 390,
+    "content": 390,
+    "assets": 1,
+    "appErrors": [],
+    "capture": "screens/forced-390-confirm.png",
+    "sha256": "349aaa78d84c63fb946ff04d02ec8dcfcb6b9acdc47faddaa2275ecedbd9547c"
+  },
+  {
+    "label": "forced-390",
+    "state": "deleting",
+    "url": "http://localhost:8787/requests/da53aacc-7367-45a2-9455-eb2843027dbf",
+    "viewport": 390,
+    "content": 390,
+    "assets": 1,
+    "appErrors": [],
+    "capture": "screens/forced-390-deleting.png",
+    "sha256": "9280b7c690ffeb430c735f2d6d32b2a124345852cfd75f4deece5fa7c46a230a"
+  },
+  {
+    "label": "forced-390",
+    "state": "failed",
+    "url": "http://localhost:8787/requests/da53aacc-7367-45a2-9455-eb2843027dbf",
+    "viewport": 390,
+    "content": 390,
+    "assets": 1,
+    "appErrors": [],
+    "capture": "screens/forced-390-failed.png",
+    "sha256": "d3aec5b46a8e86286e1c35317bed287f84da77d6978dc78c4eb89a6df4503d58"
+  },
+  {
+    "label": "forced-390",
+    "state": "complete",
+    "url": "http://localhost:8787/",
+    "viewport": 390,
+    "content": 390,
+    "assets": 3,
+    "appErrors": [],
+    "capture": "screens/forced-390-complete.png",
+    "sha256": "921e4497c3b38af78825fffbc43ca075f10faca3bd87b134688cf4eafc47e524"
+  }
+]

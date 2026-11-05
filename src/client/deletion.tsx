@@ -5,9 +5,10 @@ import { apiSchemas } from '../contracts/index.ts';
 import { date } from './date.ts';
 import { Icon } from './icon.tsx';
 import { Notice } from './notice.tsx';
+import { ApiFailure } from './api.ts';
 
 export type DeletionProof = z.infer<typeof apiSchemas.DeleteRequest>;
-type Status = z.infer<typeof apiSchemas.DeletionStatus>;
+export type DeletionStatus = z.infer<typeof apiSchemas.DeletionStatus>;
 export function deletionIntent() {
   const bytes = crypto.getRandomValues(new Uint8Array(32));
   const receiptToken = btoa(String.fromCharCode(...bytes))
@@ -16,15 +17,50 @@ export function deletionIntent() {
     .replaceAll('=', '');
   return { receiptId: crypto.randomUUID(), receiptToken, key: crypto.randomUUID() };
 }
+export async function checkDeletionStatus(proof: DeletionProof, signal?: AbortSignal) {
+  const response = await fetch(`/api/v1/deletions/${proof.receiptId}`, {
+    cache: 'no-store',
+    headers: { 'X-Deletion-Token': proof.receiptToken },
+    ...(signal ? { signal } : {}),
+  });
+  if (!response.ok)
+    throw new ApiFailure(
+      response.status,
+      'Deletion is not confirmed yet. Keep your receipt and check again.',
+    );
+  return apiSchemas.DeletionStatus.parse(await response.json());
+}
+export function downloadDeletionReceipt(proof: DeletionProof) {
+  const value = {
+    format: 'reflection-deletion-receipt.v1',
+    origin: window.location.origin,
+    instructions:
+      'Check the receipt ID at /api/v1/deletions/{receiptId} with the receipt token in the X-Deletion-Token header. This token can check deletion status only. Keep it private.',
+    receiptId: proof.receiptId,
+    receiptToken: proof.receiptToken,
+  };
+  const url = URL.createObjectURL(
+      new Blob([JSON.stringify(value, null, 2)], { type: 'application/json' }),
+    ),
+    anchor = document.createElement('a');
+  anchor.href = url;
+  anchor.download = 'reflection-deletion-receipt.json';
+  anchor.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
 export function DeletionReceiptPanel({
   proof,
   initial,
   pageHeading,
+  title = 'Deletion receipt',
+  summary,
   onDismiss,
 }: {
   proof: DeletionProof;
-  initial: Status | null;
+  initial: DeletionStatus | null;
   pageHeading?: Ref<HTMLHeadingElement>;
+  title?: string;
+  summary?: string;
   onDismiss: () => void;
 }) {
   const [status, setStatus] = useState(initial),
@@ -48,13 +84,7 @@ export function DeletionReceiptPanel({
     setBusy(true);
     setMessage('');
     try {
-      const response = await fetch(`/api/v1/deletions/${proof.receiptId}`, {
-        cache: 'no-store',
-        headers: { 'X-Deletion-Token': proof.receiptToken },
-      });
-      if (!response.ok)
-        throw new Error('Deletion is not confirmed yet. Keep your receipt and check again.');
-      const current = apiSchemas.DeletionStatus.parse(await response.json());
+      const current = await checkDeletionStatus(proof, AbortSignal.timeout(15_000));
       if (alive.current) setStatus(current);
     } catch (error) {
       if (alive.current)
@@ -64,34 +94,17 @@ export function DeletionReceiptPanel({
       if (alive.current) setBusy(false);
     }
   };
-  const download = () => {
-    const value = {
-      format: 'reflection-deletion-receipt.v1',
-      origin: window.location.origin,
-      instructions:
-        'Check the receipt ID at /api/v1/deletions/{receiptId} with the receipt token in the X-Deletion-Token header. This token can check deletion status only. Keep it private.',
-      receiptId: proof.receiptId,
-      receiptToken: proof.receiptToken,
-    };
-    const url = URL.createObjectURL(
-        new Blob([JSON.stringify(value, null, 2)], { type: 'application/json' }),
-      ),
-      anchor = document.createElement('a');
-    anchor.href = url;
-    anchor.download = 'reflection-deletion-receipt.json';
-    anchor.click();
-    setTimeout(() => URL.revokeObjectURL(url), 1000);
-  };
   return (
     <section className="card receipt-card" aria-label="Deletion receipt">
       <div className="receipt-content">
         {pageHeading ? (
           <h1 ref={pageHeading} tabIndex={-1}>
-            Deletion receipt
+            {title}
           </h1>
         ) : (
-          <h2>Deletion receipt</h2>
+          <h2>{title}</h2>
         )}
+        {summary && <p>{summary}</p>}
         <p
           role="status"
           className={`receipt-status ${status?.state === 'complete' ? 'complete' : ''}`}
@@ -109,7 +122,15 @@ export function DeletionReceiptPanel({
         </p>
         {status?.backupExpiresBy && (
           <p>
-            Backups are kept until {date(status.backupExpiresBy)}. Downloaded copies are unchanged.
+            Backups are kept until{' '}
+            <time dateTime={status.backupExpiresBy}>{date(status.backupExpiresBy)}</time>.
+            Downloaded copies are unchanged.
+          </p>
+        )}
+        {status && !status.backupExpiresBy && (
+          <p>
+            A backup expiry date has not been confirmed yet. Check deletion status for an updated
+            receipt.
           </p>
         )}
         <p className="muted">
@@ -121,7 +142,7 @@ export function DeletionReceiptPanel({
           <Button type="button" onClick={() => void check()} disabled={busy}>
             Check deletion status
           </Button>
-          <Button type="button" variant="secondary" onClick={download}>
+          <Button type="button" variant="secondary" onClick={() => downloadDeletionReceipt(proof)}>
             <Icon name="download" />
             Download deletion receipt
           </Button>

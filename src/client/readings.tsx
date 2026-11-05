@@ -34,7 +34,13 @@ import {
   requestPath,
   type ReadingRequest,
 } from './request-progress.tsx';
-import { deletionIntent, DeletionReceiptPanel, type DeletionProof } from './deletion.tsx';
+import {
+  deletionIntent,
+  DeletionReceiptPanel,
+  type DeletionProof,
+  type DeletionStatus,
+} from './deletion.tsx';
+import { ReadingDeletion, type ReadingDeletionTarget } from './reading-deletion.tsx';
 import { date } from './date.ts';
 import { Notice, type NoticeMessage } from './notice.tsx';
 import { cardName } from './card-names.ts';
@@ -262,18 +268,28 @@ export function ReadingWorkspace({
   const [busy, setBusy] = useState(false),
     [message, setMessage] = useState<NoticeMessage | null>(null),
     [conflict, setConflict] = useState(false);
-  const [confirmDelete, setConfirmDelete] = useState<false | 'family' | 'imported-edition'>(false),
-    [deleteChecked, setDeleteChecked] = useState(false);
+  const [deletionTarget, setDeletionTarget] = useState<ReadingDeletionTarget | null>(null);
+  const activeDeletion = useRef(deletionTarget);
+  activeDeletion.current = deletionTarget;
+  const [readingDeletionReceipt, setReadingDeletionReceipt] = useState<{
+    proof: DeletionProof;
+    initial: DeletionStatus;
+    single: boolean;
+  } | null>(null);
   const deleteTrigger = useRef<HTMLButtonElement>(null);
-  const deleteConfirmation = useRef<HTMLInputElement>(null);
+  const importedDeleteTrigger = useRef<HTMLButtonElement>(null);
+  const keptDeletionScope = useRef<ReadingDeletionTarget['scope']>('family');
   const restoreDeleteFocus = useRef(false);
   useLayoutEffect(() => {
-    if (confirmDelete) deleteConfirmation.current?.focus();
-    else if (restoreDeleteFocus.current) {
+    if (!deletionTarget && restoreDeleteFocus.current) {
       restoreDeleteFocus.current = false;
-      deleteTrigger.current?.focus();
+      const trigger =
+        keptDeletionScope.current === 'imported-edition'
+          ? importedDeleteTrigger.current
+          : deleteTrigger.current;
+      trigger?.focus();
     }
-  }, [confirmDelete]);
+  }, [deletionTarget]);
   const alive = useRef(true),
     epoch = useRef(0),
     inFlight = useRef(false),
@@ -355,21 +371,13 @@ export function ReadingWorkspace({
     setDraft('');
     setStance('unspecified');
     setConflict(false);
-    setConfirmDelete(false);
-    setDeleteChecked(false);
+    setDeletionTarget(null);
     setRevisionNote(null);
     setRevisionReceipt(null);
     setEraseRevisionChecked(false);
     revisionIntent.current = null;
   };
   const intents = useRef(new Map<string, { payload: string; key: string; intent: string }>());
-  const deletion = useRef<{
-    id: string;
-    revision: number;
-    receiptId: string;
-    receiptToken: string;
-    key: string;
-  } | null>(null);
   const actionKey = (action: string, payload: unknown) => {
     const text = JSON.stringify(payload),
       prior = intents.current.get(action);
@@ -526,8 +534,7 @@ export function ReadingWorkspace({
       setRevisionNote(null);
       setEraseRevisionChecked(false);
     }
-    setConfirmDelete(false);
-    setDeleteChecked(false);
+    setDeletionTarget(null);
   };
   const run = async (action: (current: Current) => Promise<void>) => {
     if (inFlight.current) return;
@@ -648,7 +655,7 @@ export function ReadingWorkspace({
     alive.current = true;
     loadLocation();
     const focus = () => {
-      if (currentMode.current === 'request') return;
+      if (currentMode.current === 'request' || activeDeletion.current) return;
       void runRef.current((current) =>
         currentMode.current === 'reading' && selected.current
           ? openRef.current(selected.current.id, current, true)
@@ -663,7 +670,6 @@ export function ReadingWorkspace({
       photoSelection.current++;
       epoch.current++;
       intents.current.clear();
-      deletion.current = null;
       window.removeEventListener('focus', focus);
       window.removeEventListener('popstate', navigation);
     };
@@ -795,66 +801,45 @@ export function ReadingWorkspace({
       }
     });
   };
-  const remove = () => {
-    if (record && confirmDelete)
-      void run(async (current) => {
-        const single = confirmDelete === 'imported-edition';
-        if (single && !imported?.record.parentIdentity) return;
-        const id = single ? imported!.editionId : record.id;
-        if (!deletion.current || deletion.current.id !== id) {
-          deletion.current = {
-            id,
-            revision: single ? imported!.editionNumber : record.revision,
-            ...deletionIntent(),
-          };
-        }
-        const request = deletion.current;
-        let receipt: z.infer<typeof apiSchemas.DeletionReceipt>;
-        try {
-          receipt = await api(
-            `/${single ? 'readings' : 'sessions'}/${request.id}`,
-            apiSchemas.DeletionReceipt,
-            { receiptId: request.receiptId, receiptToken: request.receiptToken },
-            currentUser.current.csrfToken,
-            { method: 'DELETE', revision: request.revision, key: request.key },
-          );
-        } catch (error) {
-          if (current() && error instanceof ApiFailure && error.code === 'CONFLICT') {
-            // A definite revision rejection did not commit this intent. Refresh and require a
-            // new confirmation; ambiguous network failures keep the original receipt/key.
-            deletion.current = null;
-            await open(record.id, current, true);
-            if (current())
-              setMessage({
-                tone: 'notice',
-                text: 'This reading changed. Review the updated reading and confirm deletion again.',
-              });
-            return;
-          }
-          throw error;
-        }
-        if (!current()) return;
-        if (receipt.state !== 'complete') {
-          setMessage({
-            tone: 'notice',
-            text: 'Deletion is still in progress. Keep this page open and retry to check it.',
-          });
-          return;
-        }
-        clearReading();
-        setHistory(null);
-        focusHistoryOnCommit.current = 'saved-readings-heading';
-        setMode('history');
-        replacePath('/');
-        deletion.current = null;
-        await loadHistory(current);
-        if (current())
-          setMessage({
-            tone: 'success',
-            text: 'Reading and reflections deleted. Downloaded copies are unchanged.',
-          });
-      });
+  const confirmReadingDeletion = (scope: ReadingDeletionTarget['scope']) => {
+    if (!record || (scope === 'imported-edition' && !imported?.record.parentIdentity)) return;
+    const single = scope === 'imported-edition';
+    setMessage(null);
+    setReadingDeletionReceipt(null);
+    setDeletionTarget({
+      scope,
+      path: single ? `/readings/${imported!.editionId}` : `/sessions/${record.id}`,
+      revision: single ? imported!.editionNumber : record.revision,
+      question:
+        (single ? imported?.record.question : record.question) ??
+        reading?.question ??
+        'Saved reading',
+      createdAt: (single ? imported?.record.occurredAt : null) ?? record.createdAt,
+    });
   };
+  const deletionEntry = (
+    <div className="reading-detail-actions">
+      <TextLink
+        href="#personal-reflection"
+        onClick={(event) => {
+          if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+          event.preventDefault();
+          document.getElementById('personal-reflection')?.focus();
+        }}
+      >
+        View your reflection
+      </TextLink>
+      <Button
+        ref={deleteTrigger}
+        variant="text-button"
+        className="delete-reading-trigger"
+        disabled={busy}
+        onClick={() => confirmReadingDeletion('family')}
+      >
+        Delete reading
+      </Button>
+    </div>
+  );
   const syntheticContinuity = user.continuityReady && (mode === 'followup' || context.count > 0);
   const photoNotice = photoProcessingNotice(syntheticContinuity ? false : live, runtimeMode);
   const submitNotice = submissionNotice(syntheticContinuity ? false : live, runtimeMode);
@@ -890,7 +875,7 @@ export function ReadingWorkspace({
   );
   return (
     <section className="reading-workspace" aria-label="Your readings" aria-busy={busy}>
-      {live === null && mode !== 'new' && (
+      {!deletionTarget && live === null && mode !== 'new' && (
         <div className="notice service-notice">
           <p>
             <Icon name="info" /> Reading service status is unavailable. Saved readings remain
@@ -899,7 +884,7 @@ export function ReadingWorkspace({
           {connectionRetry}
         </div>
       )}
-      {!user.permission.modelAllowed && (
+      {!deletionTarget && !user.permission.modelAllowed && (
         <p className="notice">
           <Icon name="info" />
           <span>
@@ -912,7 +897,7 @@ export function ReadingWorkspace({
           </span>
         </p>
       )}
-      <nav className="reading-navigation" aria-label="Reading actions">
+      <nav className="reading-navigation" aria-label="Reading actions" hidden={!!deletionTarget}>
         <Button
           type="button"
           variant="secondary"
@@ -957,12 +942,45 @@ export function ReadingWorkspace({
           New reading
         </Button>
       </nav>
-      <Notice message={message} />
-      {busy && !loadingFirstPage && (
+      <Notice message={deletionTarget ? null : message} />
+      {busy && !loadingFirstPage && !deletionTarget && (
         <p role="status" className="busy-line">
           <span className="spinner" aria-hidden="true" />
           Completing your reading action…
         </p>
+      )}
+      {deletionTarget && (
+        <ReadingDeletion
+          target={deletionTarget}
+          csrfToken={user.csrfToken}
+          onKeep={() => {
+            keptDeletionScope.current = deletionTarget.scope;
+            restoreDeleteFocus.current = true;
+            setDeletionTarget(null);
+          }}
+          onConflict={() => {
+            setDeletionTarget(null);
+            if (record)
+              void run(async (current) => {
+                await open(record.id, current, true, false, true);
+                if (current())
+                  setMessage({
+                    tone: 'notice',
+                    text: 'This reading changed. Review the updated reading and confirm deletion again.',
+                  });
+              });
+          }}
+          onComplete={(proof, initial) => {
+            const single = deletionTarget.scope === 'imported-edition';
+            clearReading();
+            setReadingDeletionReceipt({ proof, initial, single });
+            setHistory(null);
+            focusHistoryOnCommit.current = 'saved-readings-heading';
+            setMode('history');
+            replacePath('/');
+            void run((current) => loadHistory(current));
+          }}
+        />
       )}
       {mode === 'history' && (
         <section className="history-section" aria-label="Saved reading history">
@@ -975,6 +993,20 @@ export function ReadingWorkspace({
             Saved readings
           </h2>
           <p className="muted">Opening one does not start a new reading.</p>
+          {readingDeletionReceipt && (
+            <DeletionReceiptPanel
+              key={readingDeletionReceipt.proof.receiptId}
+              proof={readingDeletionReceipt.proof}
+              initial={readingDeletionReceipt.initial}
+              title={readingDeletionReceipt.single ? 'Imported edition deleted' : 'Reading deleted'}
+              summary={
+                readingDeletionReceipt.single
+                  ? 'The selected imported edition and its retained private copies were removed. Its imported parent and your other saved readings stay saved.'
+                  : 'The reading, its reflections, dated revisit notes and all of its follow-ups were removed. Your other saved readings stay saved.'
+              }
+              onDismiss={() => setReadingDeletionReceipt(null)}
+            />
+          )}
           {loadingFirstPage && <p role="status">Loading saved readings…</p>}
           {historyRetry && (
             <>
@@ -1388,7 +1420,7 @@ export function ReadingWorkspace({
         </Button>
       )}
       {mode === 'reading' && record && selectedEditionId && (
-        <section className="reading-detail" aria-label="Reading detail">
+        <section className="reading-detail" aria-label="Reading detail" hidden={!!deletionTarget}>
           {reading ? (
             <article
               data-testid="accepted-reading"
@@ -1416,6 +1448,7 @@ export function ReadingWorkspace({
                     {reading.question}
                   </h2>
                   {notesLink}
+                  {deletionEntry}
                 </div>
                 {!reading.spreadPhoto && <Art name="study-inquiry" className="question-art" />}
               </div>
@@ -1615,6 +1648,7 @@ export function ReadingWorkspace({
               </>
             )}
           </div>
+          {!reading && deletionEntry}
           {reading && <EditionHistory ids={record.editionIds} reading={reading} />}
           {reading &&
             record.status === 'saved' &&
@@ -1630,7 +1664,12 @@ export function ReadingWorkspace({
                 Follow up on this edition
               </TextLink>
             )}
-          <ReflectionCard className="reflection-editor" aria-label="Personal reflection">
+          <ReflectionCard
+            id="personal-reflection"
+            tabIndex={-1}
+            className="reflection-editor"
+            aria-label="Personal reflection"
+          >
             <h2>{reflection ? 'Edit reflection' : 'Add reflection'}</h2>
             <p>
               This is your own writing. It does not change the reading or request AI generation.
@@ -1825,76 +1864,18 @@ export function ReadingWorkspace({
               onExpired={onExpired}
             />
           )}
-          <div className="deletion-actions reading-deletion">
-            {!confirmDelete ? (
-              <>
-                {imported?.record.parentIdentity && (
-                  <Button
-                    variant="text-button"
-                    type="button"
-                    disabled={busy}
-                    onClick={() => setConfirmDelete('imported-edition')}
-                  >
-                    Delete this imported edition
-                  </Button>
-                )}
-                <Button
-                  ref={deleteTrigger}
-                  type="button"
-                  variant="text-button"
-                  onClick={() => setConfirmDelete('family')}
-                  disabled={busy}
-                >
-                  <Icon name="delete" />
-                  Delete reading
-                </Button>
-              </>
-            ) : (
-              <div className="notice delete-confirmation">
-                <p>
-                  {confirmDelete === 'imported-edition'
-                    ? 'This deletes the selected imported edition and its retained private copies. Its imported parent stays saved.'
-                    : 'This deletes the reading, its reflections, revisit notes and all of its follow-ups.'}{' '}
-                  Downloaded files cannot be removed. Backups are deleted on their own schedule.
-                </p>
-                <label className="check" htmlFor="check-deleteChecked">
-                  <Input
-                    id="check-deleteChecked"
-                    ref={deleteConfirmation}
-                    type="checkbox"
-                    checked={deleteChecked}
-                    onChange={(event) => setDeleteChecked(event.target.checked)}
-                    disabled={busy}
-                  />
-                  {confirmDelete === 'imported-edition'
-                    ? 'Delete this imported edition permanently'
-                    : 'Delete this reading and its reflections permanently'}
-                </label>
-                <div className="actions">
-                  <Button
-                    type="button"
-                    variant="danger"
-                    onClick={remove}
-                    disabled={busy || !deleteChecked}
-                  >
-                    Confirm deletion
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="secondary"
-                    disabled={busy}
-                    onClick={() => {
-                      restoreDeleteFocus.current = true;
-                      setConfirmDelete(false);
-                      setDeleteChecked(false);
-                    }}
-                  >
-                    Cancel
-                  </Button>
-                </div>
-              </div>
-            )}
-          </div>
+          {imported?.record.parentIdentity && (
+            <div className="deletion-actions reading-deletion">
+              <Button
+                ref={importedDeleteTrigger}
+                variant="text-button"
+                disabled={busy}
+                onClick={() => confirmReadingDeletion('imported-edition')}
+              >
+                Delete this imported edition
+              </Button>
+            </div>
+          )}
         </section>
       )}
     </section>

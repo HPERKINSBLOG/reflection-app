@@ -306,8 +306,7 @@ test('save, sign in, recover from the downloaded kit, and manage the same readin
   ).toBeVisible();
   await backToReadings(recovered);
   await recovered.getByRole('button', { name: 'Delete reading', exact: true }).click();
-  await recovered.getByLabel('Delete this reading and its reflections permanently').check();
-  await recovered.getByRole('button', { name: 'Confirm deletion', exact: true }).click();
+  await recovered.getByRole('button', { name: 'Delete permanently', exact: true }).click();
   await expect(recovered.getByText('No saved readings yet.', { exact: true })).toBeVisible();
   expect((await fresh.request.get(`/api/v1/readings/${original.reading.editionId}`)).status()).toBe(
     410,
@@ -521,7 +520,7 @@ test('focus refresh keeps a dirty reflection at its original revision until expl
   ).toHaveCount(0);
 });
 
-test('a lost deletion response keeps the original receipt and key for a safe retry', async ({
+test('a lost deletion response checks the original receipt without resending an accepted deletion', async ({
   page,
 }) => {
   await account(page, '192.0.2.95');
@@ -529,6 +528,10 @@ test('a lost deletion response keeps the original receipt and key for a safe ret
   await page.getByRole('button', { name: 'Save reading', exact: true }).click();
   await expect(page.getByText('Saved until you delete it.', { exact: true })).toBeVisible();
   const saved = await savedSnapshot(page);
+  let deletionRequests = 0;
+  page.on('request', (request) => {
+    if (request.method() === 'DELETE') deletionRequests++;
+  });
   let loseResponse = true;
   await page.route(`**/api/v1/sessions/${saved.session.id}`, async (route) => {
     if (route.request().method() !== 'DELETE' || !loseResponse) return route.continue();
@@ -538,25 +541,20 @@ test('a lost deletion response keeps the original receipt and key for a safe ret
     await route.abort('failed');
   });
   await page.getByRole('button', { name: 'Delete reading', exact: true }).click();
-  await page.getByLabel('Delete this reading and its reflections permanently').check();
   const firstRequest = page.waitForRequest((r) => r.method() === 'DELETE');
   const failure = page.waitForEvent('requestfailed', (r) => r.method() === 'DELETE');
-  await page.getByRole('button', { name: 'Confirm deletion', exact: true }).click();
+  await page.getByRole('button', { name: 'Delete permanently', exact: true }).click();
   const first = await firstRequest;
   await failure;
-  await expect(page.getByRole('button', { name: 'Confirm deletion', exact: true })).toBeEnabled();
-  const retryResponse = page.waitForResponse((r) => r.request().method() === 'DELETE');
-  await page.getByRole('button', { name: 'Confirm deletion', exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'Deletion not confirmed' })).toBeVisible();
+  const proof = first.postDataJSON() as { receiptId: string; receiptToken: string };
+  const retryResponse = page.waitForResponse(`**/api/v1/deletions/${proof.receiptId}`);
+  await page.getByRole('button', { name: 'Retry deletion', exact: true }).click();
   const retry = await retryResponse;
-  expect(retry.status()).toBe(202);
-  expect(retry.request().postData()).toBe(first.postData());
-  expect(retry.request().headers()['idempotency-key']).toBe(first.headers()['idempotency-key']);
-  expect(retry.request().headers()['if-match']).toBe(first.headers()['if-match']);
-  await expect(
-    page.getByText('Reading and reflections deleted. Downloaded copies are unchanged.', {
-      exact: true,
-    }),
-  ).toBeVisible();
+  expect(retry.status()).toBe(200);
+  expect(retry.request().headers()['x-deletion-token']).toBe(proof.receiptToken);
+  expect(deletionRequests).toBe(1);
+  await expect(page.getByRole('heading', { name: 'Reading deleted', exact: true })).toBeVisible();
 });
 
 for (const destination of ['Saved readings', 'New reading']) {
@@ -624,9 +622,8 @@ test('a rejected deletion can be freshly confirmed against the updated reading r
   expect(status).toBe(201);
   const remove = async () => {
     await page.getByRole('button', { name: 'Delete reading', exact: true }).click();
-    await page.getByLabel('Delete this reading and its reflections permanently').check();
     const response = page.waitForResponse((r) => r.request().method() === 'DELETE');
-    await page.getByRole('button', { name: 'Confirm deletion', exact: true }).click();
+    await page.getByRole('button', { name: 'Delete permanently', exact: true }).click();
     return response;
   };
   const first = await remove();
@@ -640,11 +637,7 @@ test('a rejected deletion can be freshly confirmed against the updated reading r
   expect(second.request().headers()['idempotency-key']).not.toBe(
     first.request().headers()['idempotency-key'],
   );
-  await expect(
-    page.getByText('Reading and reflections deleted. Downloaded copies are unchanged.', {
-      exact: true,
-    }),
-  ).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Reading deleted', exact: true })).toBeVisible();
 });
 
 for (const mode of ['model', 'template'] as const) {

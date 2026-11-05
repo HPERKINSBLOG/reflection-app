@@ -1,0 +1,85 @@
+{
+  "version": 1,
+  "status": "passed",
+  "sourceDigest": "440f4a2bedf25b3aa6d956d760d8d0c0fb00f83cd780cce8b000a2bb9de2b758",
+  "node": "v26.13.0",
+  "platform": "linux",
+  "finishedAt": "2026-11-05T04:21:50.296Z",
+  "durationMs": 506997,
+  "deadlineMs": 540000,
+  "stages": [
+    {
+      "name": "format and lint",
+      "durationMs": 688,
+      "status": "passed"
+    },
+    {
+      "name": "strict TypeScript",
+      "durationMs": 6107,
+      "status": "passed"
+    },
+    {
+      "name": "generated schema drift",
+      "durationMs": 258,
+      "status": "passed"
+    },
+    {
+      "name": "publication guard drift",
+      "durationMs": 80,
+      "status": "passed"
+    },
+    {
+      "name": "contract and reference checks",
+      "durationMs": 202,
+      "status": "passed"
+    },
+    {
+      "name": "private field coverage",
+      "durationMs": 132,
+      "status": "passed"
+    },
+    {
+      "name": "SQLite constraints",
+      "durationMs": 1446,
+      "status": "passed"
+    },
+    {
+      "name": "OpenAPI",
+      "durationMs": 568,
+      "status": "passed"
+    },
+    {
+      "name": "domain and verification behavior",
+      "durationMs": 19598,
+      "status": "passed"
+    },
+    {
+      "name": "workerd D1 batches",
+      "durationMs": 140353,
+      "status": "passed"
+    },
+    {
+      "name": "client production build",
+      "durationMs": 382,
+      "status": "passed"
+    },
+    {
+      "name": "Worker dry-run build",
+      "durationMs": 880,
+      "status": "passed"
+    },
+    {
+      "name": "identity and saved-reading browser journeys",
+      "durationMs": 335381,
+      "status": "passed"
+    },
+    {
+      "name": "specification package links",
+      "durationMs": 64,
+      "status": "passed"
+    }
+  ],
+  "scope": "synthetic-local-only",
+  "applicationBrowserAcceptance": "local-identity-and-saved-reading-only",
+  "hostedQualification": "not-run"
+}

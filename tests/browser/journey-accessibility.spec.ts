@@ -48,21 +48,17 @@ test('keyboard reading deletion keeps focus through confirmation, cancellation a
   await account(page, '192.0.2.232');
   await reading(page, 'Synthetic keyboard deletion journey');
   const trigger = page.getByRole('button', { name: 'Delete reading', exact: true });
-  const confirmation = page.getByLabel('Delete this reading and its reflections permanently');
+  const confirmation = page.getByRole('button', { name: 'Keep reading', exact: true });
   await trigger.focus();
   await page.keyboard.press('Enter');
   await expect(confirmation).toBeFocused();
-  await page.getByRole('button', { name: 'Cancel', exact: true }).focus();
   await page.keyboard.press('Enter');
   await expect(trigger).toBeFocused();
   await page.keyboard.press('Enter');
   await expect(confirmation).toBeFocused();
-  await page.keyboard.press('Space');
   await page.keyboard.press('Tab');
-  await expect(page.getByRole('button', { name: 'Confirm deletion', exact: true })).toBeFocused();
+  await expect(page.getByRole('button', { name: 'Delete permanently', exact: true })).toBeFocused();
   await page.keyboard.press('Enter');
   await expect(page.getByRole('heading', { name: 'Saved readings', exact: true })).toBeFocused();
-  await expect(
-    page.getByRole('status').filter({ hasText: 'Reading and reflections deleted.' }),
-  ).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Reading deleted', exact: true })).toBeVisible();
 });

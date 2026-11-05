@@ -1,0 +1,349 @@
+{
+  "config": {
+    "argv": [
+      "/home/htper/.local/lib/nodejs/node-v26.13.0-linux-x64/bin/node",
+      "/var/tmp/reflection-deletion-c3mpEa/source/node_modules/.bin/playwright",
+      "test",
+      "--config",
+      "playwright.journey.config.ts",
+      "journey-cross-browser.spec.ts"
+    ],
+    "configFile": "/var/tmp/reflection-deletion-c3mpEa/source/playwright.journey.config.ts",
+    "rootDir": "/var/tmp/reflection-deletion-c3mpEa/source/tests/browser",
+    "failOnFlakyTests": true,
+    "forbidOnly": true,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "/var/tmp/reflection-deletion-c3mpEa/source/artifacts/visual-pass/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "chromium",
+        "name": "chromium",
+        "testDir": "/var/tmp/reflection-deletion-c3mpEa/source/tests/browser",
+        "testIgnore": [],
+        "testMatch": [
+          "journey-cross-browser.spec.ts",
+          "journey-layout.spec.ts",
+          "journey-native-zoom.spec.ts",
+          "journey-forced-colors.spec.ts"
+        ],
+        "timeout": 90000
+      },
+      {
+        "outputDir": "/var/tmp/reflection-deletion-c3mpEa/source/artifacts/visual-pass/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "firefox",
+        "name": "firefox",
+        "testDir": "/var/tmp/reflection-deletion-c3mpEa/source/tests/browser",
+        "testIgnore": [
+          "journey-native-zoom.spec.ts"
+        ],
+        "testMatch": [
+          "journey-cross-browser.spec.ts",
+          "journey-layout.spec.ts",
+          "journey-native-zoom.spec.ts",
+          "journey-forced-colors.spec.ts"
+        ],
+        "timeout": 90000
+      },
+      {
+        "outputDir": "/var/tmp/reflection-deletion-c3mpEa/source/artifacts/visual-pass/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "webkit",
+        "name": "webkit",
+        "testDir": "/var/tmp/reflection-deletion-c3mpEa/source/tests/browser",
+        "testIgnore": [
+          "journey-native-zoom.spec.ts",
+          "journey-forced-colors.spec.ts"
+        ],
+        "testMatch": [
+          "journey-cross-browser.spec.ts",
+          "journey-layout.spec.ts",
+          "journey-native-zoom.spec.ts",
+          "journey-forced-colors.spec.ts"
+        ],
+        "timeout": 90000
+      }
+    ],
+    "filteredProjects": [
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "/var/tmp/reflection-deletion-c3mpEa/source/artifacts/visual-pass/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "name": "chromium",
+        "testDir": "/var/tmp/reflection-deletion-c3mpEa/source/tests/browser",
+        "snapshotDir": "/var/tmp/reflection-deletion-c3mpEa/source/tests/browser",
+        "testIgnore": [],
+        "testMatch": [
+          "journey-cross-browser.spec.ts",
+          "journey-layout.spec.ts",
+          "journey-native-zoom.spec.ts",
+          "journey-forced-colors.spec.ts"
+        ],
+        "timeout": 90000,
+        "use": {
+          "baseURL": "https://localhost:8843",
+          "ignoreHTTPSErrors": true,
+          "viewport": {
+            "width": 1280,
+            "height": 1000
+          },
+          "deviceScaleFactor": 1,
+          "reducedMotion": "reduce",
+          "trace": "retain-on-failure",
+          "browserName": "chromium"
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": "chromium"
+      },
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "/var/tmp/reflection-deletion-c3mpEa/source/artifacts/visual-pass/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "name": "firefox",
+        "testDir": "/var/tmp/reflection-deletion-c3mpEa/source/tests/browser",
+        "snapshotDir": "/var/tmp/reflection-deletion-c3mpEa/source/tests/browser",
+        "testIgnore": "journey-native-zoom.spec.ts",
+        "testMatch": [
+          "journey-cross-browser.spec.ts",
+          "journey-layout.spec.ts",
+          "journey-native-zoom.spec.ts",
+          "journey-forced-colors.spec.ts"
+        ],
+        "timeout": 90000,
+        "use": {
+          "baseURL": "https://localhost:8843",
+          "ignoreHTTPSErrors": true,
+          "viewport": {
+            "width": 1280,
+            "height": 1000
+          },
+          "deviceScaleFactor": 1,
+          "reducedMotion": "reduce",
+          "trace": "retain-on-failure",
+          "browserName": "firefox"
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": "firefox"
+      },
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "/var/tmp/reflection-deletion-c3mpEa/source/artifacts/visual-pass/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "name": "webkit",
+        "testDir": "/var/tmp/reflection-deletion-c3mpEa/source/tests/browser",
+        "snapshotDir": "/var/tmp/reflection-deletion-c3mpEa/source/tests/browser",
+        "testIgnore": [
+          "journey-native-zoom.spec.ts",
+          "journey-forced-colors.spec.ts"
+        ],
+        "testMatch": [
+          "journey-cross-browser.spec.ts",
+          "journey-layout.spec.ts",
+          "journey-native-zoom.spec.ts",
+          "journey-forced-colors.spec.ts"
+        ],
+        "timeout": 90000,
+        "use": {
+          "baseURL": "https://localhost:8843",
+          "ignoreHTTPSErrors": true,
+          "viewport": {
+            "width": 1280,
+            "height": 1000
+          },
+          "deviceScaleFactor": 1,
+          "reducedMotion": "reduce",
+          "trace": "retain-on-failure",
+          "browserName": "webkit"
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": "webkit"
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "list",
+        null
+      ],
+      [
+        "json",
+        {
+          "outputFile": "artifacts/visual-pass/browser-matrix.json"
+        }
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "default",
+    "updateSourceMethod": "patch",
+    "version": "1.64.1",
+    "workers": 1,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "journey-cross-browser.spec.ts",
+      "file": "journey-cross-browser.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "keyboard upload, processing, save, reflection, Account and exact return journey",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 90000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3604,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-05T04:21:58.575Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "10093a1532595d5f0733-b2ed56fa39ae76425d2e",
+          "file": "journey-cross-browser.spec.ts",
+          "line": 8,
+          "column": 1
+        },
+        {
+          "title": "keyboard upload, processing, save, reflection, Account and exact return journey",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 90000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "firefox",
+              "projectName": "firefox",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 4251,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-05T04:22:02.571Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "10093a1532595d5f0733-fc2dce2ecf37aa31c138",
+          "file": "journey-cross-browser.spec.ts",
+          "line": 8,
+          "column": 1
+        },
+        {
+          "title": "keyboard upload, processing, save, reflection, Account and exact return journey",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 90000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "webkit",
+              "projectName": "webkit",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3776,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-05T04:22:08.489Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "10093a1532595d5f0733-4af98ce06190bc549c6d",
+          "file": "journey-cross-browser.spec.ts",
+          "line": 8,
+          "column": 1
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-11-05T04:21:50.943Z",
+    "duration": 21621.788,
+    "expected": 3,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  }
+}

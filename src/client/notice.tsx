@@ -1,6 +1,7 @@
 import { Icon } from './icon.tsx';
 
 export type NoticeMessage = {
+  title?: string;
   text: string;
   tone: 'error' | 'success' | 'notice';
 };
@@ -11,7 +12,10 @@ export function Notice({ message }: { message: NoticeMessage | null }) {
   return (
     <p role={error ? 'alert' : 'status'} className={`notice ${message.tone}`}>
       <Icon name={error ? 'warning' : message.tone === 'success' ? 'check' : 'info'} />
-      <span>{message.text}</span>
+      <span>
+        {message.title && <strong>{message.title}</strong>}
+        {message.text}
+      </span>
     </p>
   );
 }

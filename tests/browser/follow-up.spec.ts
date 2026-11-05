@@ -88,8 +88,7 @@ test('follow-ups keep their exact parents, questions and saved family across rel
       .getByText(/deletes all three editions|deletes all follow-ups|all of its follow-ups/i)
       .first(),
   ).toBeVisible();
-  await page.getByLabel(/permanently/).check();
-  await page.getByRole('button', { name: 'Confirm deletion', exact: true }).click();
+  await page.getByRole('button', { name: 'Delete permanently', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Saved readings', exact: true })).toBeVisible();
   for (const edition of third.session.editionIds) {
     const response = await page.request.get(`/api/v1/readings/${edition}`);

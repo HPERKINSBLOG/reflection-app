@@ -167,12 +167,9 @@ test('keyboard upload, processing, save, reflection, Account and exact return jo
   );
   await page.getByRole('button', { name: 'Delete reading', exact: true }).focus();
   await page.keyboard.press('Enter');
-  await expect(
-    page.getByLabel('Delete this reading and its reflections permanently'),
-  ).toBeFocused();
-  await page.keyboard.press('Space');
+  await expect(page.getByRole('button', { name: 'Keep reading', exact: true })).toBeFocused();
   await page.keyboard.press('Tab');
-  await expect(page.getByRole('button', { name: 'Confirm deletion', exact: true })).toBeFocused();
+  await expect(page.getByRole('button', { name: 'Delete permanently', exact: true })).toBeFocused();
   await page.keyboard.press('Enter');
   await expect(page.getByRole('heading', { name: 'Saved readings', exact: true })).toBeFocused();
   await page.getByRole('link', { name: 'Account', exact: true }).focus();
