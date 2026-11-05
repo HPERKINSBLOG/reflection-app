@@ -16,6 +16,7 @@ import { useAstrologyAction } from './use-action.ts';
 import { timeLabel } from './chart-context.tsx';
 export interface BirthDetailsHandle {
   hasUnsavedChanges(): boolean;
+  isBusy(): boolean;
 }
 type View = z.infer<typeof BirthProfileView>;
 export function BirthDetails({
@@ -73,7 +74,7 @@ export function BirthDetails({
     unresolved = useRef<BirthDraft | null>(null);
   const heading = useRef<HTMLHeadingElement>(null);
   const { busy, notice, setNotice, run } = useAstrologyAction(onExpired);
-  useImperativeHandle(ref, () => ({ hasUnsavedChanges: () => dirty || busy }));
+  useImperativeHandle(ref, () => ({ hasUnsavedChanges: () => dirty || busy, isBusy: () => busy }));
   useEffect(() => {
     heading.current?.focus();
   }, []);

@@ -78,6 +78,7 @@ export function PatternWorkspace({
     Object.values(drafts).some((text) => Boolean(text));
   const confirmLeave = () =>
     !busy &&
+    !birth.current?.isBusy() &&
     (!hasUnsavedChanges() ||
       window.confirm(
         'Discard your unsaved birth details or reflections? Choose Cancel to keep editing.',

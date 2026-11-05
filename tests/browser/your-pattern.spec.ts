@@ -369,3 +369,45 @@ test('a chart refresh that suppresses a chapter keeps its unsaved writing visibl
   await expect(page.getByLabel('Your reflection', { exact: true })).toHaveValue(words);
   await expect(page.getByRole('button', { name: 'Save to journal', exact: true })).toHaveCount(0);
 });
+
+test('navigation cannot offer to discard birth details while their save is in flight', async ({
+  page,
+}) => {
+  await account(page, '192.0.2.237');
+  await manualBirth(page);
+  await page.getByRole('button', { name: 'Review details', exact: true }).click();
+  await page.getByLabel('Keep these birth details in my account.', { exact: true }).check();
+  let release!: () => void;
+  let accepted!: () => void;
+  const held = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  const committed = new Promise<void>((resolve) => {
+    accepted = resolve;
+  });
+  await page.route('**/api/v1/astrology/profile', async (route) => {
+    if (route.request().method() !== 'PUT') return route.continue();
+    const response = await route.fetch();
+    accepted();
+    await held;
+    await route.fulfill({ response });
+  });
+  let discardDialogs = 0;
+  page.on('dialog', async (dialog) => {
+    discardDialogs++;
+    await dialog.accept();
+  });
+  await page.getByRole('button', { name: 'Create my chart', exact: true }).click();
+  await committed;
+  try {
+    await page
+      .getByRole('navigation', { name: 'Reading actions' })
+      .getByRole('button', { name: 'Journal', exact: true })
+      .click();
+    await expect(page).toHaveURL(/\/astrology\/pattern$/);
+    expect(discardDialogs).toBe(0);
+  } finally {
+    release();
+  }
+  await expect(page.getByRole('group', { name: 'Choose a chapter', exact: true })).toBeVisible();
+});
