@@ -15,7 +15,8 @@ export interface ContextPassage {
  * a passage boundary. Keep this projection shared with the range picker.
  */
 export function editionContextPassages(reading: z.infer<typeof Reading>): ContextPassage[] {
-  if (reading.kind === 'reading.unavailable.v1') return [];
+  if (reading.kind === 'reading.unavailable.v1' || reading.kind === 'astrology.pattern.accepted.v1')
+    return [];
   let prose: (string | null)[], question: string | null;
   let proseAuthor: Authorship = 'generated',
     questionAuthor: Authorship = 'user';

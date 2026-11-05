@@ -6,6 +6,7 @@ import { z } from 'zod';
 import { REVISIT_LIMITS, revisitTextLength } from './revisit-policy.ts';
 import { CONTEXT_LIMITS, codePointLength } from './context-policy.ts';
 export * from './astrology.ts';
+import { PatternReadingV1 } from './astrology.ts';
 
 export const Id = z.uuid();
 export const Hash = z.string().regex(/^[a-f0-9]{64}$/);
@@ -716,13 +717,14 @@ export const UnavailableReading = z.strictObject({
   reason: z.enum(['deleted', 'source_erased', 'content_withdrawn']),
   unavailableAt: Instant,
 });
-export const Reading = z.discriminatedUnion('kind', [
+export const ReadingV1 = z.discriminatedUnion('kind', [
   AcceptedReading,
   AcceptedReadingV2,
   AcceptedReadingV3,
   ImportedReading,
   UnavailableReading,
 ]);
+export const Reading = z.discriminatedUnion('kind', [...ReadingV1.options, PatternReadingV1]);
 export const Reflection = z.strictObject({
   id: Id,
   sessionId: Id,
@@ -986,7 +988,7 @@ export const PortableRecord = z.discriminatedUnion('kind', [
     kind: z.literal('reading'),
     identity: ImportRecordIdentity,
     originalId: z.string(),
-    value: Reading,
+    value: ReadingV1,
   }),
   z.strictObject({
     kind: z.literal('reflection'),

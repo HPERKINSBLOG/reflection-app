@@ -12158,6 +12158,539 @@ components:
             - reason
             - unavailableAt
           additionalProperties: false
+        - type: object
+          properties:
+            kind:
+              type: string
+              const: astrology.pattern.accepted.v1
+            editionId:
+              type: string
+              format: uuid
+              pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+            sessionId:
+              type: string
+              format: uuid
+              pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+            editionNumber:
+              type: integer
+              exclusiveMinimum: 0
+              maximum: 9007199254740991
+            parentEditionId:
+              type: "null"
+            basis:
+              type: object
+              properties:
+                kind:
+                  type: string
+                  const: astrology.natal.v2
+                schemaVersion:
+                  type: number
+                  const: 2
+                basisId:
+                  type: string
+                  format: uuid
+                  pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+                calculationId:
+                  type: string
+                  format: uuid
+                  pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+                profileId:
+                  type: string
+                  format: uuid
+                  pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+                profileRevision:
+                  type: integer
+                  exclusiveMinimum: 0
+                  maximum: 9007199254740991
+                calculatedAt:
+                  type: string
+                  format: date-time
+                  pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?(?:Z))$
+                semanticHash:
+                  type: string
+                  pattern: ^[a-f0-9]{64}$
+                calculation:
+                  type: object
+                  properties:
+                    kind:
+                      type: string
+                      const: calculated
+                    input:
+                      type: object
+                      properties:
+                        kind:
+                          type: string
+                          const: astrology.natal.v2
+                        birth:
+                          type: object
+                          properties:
+                            date:
+                              type: string
+                              format: date
+                              pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))$
+                            place:
+                              oneOf:
+                                - type: object
+                                  properties:
+                                    source:
+                                      type: string
+                                      const: manual
+                                    label:
+                                      type: string
+                                      minLength: 1
+                                      maxLength: 200
+                                    latitudeDeg:
+                                      type: number
+                                      minimum: -90
+                                      maximum: 90
+                                    longitudeEastDeg:
+                                      type: number
+                                      minimum: -180
+                                      maximum: 180
+                                    zone:
+                                      type: string
+                                      minLength: 1
+                                      maxLength: 100
+                                  required:
+                                    - source
+                                    - label
+                                    - latitudeDeg
+                                    - longitudeEastDeg
+                                    - zone
+                                  additionalProperties: false
+                                - type: object
+                                  properties:
+                                    source:
+                                      type: string
+                                      const: geonames
+                                    label:
+                                      type: string
+                                      minLength: 1
+                                      maxLength: 200
+                                    latitudeDeg:
+                                      type: number
+                                      minimum: -90
+                                      maximum: 90
+                                    longitudeEastDeg:
+                                      type: number
+                                      minimum: -180
+                                      maximum: 180
+                                    zone:
+                                      type: string
+                                      minLength: 1
+                                      maxLength: 100
+                                    sourceId:
+                                      type: string
+                                      pattern: ^\d+$
+                                    datasetHash:
+                                      type: string
+                                      pattern: ^[a-f0-9]{64}$
+                                    country:
+                                      type: string
+                                      minLength: 1
+                                      maxLength: 100
+                                    administrativeArea:
+                                      type: string
+                                      maxLength: 150
+                                  required:
+                                    - source
+                                    - label
+                                    - latitudeDeg
+                                    - longitudeEastDeg
+                                    - zone
+                                    - sourceId
+                                    - datasetHash
+                                    - country
+                                    - administrativeArea
+                                  additionalProperties: false
+                            time:
+                              oneOf:
+                                - type: object
+                                  properties:
+                                    certainty:
+                                      type: string
+                                      const: exact
+                                    localTime:
+                                      type: string
+                                      pattern: ^(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d)?$
+                                    fold:
+                                      type: string
+                                      enum:
+                                        - earlier
+                                        - later
+                                        - unambiguous
+                                    offsetSeconds:
+                                      type: integer
+                                      minimum: -86400
+                                      maximum: 86400
+                                  required:
+                                    - certainty
+                                    - localTime
+                                  additionalProperties: false
+                                - type: object
+                                  properties:
+                                    certainty:
+                                      type: string
+                                      const: approximate
+                                    earliestLocalTime:
+                                      type: string
+                                      pattern: ^(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d)?$
+                                    latestLocalTime:
+                                      type: string
+                                      pattern: ^(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d)?$
+                                  required:
+                                    - certainty
+                                    - earliestLocalTime
+                                    - latestLocalTime
+                                  additionalProperties: false
+                                - type: object
+                                  properties:
+                                    certainty:
+                                      type: string
+                                      const: unknown
+                                  required:
+                                    - certainty
+                                  additionalProperties: false
+                            historicalZoneConfirmed:
+                              type: boolean
+                          required:
+                            - date
+                            - place
+                            - time
+                            - historicalZoneConfirmed
+                          additionalProperties: false
+                        calendar:
+                          type: string
+                          const: gregorian
+                        zodiac:
+                          type: string
+                          const: tropical
+                        houses:
+                          type: string
+                          const: not_calculated
+                      required:
+                        - kind
+                        - birth
+                        - calendar
+                        - zodiac
+                        - houses
+                      additionalProperties: false
+                    resolved:
+                      oneOf:
+                        - type: object
+                          properties:
+                            kind:
+                              type: string
+                              const: instant
+                            certainty:
+                              type: string
+                              const: exact
+                            at:
+                              type: string
+                              format: date-time
+                              pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?(?:Z))$
+                            offsetSeconds:
+                              type: integer
+                              minimum: -9007199254740991
+                              maximum: 9007199254740991
+                            fold:
+                              type: string
+                              enum:
+                                - earlier
+                                - later
+                                - unambiguous
+                            historicalZone:
+                              type: boolean
+                          required:
+                            - kind
+                            - certainty
+                            - at
+                            - offsetSeconds
+                            - fold
+                            - historicalZone
+                          additionalProperties: false
+                        - type: object
+                          properties:
+                            kind:
+                              type: string
+                              const: intervals
+                            certainty:
+                              type: string
+                              enum:
+                                - approximate
+                                - unknown
+                            intervals:
+                              minItems: 1
+                              maxItems: 10
+                              type: array
+                              items:
+                                type: object
+                                properties:
+                                  startsAt:
+                                    type: string
+                                    format: date-time
+                                    pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?(?:Z))$
+                                  endsAt:
+                                    type: string
+                                    format: date-time
+                                    pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?(?:Z))$
+                                required:
+                                  - startsAt
+                                  - endsAt
+                                additionalProperties: false
+                            historicalZone:
+                              type: boolean
+                          required:
+                            - kind
+                            - certainty
+                            - intervals
+                            - historicalZone
+                          additionalProperties: false
+                    identity:
+                      type: object
+                      properties:
+                        engine:
+                          type: string
+                          const: astronomy-engine
+                        engineVersion:
+                          type: string
+                          const: 2.1.19
+                        engineArtifactHash:
+                          type: string
+                          pattern: ^[a-f0-9]{64}$
+                        tzdbVersion:
+                          type: string
+                          const: 2026f
+                        tzdbHash:
+                          type: string
+                          pattern: ^[a-f0-9]{64}$
+                        adapterVersion:
+                          type: string
+                          const: natal.v2.1
+                        reliabilityPolicy:
+                          type: string
+                          minLength: 1
+                          maxLength: 100
+                        reliabilityHash:
+                          type: string
+                          pattern: ^[a-f0-9]{64}$
+                      required:
+                        - engine
+                        - engineVersion
+                        - engineArtifactHash
+                        - tzdbVersion
+                        - tzdbHash
+                        - adapterVersion
+                        - reliabilityPolicy
+                        - reliabilityHash
+                      additionalProperties: false
+                    placements:
+                      minItems: 10
+                      maxItems: 10
+                      type: array
+                      items:
+                        oneOf:
+                          - type: object
+                            properties:
+                              status:
+                                type: string
+                                const: supported
+                              id:
+                                type: string
+                              body:
+                                type: string
+                                enum:
+                                  - sun
+                                  - moon
+                                  - mercury
+                                  - venus
+                                  - mars
+                                  - jupiter
+                                  - saturn
+                                  - uranus
+                                  - neptune
+                                  - pluto
+                              sign:
+                                type: string
+                                enum:
+                                  - aries
+                                  - taurus
+                                  - gemini
+                                  - cancer
+                                  - leo
+                                  - virgo
+                                  - libra
+                                  - scorpio
+                                  - sagittarius
+                                  - capricorn
+                                  - aquarius
+                                  - pisces
+                              representativeLongitudeDeg:
+                                type: number
+                                minimum: 0
+                                exclusiveMaximum: 360
+                              maximumDeviationDeg:
+                                type: number
+                                minimum: 0
+                                maximum: 180
+                              guardDeg:
+                                type: number
+                                minimum: 0.05
+                            required:
+                              - status
+                              - id
+                              - body
+                              - sign
+                              - representativeLongitudeDeg
+                              - maximumDeviationDeg
+                              - guardDeg
+                            additionalProperties: false
+                          - type: object
+                            properties:
+                              status:
+                                type: string
+                                const: suppressed
+                              body:
+                                type: string
+                                enum:
+                                  - sun
+                                  - moon
+                                  - mercury
+                                  - venus
+                                  - mars
+                                  - jupiter
+                                  - saturn
+                                  - uranus
+                                  - neptune
+                                  - pluto
+                              reason:
+                                type: string
+                                enum:
+                                  - boundary
+                                  - interval_unqualified
+                                  - budget_exhausted
+                                  - engine_unavailable
+                            required:
+                              - status
+                              - body
+                              - reason
+                            additionalProperties: false
+                    evaluatedInstants:
+                      type: integer
+                      minimum: 1
+                      maximum: 2048
+                  required:
+                    - kind
+                    - input
+                    - resolved
+                    - identity
+                    - placements
+                    - evaluatedInstants
+                  additionalProperties: false
+              required:
+                - kind
+                - schemaVersion
+                - basisId
+                - calculationId
+                - profileId
+                - profileRevision
+                - calculatedAt
+                - semanticHash
+                - calculation
+              additionalProperties: false
+            chapter:
+              type: object
+              properties:
+                kind:
+                  type: string
+                  const: pattern.chapter.v1
+                id:
+                  type: string
+                  enum:
+                    - self
+                    - connection
+                    - rest
+                    - growth
+                body:
+                  type: string
+                  enum:
+                    - sun
+                    - venus
+                    - saturn
+                    - jupiter
+                factId:
+                  type: string
+                sign:
+                  type: string
+                  enum:
+                    - aries
+                    - taurus
+                    - gemini
+                    - cancer
+                    - leo
+                    - virgo
+                    - libra
+                    - scorpio
+                    - sagittarius
+                    - capricorn
+                    - aquarius
+                    - pisces
+                title:
+                  type: string
+                  minLength: 1
+                  maxLength: 150
+                text:
+                  type: string
+                  minLength: 1
+                  maxLength: 1600
+                prompt:
+                  type: string
+                  minLength: 1
+                  maxLength: 180
+                factualLabel:
+                  type: string
+                  minLength: 1
+                  maxLength: 100
+                sourceId:
+                  type: string
+                  minLength: 1
+                  maxLength: 100
+                releaseHash:
+                  type: string
+                  pattern: ^[a-f0-9]{64}$
+                editorialStatus:
+                  type: string
+                  enum:
+                    - synthetic_local
+                    - human_approved
+              required:
+                - kind
+                - id
+                - body
+                - factId
+                - sign
+                - title
+                - text
+                - prompt
+                - factualLabel
+                - sourceId
+                - releaseHash
+                - editorialStatus
+              additionalProperties: false
+            acceptedAt:
+              type: string
+              format: date-time
+              pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?(?:Z))$
+          required:
+            - kind
+            - editionId
+            - sessionId
+            - editionNumber
+            - parentEditionId
+            - basis
+            - chapter
+            - acceptedAt
+          additionalProperties: false
     SessionRecord:
       type: object
       properties:

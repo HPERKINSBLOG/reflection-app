@@ -34,6 +34,7 @@ async function request(
     reversals:
       f.reading.kind.startsWith('tarot.accepted.') &&
       'basis' in f.reading &&
+      f.reading.basis.kind === 'tarot.v1' &&
       f.reading.basis.reversals,
     parentEditionId,
     selection: [],
@@ -386,7 +387,7 @@ test('a saved v1 parent reuses its superseded eligible source and the exact orig
       )
     ).status,
   ).toBe(200);
-  if (!('contentHash' in f.reading) || !('basis' in parent.reading))
+  if (!('contentHash' in f.reading) || !('sources' in parent.reading))
     throw new Error('Expected native readings');
   await env.DB.batch([
     env.DB.prepare("UPDATE content_editions SET state='superseded' WHERE hash=?").bind(

@@ -270,7 +270,11 @@ export function ContextSelection(props: Props) {
     if (reading && reading.kind !== 'reading.unavailable.v1') {
       setEditionSummary({
         question:
-          reading.kind === 'legacy.imported.v1' ? reading.record.question : reading.question,
+          reading.kind === 'legacy.imported.v1'
+            ? reading.record.question
+            : reading.kind === 'astrology.pattern.accepted.v1'
+              ? reading.chapter.title
+              : reading.question,
         at: 'acceptedAt' in reading ? reading.acceptedAt : reading.importedAt,
       });
     }

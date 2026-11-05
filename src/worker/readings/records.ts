@@ -116,7 +116,7 @@ export class ReadingRecords {
     const account = await this.base.account(session);
     const row = await q(
       this.base.db,
-      'SELECT e.*,c.state AS content_state FROM reading_editions e LEFT JOIN content_editions c ON c.hash=e.content_hash WHERE e.owner_id=? AND e.id=?',
+      'SELECT e.*,coalesce(c.state,p.state) AS content_state FROM reading_editions e LEFT JOIN content_editions c ON c.hash=e.content_hash LEFT JOIN pattern_content_releases p ON p.hash=e.pattern_content_hash WHERE e.owner_id=? AND e.id=?',
       session.subjectId,
       id,
     ).first<{
@@ -129,6 +129,7 @@ export class ReadingRecords {
       content_state: string | null;
       body_enc: string | null;
       key_version: number;
+      pattern_content_hash: string | null;
     }>();
     if (!row) throw new RecordError(404, 'NOT_FOUND');
     await this.base.ownedSession(session, row.session_id);
@@ -157,6 +158,11 @@ export class ReadingRecords {
       result.editionId !== id ||
       result.sessionId !== row.session_id ||
       result.editionNumber !== row.edition_number ||
+      (result.kind === 'astrology.pattern.accepted.v1' &&
+        (row.mode !== 'pattern' ||
+          result.chapter.releaseHash !== row.pattern_content_hash ||
+          row.parent_edition_id !== null)) ||
+      (row.mode === 'pattern' && result.kind !== 'astrology.pattern.accepted.v1') ||
       ('provenance' in result && result.parentEditionId !== row.parent_edition_id)
     )
       throw new RecordError(503, 'KEY_UNAVAILABLE');
@@ -164,7 +170,7 @@ export class ReadingRecords {
       await this.base.checkedSession(session, row.session_id, account.data_revision, [
         assertion(
           this.base.db,
-          "EXISTS(SELECT 1 FROM reading_editions e LEFT JOIN content_editions c ON c.hash=e.content_hash WHERE e.owner_id=? AND e.id=? AND e.status IN ('accepted','imported') AND (c.state IS NULL OR c.state!='withdrawn'))",
+          "EXISTS(SELECT 1 FROM reading_editions e LEFT JOIN content_editions c ON c.hash=e.content_hash LEFT JOIN pattern_content_releases p ON p.hash=e.pattern_content_hash WHERE e.owner_id=? AND e.id=? AND e.status IN ('accepted','imported') AND (c.state IS NULL OR c.state!='withdrawn') AND (p.state IS NULL OR p.state!='withdrawn'))",
           session.subjectId,
           id,
         ),
@@ -172,7 +178,7 @@ export class ReadingRecords {
     } catch (error) {
       const current = await q(
         this.base.db,
-        "SELECT 1 FROM reading_editions e LEFT JOIN content_editions c ON c.hash=e.content_hash WHERE e.owner_id=? AND e.id=? AND (e.status NOT IN ('accepted','imported') OR c.state='withdrawn')",
+        "SELECT 1 FROM reading_editions e LEFT JOIN content_editions c ON c.hash=e.content_hash LEFT JOIN pattern_content_releases p ON p.hash=e.pattern_content_hash WHERE e.owner_id=? AND e.id=? AND (e.status NOT IN ('accepted','imported') OR c.state='withdrawn' OR p.state='withdrawn')",
         session.subjectId,
         id,
       ).first();

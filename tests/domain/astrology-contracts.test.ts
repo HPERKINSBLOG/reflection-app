@@ -8,6 +8,9 @@ import {
   ResolvedBirthTime,
 } from '../../src/contracts/astrology.ts';
 import { AnyAcceptedReading, ImportedReading } from '../../src/contracts/index.ts';
+import { Reading, PortableRecord } from '../../src/contracts/index.ts';
+import { patternFixture } from '../fixtures/pattern.ts';
+import { editionContextPassages } from '../../src/contracts/context-reading.ts';
 
 const hash = 'a'.repeat(64);
 const place = {
@@ -23,6 +26,31 @@ const birth = {
   time: { certainty: 'unknown' },
   historicalZoneConfirmed: false,
 };
+
+test('native Pattern joins Reading while the frozen v1 portability and tarot contracts remain distinct', async () => {
+  const { reading } = await patternFixture();
+  expect(Reading.parse(reading)).toEqual(reading);
+  expect(editionContextPassages(reading)).toEqual([]);
+  expect(AnyAcceptedReading.safeParse(reading).success).toBe(false);
+  expect(ImportedReading.safeParse(reading).success).toBe(false);
+  expect(
+    PatternReadingV1.safeParse({ ...reading, chapter: { ...reading.chapter, sign: 'aries' } })
+      .success,
+  ).toBe(false);
+  expect(
+    PortableRecord.safeParse({
+      kind: 'reading',
+      originalId: reading.editionId,
+      value: reading,
+      identity: {
+        source: { namespaceId: reading.sessionId, revision: 'v1' },
+        kind: 'reading',
+        recordId: reading.editionId,
+        recordRevision: 1,
+      },
+    }).success,
+  ).toBe(false);
+});
 
 test('birth drafts distinguish all three certainties without a noon surrogate', () => {
   for (const time of [

@@ -25,7 +25,9 @@ import {
   type AnyAcceptedReading,
   type ImportedReading,
   type Reflection,
+  type PatternReadingV1,
 } from '../contracts/index.ts';
+import { PatternReading } from './astrology/pattern-reading.tsx';
 import { READING_PRODUCT_COPY, SPREAD_PHOTO_COPY } from '../contracts/product-copy.ts';
 import { api, ApiFailure } from './api.ts';
 import {
@@ -217,6 +219,7 @@ export function ReadingWorkspace({
   > | null>(null);
   const [imported, setImported] = useState<z.infer<typeof ImportedReading> | null>(null);
   const [reading, setReading] = useState<z.infer<typeof AnyAcceptedReading> | null>(null);
+  const [pattern, setPattern] = useState<PatternReadingV1 | null>(null);
   useLayoutEffect(() => {
     const jumpToNotes = window.location.hash === '#revisit-notes';
     if (mode === 'reading' && selectedEditionId && (focusResultOnCommit.current || jumpToNotes)) {
@@ -385,6 +388,7 @@ export function ReadingWorkspace({
     setSelectedEditionId(null);
     selectedTarget.current = null;
     setReading(null);
+    setPattern(null);
     setImported(null);
     setUnavailable(null);
     setReflection(null);
@@ -521,6 +525,7 @@ export function ReadingWorkspace({
     setRecord(session);
     setSelectedEditionId(editionId);
     setReading(accepted ? content : null);
+    setPattern(content?.kind === 'astrology.pattern.accepted.v1' ? content : null);
     setMode(forFollowUp ? 'followup' : 'reading');
     // Session requests are capped and do not identify their edition. Only use a
     // request already associated with this selection or its accepted content.
@@ -1696,6 +1701,8 @@ export function ReadingWorkspace({
                 </p>
               </details>
             </article>
+          ) : pattern ? (
+            <PatternReading reading={pattern} headingRef={resultHeading} />
           ) : imported ? (
             <ImportedReadingDetail reading={imported} headingRef={resultHeading} />
           ) : (
