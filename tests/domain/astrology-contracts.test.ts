@@ -8,7 +8,7 @@ import {
   ResolvedBirthTime,
 } from '../../src/contracts/astrology.ts';
 import { AnyAcceptedReading, ImportedReading } from '../../src/contracts/index.ts';
-import { Reading, PortableRecord } from '../../src/contracts/index.ts';
+import { Reading, PortableRecordV1 } from '../../src/contracts/index.ts';
 import { patternFixture } from '../fixtures/pattern.ts';
 import { editionContextPassages } from '../../src/contracts/context-reading.ts';
 
@@ -38,7 +38,7 @@ test('native Pattern joins Reading while the frozen v1 portability and tarot con
       .success,
   ).toBe(false);
   expect(
-    PortableRecord.safeParse({
+    PortableRecordV1.safeParse({
       kind: 'reading',
       originalId: reading.editionId,
       value: reading,

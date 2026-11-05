@@ -1,5 +1,6 @@
 import type { z } from 'zod';
 import type {
+  BirthProfileV1,
   ImportUnit,
   ImportRecordIdentity,
   ImportRecovery,
@@ -21,6 +22,8 @@ export interface NormalizedImport {
   source: Source;
   recovery: Recovery;
   units: Unit[];
+  /** Explicit in-memory restoration candidates; never staged or committed as a reading import. */
+  profileCandidates?: z.infer<typeof BirthProfileV1>[];
   errors: { pointer: string; code: 'IMPORT_INVALID' | 'INPUT_TOO_LARGE' }[];
 }
 export interface ImportGroup {

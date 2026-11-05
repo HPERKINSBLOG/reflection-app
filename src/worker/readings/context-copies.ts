@@ -3,7 +3,7 @@ import { assertion } from '../identity/checkpoint.ts';
 import type { Target } from '../recovery/ledger.ts';
 import type { RecordBase } from './base.ts';
 
-type CopyTarget = Exclude<Target, { scope: 'account' }>;
+type CopyTarget = Exclude<Target, { scope: 'account' | 'birth_profile' }>;
 
 /** Provenance survives withdrawal, NULL ciphertext, and missing historical source
  * bodies. Follow the captured grant identity, never whatever revision is current.

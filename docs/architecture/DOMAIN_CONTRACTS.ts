@@ -6,7 +6,7 @@ import { z } from 'zod';
 import { REVISIT_LIMITS, revisitTextLength } from './revisit-policy.ts';
 import { CONTEXT_LIMITS, codePointLength } from './context-policy.ts';
 export * from './astrology.ts';
-import { PatternReadingV1 } from './astrology.ts';
+import { BirthProfileV1, PatternReadingV1 } from './astrology.ts';
 
 export const Id = z.uuid();
 export const Hash = z.string().regex(/^[a-f0-9]{64}$/);
@@ -977,7 +977,7 @@ export const LegacyAuthoredRecord = z.strictObject({
   originalJsonText: JsonText,
   originalSha256: Hash,
 });
-export const PortableRecord = z.discriminatedUnion('kind', [
+export const PortableRecordV1 = z.discriminatedUnion('kind', [
   z.strictObject({
     kind: z.literal('session'),
     identity: ImportRecordIdentity,
@@ -1022,11 +1022,30 @@ export const PortableRecord = z.discriminatedUnion('kind', [
     value: Grant,
   }),
 ]);
-export const ExportPage = z.strictObject({
+/** The original envelope remains frozen; v2 adds native Pattern and optional profile records. */
+export const PortableRecord = z.discriminatedUnion('kind', [
+  PortableRecordV1.options[0],
+  PortableRecordV1.options[1].extend({ value: Reading }),
+  PortableRecordV1.options[2],
+  PortableRecordV1.options[3],
+  PortableRecordV1.options[4],
+  PortableRecordV1.options[5],
+  PortableRecordV1.options[6],
+]);
+export const PortableRecordV2 = z.discriminatedUnion('kind', [
+  ...PortableRecord.options,
+  z.strictObject({
+    kind: z.literal('birth_profile'),
+    identity: ImportRecordIdentity.extend({ kind: z.literal('birth_profile') }),
+    originalId: z.string(),
+    value: BirthProfileV1,
+  }),
+]);
+export const ExportPageV1 = z.strictObject({
   format: z.literal('reflection-export.v1'),
   exportId: Id,
   snapshotRevision: Revision,
-  records: z.array(PortableRecord).max(100),
+  records: z.array(PortableRecordV1).max(100),
   nextCursor: z.string().nullable(),
   exportedAt: Instant,
   account: z
@@ -1039,6 +1058,11 @@ export const ExportPage = z.strictObject({
     })
     .nullable(),
 });
+export const ExportPageV2 = ExportPageV1.extend({
+  format: z.literal('reflection-export.v2'),
+  records: z.array(PortableRecordV2).max(100),
+});
+export const ExportPage = z.discriminatedUnion('format', [ExportPageV1, ExportPageV2]);
 const ImportUnitCommon = {
   key: z.string().min(1).max(2000),
   identity: ImportRecordIdentity,
@@ -1265,6 +1289,7 @@ export const apiSchemas = {
     format: z.enum([
       'reflection-import.v1',
       'reflection-export.v1',
+      'reflection-export.v2',
       'tarot-json',
       'patternlike-export',
       'pixel-json',
@@ -1475,6 +1500,12 @@ export const RecoveryCiphertext = z.strictObject({
 });
 export const ErasureTarget = z.discriminatedUnion('scope', [
   z.strictObject({ scope: z.literal('account'), subjectId: Id }),
+  z.strictObject({
+    scope: z.literal('birth_profile'),
+    subjectId: Id,
+    profileId: Id,
+    revision: Revision,
+  }),
   z.strictObject({ scope: z.literal('session'), subjectId: Id, sessionId: Id }),
   z.strictObject({ scope: z.literal('revisit'), subjectId: Id, revisitId: Id }),
   z.strictObject({
@@ -1493,7 +1524,14 @@ export const ErasureTarget = z.discriminatedUnion('scope', [
 export const ErasureIntent = z.strictObject({
   v: z.literal(1),
   jobId: Id,
-  scope: z.enum(['account', 'session', 'reflection_revision', 'context_copy', 'revisit']),
+  scope: z.enum([
+    'account',
+    'session',
+    'reflection_revision',
+    'context_copy',
+    'revisit',
+    'birth_profile',
+  ]),
   subjectHmac: Hash,
   targetHmac: Hash,
   hmacKeyId: LedgerKeyId,

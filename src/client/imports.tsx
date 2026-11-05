@@ -22,7 +22,8 @@ const formats = [
   ['tarot-json', 'Tarot journal'],
   ['patternlike-export', 'Patternlike 0.7.0 or 0.8.0'],
   ['reflection-import.v1', 'Canonical reading archive'],
-  ['reflection-export.v1', 'Reflection export (NDJSON)'],
+  ['reflection-export.v1', 'Reflection export v1 (NDJSON)'],
+  ['reflection-export.v2', 'Reflection export v2 (NDJSON)'],
   ['pixel-json', 'Native Pixel'],
 ] as const;
 type Review = {
@@ -208,6 +209,17 @@ export function ImportRecordContent({ unit }: { unit: Unit }) {
             This edition was recorded as {reading.reason.replaceAll('_', ' ')}. Its unavailable
             state and original date are preserved; importing does not restore erased text.
           </p>
+        );
+      if (reading.kind === 'astrology.pattern.accepted.v1')
+        return (
+          <>
+            <p>Your Pattern · Original saved chapter</p>
+            <h6>{reading.chapter.title}</h6>
+            <p>{reading.chapter.factualLabel}</p>
+            <p className="import-kept-text">{reading.chapter.text}</p>
+            <p>{reading.chapter.prompt}</p>
+            <p>Import preserves the original calculation and chapter as a historical reading.</p>
+          </>
         );
       return (
         <>

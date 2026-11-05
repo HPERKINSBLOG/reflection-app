@@ -63,6 +63,21 @@ export class SessionErasure {
       revision,
     );
   }
+  async removeBirthProfile(
+    session: Session,
+    profileId: string,
+    revision: number,
+    key: string,
+    receipt: Receipt,
+  ) {
+    return this.removeTarget(
+      session,
+      { scope: 'birth_profile', subjectId: session.subjectId, profileId, revision },
+      key,
+      receipt,
+      revision,
+    );
+  }
   async removeImportedEdition(
     session: Session,
     editionId: string,
@@ -144,6 +159,16 @@ export class SessionErasure {
         if (target.scope === 'session') {
           const row = await this.base.ownedSession(session, target.sessionId);
           if (row.revision !== revision) throw new RecordError(409, 'CONFLICT', row.revision);
+        } else if (target.scope === 'birth_profile') {
+          const row = await q(
+            this.base.db,
+            'SELECT revision,body_enc FROM birth_profiles WHERE owner_id=? AND id=?',
+            target.subjectId,
+            target.profileId,
+          ).first<{ revision: number; body_enc: string | null }>();
+          if (!row) throw new RecordError(404, 'NOT_FOUND');
+          if (row.revision !== revision) throw new RecordError(409, 'CONFLICT', row.revision);
+          if (!row.body_enc) throw new RecordError(410, 'CONTENT_UNAVAILABLE');
         } else if (target.scope === 'revisit') {
           const row = await q(
             this.base.db,
@@ -296,7 +321,18 @@ export class SessionErasure {
         ),
       );
     }
-    if (target.scope !== 'account') {
+    if (target.scope === 'birth_profile')
+      statements.push(
+        assertion(
+          this.base.db,
+          "EXISTS(SELECT 1 FROM birth_profiles WHERE owner_id=? AND id=? AND revision=? AND body_enc IS NOT NULL) AND NOT EXISTS(SELECT 1 FROM deletion_jobs WHERE owner_id=? AND scope='birth_profile' AND state!='complete')",
+          target.subjectId,
+          target.profileId,
+          target.revision,
+          target.subjectId,
+        ),
+      );
+    if (target.scope !== 'account' && target.scope !== 'birth_profile') {
       const imports = await ImportCopies.find(this.base, target);
       statements.push(
         imports.admissionGuard(),
@@ -346,6 +382,8 @@ export class SessionErasure {
         q(this.base.db, 'DELETE FROM auth_sessions WHERE owner_id=?', owner),
         q(this.base.db, 'DELETE FROM auth_challenges WHERE owner_id=?', owner),
       ];
+    // Birth profiles are never writer context. The pending job fences profile reads/writes until ledgered erasure.
+    if (target.scope === 'birth_profile') return [q(this.base.db, 'SELECT 1')];
     const copies = new ContextCopies(this.base, target, mirrors).fence();
     if (target.scope === 'session')
       return [

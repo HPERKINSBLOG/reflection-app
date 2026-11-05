@@ -114,7 +114,7 @@ test('consent-off export contains exact accepted reading, both reflection revisi
   expect(response.status, await response.clone().text()).toBe(200);
   const page = apiSchemas.ExportPage.parse(await response.json());
   expect(page.records.find((r) => r.kind === 'reading')?.value).toEqual(reading);
-  expect(page.records.filter((r) => r.kind === 'reflection').map((r) => r.value.revision)).toEqual([
+  expect(page.records.flatMap((r) => (r.kind === 'reflection' ? [r.value.revision] : []))).toEqual([
     1, 2,
   ]);
   expect(page.account?.subjectId).toBe(kit.subjectId);

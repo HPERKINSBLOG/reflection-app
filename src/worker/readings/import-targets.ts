@@ -77,6 +77,31 @@ function historicalReading(
 ) {
   if (reading.kind === 'legacy.imported.v1')
     return { ...reading.record, identity: unit.identity, parentIdentity: unit.parentIdentity };
+  if (reading.kind === 'astrology.pattern.accepted.v1')
+    return LegacyRecord.parse({
+      format: 'reflection-import.v1',
+      identity: unit.identity,
+      parentIdentity: unit.parentIdentity,
+      source: 'successor',
+      originalId: unit.record.originalId,
+      originalParentId: null,
+      originalTimestamp: reading.acceptedAt,
+      occurredAt: reading.acceptedAt,
+      question: reading.chapter.prompt,
+      generatedText: `${reading.chapter.factualLabel}\n\n${reading.chapter.title}\n\n${reading.chapter.text}`,
+      userStatements: [],
+      basis: {
+        method: 'astrology',
+        cards: [],
+        sourceIds: [reading.chapter.sourceId],
+        rawBasisJson: JSON.stringify(reading.basis),
+        verification: 'legacy_unverified',
+      },
+      originalJsonText: unit.originalJsonText,
+      originalSha256: unit.originalSha256,
+      provenanceGaps: ['review'],
+      review: 'legacy_unknown',
+    });
   const generated =
     editionContextPassages(reading).find((p) => p.authorship === 'generated')?.text ?? null;
   return LegacyRecord.parse({

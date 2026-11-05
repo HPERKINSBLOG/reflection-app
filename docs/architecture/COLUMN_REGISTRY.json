@@ -3818,7 +3818,7 @@
           "export": "never"
         },
         "body_enc": {
-          "aadRule": "[env,birth_profiles,body_enc,owner_id,id,revision,1,key_version]",
+          "aadRule": "[env,birth_profiles,body_enc,owner_id,id,envelope.aadRevision,1,envelope.keyVersion]",
           "class": "E",
           "sqlType": "TEXT",
           "nullable": true,

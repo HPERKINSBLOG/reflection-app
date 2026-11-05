@@ -1,3 +1,5 @@
+import { fixture } from '../fixtures/revisits.ts';
+import { seedPattern } from '../fixtures/pattern-record.ts';
 import { env } from 'cloudflare:workers';
 import { applyD1Migrations } from 'cloudflare:test';
 import { beforeAll, beforeEach, expect, test } from 'vitest';
@@ -211,4 +213,21 @@ test('current session endpoint returns the actual retention expiry and null for 
   );
   expect(response.status).toBe(200);
   expect(apiSchemas.SessionRecord.parse(await response.json()).retentionExpiresAt).toBeNull();
+});
+
+test('native Pattern profiles, snapshots and keyed admission rows are charged exactly', async () => {
+  const f = await fixture(),
+    owner = f.session.subjectId,
+    before = (await bytes(owner))!;
+  const p = await seedPattern(f.base, f.session);
+  const row = await env.DB.prepare(`SELECT
+    (SELECT length(CAST(body_enc AS BLOB)) FROM birth_profiles WHERE owner_id=?) +
+    (SELECT length(CAST(body_enc AS BLOB)) FROM basis_snapshots WHERE id=?) +
+    (SELECT length(CAST(body_enc AS BLOB)) FROM reading_editions WHERE id=?) +
+    (SELECT length(CAST(question_enc AS BLOB)) FROM reading_sessions WHERE id=?) n`)
+    .bind(owner, p.reading.basis.basisId, p.reading.editionId, p.reading.sessionId)
+    .first<number>('n');
+  expect(await bytes(owner)).toBe(before + 6 * 1024 + row!);
+  await env.DB.prepare('DELETE FROM astrology_admissions WHERE owner_id=?').bind(owner).run();
+  expect(await bytes(owner)).toBe(before + 5 * 1024 + row!);
 });

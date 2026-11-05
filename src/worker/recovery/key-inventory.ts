@@ -7,7 +7,7 @@ import type { BackupInventory } from './backup-inventory.ts';
 import { OfflineRestore } from './restore.ts';
 import { CleanupJournal, CLEANUP_STATE_KEY } from './cleanup-state.ts';
 import { objects, erasureJobIds, type ErasureLedger } from './ledger.ts';
-import { ACCOUNT_FIELD_HANDLERS } from './private-fields.ts';
+import { ACCOUNT_FIELD_HANDLERS, OPERATIONAL_KEY_TABLES } from './private-fields.ts';
 import { privateFieldRegistryHash } from './account-rekey.ts';
 import { RecordCrypto } from '../readings/crypto.ts';
 import { bytesDigest } from './digest.ts';
@@ -169,13 +169,16 @@ export async function inventoryKeyReferences(
           }
           if (rows.length < 100) break;
         }
-        for (const table of new Set(
-          ACCOUNT_FIELD_HANDLERS.filter((f) => f.table !== 'reading_sessions').map((f) => f.table),
-        )) {
+        for (const table of new Set([
+          ...ACCOUNT_FIELD_HANDLERS.filter((f) => f.table !== 'reading_sessions').map(
+            (f) => f.table,
+          ),
+          ...OPERATIONAL_KEY_TABLES,
+        ])) {
           const rows = (
             await runtime.base.db
               .prepare(
-                `SELECT owner_id,key_version,count(*) n FROM ${table} GROUP BY owner_id,key_version`,
+                `SELECT owner_id,key_version,count(*) n FROM ${table} WHERE key_version IS NOT NULL GROUP BY owner_id,key_version`,
               )
               .all<{ owner_id: string; key_version: number; n: number }>()
           ).results;

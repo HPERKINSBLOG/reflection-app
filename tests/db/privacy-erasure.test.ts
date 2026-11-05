@@ -55,7 +55,7 @@ test('erasing an exact old reflection revision preserves current text, original 
     await (await client.request(`/exports/${ticket.id}`)).json(),
   );
   expect(
-    exported.records.filter((r) => r.kind === 'reflection').map((r) => r.value.revision),
+    exported.records.flatMap((r) => (r.kind === 'reflection' ? [r.value.revision] : [])),
   ).toEqual([2]);
   expect(JSON.stringify(exported)).not.toContain(one.text);
 });
@@ -79,7 +79,7 @@ test('erasing the current revision hides that reflection but retains unselected 
     await (await client.request(`/exports/${ticket.id}`)).json(),
   );
   expect(
-    exported.records.filter((r) => r.kind === 'reflection').map((r) => r.value.revision),
+    exported.records.flatMap((r) => (r.kind === 'reflection' ? [r.value.revision] : [])),
   ).toEqual([1]);
   expect(JSON.stringify(exported)).not.toContain(two.text);
 });

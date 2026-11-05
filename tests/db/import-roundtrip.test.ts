@@ -1,8 +1,8 @@
 import { env } from 'cloudflare:workers';
 import { applyD1Migrations } from 'cloudflare:test';
 import { beforeAll, beforeEach, expect, test } from 'vitest';
-import { apiSchemas, type PortableRecord, type Reading } from '../../src/contracts/index.ts';
-import { type z } from 'zod';
+import { apiSchemas, PortableRecord, type Reading } from '../../src/contracts/index.ts';
+import type { z } from 'zod';
 import { buildImportGroups } from '../../src/domain/imports/chunks.ts';
 import { parseImportFile } from '../../src/domain/imports/parse.ts';
 import { readingAccount, readingBindings } from '../fixtures/reading-client.ts';
@@ -126,7 +126,7 @@ test('portable unavailable reading, dated revisions and historical permission su
     now = '2026-10-26T09:15:00.000Z';
   type Portable = z.infer<typeof PortableRecord>;
   const rec = (kind: Portable['kind'], id: string, revision: number, value: unknown) =>
-    apiSchemas.ExportPage.shape.records.element.parse({
+    PortableRecord.parse({
       kind,
       identity: { source, kind, recordId: id, recordRevision: revision },
       originalId: id,

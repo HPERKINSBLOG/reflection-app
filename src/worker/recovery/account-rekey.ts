@@ -6,7 +6,11 @@ import { statement as q, DB_NOW } from '../db/core.ts';
 import { assertion } from '../identity/checkpoint.ts';
 import type { RecordBase } from '../readings/base.ts';
 import type { HostedCoordinator, OfflineContext } from './hosted-coordinator.ts';
-import { ACCOUNT_FIELD_HANDLERS, type AccountPrivateField } from './private-fields.ts';
+import {
+  ACCOUNT_FIELD_HANDLERS,
+  OPERATIONAL_KEY_TABLES,
+  type AccountPrivateField,
+} from './private-fields.ts';
 import { bytesDigest } from './digest.ts';
 
 type Phase = 'inventorying' | 'rewriting' | 'validating' | 'checkpoint' | 'complete';
@@ -630,6 +634,7 @@ export class AccountRekey {
         )
           throw new Error('Replacement validation incomplete');
         const tables = [
+          ...OPERATIONAL_KEY_TABLES,
           ...new Set(
             ACCOUNT_FIELD_HANDLERS.filter((f) => f.table !== 'reading_sessions').map(
               (f) => f.table,
@@ -640,7 +645,7 @@ export class AccountRekey {
           statements.push(
             q(
               this.base.db,
-              `UPDATE ${table} SET key_version=? WHERE owner_id=?`,
+              `UPDATE ${table} SET key_version=? WHERE owner_id=? AND key_version IS NOT NULL`,
               job.target_version,
               job.owner_id,
             ),

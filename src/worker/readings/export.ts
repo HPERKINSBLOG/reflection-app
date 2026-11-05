@@ -9,7 +9,10 @@ import {
   ImportUnit,
   Hash,
   type ImportRecordIdentity,
-  type PortableRecord,
+  PortableRecord,
+  PortableRecordV2,
+  BirthProfileV1,
+  type ExportPageV2,
 } from '../../contracts/index.ts';
 import { statement as q, DB_NOW } from '../db/core.ts';
 import { assertion } from '../identity/checkpoint.ts';
@@ -30,6 +33,7 @@ const Point = z.strictObject({
     'revisit',
     'grant',
     'import_alias',
+    'birth_profile',
   ]),
   id: Id.or(Hash),
   revision: z.number().int().positive(),
@@ -168,6 +172,9 @@ export class ReadingExports {
       SELECT 'grant',g.id,g.revision,NULL,NULL,1,json_object('id',g.id,'revision',g.revision,'state',g.state,'edition_id',g.edition_id,
         'reflection_id',g.reflection_id,'reflection_revision',g.reflection_revision,'revisit_id',g.revisit_id,'revisit_revision',g.revisit_revision)
       FROM context_grants g WHERE g.owner_id=?
+      UNION ALL
+      SELECT 'birth_profile',p.id,p.revision,NULL,p.body_enc,p.key_version,'{}'
+      FROM birth_profiles p WHERE p.owner_id=? AND p.deleted_at IS NULL AND p.body_enc IS NOT NULL
 
     ) AS n WHERE ${filter} ORDER BY kind,id,revision LIMIT 101) SELECT * FROM (
       SELECT 'session' AS kind,s.id,s.revision,s.id AS session_id,s.question_enc AS value_enc,1 AS key_version,
@@ -178,8 +185,8 @@ export class ReadingExports {
       FROM reading_sessions s WHERE s.owner_id=? AND ${availableSession}
       UNION ALL
       SELECT 'reading',e.id,e.edition_number,e.session_id,e.body_enc,e.key_version,
-        json_object('status',e.status,'contentState',c.state,'parentEditionId',e.parent_edition_id,'unavailableAt',coalesce(e.invalidated_at,c.withdrawn_at,e.accepted_at))
-      FROM reading_editions e JOIN reading_sessions s ON s.id=e.session_id AND s.owner_id=e.owner_id LEFT JOIN content_editions c ON c.hash=e.content_hash WHERE e.owner_id=? AND ${availableSession}
+        json_object('status',e.status,'contentState',coalesce(pc.state,c.state),'parentEditionId',e.parent_edition_id,'unavailableAt',coalesce(e.invalidated_at,pc.withdrawn_at,c.withdrawn_at,e.accepted_at))
+      FROM reading_editions e JOIN reading_sessions s ON s.id=e.session_id AND s.owner_id=e.owner_id LEFT JOIN content_editions c ON c.hash=e.content_hash LEFT JOIN pattern_content_releases pc ON pc.hash=e.pattern_content_hash WHERE e.owner_id=? AND ${availableSession}
       UNION ALL
       SELECT * FROM authored
       UNION ALL
@@ -193,7 +200,7 @@ export class ReadingExports {
     return q(
       this.base.db,
       sql,
-      ...Array<string>(4).fill(owner),
+      ...Array<string>(5).fill(owner),
       ...extra,
       ...Array<string>(4).fill(owner),
       ...extra,
@@ -223,7 +230,7 @@ export class ReadingExports {
       )
         return null;
     }
-    const record = apiSchemas.ExportPage.shape.records.element.parse({
+    const record = PortableRecord.parse({
       kind: row.kind,
       identity,
       originalId: row.id,
@@ -232,7 +239,7 @@ export class ReadingExports {
     await this.base.checked(session, account.data_revision);
     return record;
   }
-  private async exported(session: Session, row: Row): Promise<z.infer<typeof PortableRecord>> {
+  private async exported(session: Session, row: Row): Promise<z.infer<typeof PortableRecordV2>> {
     const owner = session.subjectId,
       meta = JSON.parse(row.metadata);
     if (row.kind === 'import_alias') {
@@ -258,7 +265,7 @@ export class ReadingExports {
           meta.reflectionRevision,
         );
       }
-      return apiSchemas.ExportPage.shape.records.element.parse({
+      return PortableRecordV2.parse({
         kind: unit.identity.kind,
         identity: unit.identity,
         originalId: unit.identity.recordId,
@@ -292,7 +299,7 @@ export class ReadingExports {
         source = unit.identity.source;
       }
     }
-    return apiSchemas.ExportPage.shape.records.element.parse({
+    return PortableRecordV2.parse({
       kind: row.kind,
       identity: {
         source,
@@ -304,7 +311,15 @@ export class ReadingExports {
       value,
     });
   }
-  async page(session: Session, id: string, cursor: string | null) {
+  async page(
+    session: Session,
+    id: string,
+    cursor: string | null,
+  ): Promise<
+    Omit<z.infer<typeof ExportPageV2>, 'format'> & {
+      format: 'reflection-export.v1' | 'reflection-export.v2';
+    }
+  > {
     const ticket = await this.ticket(session, id),
       scope = ['export', id, ticket.snapshot_revision];
     const point = cursor ? await this.base.parseCursor(session, scope, cursor, Point) : null;
@@ -334,7 +349,7 @@ export class ReadingExports {
               : 1
             : a.revision - b.revision,
       ),
-      records: z.infer<typeof PortableRecord>[] = [];
+      records: z.infer<typeof PortableRecordV2>[] = [];
     let length = 0,
       last: Row | undefined;
     for (const row of rows.slice(0, 100)) {
@@ -344,7 +359,7 @@ export class ReadingExports {
         if (!records.length) throw new RecordError(413, 'INPUT_TOO_LARGE');
         break;
       }
-      records.push(record as z.infer<typeof PortableRecord>);
+      records.push(record);
       length += size;
       last = row;
     }
@@ -378,8 +393,14 @@ export class ReadingExports {
             revision: last.revision,
           })
         : null;
+    const v2 = await q(
+      this.base.db,
+      "SELECT 1 FROM birth_profiles WHERE owner_id=? AND body_enc IS NOT NULL UNION ALL SELECT 1 FROM reading_editions WHERE owner_id=? AND mode IN('pattern','legacy') LIMIT 1",
+      session.subjectId,
+      session.subjectId,
+    ).first();
     const result = apiSchemas.ExportPage.parse({
-      format: 'reflection-export.v1',
+      format: v2 ? 'reflection-export.v2' : 'reflection-export.v1',
       exportId: id,
       snapshotRevision: ticket.snapshot_revision,
       records,
@@ -397,9 +418,27 @@ export class ReadingExports {
           .filter((id): id is string => id !== null),
       ),
     ];
+    const patternEditions = records.flatMap((record, index) =>
+      rows[index]?.kind === 'reading' &&
+      record.kind === 'reading' &&
+      record.value.kind === 'astrology.pattern.accepted.v1'
+        ? [record.originalId]
+        : [],
+    );
     await this.guardedBatch(session, ticket, [
       this.base.identity.sessions.guard(session, false, false),
       this.guard(session, ticket),
+      ...(patternEditions.length
+        ? [
+            assertion(
+              this.base.db,
+              "(SELECT count(*) FROM reading_editions e JOIN pattern_content_releases p ON p.hash=e.pattern_content_hash WHERE e.owner_id=? AND e.id IN (SELECT value FROM json_each(?)) AND e.status='accepted' AND e.mode='pattern' AND p.state='active' AND e.body_enc IS NOT NULL)=?",
+              session.subjectId,
+              JSON.stringify(patternEditions),
+              patternEditions.length,
+            ),
+          ]
+        : []),
       ...(sessions.length
         ? [
             assertion(
@@ -417,6 +456,18 @@ export class ReadingExports {
   private async value(session: Session, row: Row): Promise<unknown> {
     const metadata = JSON.parse(row.metadata) as Record<string, unknown>;
     const owner = session.subjectId;
+    if (row.kind === 'birth_profile')
+      return this.base.opened(
+        {
+          ownerId: owner,
+          table: 'birth_profiles',
+          column: 'body_enc',
+          recordId: row.id,
+          aadRevision: row.revision,
+        },
+        row.value_enc!,
+        BirthProfileV1,
+      );
     if (row.kind === 'grant') return grantFromRow(metadata as unknown as GrantRow);
     if (row.kind === 'permission')
       return {

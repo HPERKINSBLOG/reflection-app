@@ -1,3 +1,4 @@
+import { seedPattern } from '../fixtures/pattern-record.ts';
 import { encode } from '../../src/worker/identity/crypto.ts';
 import { env } from 'cloudflare:workers';
 import { applyD1Migrations } from 'cloudflare:test';
@@ -119,6 +120,10 @@ async function deferredFields(f: Awaited<ReturnType<typeof fixture>>) {
     aadRevision = 1,
   ) =>
     f.runtime.base.crypt.seal({ ownerId: owner, table, column, recordId, aadRevision }, value, 1);
+  const profileSession = await f.runtime.identity.sessions.get(
+    f.client.cookies.get('__Host-session'),
+  );
+  await seedPattern(f.runtime.base, profileSession);
   // Keep an actual committed alias/outcome and an in-progress raw review in the
   // inventory. Destination ciphertext is sealed with the final edition's AAD.
   const imports = new ReadingImports(env.DB, f.runtime.identity);
@@ -324,6 +329,12 @@ test('bounded replacement resumes in fresh instances, preserves exact values and
   );
   expect(receipt).toMatchObject({ fromVersion: 1, toVersion: 2, stillOffline: true });
   expect(await values(f)).toEqual(before);
+  for (const table of ['birth_profiles', 'astrology_admissions', 'pattern_saved_sources'])
+    expect(
+      await env.DB.prepare(`SELECT DISTINCT key_version FROM ${table} WHERE owner_id=?`)
+        .bind(f.owner)
+        .first('key_version'),
+    ).toBe(2);
   for (const [table, column] of [
     ['import_staging', 'field_enc'],
     ['import_items', 'body_enc'],
