@@ -1,0 +1,4075 @@
+{
+  "kind": "astrology.foundation-probe.v1",
+  "generatedAt": "2026-11-05T12:26:54.700Z",
+  "runtime": {
+    "node": "v26.13.0",
+    "platform": "linux",
+    "architecture": "x64",
+    "hostTzdb": "2026e"
+  },
+  "packages": [
+    {
+      "name": "astronomy-engine",
+      "version": "2.1.19",
+      "license": "MIT"
+    },
+    {
+      "name": "moment-timezone",
+      "version": "0.6.6",
+      "license": "MIT"
+    },
+    {
+      "name": "moment",
+      "version": "2.31.0",
+      "license": "MIT"
+    },
+    {
+      "name": "sweph",
+      "version": "2.10.3-7",
+      "license": "(AGPL-3.0-or-later OR LGPL-3.0-or-later)"
+    }
+  ],
+  "identities": {
+    "astronomyCommonJsSha256": "729c0ce37cc1a8096034a689039a5f04585ee8184177c638e8c74dec4fa3185a",
+    "timezoneDataSha256": "3103c5c0eaa879615da630b74e2373ad9b571e0eae992e0b2a3db6e4475de2ce",
+    "timezoneDataVersion": "2026f",
+    "probeSha256": "1bfe149e608a3a6196b46e6bc236502f03974a8f188586b3aca672755d91b7b6"
+  },
+  "comparison": {
+    "reference": "Swiss Ephemeris 2.10.03, explicit Moshier mode; not external Swiss ephemeris files or JPL Horizons",
+    "coordinateConvention": "geocentric apparent true ecliptic of date",
+    "count": 550,
+    "toleranceDeg": 0.05,
+    "maximumDifferenceDeg": 0.017851301179462098,
+    "passed": true,
+    "samples": [
+      {
+        "instant": "1850-06-15T12:00:00.000Z",
+        "body": "sun",
+        "astronomyDeg": 83.95860854279064,
+        "swissMoshierDeg": 83.95857910310475,
+        "differenceDeg": 0.000029439685931720305
+      },
+      {
+        "instant": "1850-06-15T12:00:00.000Z",
+        "body": "moon",
+        "astronomyDeg": 155.4413102745848,
+        "swissMoshierDeg": 155.4406728309942,
+        "differenceDeg": 0.0006374435905627251
+      },
+      {
+        "instant": "1850-06-15T12:00:00.000Z",
+        "body": "mercury",
+        "astronomyDeg": 76.2723209717124,
+        "swissMoshierDeg": 76.27193885760589,
+        "differenceDeg": 0.0003821141065145639
+      },
+      {
+        "instant": "1850-06-15T12:00:00.000Z",
+        "body": "venus",
+        "astronomyDeg": 110.65042908426713,
+        "swissMoshierDeg": 110.65023437311935,
+        "differenceDeg": 0.0001947111477420549
+      },
+      {
+        "instant": "1850-06-15T12:00:00.000Z",
+        "body": "mars",
+        "astronomyDeg": 137.76990945604376,
+        "swissMoshierDeg": 137.76959460088742,
+        "differenceDeg": 0.0003148551563754154
+      },
+      {
+        "instant": "1850-06-15T12:00:00.000Z",
+        "body": "jupiter",
+        "astronomyDeg": 165.00647313846983,
+        "swissMoshierDeg": 165.00496694490585,
+        "differenceDeg": 0.0015061935639550939
+      },
+      {
+        "instant": "1850-06-15T12:00:00.000Z",
+        "body": "saturn",
+        "astronomyDeg": 19.081349120597384,
+        "swissMoshierDeg": 19.082345233167636,
+        "differenceDeg": 0.0009961125703057405
+      },
+      {
+        "instant": "1850-06-15T12:00:00.000Z",
+        "body": "uranus",
+        "astronomyDeg": 29.290590272964632,
+        "swissMoshierDeg": 29.28929541869761,
+        "differenceDeg": 0.0012948542670301322
+      },
+      {
+        "instant": "1850-06-15T12:00:00.000Z",
+        "body": "neptune",
+        "astronomyDeg": 337.0433843537041,
+        "swissMoshierDeg": 337.0391505619178,
+        "differenceDeg": 0.004233791786305119
+      },
+      {
+        "instant": "1850-06-15T12:00:00.000Z",
+        "body": "pluto",
+        "astronomyDeg": 29.5216117670976,
+        "swissMoshierDeg": 29.518554734430467,
+        "differenceDeg": 0.0030570326671295334
+      },
+      {
+        "instant": "1855-06-15T12:00:00.000Z",
+        "body": "sun",
+        "astronomyDeg": 83.76463358235094,
+        "swissMoshierDeg": 83.76466929966553,
+        "differenceDeg": 0.00003571731463125616
+      },
+      {
+        "instant": "1855-06-15T12:00:00.000Z",
+        "body": "moon",
+        "astronomyDeg": 94.10426519039119,
+        "swissMoshierDeg": 94.1035711531267,
+        "differenceDeg": 0.0006940372644521631
+      },
+      {
+        "instant": "1855-06-15T12:00:00.000Z",
+        "body": "mercury",
+        "astronomyDeg": 108.35505826941399,
+        "swissMoshierDeg": 108.35438357761352,
+        "differenceDeg": 0.0006746918004409963
+      },
+      {
+        "instant": "1855-06-15T12:00:00.000Z",
+        "body": "venus",
+        "astronomyDeg": 125.71214583671463,
+        "swissMoshierDeg": 125.71285674885375,
+        "differenceDeg": 0.0007109121390840301
+      },
+      {
+        "instant": "1855-06-15T12:00:00.000Z",
+        "body": "mars",
+        "astronomyDeg": 68.15957747173077,
+        "swissMoshierDeg": 68.15926559090543,
+        "differenceDeg": 0.0003118808253930183
+      },
+      {
+        "instant": "1855-06-15T12:00:00.000Z",
+        "body": "jupiter",
+        "astronomyDeg": 332.53917125734057,
+        "swissMoshierDeg": 332.5397933477056,
+        "differenceDeg": 0.0006220903650273613
+      },
+      {
+        "instant": "1855-06-15T12:00:00.000Z",
+        "body": "saturn",
+        "astronomyDeg": 79.98973670742056,
+        "swissMoshierDeg": 79.99008804800835,
+        "differenceDeg": 0.0003513405878265985
+      },
+      {
+        "instant": "1855-06-15T12:00:00.000Z",
+        "body": "uranus",
+        "astronomyDeg": 48.82457669373878,
+        "swissMoshierDeg": 48.82392897821504,
+        "differenceDeg": 0.0006477155237689658
+      },
+      {
+        "instant": "1855-06-15T12:00:00.000Z",
+        "body": "neptune",
+        "astronomyDeg": 348.1963410183693,
+        "swissMoshierDeg": 348.1932042738215,
+        "differenceDeg": 0.0031367445478736045
+      },
+      {
+        "instant": "1855-06-15T12:00:00.000Z",
+        "body": "pluto",
+        "astronomyDeg": 34.27659264302675,
+        "swissMoshierDeg": 34.273866285348205,
+        "differenceDeg": 0.002726357678511704
+      },
+      {
+        "instant": "1860-06-15T12:00:00.000Z",
+        "body": "sun",
+        "astronomyDeg": 84.52329254415656,
+        "swissMoshierDeg": 84.52341408988717,
+        "differenceDeg": 0.00012154573062161944
+      },
+      {
+        "instant": "1860-06-15T12:00:00.000Z",
+        "body": "moon",
+        "astronomyDeg": 38.8246265222162,
+        "swissMoshierDeg": 38.82378408725203,
+        "differenceDeg": 0.0008424349641700246
+      },
+      {
+        "instant": "1860-06-15T12:00:00.000Z",
+        "body": "mercury",
+        "astronomyDeg": 95.01022963358177,
+        "swissMoshierDeg": 95.00989637149698,
+        "differenceDeg": 0.0003332620848368606
+      },
+      {
+        "instant": "1860-06-15T12:00:00.000Z",
+        "body": "venus",
+        "astronomyDeg": 122.12645982189035,
+        "swissMoshierDeg": 122.12787207829886,
+        "differenceDeg": 0.0014122564084573241
+      },
+      {
+        "instant": "1860-06-15T12:00:00.000Z",
+        "body": "mars",
+        "astronomyDeg": 300.2645209571024,
+        "swissMoshierDeg": 300.26444951569295,
+        "differenceDeg": 0.0000714414094318272
+      },
+      {
+        "instant": "1860-06-15T12:00:00.000Z",
+        "body": "jupiter",
+        "astronomyDeg": 117.01598806496831,
+        "swissMoshierDeg": 117.01611821251868,
+        "differenceDeg": 0.0001301475504078553
+      },
+      {
+        "instant": "1860-06-15T12:00:00.000Z",
+        "body": "saturn",
+        "astronomyDeg": 141.79254489707367,
+        "swissMoshierDeg": 141.79244811688534,
+        "differenceDeg": 0.00009678018830072688
+      },
+      {
+        "instant": "1860-06-15T12:00:00.000Z",
+        "body": "uranus",
+        "astronomyDeg": 68.83042964687897,
+        "swissMoshierDeg": 68.83158140834709,
+        "differenceDeg": 0.0011517614681224586
+      },
+      {
+        "instant": "1860-06-15T12:00:00.000Z",
+        "body": "neptune",
+        "astronomyDeg": 359.3308983647763,
+        "swissMoshierDeg": 359.32858550700524,
+        "differenceDeg": 0.0023128577711304388
+      },
+      {
+        "instant": "1860-06-15T12:00:00.000Z",
+        "body": "pluto",
+        "astronomyDeg": 39.011962643873154,
+        "swissMoshierDeg": 39.00947315801037,
+        "differenceDeg": 0.002489485862724905
+      },
+      {
+        "instant": "1865-06-15T12:00:00.000Z",
+        "body": "sun",
+        "astronomyDeg": 84.32315993035394,
+        "swissMoshierDeg": 84.32312637917246,
+        "differenceDeg": 0.00003355118144554581
+      },
+      {
+        "instant": "1865-06-15T12:00:00.000Z",
+        "body": "moon",
+        "astronomyDeg": 341.2543356379434,
+        "swissMoshierDeg": 341.25329521228264,
+        "differenceDeg": 0.0010404256607898787
+      },
+      {
+        "instant": "1865-06-15T12:00:00.000Z",
+        "body": "mercury",
+        "astronomyDeg": 66.59078701791778,
+        "swissMoshierDeg": 66.59028404573634,
+        "differenceDeg": 0.0005029721814935328
+      },
+      {
+        "instant": "1865-06-15T12:00:00.000Z",
+        "body": "venus",
+        "astronomyDeg": 44.14567937089227,
+        "swissMoshierDeg": 44.14486703844792,
+        "differenceDeg": 0.0008123324442976809
+      },
+      {
+        "instant": "1865-06-15T12:00:00.000Z",
+        "body": "mars",
+        "astronomyDeg": 132.95049021462486,
+        "swissMoshierDeg": 132.95023848784686,
+        "differenceDeg": 0.00025172677806040156
+      },
+      {
+        "instant": "1865-06-15T12:00:00.000Z",
+        "body": "jupiter",
+        "astronomyDeg": 264.11066666417173,
+        "swissMoshierDeg": 264.1105013126665,
+        "differenceDeg": 0.00016535150530216924
+      },
+      {
+        "instant": "1865-06-15T12:00:00.000Z",
+        "body": "saturn",
+        "astronomyDeg": 203.7060206017153,
+        "swissMoshierDeg": 203.70721698727996,
+        "differenceDeg": 0.001196385564639968
+      },
+      {
+        "instant": "1865-06-15T12:00:00.000Z",
+        "body": "uranus",
+        "astronomyDeg": 89.30482234776346,
+        "swissMoshierDeg": 89.30496465904996,
+        "differenceDeg": 0.00014231128648134472
+      },
+      {
+        "instant": "1865-06-15T12:00:00.000Z",
+        "body": "neptune",
+        "astronomyDeg": 10.37485417191636,
+        "swissMoshierDeg": 10.37361728570275,
+        "differenceDeg": 0.0012368862136327152
+      },
+      {
+        "instant": "1865-06-15T12:00:00.000Z",
+        "body": "pluto",
+        "astronomyDeg": 43.653105057595944,
+        "swissMoshierDeg": 43.65074422196972,
+        "differenceDeg": 0.0023608356261775043
+      },
+      {
+        "instant": "1870-06-15T12:00:00.000Z",
+        "body": "sun",
+        "astronomyDeg": 84.11877014567551,
+        "swissMoshierDeg": 84.11878182088005,
+        "differenceDeg": 0.000011675204518724058
+      },
+      {
+        "instant": "1870-06-15T12:00:00.000Z",
+        "body": "moon",
+        "astronomyDeg": 289.74282978985616,
+        "swissMoshierDeg": 289.74179496864855,
+        "differenceDeg": 0.0010348212076678465
+      },
+      {
+        "instant": "1870-06-15T12:00:00.000Z",
+        "body": "mercury",
+        "astronomyDeg": 69.63081024433946,
+        "swissMoshierDeg": 69.63078563045029,
+        "differenceDeg": 0.000024613889195279626
+      },
+      {
+        "instant": "1870-06-15T12:00:00.000Z",
+        "body": "venus",
+        "astronomyDeg": 42.27536524915146,
+        "swissMoshierDeg": 42.27490610250475,
+        "differenceDeg": 0.00045914664667634497
+      },
+      {
+        "instant": "1870-06-15T12:00:00.000Z",
+        "body": "mars",
+        "astronomyDeg": 62.981660972442775,
+        "swissMoshierDeg": 62.9815720841767,
+        "differenceDeg": 0.00008888826607744704
+      },
+      {
+        "instant": "1870-06-15T12:00:00.000Z",
+        "body": "jupiter",
+        "astronomyDeg": 68.62232628120569,
+        "swissMoshierDeg": 68.62346621824811,
+        "differenceDeg": 0.0011399370424669542
+      },
+      {
+        "instant": "1870-06-15T12:00:00.000Z",
+        "body": "saturn",
+        "astronomyDeg": 265.33336485115757,
+        "swissMoshierDeg": 265.33546756338285,
+        "differenceDeg": 0.002102712225223513
+      },
+      {
+        "instant": "1870-06-15T12:00:00.000Z",
+        "body": "uranus",
+        "astronomyDeg": 110.49088820412959,
+        "swissMoshierDeg": 110.49139994539144,
+        "differenceDeg": 0.0005117412617892114
+      },
+      {
+        "instant": "1870-06-15T12:00:00.000Z",
+        "body": "neptune",
+        "astronomyDeg": 21.397618902777257,
+        "swissMoshierDeg": 21.397798764201085,
+        "differenceDeg": 0.00017986142381687387
+      },
+      {
+        "instant": "1870-06-15T12:00:00.000Z",
+        "body": "pluto",
+        "astronomyDeg": 48.27375229980959,
+        "swissMoshierDeg": 48.27169261327659,
+        "differenceDeg": 0.0020596865330162473
+      },
+      {
+        "instant": "1875-06-15T12:00:00.000Z",
+        "body": "sun",
+        "astronomyDeg": 83.9274039323653,
+        "swissMoshierDeg": 83.92747761411638,
+        "differenceDeg": 0.00007368175113242614
+      },
+      {
+        "instant": "1875-06-15T12:00:00.000Z",
+        "body": "moon",
+        "astronomyDeg": 225.59462948876183,
+        "swissMoshierDeg": 225.59364077756672,
+        "differenceDeg": 0.0009887111950774852
+      },
+      {
+        "instant": "1875-06-15T12:00:00.000Z",
+        "body": "mercury",
+        "astronomyDeg": 107.16105213690567,
+        "swissMoshierDeg": 107.16174694901716,
+        "differenceDeg": 0.0006948121115328831
+      },
+      {
+        "instant": "1875-06-15T12:00:00.000Z",
+        "body": "venus",
+        "astronomyDeg": 57.40797365713312,
+        "swissMoshierDeg": 57.40834676781945,
+        "differenceDeg": 0.0003731106863824607
+      },
+      {
+        "instant": "1875-06-15T12:00:00.000Z",
+        "body": "mars",
+        "astronomyDeg": 270.0393436106008,
+        "swissMoshierDeg": 270.03912017527756,
+        "differenceDeg": 0.000223435323277954
+      },
+      {
+        "instant": "1875-06-15T12:00:00.000Z",
+        "body": "jupiter",
+        "astronomyDeg": 201.77927021370917,
+        "swissMoshierDeg": 201.77899710343604,
+        "differenceDeg": 0.00027311027315590763
+      },
+      {
+        "instant": "1875-06-15T12:00:00.000Z",
+        "body": "saturn",
+        "astronomyDeg": 326.0175224900565,
+        "swissMoshierDeg": 326.01812020901707,
+        "differenceDeg": 0.0005977189605346211
+      },
+      {
+        "instant": "1875-06-15T12:00:00.000Z",
+        "body": "uranus",
+        "astronomyDeg": 132.5383000473868,
+        "swissMoshierDeg": 132.5377095022989,
+        "differenceDeg": 0.000590545087902683
+      },
+      {
+        "instant": "1875-06-15T12:00:00.000Z",
+        "body": "neptune",
+        "astronomyDeg": 32.36307563596845,
+        "swissMoshierDeg": 32.36372132658175,
+        "differenceDeg": 0.0006456906132825679
+      },
+      {
+        "instant": "1875-06-15T12:00:00.000Z",
+        "body": "pluto",
+        "astronomyDeg": 52.887112431802976,
+        "swissMoshierDeg": 52.885391198343946,
+        "differenceDeg": 0.0017212334590794853
+      },
+      {
+        "instant": "1880-06-15T12:00:00.000Z",
+        "body": "sun",
+        "astronomyDeg": 84.69267736629813,
+        "swissMoshierDeg": 84.692483463851,
+        "differenceDeg": 0.00019390244710848492
+      },
+      {
+        "instant": "1880-06-15T12:00:00.000Z",
+        "body": "moon",
+        "astronomyDeg": 169.69233981032556,
+        "swissMoshierDeg": 169.6917116717435,
+        "differenceDeg": 0.0006281385821012009
+      },
+      {
+        "instant": "1880-06-15T12:00:00.000Z",
+        "body": "mercury",
+        "astronomyDeg": 99.53121569185824,
+        "swissMoshierDeg": 99.5314920180282,
+        "differenceDeg": 0.00027632617002382176
+      },
+      {
+        "instant": "1880-06-15T12:00:00.000Z",
+        "body": "venus",
+        "astronomyDeg": 76.85863670360325,
+        "swissMoshierDeg": 76.85841280268757,
+        "differenceDeg": 0.0002239009156710381
+      },
+      {
+        "instant": "1880-06-15T12:00:00.000Z",
+        "body": "mars",
+        "astronomyDeg": 128.22580304880645,
+        "swissMoshierDeg": 128.22570395323288,
+        "differenceDeg": 0.00009909557354603749
+      },
+      {
+        "instant": "1880-06-15T12:00:00.000Z",
+        "body": "jupiter",
+        "astronomyDeg": 15.135498394489876,
+        "swissMoshierDeg": 15.135390301963934,
+        "differenceDeg": 0.00010809252592025587
+      },
+      {
+        "instant": "1880-06-15T12:00:00.000Z",
+        "body": "saturn",
+        "astronomyDeg": 26.414028788520035,
+        "swissMoshierDeg": 26.41511973707269,
+        "differenceDeg": 0.0010909485527008655
+      },
+      {
+        "instant": "1880-06-15T12:00:00.000Z",
+        "body": "uranus",
+        "astronomyDeg": 155.3749059381125,
+        "swissMoshierDeg": 155.37441724985695,
+        "differenceDeg": 0.0004886882555865668
+      },
+      {
+        "instant": "1880-06-15T12:00:00.000Z",
+        "body": "neptune",
+        "astronomyDeg": 43.316707678750426,
+        "swissMoshierDeg": 43.317226034163205,
+        "differenceDeg": 0.0005183554127370371
+      },
+      {
+        "instant": "1880-06-15T12:00:00.000Z",
+        "body": "pluto",
+        "astronomyDeg": 57.52128706810921,
+        "swissMoshierDeg": 57.51965496896018,
+        "differenceDeg": 0.0016320991489919834
+      },
+      {
+        "instant": "1885-06-15T12:00:00.000Z",
+        "body": "sun",
+        "astronomyDeg": 84.47869518695192,
+        "swissMoshierDeg": 84.47894160994467,
+        "differenceDeg": 0.0002464229927454653
+      },
+      {
+        "instant": "1885-06-15T12:00:00.000Z",
+        "body": "moon",
+        "astronomyDeg": 120.78578607379438,
+        "swissMoshierDeg": 120.78519802530562,
+        "differenceDeg": 0.0005880484887939019
+      },
+      {
+        "instant": "1885-06-15T12:00:00.000Z",
+        "body": "mercury",
+        "astronomyDeg": 70.48676086035135,
+        "swissMoshierDeg": 70.48751924354075,
+        "differenceDeg": 0.0007583831893498427
+      },
+      {
+        "instant": "1885-06-15T12:00:00.000Z",
+        "body": "venus",
+        "astronomyDeg": 95.72126858161609,
+        "swissMoshierDeg": 95.72167016414328,
+        "differenceDeg": 0.00040158252716082643
+      },
+      {
+        "instant": "1885-06-15T12:00:00.000Z",
+        "body": "mars",
+        "astronomyDeg": 57.68338221581332,
+        "swissMoshierDeg": 57.68288712527107,
+        "differenceDeg": 0.0004950905422447249
+      },
+      {
+        "instant": "1885-06-15T12:00:00.000Z",
+        "body": "jupiter",
+        "astronomyDeg": 149.99353323606897,
+        "swissMoshierDeg": 149.99367619085672,
+        "differenceDeg": 0.00014295478774783987
+      },
+      {
+        "instant": "1885-06-15T12:00:00.000Z",
+        "body": "saturn",
+        "astronomyDeg": 87.33298392592286,
+        "swissMoshierDeg": 87.33483654859485,
+        "differenceDeg": 0.001852622672004145
+      },
+      {
+        "instant": "1885-06-15T12:00:00.000Z",
+        "body": "uranus",
+        "astronomyDeg": 178.83643996357983,
+        "swissMoshierDeg": 178.83717166785635,
+        "differenceDeg": 0.0007317042765180304
+      },
+      {
+        "instant": "1885-06-15T12:00:00.000Z",
+        "body": "neptune",
+        "astronomyDeg": 54.208394934220834,
+        "swissMoshierDeg": 54.209304351922405,
+        "differenceDeg": 0.0009094177015640525
+      },
+      {
+        "instant": "1885-06-15T12:00:00.000Z",
+        "body": "pluto",
+        "astronomyDeg": 62.163330964159634,
+        "swissMoshierDeg": 62.16187289701073,
+        "differenceDeg": 0.0014580671488602093
+      },
+      {
+        "instant": "1890-06-15T12:00:00.000Z",
+        "body": "sun",
+        "astronomyDeg": 84.27628024968911,
+        "swissMoshierDeg": 84.27635770214889,
+        "differenceDeg": 0.0000774524597773052
+      },
+      {
+        "instant": "1890-06-15T12:00:00.000Z",
+        "body": "moon",
+        "astronomyDeg": 62.53505265421725,
+        "swissMoshierDeg": 62.53449407029405,
+        "differenceDeg": 0.0005585839231798673
+      },
+      {
+        "instant": "1890-06-15T12:00:00.000Z",
+        "body": "mercury",
+        "astronomyDeg": 64.9777399112685,
+        "swissMoshierDeg": 64.97792523078748,
+        "differenceDeg": 0.00018531951900513377
+      },
+      {
+        "instant": "1890-06-15T12:00:00.000Z",
+        "body": "venus",
+        "astronomyDeg": 113.76316695456241,
+        "swissMoshierDeg": 113.76302272555608,
+        "differenceDeg": 0.00014422900630961522
+      },
+      {
+        "instant": "1890-06-15T12:00:00.000Z",
+        "body": "mars",
+        "astronomyDeg": 240.47078526142258,
+        "swissMoshierDeg": 240.46963613242622,
+        "differenceDeg": 0.0011491289963032614
+      },
+      {
+        "instant": "1890-06-15T12:00:00.000Z",
+        "body": "jupiter",
+        "astronomyDeg": 311.7844569371367,
+        "swissMoshierDeg": 311.78487097938,
+        "differenceDeg": 0.00041404224327834527
+      },
+      {
+        "instant": "1890-06-15T12:00:00.000Z",
+        "body": "saturn",
+        "astronomyDeg": 148.9305223928296,
+        "swissMoshierDeg": 148.93150041437875,
+        "differenceDeg": 0.0009780215491446143
+      },
+      {
+        "instant": "1890-06-15T12:00:00.000Z",
+        "body": "uranus",
+        "astronomyDeg": 202.69103579608964,
+        "swissMoshierDeg": 202.69205825288282,
+        "differenceDeg": 0.0010224567931800266
+      },
+      {
+        "instant": "1890-06-15T12:00:00.000Z",
+        "body": "neptune",
+        "astronomyDeg": 65.02424617126232,
+        "swissMoshierDeg": 65.02507965096251,
+        "differenceDeg": 0.0008334797001907646
+      },
+      {
+        "instant": "1890-06-15T12:00:00.000Z",
+        "body": "pluto",
+        "astronomyDeg": 66.82010128626646,
+        "swissMoshierDeg": 66.818888866534,
+        "differenceDeg": 0.001212419732496528
+      },
+      {
+        "instant": "1895-06-15T12:00:00.000Z",
+        "body": "sun",
+        "astronomyDeg": 84.08399192088248,
+        "swissMoshierDeg": 84.08403141601849,
+        "differenceDeg": 0.000039495135979450424
+      },
+      {
+        "instant": "1895-06-15T12:00:00.000Z",
+        "body": "moon",
+        "astronomyDeg": 354.3301845120725,
+        "swissMoshierDeg": 354.32964903296016,
+        "differenceDeg": 0.0005354791123863833
+      },
+      {
+        "instant": "1895-06-15T12:00:00.000Z",
+        "body": "mercury",
+        "astronomyDeg": 104.16719066909509,
+        "swissMoshierDeg": 104.16854278980212,
+        "differenceDeg": 0.0013521207069970842
+      },
+      {
+        "instant": "1895-06-15T12:00:00.000Z",
+        "body": "venus",
+        "astronomyDeg": 127.68056972623674,
+        "swissMoshierDeg": 127.68089444195074,
+        "differenceDeg": 0.00032471571398673404
+      },
+      {
+        "instant": "1895-06-15T12:00:00.000Z",
+        "body": "mars",
+        "astronomyDeg": 122.95778699201583,
+        "swissMoshierDeg": 122.95801534868306,
+        "differenceDeg": 0.00022835666720766312
+      },
+      {
+        "instant": "1895-06-15T12:00:00.000Z",
+        "body": "jupiter",
+        "astronomyDeg": 102.38697696401816,
+        "swissMoshierDeg": 102.38758669836821,
+        "differenceDeg": 0.0006097343500641728
+      },
+      {
+        "instant": "1895-06-15T12:00:00.000Z",
+        "body": "saturn",
+        "astronomyDeg": 210.82498161935942,
+        "swissMoshierDeg": 210.8245823167035,
+        "differenceDeg": 0.0003993026559783175
+      },
+      {
+        "instant": "1895-06-15T12:00:00.000Z",
+        "body": "uranus",
+        "astronomyDeg": 226.48997468939947,
+        "swissMoshierDeg": 226.4908804496202,
+        "differenceDeg": 0.0009057602206894444
+      },
+      {
+        "instant": "1895-06-15T12:00:00.000Z",
+        "body": "neptune",
+        "astronomyDeg": 75.8402332917447,
+        "swissMoshierDeg": 75.84036905071038,
+        "differenceDeg": 0.00013575896571182966
+      },
+      {
+        "instant": "1895-06-15T12:00:00.000Z",
+        "body": "pluto",
+        "astronomyDeg": 71.56093098556534,
+        "swissMoshierDeg": 71.55977860060118,
+        "differenceDeg": 0.0011523849641434936
+      },
+      {
+        "instant": "1900-06-15T12:00:00.000Z",
+        "body": "sun",
+        "astronomyDeg": 83.89052937002242,
+        "swissMoshierDeg": 83.89079957663203,
+        "differenceDeg": 0.0002702066095707778
+      },
+      {
+        "instant": "1900-06-15T12:00:00.000Z",
+        "body": "moon",
+        "astronomyDeg": 293.7952924423449,
+        "swissMoshierDeg": 293.7948979854682,
+        "differenceDeg": 0.0003944568766200973
+      },
+      {
+        "instant": "1900-06-15T12:00:00.000Z",
+        "body": "mercury",
+        "astronomyDeg": 101.63304637607575,
+        "swissMoshierDeg": 101.63304932847008,
+        "differenceDeg": 0.0000029523943112508277
+      },
+      {
+        "instant": "1900-06-15T12:00:00.000Z",
+        "body": "venus",
+        "astronomyDeg": 113.96076907723644,
+        "swissMoshierDeg": 113.96146547771436,
+        "differenceDeg": 0.00069640047786379
+      },
+      {
+        "instant": "1900-06-15T12:00:00.000Z",
+        "body": "mars",
+        "astronomyDeg": 51.469995949926165,
+        "swissMoshierDeg": 51.47034021812536,
+        "differenceDeg": 0.00034426819922828145
+      },
+      {
+        "instant": "1900-06-15T12:00:00.000Z",
+        "body": "jupiter",
+        "astronomyDeg": 243.71351363246072,
+        "swissMoshierDeg": 243.71214873682084,
+        "differenceDeg": 0.0013648956398810697
+      },
+      {
+        "instant": "1900-06-15T12:00:00.000Z",
+        "body": "saturn",
+        "astronomyDeg": 272.3466810138632,
+        "swissMoshierDeg": 272.3493400905072,
+        "differenceDeg": 0.002659076644022207
+      },
+      {
+        "instant": "1900-06-15T12:00:00.000Z",
+        "body": "uranus",
+        "astronomyDeg": 249.9146291695971,
+        "swissMoshierDeg": 249.91382455324077,
+        "differenceDeg": 0.0008046163563903974
+      },
+      {
+        "instant": "1900-06-15T12:00:00.000Z",
+        "body": "neptune",
+        "astronomyDeg": 86.60827293353317,
+        "swissMoshierDeg": 86.60788272552014,
+        "differenceDeg": 0.0003902080130728791
+      },
+      {
+        "instant": "1900-06-15T12:00:00.000Z",
+        "body": "pluto",
+        "astronomyDeg": 76.36606284608656,
+        "swissMoshierDeg": 76.36510561526676,
+        "differenceDeg": 0.000957230819835786
+      },
+      {
+        "instant": "1905-06-15T12:00:00.000Z",
+        "body": "sun",
+        "astronomyDeg": 83.68499692762214,
+        "swissMoshierDeg": 83.68504276324015,
+        "differenceDeg": 0.0000458356180388364
+      },
+      {
+        "instant": "1905-06-15T12:00:00.000Z",
+        "body": "moon",
+        "astronomyDeg": 240.31294716843814,
+        "swissMoshierDeg": 240.31266373898038,
+        "differenceDeg": 0.00028342945779513684
+      },
+      {
+        "instant": "1905-06-15T12:00:00.000Z",
+        "body": "mercury",
+        "astronomyDeg": 73.03339164438597,
+        "swissMoshierDeg": 73.03243639977133,
+        "differenceDeg": 0.0009552446146017246
+      },
+      {
+        "instant": "1905-06-15T12:00:00.000Z",
+        "body": "venus",
+        "astronomyDeg": 40.082489314571966,
+        "swissMoshierDeg": 40.081588068860384,
+        "differenceDeg": 0.0009012457115886718
+      },
+      {
+        "instant": "1905-06-15T12:00:00.000Z",
+        "body": "mars",
+        "astronomyDeg": 218.34892712914476,
+        "swissMoshierDeg": 218.34774912991946,
+        "differenceDeg": 0.0011779992253195815
+      },
+      {
+        "instant": "1905-06-15T12:00:00.000Z",
+        "body": "jupiter",
+        "astronomyDeg": 52.901734904677944,
+        "swissMoshierDeg": 52.90169189315468,
+        "differenceDeg": 0.00004301152330299374
+      },
+      {
+        "instant": "1905-06-15T12:00:00.000Z",
+        "body": "saturn",
+        "astronomyDeg": 332.89189393824296,
+        "swissMoshierDeg": 332.89342996424944,
+        "differenceDeg": 0.0015360260065335751
+      },
+      {
+        "instant": "1905-06-15T12:00:00.000Z",
+        "body": "uranus",
+        "astronomyDeg": 272.6111146103806,
+        "swissMoshierDeg": 272.61213865855905,
+        "differenceDeg": 0.0010240481784649091
+      },
+      {
+        "instant": "1905-06-15T12:00:00.000Z",
+        "body": "neptune",
+        "astronomyDeg": 97.33732825040977,
+        "swissMoshierDeg": 97.33539667469053,
+        "differenceDeg": 0.001931575719254397
+      },
+      {
+        "instant": "1905-06-15T12:00:00.000Z",
+        "body": "pluto",
+        "astronomyDeg": 81.26244040981642,
+        "swissMoshierDeg": 81.2616090201348,
+        "differenceDeg": 0.000831389681593464
+      },
+      {
+        "instant": "1910-06-15T12:00:00.000Z",
+        "body": "sun",
+        "astronomyDeg": 83.48725069351265,
+        "swissMoshierDeg": 83.4872586497034,
+        "differenceDeg": 0.000007956190756885917
+      },
+      {
+        "instant": "1910-06-15T12:00:00.000Z",
+        "body": "moon",
+        "astronomyDeg": 182.67285774564905,
+        "swissMoshierDeg": 182.6725195379949,
+        "differenceDeg": 0.00033820765418113297
+      },
+      {
+        "instant": "1910-06-15T12:00:00.000Z",
+        "body": "mercury",
+        "astronomyDeg": 61.734864415915055,
+        "swissMoshierDeg": 61.735604339051264,
+        "differenceDeg": 0.0007399231361659986
+      },
+      {
+        "instant": "1910-06-15T12:00:00.000Z",
+        "body": "venus",
+        "astronomyDeg": 43.48025726241843,
+        "swissMoshierDeg": 43.47975083569656,
+        "differenceDeg": 0.0005064267218131135
+      },
+      {
+        "instant": "1910-06-15T12:00:00.000Z",
+        "body": "mars",
+        "astronomyDeg": 117.72937020702028,
+        "swissMoshierDeg": 117.7294971058079,
+        "differenceDeg": 0.00012689878758465056
+      },
+      {
+        "instant": "1910-06-15T12:00:00.000Z",
+        "body": "jupiter",
+        "astronomyDeg": 184.8921173218216,
+        "swissMoshierDeg": 184.89137650131354,
+        "differenceDeg": 0.0007408205080992047
+      },
+      {
+        "instant": "1910-06-15T12:00:00.000Z",
+        "body": "saturn",
+        "astronomyDeg": 33.179307612678805,
+        "swissMoshierDeg": 33.17910202716264,
+        "differenceDeg": 0.00020558551614158205
+      },
+      {
+        "instant": "1910-06-15T12:00:00.000Z",
+        "body": "uranus",
+        "astronomyDeg": 294.41411269033733,
+        "swissMoshierDeg": 294.4160595655644,
+        "differenceDeg": 0.0019468752270768164
+      },
+      {
+        "instant": "1910-06-15T12:00:00.000Z",
+        "body": "neptune",
+        "astronomyDeg": 108.08768242708074,
+        "swissMoshierDeg": 108.08461455825926,
+        "differenceDeg": 0.00306786882151755
+      },
+      {
+        "instant": "1910-06-15T12:00:00.000Z",
+        "body": "pluto",
+        "astronomyDeg": 86.3099929307361,
+        "swissMoshierDeg": 86.30927326729852,
+        "differenceDeg": 0.0007196634376214206
+      },
+      {
+        "instant": "1915-06-15T12:00:00.000Z",
+        "body": "sun",
+        "astronomyDeg": 83.29899290550458,
+        "swissMoshierDeg": 83.29922569459814,
+        "differenceDeg": 0.0002327890936157928
+      },
+      {
+        "instant": "1915-06-15T12:00:00.000Z",
+        "body": "moon",
+        "astronomyDeg": 113.28890109068095,
+        "swissMoshierDeg": 113.2887690274185,
+        "differenceDeg": 0.0001320632624128848
+      },
+      {
+        "instant": "1915-06-15T12:00:00.000Z",
+        "body": "mercury",
+        "astronomyDeg": 99.29040583975461,
+        "swissMoshierDeg": 99.2910377384435,
+        "differenceDeg": 0.0006318986888800282
+      },
+      {
+        "instant": "1915-06-15T12:00:00.000Z",
+        "body": "venus",
+        "astronomyDeg": 59.376773405292674,
+        "swissMoshierDeg": 59.377486436904505,
+        "differenceDeg": 0.0007130316117809343
+      },
+      {
+        "instant": "1915-06-15T12:00:00.000Z",
+        "body": "mars",
+        "astronomyDeg": 45.071185298341526,
+        "swissMoshierDeg": 45.071135358394095,
+        "differenceDeg": 0.00004993994741653296
+      },
+      {
+        "instant": "1915-06-15T12:00:00.000Z",
+        "body": "jupiter",
+        "astronomyDeg": 356.7059664907823,
+        "swissMoshierDeg": 356.70606466371737,
+        "differenceDeg": 0.00009817293505420821
+      },
+      {
+        "instant": "1915-06-15T12:00:00.000Z",
+        "body": "saturn",
+        "astronomyDeg": 94.1972874640662,
+        "swissMoshierDeg": 94.19740577832091,
+        "differenceDeg": 0.00011831425467789813
+      },
+      {
+        "instant": "1915-06-15T12:00:00.000Z",
+        "body": "uranus",
+        "astronomyDeg": 315.420540906814,
+        "swissMoshierDeg": 315.4218358805361,
+        "differenceDeg": 0.0012949737221106261
+      },
+      {
+        "instant": "1915-06-15T12:00:00.000Z",
+        "body": "neptune",
+        "astronomyDeg": 118.8142526376915,
+        "swissMoshierDeg": 118.81077158107293,
+        "differenceDeg": 0.003481056618511502
+      },
+      {
+        "instant": "1915-06-15T12:00:00.000Z",
+        "body": "pluto",
+        "astronomyDeg": 91.50810144204328,
+        "swissMoshierDeg": 91.50756790781713,
+        "differenceDeg": 0.0005335342261787446
+      },
+      {
+        "instant": "1920-06-15T12:00:00.000Z",
+        "body": "sun",
+        "astronomyDeg": 84.0464052127324,
+        "swissMoshierDeg": 84.04654727501631,
+        "differenceDeg": 0.00014206228388502495
+      },
+      {
+        "instant": "1920-06-15T12:00:00.000Z",
+        "body": "moon",
+        "astronomyDeg": 68.80419262540178,
+        "swissMoshierDeg": 68.8040596912247,
+        "differenceDeg": 0.00013293417714521638
+      },
+      {
+        "instant": "1920-06-15T12:00:00.000Z",
+        "body": "mercury",
+        "astronomyDeg": 104.92668237031681,
+        "swissMoshierDeg": 104.92691581752945,
+        "differenceDeg": 0.00023344721262219537
+      },
+      {
+        "instant": "1920-06-15T12:00:00.000Z",
+        "body": "venus",
+        "astronomyDeg": 79.00791641453678,
+        "swissMoshierDeg": 79.00760691030754,
+        "differenceDeg": 0.00030950422922160215
+      },
+      {
+        "instant": "1920-06-15T12:00:00.000Z",
+        "body": "mars",
+        "astronomyDeg": 202.56089769746077,
+        "swissMoshierDeg": 202.56095513547592,
+        "differenceDeg": 0.000057438015119259944
+      },
+      {
+        "instant": "1920-06-15T12:00:00.000Z",
+        "body": "jupiter",
+        "astronomyDeg": 135.1564809171487,
+        "swissMoshierDeg": 135.1565140056938,
+        "differenceDeg": 0.00003308854502392933
+      },
+      {
+        "instant": "1920-06-15T12:00:00.000Z",
+        "body": "saturn",
+        "astronomyDeg": 156.1325499076241,
+        "swissMoshierDeg": 156.13306959364996,
+        "differenceDeg": 0.0005196860258820379
+      },
+      {
+        "instant": "1920-06-15T12:00:00.000Z",
+        "body": "uranus",
+        "astronomyDeg": 335.6634176344811,
+        "swissMoshierDeg": 335.6633291975051,
+        "differenceDeg": 0.00008843697605698253
+      },
+      {
+        "instant": "1920-06-15T12:00:00.000Z",
+        "body": "neptune",
+        "astronomyDeg": 129.59402065791008,
+        "swissMoshierDeg": 129.59033840930212,
+        "differenceDeg": 0.0036822486079017835
+      },
+      {
+        "instant": "1920-06-15T12:00:00.000Z",
+        "body": "pluto",
+        "astronomyDeg": 96.94156300519845,
+        "swissMoshierDeg": 96.94109162963701,
+        "differenceDeg": 0.00047137556146026327
+      },
+      {
+        "instant": "1925-06-15T12:00:00.000Z",
+        "body": "sun",
+        "astronomyDeg": 83.84104624588925,
+        "swissMoshierDeg": 83.84111927890508,
+        "differenceDeg": 0.00007303301583760913
+      },
+      {
+        "instant": "1925-06-15T12:00:00.000Z",
+        "body": "moon",
+        "astronomyDeg": 18.083244684671026,
+        "swissMoshierDeg": 18.082468867024318,
+        "differenceDeg": 0.0007758176467405065
+      },
+      {
+        "instant": "1925-06-15T12:00:00.000Z",
+        "body": "mercury",
+        "astronomyDeg": 78.05335652728746,
+        "swissMoshierDeg": 78.0532474534781,
+        "differenceDeg": 0.00010907380942626332
+      },
+      {
+        "instant": "1925-06-15T12:00:00.000Z",
+        "body": "venus",
+        "astronomyDeg": 97.85036410430483,
+        "swissMoshierDeg": 97.85072346106612,
+        "differenceDeg": 0.0003593567612369952
+      },
+      {
+        "instant": "1925-06-15T12:00:00.000Z",
+        "body": "mars",
+        "astronomyDeg": 113.13553098960665,
+        "swissMoshierDeg": 113.13541716685278,
+        "differenceDeg": 0.00011382275386040419
+      },
+      {
+        "instant": "1925-06-15T12:00:00.000Z",
+        "body": "jupiter",
+        "astronomyDeg": 290.59112600536787,
+        "swissMoshierDeg": 290.5918023312326,
+        "differenceDeg": 0.0006763258647879411
+      },
+      {
+        "instant": "1925-06-15T12:00:00.000Z",
+        "body": "saturn",
+        "astronomyDeg": 218.1786076482304,
+        "swissMoshierDeg": 218.1781582143976,
+        "differenceDeg": 0.0004494338328413505
+      },
+      {
+        "instant": "1925-06-15T12:00:00.000Z",
+        "body": "uranus",
+        "astronomyDeg": 355.3798078854424,
+        "swissMoshierDeg": 355.3797615579959,
+        "differenceDeg": 0.00004632744651189569
+      },
+      {
+        "instant": "1925-06-15T12:00:00.000Z",
+        "body": "neptune",
+        "astronomyDeg": 140.34220480622074,
+        "swissMoshierDeg": 140.33912543666514,
+        "differenceDeg": 0.0030793695556212697
+      },
+      {
+        "instant": "1925-06-15T12:00:00.000Z",
+        "body": "pluto",
+        "astronomyDeg": 102.56176669895461,
+        "swissMoshierDeg": 102.56136155699036,
+        "differenceDeg": 0.0004051419642792098
+      },
+      {
+        "instant": "1930-06-15T12:00:00.000Z",
+        "body": "sun",
+        "astronomyDeg": 83.64108501198326,
+        "swissMoshierDeg": 83.64151660156128,
+        "differenceDeg": 0.00043158957805644604
+      },
+      {
+        "instant": "1930-06-15T12:00:00.000Z",
+        "body": "moon",
+        "astronomyDeg": 311.1122842720226,
+        "swissMoshierDeg": 311.1118125372656,
+        "differenceDeg": 0.00047173475695672096
+      },
+      {
+        "instant": "1930-06-15T12:00:00.000Z",
+        "body": "mercury",
+        "astronomyDeg": 60.62229977322806,
+        "swissMoshierDeg": 60.62235557532939,
+        "differenceDeg": 0.00005580210131483909
+      },
+      {
+        "instant": "1930-06-15T12:00:00.000Z",
+        "body": "venus",
+        "astronomyDeg": 115.60021145376554,
+        "swissMoshierDeg": 115.5998654674129,
+        "differenceDeg": 0.0003459863526131812
+      },
+      {
+        "instant": "1930-06-15T12:00:00.000Z",
+        "body": "mars",
+        "astronomyDeg": 39.15106767904295,
+        "swissMoshierDeg": 39.15103549724138,
+        "differenceDeg": 0.00003218180154362926
+      },
+      {
+        "instant": "1930-06-15T12:00:00.000Z",
+        "body": "jupiter",
+        "astronomyDeg": 87.37426967479837,
+        "swissMoshierDeg": 87.37500891071484,
+        "differenceDeg": 0.0007392359165123707
+      },
+      {
+        "instant": "1930-06-15T12:00:00.000Z",
+        "body": "saturn",
+        "astronomyDeg": 279.70954214596185,
+        "swissMoshierDeg": 279.70953519696684,
+        "differenceDeg": 0.0000069489949510170845
+      },
+      {
+        "instant": "1930-06-15T12:00:00.000Z",
+        "body": "uranus",
+        "astronomyDeg": 14.855354474761489,
+        "swissMoshierDeg": 14.855751195775838,
+        "differenceDeg": 0.00039672101434007345
+      },
+      {
+        "instant": "1930-06-15T12:00:00.000Z",
+        "body": "neptune",
+        "astronomyDeg": 151.10461080141835,
+        "swissMoshierDeg": 151.1018156866719,
+        "differenceDeg": 0.0027951147465046233
+      },
+      {
+        "instant": "1930-06-15T12:00:00.000Z",
+        "body": "pluto",
+        "astronomyDeg": 108.47573204665301,
+        "swissMoshierDeg": 108.47541307987115,
+        "differenceDeg": 0.0003189667818332964
+      },
+      {
+        "instant": "1935-06-15T12:00:00.000Z",
+        "body": "sun",
+        "astronomyDeg": 83.4544599683585,
+        "swissMoshierDeg": 83.45458835117785,
+        "differenceDeg": 0.0001283828192981673
+      },
+      {
+        "instant": "1935-06-15T12:00:00.000Z",
+        "body": "moon",
+        "astronomyDeg": 246.20597966677366,
+        "swissMoshierDeg": 246.2055248872558,
+        "differenceDeg": 0.0004547795178950764
+      },
+      {
+        "instant": "1935-06-15T12:00:00.000Z",
+        "body": "mercury",
+        "astronomyDeg": 92.70528470567926,
+        "swissMoshierDeg": 92.70528136532573,
+        "differenceDeg": 0.0000033403534871467855
+      },
+      {
+        "instant": "1935-06-15T12:00:00.000Z",
+        "body": "venus",
+        "astronomyDeg": 128.1578988685718,
+        "swissMoshierDeg": 128.15846657158508,
+        "differenceDeg": 0.0005677030133028893
+      },
+      {
+        "instant": "1935-06-15T12:00:00.000Z",
+        "body": "mars",
+        "astronomyDeg": 190.67573037675336,
+        "swissMoshierDeg": 190.675259104904,
+        "differenceDeg": 0.0004712718493919965
+      },
+      {
+        "instant": "1935-06-15T12:00:00.000Z",
+        "body": "jupiter",
+        "astronomyDeg": 224.43813884627122,
+        "swissMoshierDeg": 224.4371998772312,
+        "differenceDeg": 0.0009389690400212203
+      },
+      {
+        "instant": "1935-06-15T12:00:00.000Z",
+        "body": "saturn",
+        "astronomyDeg": 340.1915380408067,
+        "swissMoshierDeg": 340.1926900335244,
+        "differenceDeg": 0.0011519927177232603
+      },
+      {
+        "instant": "1935-06-15T12:00:00.000Z",
+        "body": "uranus",
+        "astronomyDeg": 34.24475805674623,
+        "swissMoshierDeg": 34.243343946751544,
+        "differenceDeg": 0.001414109994698265
+      },
+      {
+        "instant": "1935-06-15T12:00:00.000Z",
+        "body": "neptune",
+        "astronomyDeg": 161.93256088649852,
+        "swissMoshierDeg": 161.93061488926338,
+        "differenceDeg": 0.001945997235111463
+      },
+      {
+        "instant": "1935-06-15T12:00:00.000Z",
+        "body": "pluto",
+        "astronomyDeg": 114.74543291977793,
+        "swissMoshierDeg": 114.74518355089985,
+        "differenceDeg": 0.0002493688780305092
+      },
+      {
+        "instant": "1940-06-15T12:00:00.000Z",
+        "body": "sun",
+        "astronomyDeg": 84.21160553314073,
+        "swissMoshierDeg": 84.21161740369608,
+        "differenceDeg": 0.000011870555340465216
+      },
+      {
+        "instant": "1940-06-15T12:00:00.000Z",
+        "body": "moon",
+        "astronomyDeg": 206.14682886163087,
+        "swissMoshierDeg": 206.1466456964998,
+        "differenceDeg": 0.00018316513103400212
+      },
+      {
+        "instant": "1940-06-15T12:00:00.000Z",
+        "body": "mercury",
+        "astronomyDeg": 107.37014500912915,
+        "swissMoshierDeg": 107.3705626698788,
+        "differenceDeg": 0.0004176607496901852
+      },
+      {
+        "instant": "1940-06-15T12:00:00.000Z",
+        "body": "venus",
+        "astronomyDeg": 101.28895187390174,
+        "swissMoshierDeg": 101.2887472059442,
+        "differenceDeg": 0.0002046679575187227
+      },
+      {
+        "instant": "1940-06-15T12:00:00.000Z",
+        "body": "mars",
+        "astronomyDeg": 108.56180113100426,
+        "swissMoshierDeg": 108.56210440646068,
+        "differenceDeg": 0.0003032754564173956
+      },
+      {
+        "instant": "1940-06-15T12:00:00.000Z",
+        "body": "jupiter",
+        "astronomyDeg": 36.48678074837806,
+        "swissMoshierDeg": 36.48689343731757,
+        "differenceDeg": 0.00011268893945270975
+      },
+      {
+        "instant": "1940-06-15T12:00:00.000Z",
+        "body": "saturn",
+        "astronomyDeg": 40.57674639996897,
+        "swissMoshierDeg": 40.57801558362341,
+        "differenceDeg": 0.0012691836544718171
+      },
+      {
+        "instant": "1940-06-15T12:00:00.000Z",
+        "body": "uranus",
+        "astronomyDeg": 53.877155615806494,
+        "swissMoshierDeg": 53.876279249385156,
+        "differenceDeg": 0.0008763664213802258
+      },
+      {
+        "instant": "1940-06-15T12:00:00.000Z",
+        "body": "neptune",
+        "astronomyDeg": 172.76565070675463,
+        "swissMoshierDeg": 172.76501603301,
+        "differenceDeg": 0.000634673744571046
+      },
+      {
+        "instant": "1940-06-15T12:00:00.000Z",
+        "body": "pluto",
+        "astronomyDeg": 121.4147492621584,
+        "swissMoshierDeg": 121.41457925481323,
+        "differenceDeg": 0.00017000734510475013
+      },
+      {
+        "instant": "1945-06-15T12:00:00.000Z",
+        "body": "sun",
+        "astronomyDeg": 84.00030050642792,
+        "swissMoshierDeg": 84.00053649808315,
+        "differenceDeg": 0.00023599165524501586
+      },
+      {
+        "instant": "1945-06-15T12:00:00.000Z",
+        "body": "moon",
+        "astronomyDeg": 150.45946281795804,
+        "swissMoshierDeg": 150.45913957817362,
+        "differenceDeg": 0.0003232397843930812
+      },
+      {
+        "instant": "1945-06-15T12:00:00.000Z",
+        "body": "mercury",
+        "astronomyDeg": 83.38230545215532,
+        "swissMoshierDeg": 83.38144202975316,
+        "differenceDeg": 0.0008634224021761838
+      },
+      {
+        "instant": "1945-06-15T12:00:00.000Z",
+        "body": "venus",
+        "astronomyDeg": 38.65627154532184,
+        "swissMoshierDeg": 38.655346808473894,
+        "differenceDeg": 0.0009247368479918805
+      },
+      {
+        "instant": "1945-06-15T12:00:00.000Z",
+        "body": "mars",
+        "astronomyDeg": 32.958748114236016,
+        "swissMoshierDeg": 32.958794032526626,
+        "differenceDeg": 0.00004591829065248021
+      },
+      {
+        "instant": "1945-06-15T12:00:00.000Z",
+        "body": "jupiter",
+        "astronomyDeg": 168.99072103276643,
+        "swissMoshierDeg": 168.99115258299784,
+        "differenceDeg": 0.0004315502313829711
+      },
+      {
+        "instant": "1945-06-15T12:00:00.000Z",
+        "body": "saturn",
+        "astronomyDeg": 101.62816299735216,
+        "swissMoshierDeg": 101.63015254441304,
+        "differenceDeg": 0.001989547060929908
+      },
+      {
+        "instant": "1945-06-15T12:00:00.000Z",
+        "body": "uranus",
+        "astronomyDeg": 73.89324444689909,
+        "swissMoshierDeg": 73.89219830433763,
+        "differenceDeg": 0.0010461425614494146
+      },
+      {
+        "instant": "1945-06-15T12:00:00.000Z",
+        "body": "neptune",
+        "astronomyDeg": 183.65175909324887,
+        "swissMoshierDeg": 183.65203322100948,
+        "differenceDeg": 0.00027412776057644805
+      },
+      {
+        "instant": "1945-06-15T12:00:00.000Z",
+        "body": "pluto",
+        "astronomyDeg": 128.56897962317927,
+        "swissMoshierDeg": 128.5688249891921,
+        "differenceDeg": 0.00015463398722204147
+      },
+      {
+        "instant": "1950-06-15T12:00:00.000Z",
+        "body": "sun",
+        "astronomyDeg": 83.80977148360584,
+        "swissMoshierDeg": 83.80981382267406,
+        "differenceDeg": 0.00004233906815898081
+      },
+      {
+        "instant": "1950-06-15T12:00:00.000Z",
+        "body": "moon",
+        "astronomyDeg": 81.99933539354089,
+        "swissMoshierDeg": 81.99923711349224,
+        "differenceDeg": 0.0000982800486326596
+      },
+      {
+        "instant": "1950-06-15T12:00:00.000Z",
+        "body": "mercury",
+        "astronomyDeg": 61.097949859820616,
+        "swissMoshierDeg": 61.096976866606646,
+        "differenceDeg": 0.0009729932139634911
+      },
+      {
+        "instant": "1950-06-15T12:00:00.000Z",
+        "body": "venus",
+        "astronomyDeg": 46.040629695741664,
+        "swissMoshierDeg": 46.04092333363621,
+        "differenceDeg": 0.00029363789451508637
+      },
+      {
+        "instant": "1950-06-15T12:00:00.000Z",
+        "body": "mars",
+        "astronomyDeg": 181.37402561283372,
+        "swissMoshierDeg": 181.37388785535828,
+        "differenceDeg": 0.00013775747538602445
+      },
+      {
+        "instant": "1950-06-15T12:00:00.000Z",
+        "body": "jupiter",
+        "astronomyDeg": 337.2394953591807,
+        "swissMoshierDeg": 337.2401510918584,
+        "differenceDeg": 0.0006557326777283379
+      },
+      {
+        "instant": "1950-06-15T12:00:00.000Z",
+        "body": "saturn",
+        "astronomyDeg": 163.40281745443377,
+        "swissMoshierDeg": 163.40338127508718,
+        "differenceDeg": 0.000563820653383118
+      },
+      {
+        "instant": "1950-06-15T12:00:00.000Z",
+        "body": "uranus",
+        "astronomyDeg": 94.47880398317338,
+        "swissMoshierDeg": 94.47868350229537,
+        "differenceDeg": 0.0001204808779675659
+      },
+      {
+        "instant": "1950-06-15T12:00:00.000Z",
+        "body": "neptune",
+        "astronomyDeg": 194.6055117731888,
+        "swissMoshierDeg": 194.60743401175733,
+        "differenceDeg": 0.001922238568567991
+      },
+      {
+        "instant": "1950-06-15T12:00:00.000Z",
+        "body": "pluto",
+        "astronomyDeg": 136.28460953164927,
+        "swissMoshierDeg": 136.28441359351348,
+        "differenceDeg": 0.00019593813578921981
+      },
+      {
+        "instant": "1955-06-15T12:00:00.000Z",
+        "body": "sun",
+        "astronomyDeg": 83.61291614231249,
+        "swissMoshierDeg": 83.6131811272722,
+        "differenceDeg": 0.0002649849596991771
+      },
+      {
+        "instant": "1955-06-15T12:00:00.000Z",
+        "body": "moon",
+        "astronomyDeg": 18.79975248997536,
+        "swissMoshierDeg": 18.799494142822446,
+        "differenceDeg": 0.00025834715290784516
+      },
+      {
+        "instant": "1955-06-15T12:00:00.000Z",
+        "body": "mercury",
+        "astronomyDeg": 84.78097279151102,
+        "swissMoshierDeg": 84.78208103239072,
+        "differenceDeg": 0.0011082408797165044
+      },
+      {
+        "instant": "1955-06-15T12:00:00.000Z",
+        "body": "venus",
+        "astronomyDeg": 62.59775435232289,
+        "swissMoshierDeg": 62.59790517081001,
+        "differenceDeg": 0.00015081848709996848
+      },
+      {
+        "instant": "1955-06-15T12:00:00.000Z",
+        "body": "mars",
+        "astronomyDeg": 103.32695356752765,
+        "swissMoshierDeg": 103.32676865721558,
+        "differenceDeg": 0.00018491031210032816
+      },
+      {
+        "instant": "1955-06-15T12:00:00.000Z",
+        "body": "jupiter",
+        "astronomyDeg": 120.4882488280805,
+        "swissMoshierDeg": 120.48866864891421,
+        "differenceDeg": 0.0004198208337129472
+      },
+      {
+        "instant": "1955-06-15T12:00:00.000Z",
+        "body": "saturn",
+        "astronomyDeg": 225.39185768743104,
+        "swissMoshierDeg": 225.39181218880364,
+        "differenceDeg": 0.00004549862740077515
+      },
+      {
+        "instant": "1955-06-15T12:00:00.000Z",
+        "body": "uranus",
+        "astronomyDeg": 115.85804079012493,
+        "swissMoshierDeg": 115.85868223710371,
+        "differenceDeg": 0.0006414469787614507
+      },
+      {
+        "instant": "1955-06-15T12:00:00.000Z",
+        "body": "neptune",
+        "astronomyDeg": 205.5916536955247,
+        "swissMoshierDeg": 205.594447519222,
+        "differenceDeg": 0.0027938236972886443
+      },
+      {
+        "instant": "1955-06-15T12:00:00.000Z",
+        "body": "pluto",
+        "astronomyDeg": 144.67038930346848,
+        "swissMoshierDeg": 144.6700961637434,
+        "differenceDeg": 0.0002931397250449663
+      },
+      {
+        "instant": "1960-06-15T12:00:00.000Z",
+        "body": "sun",
+        "astronomyDeg": 84.36389448964232,
+        "swissMoshierDeg": 84.36388774320828,
+        "differenceDeg": 0.000006746433996340784
+      },
+      {
+        "instant": "1960-06-15T12:00:00.000Z",
+        "body": "moon",
+        "astronomyDeg": 345.82325781169675,
+        "swissMoshierDeg": 345.8231525482627,
+        "differenceDeg": 0.00010526343407946115
+      },
+      {
+        "instant": "1960-06-15T12:00:00.000Z",
+        "body": "mercury",
+        "astronomyDeg": 108.78198704396777,
+        "swissMoshierDeg": 108.78180774283572,
+        "differenceDeg": 0.00017930113199327025
+      },
+      {
+        "instant": "1960-06-15T12:00:00.000Z",
+        "body": "venus",
+        "astronomyDeg": 82.39648271240817,
+        "swissMoshierDeg": 82.39642882765801,
+        "differenceDeg": 0.00005388475017298333
+      },
+      {
+        "instant": "1960-06-15T12:00:00.000Z",
+        "body": "mars",
+        "astronomyDeg": 26.422982823524542,
+        "swissMoshierDeg": 26.42280932486438,
+        "differenceDeg": 0.000173498660160476
+      },
+      {
+        "instant": "1960-06-15T12:00:00.000Z",
+        "body": "jupiter",
+        "astronomyDeg": 269.3239453735396,
+        "swissMoshierDeg": 269.3217544909543,
+        "differenceDeg": 0.0021908825852960945
+      },
+      {
+        "instant": "1960-06-15T12:00:00.000Z",
+        "body": "saturn",
+        "astronomyDeg": 286.66642639366296,
+        "swissMoshierDeg": 286.66817205154246,
+        "differenceDeg": 0.0017456578794963207
+      },
+      {
+        "instant": "1960-06-15T12:00:00.000Z",
+        "body": "uranus",
+        "astronomyDeg": 138.09726222735827,
+        "swissMoshierDeg": 138.096534750915,
+        "differenceDeg": 0.0007274764432168013
+      },
+      {
+        "instant": "1960-06-15T12:00:00.000Z",
+        "body": "neptune",
+        "astronomyDeg": 216.63663862786413,
+        "swissMoshierDeg": 216.63969108304337,
+        "differenceDeg": 0.0030524551792723287
+      },
+      {
+        "instant": "1960-06-15T12:00:00.000Z",
+        "body": "pluto",
+        "astronomyDeg": 153.83230304712234,
+        "swissMoshierDeg": 153.83204011760864,
+        "differenceDeg": 0.0002629295137239751
+      },
+      {
+        "instant": "1965-06-15T12:00:00.000Z",
+        "body": "sun",
+        "astronomyDeg": 84.15759738703511,
+        "swissMoshierDeg": 84.15755924901104,
+        "differenceDeg": 0.00003813802402419242
+      },
+      {
+        "instant": "1965-06-15T12:00:00.000Z",
+        "body": "moon",
+        "astronomyDeg": 279.79703697842245,
+        "swissMoshierDeg": 279.7970263511796,
+        "differenceDeg": 0.000010627242772898171
+      },
+      {
+        "instant": "1965-06-15T12:00:00.000Z",
+        "body": "mercury",
+        "astronomyDeg": 88.73216011116175,
+        "swissMoshierDeg": 88.73256043798841,
+        "differenceDeg": 0.00040032682670698705
+      },
+      {
+        "instant": "1965-06-15T12:00:00.000Z",
+        "body": "venus",
+        "astronomyDeg": 101.18301550657412,
+        "swissMoshierDeg": 101.1828600554016,
+        "differenceDeg": 0.00015545117253168428
+      },
+      {
+        "instant": "1965-06-15T12:00:00.000Z",
+        "body": "mars",
+        "astronomyDeg": 173.5833760312838,
+        "swissMoshierDeg": 173.58345028976873,
+        "differenceDeg": 0.00007425848491493525
+      },
+      {
+        "instant": "1965-06-15T12:00:00.000Z",
+        "body": "jupiter",
+        "astronomyDeg": 72.4247249567686,
+        "swissMoshierDeg": 72.4255076847851,
+        "differenceDeg": 0.0007827280164747208
+      },
+      {
+        "instant": "1965-06-15T12:00:00.000Z",
+        "body": "saturn",
+        "astronomyDeg": 347.0864181822829,
+        "swissMoshierDeg": 347.08648381168626,
+        "differenceDeg": 0.00006562940336607426
+      },
+      {
+        "instant": "1965-06-15T12:00:00.000Z",
+        "body": "uranus",
+        "astronomyDeg": 161.03805675524814,
+        "swissMoshierDeg": 161.03859899666062,
+        "differenceDeg": 0.0005422414125177966
+      },
+      {
+        "instant": "1965-06-15T12:00:00.000Z",
+        "body": "neptune",
+        "astronomyDeg": 227.71415461968556,
+        "swissMoshierDeg": 227.7183194962206,
+        "differenceDeg": 0.004164876535014628
+      },
+      {
+        "instant": "1965-06-15T12:00:00.000Z",
+        "body": "pluto",
+        "astronomyDeg": 163.79780928038508,
+        "swissMoshierDeg": 163.7974150610805,
+        "differenceDeg": 0.00039421930455318943
+      },
+      {
+        "instant": "1970-06-15T12:00:00.000Z",
+        "body": "sun",
+        "astronomyDeg": 83.96780243818863,
+        "swissMoshierDeg": 83.96801578173364,
+        "differenceDeg": 0.0002133435450559773
+      },
+      {
+        "instant": "1970-06-15T12:00:00.000Z",
+        "body": "moon",
+        "astronomyDeg": 212.15052750410626,
+        "swissMoshierDeg": 212.15054138318123,
+        "differenceDeg": 0.000013879074913347722
+      },
+      {
+        "instant": "1970-06-15T12:00:00.000Z",
+        "body": "mercury",
+        "astronomyDeg": 62.852190786803156,
+        "swissMoshierDeg": 62.85325267688926,
+        "differenceDeg": 0.0010618900861345537
+      },
+      {
+        "instant": "1970-06-15T12:00:00.000Z",
+        "body": "venus",
+        "astronomyDeg": 118.53237947430021,
+        "swissMoshierDeg": 118.53226134041297,
+        "differenceDeg": 0.0001181338872129345
+      },
+      {
+        "instant": "1970-06-15T12:00:00.000Z",
+        "body": "mars",
+        "astronomyDeg": 98.70751547552747,
+        "swissMoshierDeg": 98.70738310993225,
+        "differenceDeg": 0.00013236559516371926
+      },
+      {
+        "instant": "1970-06-15T12:00:00.000Z",
+        "body": "jupiter",
+        "astronomyDeg": 206.16404277018663,
+        "swissMoshierDeg": 206.1640378152114,
+        "differenceDeg": 0.000004954975224791269
+      },
+      {
+        "instant": "1970-06-15T12:00:00.000Z",
+        "body": "saturn",
+        "astronomyDeg": 47.47757311004043,
+        "swissMoshierDeg": 47.4772701110355,
+        "differenceDeg": 0.00030299900492991583
+      },
+      {
+        "instant": "1970-06-15T12:00:00.000Z",
+        "body": "uranus",
+        "astronomyDeg": 184.65902506495735,
+        "swissMoshierDeg": 184.65995072858345,
+        "differenceDeg": 0.0009256636260488449
+      },
+      {
+        "instant": "1970-06-15T12:00:00.000Z",
+        "body": "neptune",
+        "astronomyDeg": 238.85614924012435,
+        "swissMoshierDeg": 238.86077805454212,
+        "differenceDeg": 0.004628814417742433
+      },
+      {
+        "instant": "1970-06-15T12:00:00.000Z",
+        "body": "pluto",
+        "astronomyDeg": 174.70715138883648,
+        "swissMoshierDeg": 174.70657332618893,
+        "differenceDeg": 0.0005780626474916062
+      },
+      {
+        "instant": "1975-06-15T12:00:00.000Z",
+        "body": "sun",
+        "astronomyDeg": 83.7787065468342,
+        "swissMoshierDeg": 83.77859199842014,
+        "differenceDeg": 0.00011454841410341032
+      },
+      {
+        "instant": "1975-06-15T12:00:00.000Z",
+        "body": "moon",
+        "astronomyDeg": 158.83327508131666,
+        "swissMoshierDeg": 158.8334512062444,
+        "differenceDeg": 0.00017612492774787825
+      },
+      {
+        "instant": "1975-06-15T12:00:00.000Z",
+        "body": "mercury",
+        "astronomyDeg": 76.76787158939797,
+        "swissMoshierDeg": 76.76800245217456,
+        "differenceDeg": 0.00013086277658658219
+      },
+      {
+        "instant": "1975-06-15T12:00:00.000Z",
+        "body": "venus",
+        "astronomyDeg": 129.1023199715738,
+        "swissMoshierDeg": 129.10305896015078,
+        "differenceDeg": 0.0007389885770408
+      },
+      {
+        "instant": "1975-06-15T12:00:00.000Z",
+        "body": "mars",
+        "astronomyDeg": 18.68679029799996,
+        "swissMoshierDeg": 18.686822395490033,
+        "differenceDeg": 0.00003209749002053286
+      },
+      {
+        "instant": "1975-06-15T12:00:00.000Z",
+        "body": "jupiter",
+        "astronomyDeg": 19.307608181025234,
+        "swissMoshierDeg": 19.30643628278731,
+        "differenceDeg": 0.001171898237885216
+      },
+      {
+        "instant": "1975-06-15T12:00:00.000Z",
+        "body": "saturn",
+        "astronomyDeg": 108.6705901764009,
+        "swissMoshierDeg": 108.67318823614208,
+        "differenceDeg": 0.0025980597412171846
+      },
+      {
+        "instant": "1975-06-15T12:00:00.000Z",
+        "body": "uranus",
+        "astronomyDeg": 208.5576369853007,
+        "swissMoshierDeg": 208.55870853356998,
+        "differenceDeg": 0.00107154826923761
+      },
+      {
+        "instant": "1975-06-15T12:00:00.000Z",
+        "body": "neptune",
+        "astronomyDeg": 250.04688971529055,
+        "swissMoshierDeg": 250.0512210336924,
+        "differenceDeg": 0.004331318401909812
+      },
+      {
+        "instant": "1975-06-15T12:00:00.000Z",
+        "body": "pluto",
+        "astronomyDeg": 186.4825072057098,
+        "swissMoshierDeg": 186.4819653505515,
+        "differenceDeg": 0.0005418551583034059
+      },
+      {
+        "instant": "1980-06-15T12:00:00.000Z",
+        "body": "sun",
+        "astronomyDeg": 84.51943070116218,
+        "swissMoshierDeg": 84.51941467859119,
+        "differenceDeg": 0.00001602257100330462
+      },
+      {
+        "instant": "1980-06-15T12:00:00.000Z",
+        "body": "moon",
+        "astronomyDeg": 117.6408252887167,
+        "swissMoshierDeg": 117.64063923644886,
+        "differenceDeg": 0.00018605226784984552
+      },
+      {
+        "instant": "1980-06-15T12:00:00.000Z",
+        "body": "mercury",
+        "astronomyDeg": 108.96280625550266,
+        "swissMoshierDeg": 108.96193865978655,
+        "differenceDeg": 0.0008675957160448888
+      },
+      {
+        "instant": "1980-06-15T12:00:00.000Z",
+        "body": "venus",
+        "astronomyDeg": 84.21928301009102,
+        "swissMoshierDeg": 84.21949186090309,
+        "differenceDeg": 0.00020885081210053613
+      },
+      {
+        "instant": "1980-06-15T12:00:00.000Z",
+        "body": "mars",
+        "astronomyDeg": 166.76483778220668,
+        "swissMoshierDeg": 166.76501711559786,
+        "differenceDeg": 0.00017933339120190794
+      },
+      {
+        "instant": "1980-06-15T12:00:00.000Z",
+        "body": "jupiter",
+        "astronomyDeg": 153.77908398071247,
+        "swissMoshierDeg": 153.77914555253963,
+        "differenceDeg": 0.00006157182713195652
+      },
+      {
+        "instant": "1980-06-15T12:00:00.000Z",
+        "body": "saturn",
+        "astronomyDeg": 170.6809653267883,
+        "swissMoshierDeg": 170.68233906651705,
+        "differenceDeg": 0.0013737397287059139
+      },
+      {
+        "instant": "1980-06-15T12:00:00.000Z",
+        "body": "uranus",
+        "astronomyDeg": 232.30035592753237,
+        "swissMoshierDeg": 232.30181486726082,
+        "differenceDeg": 0.0014589397284225925
+      },
+      {
+        "instant": "1980-06-15T12:00:00.000Z",
+        "body": "neptune",
+        "astronomyDeg": 261.2065082045005,
+        "swissMoshierDeg": 261.21044501492867,
+        "differenceDeg": 0.003936810428172066
+      },
+      {
+        "instant": "1980-06-15T12:00:00.000Z",
+        "body": "pluto",
+        "astronomyDeg": 199.01857035415338,
+        "swissMoshierDeg": 199.01786440888836,
+        "differenceDeg": 0.0007059452650537423
+      },
+      {
+        "instant": "1985-06-15T12:00:00.000Z",
+        "body": "sun",
+        "astronomyDeg": 84.32059157097711,
+        "swissMoshierDeg": 84.32071342248125,
+        "differenceDeg": 0.00012185150410459755
+      },
+      {
+        "instant": "1985-06-15T12:00:00.000Z",
+        "body": "moon",
+        "astronomyDeg": 50.63462539731147,
+        "swissMoshierDeg": 50.63452851448178,
+        "differenceDeg": 0.00009688282966635597
+      },
+      {
+        "instant": "1985-06-15T12:00:00.000Z",
+        "body": "mercury",
+        "astronomyDeg": 93.83709372507326,
+        "swissMoshierDeg": 93.83649665899439,
+        "differenceDeg": 0.0005970660788534587
+      },
+      {
+        "instant": "1985-06-15T12:00:00.000Z",
+        "body": "venus",
+        "astronomyDeg": 38.60099210354801,
+        "swissMoshierDeg": 38.60068645449105,
+        "differenceDeg": 0.0003056490569406378
+      },
+      {
+        "instant": "1985-06-15T12:00:00.000Z",
+        "body": "mars",
+        "astronomyDeg": 94.03044019169644,
+        "swissMoshierDeg": 94.03036825573292,
+        "differenceDeg": 0.00007193596354682086
+      },
+      {
+        "instant": "1985-06-15T12:00:00.000Z",
+        "body": "jupiter",
+        "astronomyDeg": 316.7846013882087,
+        "swissMoshierDeg": 316.78577343173447,
+        "differenceDeg": 0.001172043525684785
+      },
+      {
+        "instant": "1985-06-15T12:00:00.000Z",
+        "body": "saturn",
+        "astronomyDeg": 232.70861911662433,
+        "swissMoshierDeg": 232.7078441271224,
+        "differenceDeg": 0.0007749895019060205
+      },
+      {
+        "instant": "1985-06-15T12:00:00.000Z",
+        "body": "uranus",
+        "astronomyDeg": 255.63169535307537,
+        "swissMoshierDeg": 255.63311886492644,
+        "differenceDeg": 0.001423511851044168
+      },
+      {
+        "instant": "1985-06-15T12:00:00.000Z",
+        "body": "neptune",
+        "astronomyDeg": 272.46068300564275,
+        "swissMoshierDeg": 272.46316617870036,
+        "differenceDeg": 0.0024831730576124755
+      },
+      {
+        "instant": "1985-06-15T12:00:00.000Z",
+        "body": "pluto",
+        "astronomyDeg": 212.1219758895049,
+        "swissMoshierDeg": 212.1212233403698,
+        "differenceDeg": 0.0007525491350861557
+      },
+      {
+        "instant": "1990-06-15T12:00:00.000Z",
+        "body": "sun",
+        "astronomyDeg": 84.1293893072255,
+        "swissMoshierDeg": 84.12956685673697,
+        "differenceDeg": 0.00017754951147708198
+      },
+      {
+        "instant": "1990-06-15T12:00:00.000Z",
+        "body": "moon",
+        "astronomyDeg": 345.35827600277196,
+        "swissMoshierDeg": 345.35793997376055,
+        "differenceDeg": 0.0003360290113505471
+      },
+      {
+        "instant": "1990-06-15T12:00:00.000Z",
+        "body": "mercury",
+        "astronomyDeg": 65.69077961084322,
+        "swissMoshierDeg": 65.69070646946744,
+        "differenceDeg": 0.00007314137576486246
+      },
+      {
+        "instant": "1990-06-15T12:00:00.000Z",
+        "body": "venus",
+        "astronomyDeg": 48.777373022438944,
+        "swissMoshierDeg": 48.777612211248105,
+        "differenceDeg": 0.00023918880913242901
+      },
+      {
+        "instant": "1990-06-15T12:00:00.000Z",
+        "body": "mars",
+        "astronomyDeg": 11.041065667020554,
+        "swissMoshierDeg": 11.041312794175441,
+        "differenceDeg": 0.0002471271549211451
+      },
+      {
+        "instant": "1990-06-15T12:00:00.000Z",
+        "body": "jupiter",
+        "astronomyDeg": 105.88948786636922,
+        "swissMoshierDeg": 105.88943731764725,
+        "differenceDeg": 0.0000505487220152645
+      },
+      {
+        "instant": "1990-06-15T12:00:00.000Z",
+        "body": "saturn",
+        "astronomyDeg": 294.0318698191326,
+        "swissMoshierDeg": 294.03196247542286,
+        "differenceDeg": 0.00009265629023502697
+      },
+      {
+        "instant": "1990-06-15T12:00:00.000Z",
+        "body": "uranus",
+        "astronomyDeg": 278.1639398136095,
+        "swissMoshierDeg": 278.1652400240266,
+        "differenceDeg": 0.001300210417184644
+      },
+      {
+        "instant": "1990-06-15T12:00:00.000Z",
+        "body": "neptune",
+        "astronomyDeg": 283.71685144174637,
+        "swissMoshierDeg": 283.7170973586039,
+        "differenceDeg": 0.0002459168574659998
+      },
+      {
+        "instant": "1990-06-15T12:00:00.000Z",
+        "body": "pluto",
+        "astronomyDeg": 225.4021823783334,
+        "swissMoshierDeg": 225.4015508057338,
+        "differenceDeg": 0.0006315725995591492
+      },
+      {
+        "instant": "1995-06-15T12:00:00.000Z",
+        "body": "sun",
+        "astronomyDeg": 83.93227710514287,
+        "swissMoshierDeg": 83.93221613760944,
+        "differenceDeg": 0.00006096753338624694
+      },
+      {
+        "instant": "1995-06-15T12:00:00.000Z",
+        "body": "moon",
+        "astronomyDeg": 296.99952965451416,
+        "swissMoshierDeg": 296.9994750953342,
+        "differenceDeg": 0.00005455917994368065
+      },
+      {
+        "instant": "1995-06-15T12:00:00.000Z",
+        "body": "mercury",
+        "astronomyDeg": 69.93129952531096,
+        "swissMoshierDeg": 69.93143846185478,
+        "differenceDeg": 0.00013893654386265553
+      },
+      {
+        "instant": "1995-06-15T12:00:00.000Z",
+        "body": "venus",
+        "astronomyDeg": 65.86630034301596,
+        "swissMoshierDeg": 65.86633244183473,
+        "differenceDeg": 0.00003209881879229215
+      },
+      {
+        "instant": "1995-06-15T12:00:00.000Z",
+        "body": "mars",
+        "astronomyDeg": 160.10023411254784,
+        "swissMoshierDeg": 160.1000911339501,
+        "differenceDeg": 0.0001429785977506981
+      },
+      {
+        "instant": "1995-06-15T12:00:00.000Z",
+        "body": "jupiter",
+        "astronomyDeg": 248.76947331542678,
+        "swissMoshierDeg": 248.76734035480217,
+        "differenceDeg": 0.002132960624635416
+      },
+      {
+        "instant": "1995-06-15T12:00:00.000Z",
+        "body": "saturn",
+        "astronomyDeg": 354.38928377147914,
+        "swissMoshierDeg": 354.3900418347172,
+        "differenceDeg": 0.0007580632379813323
+      },
+      {
+        "instant": "1995-06-15T12:00:00.000Z",
+        "body": "uranus",
+        "astronomyDeg": 299.8182896765111,
+        "swissMoshierDeg": 299.82053443967277,
+        "differenceDeg": 0.0022447631616842045
+      },
+      {
+        "instant": "1995-06-15T12:00:00.000Z",
+        "body": "neptune",
+        "astronomyDeg": 294.96816764309904,
+        "swissMoshierDeg": 294.9667565119877,
+        "differenceDeg": 0.001411131111353825
+      },
+      {
+        "instant": "1995-06-15T12:00:00.000Z",
+        "body": "pluto",
+        "astronomyDeg": 238.545102289405,
+        "swissMoshierDeg": 238.54473222249325,
+        "differenceDeg": 0.0003700669117279176
+      },
+      {
+        "instant": "2000-06-15T12:00:00.000Z",
+        "body": "sun",
+        "astronomyDeg": 84.68011733085416,
+        "swissMoshierDeg": 84.68007940490105,
+        "differenceDeg": 0.000037925953165540705
+      },
+      {
+        "instant": "2000-06-15T12:00:00.000Z",
+        "body": "moon",
+        "astronomyDeg": 248.90444905994164,
+        "swissMoshierDeg": 248.90428846013333,
+        "differenceDeg": 0.00016059980828231346
+      },
+      {
+        "instant": "2000-06-15T12:00:00.000Z",
+        "body": "mercury",
+        "astronomyDeg": 107.63875555024524,
+        "swissMoshierDeg": 107.63950313076853,
+        "differenceDeg": 0.0007475805232388666
+      },
+      {
+        "instant": "2000-06-15T12:00:00.000Z",
+        "body": "venus",
+        "astronomyDeg": 85.79021890147348,
+        "swissMoshierDeg": 85.7902727022653,
+        "differenceDeg": 0.00005380079187489173
+      },
+      {
+        "instant": "2000-06-15T12:00:00.000Z",
+        "body": "mars",
+        "astronomyDeg": 89.31474283151614,
+        "swissMoshierDeg": 89.3146017315916,
+        "differenceDeg": 0.0001410999245763378
+      },
+      {
+        "instant": "2000-06-15T12:00:00.000Z",
+        "body": "jupiter",
+        "astronomyDeg": 56.79666754805344,
+        "swissMoshierDeg": 56.79670511061766,
+        "differenceDeg": 0.00003756256421638682
+      },
+      {
+        "instant": "2000-06-15T12:00:00.000Z",
+        "body": "saturn",
+        "astronomyDeg": 54.9042514003097,
+        "swissMoshierDeg": 54.902736670268084,
+        "differenceDeg": 0.001514730041662915
+      },
+      {
+        "instant": "2000-06-15T12:00:00.000Z",
+        "body": "uranus",
+        "astronomyDeg": 320.64261383891596,
+        "swissMoshierDeg": 320.645844592503,
+        "differenceDeg": 0.003230753587104118
+      },
+      {
+        "instant": "2000-06-15T12:00:00.000Z",
+        "body": "neptune",
+        "astronomyDeg": 306.20668965707193,
+        "swissMoshierDeg": 306.2038657797046,
+        "differenceDeg": 0.002823877367291061
+      },
+      {
+        "instant": "2000-06-15T12:00:00.000Z",
+        "body": "pluto",
+        "astronomyDeg": 251.1723857799232,
+        "swissMoshierDeg": 251.17234103691328,
+        "differenceDeg": 0.00004474300988022151
+      },
+      {
+        "instant": "2005-06-15T12:00:00.000Z",
+        "body": "sun",
+        "astronomyDeg": 84.48176060653333,
+        "swissMoshierDeg": 84.48186998460785,
+        "differenceDeg": 0.00010937807451227854
+      },
+      {
+        "instant": "2005-06-15T12:00:00.000Z",
+        "body": "moon",
+        "astronomyDeg": 179.4964924335898,
+        "swissMoshierDeg": 179.4966048516612,
+        "differenceDeg": 0.00011241807146689098
+      },
+      {
+        "instant": "2005-06-15T12:00:00.000Z",
+        "body": "mercury",
+        "astronomyDeg": 98.47545021819572,
+        "swissMoshierDeg": 98.47523647394213,
+        "differenceDeg": 0.00021374425364228955
+      },
+      {
+        "instant": "2005-06-15T12:00:00.000Z",
+        "body": "venus",
+        "astronomyDeg": 104.48844852607068,
+        "swissMoshierDeg": 104.48836651701237,
+        "differenceDeg": 0.00008200905836019956
+      },
+      {
+        "instant": "2005-06-15T12:00:00.000Z",
+        "body": "mars",
+        "astronomyDeg": 2.3567617894375203,
+        "swissMoshierDeg": 2.3569096297147056,
+        "differenceDeg": 0.00014784027723635518
+      },
+      {
+        "instant": "2005-06-15T12:00:00.000Z",
+        "body": "jupiter",
+        "astronomyDeg": 189.08495182154712,
+        "swissMoshierDeg": 189.0864461792592,
+        "differenceDeg": 0.0014943577120902773
+      },
+      {
+        "instant": "2005-06-15T12:00:00.000Z",
+        "body": "saturn",
+        "astronomyDeg": 116.14967704707854,
+        "swissMoshierDeg": 116.14940256434905,
+        "differenceDeg": 0.00027448272953733976
+      },
+      {
+        "instant": "2005-06-15T12:00:00.000Z",
+        "body": "uranus",
+        "astronomyDeg": 340.763459176586,
+        "swissMoshierDeg": 340.76449576102004,
+        "differenceDeg": 0.0010365844340185504
+      },
+      {
+        "instant": "2005-06-15T12:00:00.000Z",
+        "body": "neptune",
+        "astronomyDeg": 317.42430294554083,
+        "swissMoshierDeg": 317.4202082347494,
+        "differenceDeg": 0.00409471079137802
+      },
+      {
+        "instant": "2005-06-15T12:00:00.000Z",
+        "body": "pluto",
+        "astronomyDeg": 263.14273403776906,
+        "swissMoshierDeg": 263.14277836851824,
+        "differenceDeg": 0.00004433074923326785
+      },
+      {
+        "instant": "2010-06-15T12:00:00.000Z",
+        "body": "sun",
+        "astronomyDeg": 84.29236958689619,
+        "swissMoshierDeg": 84.29251963516103,
+        "differenceDeg": 0.00015004826479980693
+      },
+      {
+        "instant": "2010-06-15T12:00:00.000Z",
+        "body": "moon",
+        "astronomyDeg": 124.8886269786172,
+        "swissMoshierDeg": 124.88895423446368,
+        "differenceDeg": 0.00032725584651416284
+      },
+      {
+        "instant": "2010-06-15T12:00:00.000Z",
+        "body": "mercury",
+        "astronomyDeg": 69.43850258440271,
+        "swissMoshierDeg": 69.43945934329922,
+        "differenceDeg": 0.0009567588965637697
+      },
+      {
+        "instant": "2010-06-15T12:00:00.000Z",
+        "body": "venus",
+        "astronomyDeg": 121.32351681706741,
+        "swissMoshierDeg": 121.3238914046162,
+        "differenceDeg": 0.00037458754877661704
+      },
+      {
+        "instant": "2010-06-15T12:00:00.000Z",
+        "body": "mars",
+        "astronomyDeg": 154.3670670349167,
+        "swissMoshierDeg": 154.3677677619936,
+        "differenceDeg": 0.0007007270769463503
+      },
+      {
+        "instant": "2010-06-15T12:00:00.000Z",
+        "body": "jupiter",
+        "astronomyDeg": 1.1536140308553886,
+        "swissMoshierDeg": 1.1531334032597806,
+        "differenceDeg": 0.0004806275956070749
+      },
+      {
+        "instant": "2010-06-15T12:00:00.000Z",
+        "body": "saturn",
+        "astronomyDeg": 178.0410560319324,
+        "swissMoshierDeg": 178.0425819721198,
+        "differenceDeg": 0.0015259401873208844
+      },
+      {
+        "instant": "2010-06-15T12:00:00.000Z",
+        "body": "uranus",
+        "astronomyDeg": 0.4272423827763395,
+        "swissMoshierDeg": 0.4273500737115963,
+        "differenceDeg": 0.00010769093523776974
+      },
+      {
+        "instant": "2010-06-15T12:00:00.000Z",
+        "body": "neptune",
+        "astronomyDeg": 328.6491676204006,
+        "swissMoshierDeg": 328.6442763241052,
+        "differenceDeg": 0.004891296295454595
+      },
+      {
+        "instant": "2010-06-15T12:00:00.000Z",
+        "body": "pluto",
+        "astronomyDeg": 274.37248222875075,
+        "swissMoshierDeg": 274.37247443010796,
+        "differenceDeg": 0.000007798642855050275
+      },
+      {
+        "instant": "2015-06-15T12:00:00.000Z",
+        "body": "sun",
+        "astronomyDeg": 84.08538629732777,
+        "swissMoshierDeg": 84.08543902086144,
+        "differenceDeg": 0.00005272353371310601
+      },
+      {
+        "instant": "2015-06-15T12:00:00.000Z",
+        "body": "moon",
+        "astronomyDeg": 70.39877113042722,
+        "swissMoshierDeg": 70.39890592945923,
+        "differenceDeg": 0.00013479903202551213
+      },
+      {
+        "instant": "2015-06-15T12:00:00.000Z",
+        "body": "mercury",
+        "astronomyDeg": 65.04130105728173,
+        "swissMoshierDeg": 65.04104098942125,
+        "differenceDeg": 0.000260067860494928
+      },
+      {
+        "instant": "2015-06-15T12:00:00.000Z",
+        "body": "venus",
+        "astronomyDeg": 129.13919323118128,
+        "swissMoshierDeg": 129.13993745095806,
+        "differenceDeg": 0.000744219776834143
+      },
+      {
+        "instant": "2015-06-15T12:00:00.000Z",
+        "body": "mars",
+        "astronomyDeg": 83.8562747041134,
+        "swissMoshierDeg": 83.85608180216042,
+        "differenceDeg": 0.00019290195302801294
+      },
+      {
+        "instant": "2015-06-15T12:00:00.000Z",
+        "body": "jupiter",
+        "astronomyDeg": 138.84027917414318,
+        "swissMoshierDeg": 138.8397044045204,
+        "differenceDeg": 0.0005747696227444976
+      },
+      {
+        "instant": "2015-06-15T12:00:00.000Z",
+        "body": "saturn",
+        "astronomyDeg": 239.9693035642201,
+        "swissMoshierDeg": 239.96928395598647,
+        "differenceDeg": 0.000019608233628787275
+      },
+      {
+        "instant": "2015-06-15T12:00:00.000Z",
+        "body": "uranus",
+        "astronomyDeg": 19.837511493035272,
+        "swissMoshierDeg": 19.837069060384433,
+        "differenceDeg": 0.00044243265085697203
+      },
+      {
+        "instant": "2015-06-15T12:00:00.000Z",
+        "body": "neptune",
+        "astronomyDeg": 339.81955637255294,
+        "swissMoshierDeg": 339.8147446258754,
+        "differenceDeg": 0.00481174667754658
+      },
+      {
+        "instant": "2015-06-15T12:00:00.000Z",
+        "body": "pluto",
+        "astronomyDeg": 284.7745214872516,
+        "swissMoshierDeg": 284.77464788841326,
+        "differenceDeg": 0.00012640116165130166
+      },
+      {
+        "instant": "2020-06-15T12:00:00.000Z",
+        "body": "sun",
+        "astronomyDeg": 84.83834487490007,
+        "swissMoshierDeg": 84.83848437171582,
+        "differenceDeg": 0.00013949681579106255
+      },
+      {
+        "instant": "2020-06-15T12:00:00.000Z",
+        "body": "moon",
+        "astronomyDeg": 19.286473157778843,
+        "swissMoshierDeg": 19.286540797786657,
+        "differenceDeg": 0.00006764000784187374
+      },
+      {
+        "instant": "2020-06-15T12:00:00.000Z",
+        "body": "mercury",
+        "astronomyDeg": 104.48646081226151,
+        "swissMoshierDeg": 104.48620362948931,
+        "differenceDeg": 0.00025718277220221353
+      },
+      {
+        "instant": "2020-06-15T12:00:00.000Z",
+        "body": "venus",
+        "astronomyDeg": 67.21710883476685,
+        "swissMoshierDeg": 67.21738706008641,
+        "differenceDeg": 0.0002782253195618978
+      },
+      {
+        "instant": "2020-06-15T12:00:00.000Z",
+        "body": "mars",
+        "astronomyDeg": 352.15766093239523,
+        "swissMoshierDeg": 352.15825268352665,
+        "differenceDeg": 0.0005917511314237345
+      },
+      {
+        "instant": "2020-06-15T12:00:00.000Z",
+        "body": "jupiter",
+        "astronomyDeg": 295.6933352588138,
+        "swissMoshierDeg": 295.6928304657105,
+        "differenceDeg": 0.0005047931033459463
+      },
+      {
+        "instant": "2020-06-15T12:00:00.000Z",
+        "body": "saturn",
+        "astronomyDeg": 300.9924654340695,
+        "swissMoshierDeg": 300.9930284453906,
+        "differenceDeg": 0.0005630113211054777
+      },
+      {
+        "instant": "2020-06-15T12:00:00.000Z",
+        "body": "uranus",
+        "astronomyDeg": 39.24935775105882,
+        "swissMoshierDeg": 39.248406905473146,
+        "differenceDeg": 0.0009508455856348519
+      },
+      {
+        "instant": "2020-06-15T12:00:00.000Z",
+        "body": "neptune",
+        "astronomyDeg": 350.94815176503494,
+        "swissMoshierDeg": 350.94407649087447,
+        "differenceDeg": 0.0040752741604137555
+      },
+      {
+        "instant": "2020-06-15T12:00:00.000Z",
+        "body": "pluto",
+        "astronomyDeg": 294.4300953103962,
+        "swissMoshierDeg": 294.4303335802242,
+        "differenceDeg": 0.00023826982805985608
+      },
+      {
+        "instant": "2025-06-15T12:00:00.000Z",
+        "body": "sun",
+        "astronomyDeg": 84.64111797357118,
+        "swissMoshierDeg": 84.64136331482733,
+        "differenceDeg": 0.0002453412561180812
+      },
+      {
+        "instant": "2025-06-15T12:00:00.000Z",
+        "body": "moon",
+        "astronomyDeg": 313.4652449028125,
+        "swissMoshierDeg": 313.4646270387703,
+        "differenceDeg": 0.0006178640421694581
+      },
+      {
+        "instant": "2025-06-15T12:00:00.000Z",
+        "body": "mercury",
+        "astronomyDeg": 102.48887971198232,
+        "swissMoshierDeg": 102.48865318919053,
+        "differenceDeg": 0.00022652279176327283
+      },
+      {
+        "instant": "2025-06-15T12:00:00.000Z",
+        "body": "venus",
+        "astronomyDeg": 39.45476832633829,
+        "swissMoshierDeg": 39.45448968780733,
+        "differenceDeg": 0.0002786385309718753
+      },
+      {
+        "instant": "2025-06-15T12:00:00.000Z",
+        "body": "mars",
+        "astronomyDeg": 148.96334663891963,
+        "swissMoshierDeg": 148.96310548096392,
+        "differenceDeg": 0.00024115795577017707
+      },
+      {
+        "instant": "2025-06-15T12:00:00.000Z",
+        "body": "jupiter",
+        "astronomyDeg": 91.27793657381291,
+        "swissMoshierDeg": 91.27844276786189,
+        "differenceDeg": 0.0005061940489667904
+      },
+      {
+        "instant": "2025-06-15T12:00:00.000Z",
+        "body": "saturn",
+        "astronomyDeg": 1.295910065317545,
+        "swissMoshierDeg": 1.2981855536430535,
+        "differenceDeg": 0.0022754883254947345
+      },
+      {
+        "instant": "2025-06-15T12:00:00.000Z",
+        "body": "uranus",
+        "astronomyDeg": 58.91619546790634,
+        "swissMoshierDeg": 58.916587681219895,
+        "differenceDeg": 0.00039221331360295153
+      },
+      {
+        "instant": "2025-06-15T12:00:00.000Z",
+        "body": "neptune",
+        "astronomyDeg": 2.076010517204951,
+        "swissMoshierDeg": 2.072755061182264,
+        "differenceDeg": 0.0032554560226571994
+      },
+      {
+        "instant": "2025-06-15T12:00:00.000Z",
+        "body": "pluto",
+        "astronomyDeg": 303.438291382502,
+        "swissMoshierDeg": 303.4386030055267,
+        "differenceDeg": 0.00031162302479970094
+      },
+      {
+        "instant": "2030-06-15T12:00:00.000Z",
+        "body": "sun",
+        "astronomyDeg": 84.45148926550732,
+        "swissMoshierDeg": 84.45151321495646,
+        "differenceDeg": 0.00002394944908701291
+      },
+      {
+        "instant": "2030-06-15T12:00:00.000Z",
+        "body": "moon",
+        "astronomyDeg": 260.51588490405504,
+        "swissMoshierDeg": 260.5145808760353,
+        "differenceDeg": 0.001304028019717407
+      },
+      {
+        "instant": "2030-06-15T12:00:00.000Z",
+        "body": "mercury",
+        "astronomyDeg": 73.92348891081194,
+        "swissMoshierDeg": 73.92307679521677,
+        "differenceDeg": 0.00041211559516796115
+      },
+      {
+        "instant": "2030-06-15T12:00:00.000Z",
+        "body": "venus",
+        "astronomyDeg": 51.657474400777545,
+        "swissMoshierDeg": 51.65780580222168,
+        "differenceDeg": 0.0003314014441002655
+      },
+      {
+        "instant": "2030-06-15T12:00:00.000Z",
+        "body": "mars",
+        "astronomyDeg": 78.97681660094683,
+        "swissMoshierDeg": 78.97673348672798,
+        "differenceDeg": 0.00008311421879625414
+      },
+      {
+        "instant": "2030-06-15T12:00:00.000Z",
+        "body": "jupiter",
+        "astronomyDeg": 229.05080984045668,
+        "swissMoshierDeg": 229.05115821610212,
+        "differenceDeg": 0.000348375645444321
+      },
+      {
+        "instant": "2030-06-15T12:00:00.000Z",
+        "body": "saturn",
+        "astronomyDeg": 61.811173844558006,
+        "swissMoshierDeg": 61.81090987764729,
+        "differenceDeg": 0.00026396691066565836
+      },
+      {
+        "instant": "2030-06-15T12:00:00.000Z",
+        "body": "uranus",
+        "astronomyDeg": 79.01501217220722,
+        "swissMoshierDeg": 79.01551691834871,
+        "differenceDeg": 0.0005047461414733334
+      },
+      {
+        "instant": "2030-06-15T12:00:00.000Z",
+        "body": "neptune",
+        "astronomyDeg": 13.122229977094785,
+        "swissMoshierDeg": 13.120205271945359,
+        "differenceDeg": 0.0020247051494379775
+      },
+      {
+        "instant": "2030-06-15T12:00:00.000Z",
+        "body": "pluto",
+        "astronomyDeg": 311.8198667284451,
+        "swissMoshierDeg": 311.82042939440964,
+        "differenceDeg": 0.0005626659644804022
+      },
+      {
+        "instant": "2035-06-15T12:00:00.000Z",
+        "body": "sun",
+        "astronomyDeg": 84.25149816683931,
+        "swissMoshierDeg": 84.2513710622581,
+        "differenceDeg": 0.00012710458122455748
+      },
+      {
+        "instant": "2035-06-15T12:00:00.000Z",
+        "body": "moon",
+        "astronomyDeg": 205.50401925229676,
+        "swissMoshierDeg": 205.50267971782014,
+        "differenceDeg": 0.0013395344766422568
+      },
+      {
+        "instant": "2035-06-15T12:00:00.000Z",
+        "body": "mercury",
+        "astronomyDeg": 62.23059188858847,
+        "swissMoshierDeg": 62.23143716400934,
+        "differenceDeg": 0.000845275420829239
+      },
+      {
+        "instant": "2035-06-15T12:00:00.000Z",
+        "body": "venus",
+        "astronomyDeg": 69.17166338893054,
+        "swissMoshierDeg": 69.17125862061741,
+        "differenceDeg": 0.0004047683131602753
+      },
+      {
+        "instant": "2035-06-15T12:00:00.000Z",
+        "body": "mars",
+        "astronomyDeg": 338.73904164614754,
+        "swissMoshierDeg": 338.7386212626673,
+        "differenceDeg": 0.0004203834802183337
+      },
+      {
+        "instant": "2035-06-15T12:00:00.000Z",
+        "body": "jupiter",
+        "astronomyDeg": 40.52260430663412,
+        "swissMoshierDeg": 40.52176141449825,
+        "differenceDeg": 0.0008428921358927255
+      },
+      {
+        "instant": "2035-06-15T12:00:00.000Z",
+        "body": "saturn",
+        "astronomyDeg": 123.19810237438688,
+        "swissMoshierDeg": 123.19896658594148,
+        "differenceDeg": 0.0008642115545853812
+      },
+      {
+        "instant": "2035-06-15T12:00:00.000Z",
+        "body": "uranus",
+        "astronomyDeg": 99.73114234500632,
+        "swissMoshierDeg": 99.73233434118849,
+        "differenceDeg": 0.0011919961821149627
+      },
+      {
+        "instant": "2035-06-15T12:00:00.000Z",
+        "body": "neptune",
+        "astronomyDeg": 24.13045904760461,
+        "swissMoshierDeg": 24.129374883150785,
+        "differenceDeg": 0.0010841644538004402
+      },
+      {
+        "instant": "2035-06-15T12:00:00.000Z",
+        "body": "pluto",
+        "astronomyDeg": 319.6825961907432,
+        "swissMoshierDeg": 319.6834901146057,
+        "differenceDeg": 0.0008939238625771395
+      },
+      {
+        "instant": "2040-06-15T12:00:00.000Z",
+        "body": "sun",
+        "astronomyDeg": 84.997423411653,
+        "swissMoshierDeg": 84.99735964728696,
+        "differenceDeg": 0.00006376436601840396
+      },
+      {
+        "instant": "2040-06-15T12:00:00.000Z",
+        "body": "moon",
+        "astronomyDeg": 147.8259462541611,
+        "swissMoshierDeg": 147.82384475298264,
+        "differenceDeg": 0.0021015011784584203
+      },
+      {
+        "instant": "2040-06-15T12:00:00.000Z",
+        "body": "mercury",
+        "astronomyDeg": 99.3086361231396,
+        "swissMoshierDeg": 99.30929020556286,
+        "differenceDeg": 0.0006540824232388331
+      },
+      {
+        "instant": "2040-06-15T12:00:00.000Z",
+        "body": "venus",
+        "astronomyDeg": 89.18646794213713,
+        "swissMoshierDeg": 89.18661529953874,
+        "differenceDeg": 0.00014735740160176647
+      },
+      {
+        "instant": "2040-06-15T12:00:00.000Z",
+        "body": "mars",
+        "astronomyDeg": 143.81615865686527,
+        "swissMoshierDeg": 143.81639742361557,
+        "differenceDeg": 0.00023876675027167948
+      },
+      {
+        "instant": "2040-06-15T12:00:00.000Z",
+        "body": "jupiter",
+        "astronomyDeg": 173.05013416528232,
+        "swissMoshierDeg": 173.0501540121537,
+        "differenceDeg": 0.000019846871396111965
+      },
+      {
+        "instant": "2040-06-15T12:00:00.000Z",
+        "body": "saturn",
+        "astronomyDeg": 185.304109629545,
+        "swissMoshierDeg": 185.30374319874656,
+        "differenceDeg": 0.0003664307984081461
+      },
+      {
+        "instant": "2040-06-15T12:00:00.000Z",
+        "body": "uranus",
+        "astronomyDeg": 121.33681634029492,
+        "swissMoshierDeg": 121.33701706063101,
+        "differenceDeg": 0.00020072033612450468
+      },
+      {
+        "instant": "2040-06-15T12:00:00.000Z",
+        "body": "neptune",
+        "astronomyDeg": 35.113282710549385,
+        "swissMoshierDeg": 35.1126036853739,
+        "differenceDeg": 0.0006790251754864585
+      },
+      {
+        "instant": "2040-06-15T12:00:00.000Z",
+        "body": "pluto",
+        "astronomyDeg": 327.0488263068019,
+        "swissMoshierDeg": 327.04985602919254,
+        "differenceDeg": 0.0010297223906263753
+      },
+      {
+        "instant": "2045-06-15T12:00:00.000Z",
+        "body": "sun",
+        "astronomyDeg": 84.80471766173925,
+        "swissMoshierDeg": 84.80457753953722,
+        "differenceDeg": 0.0001401222020831483
+      },
+      {
+        "instant": "2045-06-15T12:00:00.000Z",
+        "body": "moon",
+        "astronomyDeg": 89.91102278513313,
+        "swissMoshierDeg": 89.90846343049593,
+        "differenceDeg": 0.002559354637241995
+      },
+      {
+        "instant": "2045-06-15T12:00:00.000Z",
+        "body": "mercury",
+        "astronomyDeg": 105.75342761624941,
+        "swissMoshierDeg": 105.75317737886661,
+        "differenceDeg": 0.0002502373828292548
+      },
+      {
+        "instant": "2045-06-15T12:00:00.000Z",
+        "body": "venus",
+        "astronomyDeg": 107.75014349766529,
+        "swissMoshierDeg": 107.75003757771383,
+        "differenceDeg": 0.00010591995146569388
+      },
+      {
+        "instant": "2045-06-15T12:00:00.000Z",
+        "body": "mars",
+        "astronomyDeg": 73.99462708596252,
+        "swissMoshierDeg": 73.99458369153815,
+        "differenceDeg": 0.000043394424324105785
+      },
+      {
+        "instant": "2045-06-15T12:00:00.000Z",
+        "body": "jupiter",
+        "astronomyDeg": 341.92061247276433,
+        "swissMoshierDeg": 341.92176325822453,
+        "differenceDeg": 0.0011507854601404688
+      },
+      {
+        "instant": "2045-06-15T12:00:00.000Z",
+        "body": "saturn",
+        "astronomyDeg": 247.25903550965091,
+        "swissMoshierDeg": 247.25806016612103,
+        "differenceDeg": 0.0009753435299444391
+      },
+      {
+        "instant": "2045-06-15T12:00:00.000Z",
+        "body": "uranus",
+        "astronomyDeg": 143.69127553003008,
+        "swissMoshierDeg": 143.69001554593453,
+        "differenceDeg": 0.0012599840955545005
+      },
+      {
+        "instant": "2045-06-15T12:00:00.000Z",
+        "body": "neptune",
+        "astronomyDeg": 46.016452652643174,
+        "swissMoshierDeg": 46.01616462926521,
+        "differenceDeg": 0.0002880233779478658
+      },
+      {
+        "instant": "2045-06-15T12:00:00.000Z",
+        "body": "pluto",
+        "astronomyDeg": 334.0459961432438,
+        "swissMoshierDeg": 334.0471953193088,
+        "differenceDeg": 0.0011991760650289507
+      },
+      {
+        "instant": "2050-06-15T12:00:00.000Z",
+        "body": "sun",
+        "astronomyDeg": 84.60508719722591,
+        "swissMoshierDeg": 84.60510734365995,
+        "differenceDeg": 0.000020146434053458506
+      },
+      {
+        "instant": "2050-06-15T12:00:00.000Z",
+        "body": "moon",
+        "astronomyDeg": 37.406713844717345,
+        "swissMoshierDeg": 37.403756197563474,
+        "differenceDeg": 0.0029576471538348414
+      },
+      {
+        "instant": "2050-06-15T12:00:00.000Z",
+        "body": "mercury",
+        "astronomyDeg": 78.95290855787101,
+        "swissMoshierDeg": 78.95290322837387,
+        "differenceDeg": 0.000005329497184902721
+      },
+      {
+        "instant": "2050-06-15T12:00:00.000Z",
+        "body": "venus",
+        "astronomyDeg": 123.93053357000862,
+        "swissMoshierDeg": 123.93063607164963,
+        "differenceDeg": 0.00010250164098124515
+      },
+      {
+        "instant": "2050-06-15T12:00:00.000Z",
+        "body": "mars",
+        "astronomyDeg": 321.51503922231586,
+        "swissMoshierDeg": 321.51559076492634,
+        "differenceDeg": 0.0005515426105375809
+      },
+      {
+        "instant": "2050-06-15T12:00:00.000Z",
+        "body": "jupiter",
+        "astronomyDeg": 124.20940376023414,
+        "swissMoshierDeg": 124.20899933645194,
+        "differenceDeg": 0.00040442378224270215
+      },
+      {
+        "instant": "2050-06-15T12:00:00.000Z",
+        "body": "saturn",
+        "astronomyDeg": 308.3091740914806,
+        "swissMoshierDeg": 308.3103843210313,
+        "differenceDeg": 0.001210229550679287
+      },
+      {
+        "instant": "2050-06-15T12:00:00.000Z",
+        "body": "uranus",
+        "astronomyDeg": 166.82291435833534,
+        "swissMoshierDeg": 166.82225955167314,
+        "differenceDeg": 0.0006548066621689941
+      },
+      {
+        "instant": "2050-06-15T12:00:00.000Z",
+        "body": "neptune",
+        "astronomyDeg": 56.90149043472104,
+        "swissMoshierDeg": 56.901856298547024,
+        "differenceDeg": 0.0003658638260048974
+      },
+      {
+        "instant": "2050-06-15T12:00:00.000Z",
+        "body": "pluto",
+        "astronomyDeg": 340.6838205613647,
+        "swissMoshierDeg": 340.6853719157527,
+        "differenceDeg": 0.0015513543879706049
+      },
+      {
+        "instant": "2055-06-15T12:00:00.000Z",
+        "body": "sun",
+        "astronomyDeg": 84.4036852520605,
+        "swissMoshierDeg": 84.40333967298035,
+        "differenceDeg": 0.0003455790802036063
+      },
+      {
+        "instant": "2055-06-15T12:00:00.000Z",
+        "body": "moon",
+        "astronomyDeg": 335.70066119183224,
+        "swissMoshierDeg": 335.696812161807,
+        "differenceDeg": 0.0038490300253215537
+      },
+      {
+        "instant": "2055-06-15T12:00:00.000Z",
+        "body": "mercury",
+        "astronomyDeg": 61.245388180360706,
+        "swissMoshierDeg": 61.24495382518146,
+        "differenceDeg": 0.00043435517920897837
+      },
+      {
+        "instant": "2055-06-15T12:00:00.000Z",
+        "body": "venus",
+        "astronomyDeg": 127.8590088540386,
+        "swissMoshierDeg": 127.85913738937766,
+        "differenceDeg": 0.0001285353390585442
+      },
+      {
+        "instant": "2055-06-15T12:00:00.000Z",
+        "body": "mars",
+        "astronomyDeg": 138.27396843098194,
+        "swissMoshierDeg": 138.27345241060848,
+        "differenceDeg": 0.000516020373424908
+      },
+      {
+        "instant": "2055-06-15T12:00:00.000Z",
+        "body": "jupiter",
+        "astronomyDeg": 274.49063830798184,
+        "swissMoshierDeg": 274.4885930379744,
+        "differenceDeg": 0.002045270007442923
+      },
+      {
+        "instant": "2055-06-15T12:00:00.000Z",
+        "body": "saturn",
+        "astronomyDeg": 8.57719613127119,
+        "swissMoshierDeg": 8.578334113655282,
+        "differenceDeg": 0.0011379823840798053
+      },
+      {
+        "instant": "2055-06-15T12:00:00.000Z",
+        "body": "uranus",
+        "astronomyDeg": 190.54908623045867,
+        "swissMoshierDeg": 190.548446302722,
+        "differenceDeg": 0.0006399277366426759
+      },
+      {
+        "instant": "2055-06-15T12:00:00.000Z",
+        "body": "neptune",
+        "astronomyDeg": 67.71149413264793,
+        "swissMoshierDeg": 67.71181547586343,
+        "differenceDeg": 0.00032134321554622147
+      },
+      {
+        "instant": "2055-06-15T12:00:00.000Z",
+        "body": "pluto",
+        "astronomyDeg": 346.9888982888722,
+        "swissMoshierDeg": 346.9905413520361,
+        "differenceDeg": 0.0016430631638968407
+      },
+      {
+        "instant": "2060-06-15T12:00:00.000Z",
+        "body": "sun",
+        "astronomyDeg": 85.15731151747121,
+        "swissMoshierDeg": 85.15690093238531,
+        "differenceDeg": 0.0004105850858877602
+      },
+      {
+        "instant": "2060-06-15T12:00:00.000Z",
+        "body": "moon",
+        "astronomyDeg": 281.16130283647203,
+        "swissMoshierDeg": 281.15595333356293,
+        "differenceDeg": 0.005349502909098192
+      },
+      {
+        "instant": "2060-06-15T12:00:00.000Z",
+        "body": "mercury",
+        "astronomyDeg": 92.26811042034984,
+        "swissMoshierDeg": 92.26632770850877,
+        "differenceDeg": 0.001782711841087803
+      },
+      {
+        "instant": "2060-06-15T12:00:00.000Z",
+        "body": "venus",
+        "astronomyDeg": 54.60068753838494,
+        "swissMoshierDeg": 54.60071009901724,
+        "differenceDeg": 0.000022560632260137936
+      },
+      {
+        "instant": "2060-06-15T12:00:00.000Z",
+        "body": "mars",
+        "astronomyDeg": 68.8950988978024,
+        "swissMoshierDeg": 68.89455691527789,
+        "differenceDeg": 0.0005419825245098764
+      },
+      {
+        "instant": "2060-06-15T12:00:00.000Z",
+        "body": "jupiter",
+        "astronomyDeg": 76.22256960050319,
+        "swissMoshierDeg": 76.22307486745271,
+        "differenceDeg": 0.0005052669495171358
+      },
+      {
+        "instant": "2060-06-15T12:00:00.000Z",
+        "body": "saturn",
+        "astronomyDeg": 69.28445772153148,
+        "swissMoshierDeg": 69.28372721668147,
+        "differenceDeg": 0.0007305048500256817
+      },
+      {
+        "instant": "2060-06-15T12:00:00.000Z",
+        "body": "uranus",
+        "astronomyDeg": 214.43854743415784,
+        "swissMoshierDeg": 214.43858722179118,
+        "differenceDeg": 0.00003978763334089308
+      },
+      {
+        "instant": "2060-06-15T12:00:00.000Z",
+        "body": "neptune",
+        "astronomyDeg": 78.55232766880461,
+        "swissMoshierDeg": 78.55174099929755,
+        "differenceDeg": 0.0005866695070153582
+      },
+      {
+        "instant": "2060-06-15T12:00:00.000Z",
+        "body": "pluto",
+        "astronomyDeg": 353.05332860130443,
+        "swissMoshierDeg": 353.0551169868389,
+        "differenceDeg": 0.0017883855344962285
+      },
+      {
+        "instant": "2065-06-15T12:00:00.000Z",
+        "body": "sun",
+        "astronomyDeg": 84.96755133882392,
+        "swissMoshierDeg": 84.96716631056476,
+        "differenceDeg": 0.00038502825918840244
+      },
+      {
+        "instant": "2065-06-15T12:00:00.000Z",
+        "body": "moon",
+        "astronomyDeg": 224.46505938664885,
+        "swissMoshierDeg": 224.45747626535868,
+        "differenceDeg": 0.007583121290167583
+      },
+      {
+        "instant": "2065-06-15T12:00:00.000Z",
+        "body": "mercury",
+        "astronomyDeg": 108.14362732636918,
+        "swissMoshierDeg": 108.14428264544811,
+        "differenceDeg": 0.0006553190789873042
+      },
+      {
+        "instant": "2065-06-15T12:00:00.000Z",
+        "body": "venus",
+        "astronomyDeg": 40.94968395533641,
+        "swissMoshierDeg": 40.9487422767837,
+        "differenceDeg": 0.0009416785527491811
+      },
+      {
+        "instant": "2065-06-15T12:00:00.000Z",
+        "body": "mars",
+        "astronomyDeg": 297.3425422140293,
+        "swissMoshierDeg": 297.34295007655965,
+        "differenceDeg": 0.00040786253032365494
+      },
+      {
+        "instant": "2065-06-15T12:00:00.000Z",
+        "body": "jupiter",
+        "astronomyDeg": 210.5351971888335,
+        "swissMoshierDeg": 210.53670737895047,
+        "differenceDeg": 0.001510190116960075
+      },
+      {
+        "instant": "2065-06-15T12:00:00.000Z",
+        "body": "saturn",
+        "astronomyDeg": 130.74106538239573,
+        "swissMoshierDeg": 130.74081085799295,
+        "differenceDeg": 0.000254524402748757
+      },
+      {
+        "instant": "2065-06-15T12:00:00.000Z",
+        "body": "uranus",
+        "astronomyDeg": 238.18850831237677,
+        "swissMoshierDeg": 238.188142097955,
+        "differenceDeg": 0.0003662144217742025
+      },
+      {
+        "instant": "2065-06-15T12:00:00.000Z",
+        "body": "neptune",
+        "astronomyDeg": 89.33977325375906,
+        "swissMoshierDeg": 89.33868341130193,
+        "differenceDeg": 0.0010898424570768839
+      },
+      {
+        "instant": "2065-06-15T12:00:00.000Z",
+        "body": "pluto",
+        "astronomyDeg": 358.8551982729437,
+        "swissMoshierDeg": 358.85717982904106,
+        "differenceDeg": 0.0019815560973484025
+      },
+      {
+        "instant": "2070-06-15T12:00:00.000Z",
+        "body": "sun",
+        "astronomyDeg": 84.77428010051635,
+        "swissMoshierDeg": 84.77364950302896,
+        "differenceDeg": 0.0006305974874294407
+      },
+      {
+        "instant": "2070-06-15T12:00:00.000Z",
+        "body": "moon",
+        "astronomyDeg": 173.95651684394306,
+        "swissMoshierDeg": 173.94874660231713,
+        "differenceDeg": 0.007770241625962626
+      },
+      {
+        "instant": "2070-06-15T12:00:00.000Z",
+        "body": "mercury",
+        "astronomyDeg": 84.29568100349155,
+        "swissMoshierDeg": 84.29419282212687,
+        "differenceDeg": 0.001488181364720731
+      },
+      {
+        "instant": "2070-06-15T12:00:00.000Z",
+        "body": "venus",
+        "astronomyDeg": 54.64961085136574,
+        "swissMoshierDeg": 54.64907930888228,
+        "differenceDeg": 0.0005315424834861915
+      },
+      {
+        "instant": "2070-06-15T12:00:00.000Z",
+        "body": "mars",
+        "astronomyDeg": 133.43853428871313,
+        "swissMoshierDeg": 133.43846719119173,
+        "differenceDeg": 0.0000670975214234204
+      },
+      {
+        "instant": "2070-06-15T12:00:00.000Z",
+        "body": "jupiter",
+        "astronomyDeg": 23.538648218023354,
+        "swissMoshierDeg": 23.537626569956952,
+        "differenceDeg": 0.001021648066398484
+      },
+      {
+        "instant": "2070-06-15T12:00:00.000Z",
+        "body": "saturn",
+        "astronomyDeg": 192.72028502055,
+        "swissMoshierDeg": 192.72066696825473,
+        "differenceDeg": 0.0003819477046818065
+      },
+      {
+        "instant": "2070-06-15T12:00:00.000Z",
+        "body": "uranus",
+        "astronomyDeg": 261.38698425413475,
+        "swissMoshierDeg": 261.38746746203077,
+        "differenceDeg": 0.0004832078959680075
+      },
+      {
+        "instant": "2070-06-15T12:00:00.000Z",
+        "body": "neptune",
+        "astronomyDeg": 100.07215326301753,
+        "swissMoshierDeg": 100.06962064271397,
+        "differenceDeg": 0.0025326203035547223
+      },
+      {
+        "instant": "2070-06-15T12:00:00.000Z",
+        "body": "pluto",
+        "astronomyDeg": 4.45083778638864,
+        "swissMoshierDeg": 4.45273051718815,
+        "differenceDeg": 0.0018927307994545117
+      },
+      {
+        "instant": "2075-06-15T12:00:00.000Z",
+        "body": "sun",
+        "astronomyDeg": 84.56173017257586,
+        "swissMoshierDeg": 84.56087718855841,
+        "differenceDeg": 0.0008529840174560377
+      },
+      {
+        "instant": "2075-06-15T12:00:00.000Z",
+        "body": "moon",
+        "astronomyDeg": 105.03353142066813,
+        "swissMoshierDeg": 105.02507856619647,
+        "differenceDeg": 0.008452854471670435
+      },
+      {
+        "instant": "2075-06-15T12:00:00.000Z",
+        "body": "mercury",
+        "astronomyDeg": 61.80500029519975,
+        "swissMoshierDeg": 61.80338820515852,
+        "differenceDeg": 0.0016120900412488481
+      },
+      {
+        "instant": "2075-06-15T12:00:00.000Z",
+        "body": "venus",
+        "astronomyDeg": 72.50301525774007,
+        "swissMoshierDeg": 72.50185599158651,
+        "differenceDeg": 0.0011592661535360094
+      },
+      {
+        "instant": "2075-06-15T12:00:00.000Z",
+        "body": "mars",
+        "astronomyDeg": 62.96909187461557,
+        "swissMoshierDeg": 62.96859042116175,
+        "differenceDeg": 0.0005014534538076987
+      },
+      {
+        "instant": "2075-06-15T12:00:00.000Z",
+        "body": "jupiter",
+        "astronomyDeg": 157.55872385495064,
+        "swissMoshierDeg": 157.55753299947796,
+        "differenceDeg": 0.0011908554727142473
+      },
+      {
+        "instant": "2075-06-15T12:00:00.000Z",
+        "body": "saturn",
+        "astronomyDeg": 254.50989305113305,
+        "swissMoshierDeg": 254.50873065154244,
+        "differenceDeg": 0.00116239959061204
+      },
+      {
+        "instant": "2075-06-15T12:00:00.000Z",
+        "body": "uranus",
+        "astronomyDeg": 283.72822807342766,
+        "swissMoshierDeg": 283.72895233194686,
+        "differenceDeg": 0.0007242585191988837
+      },
+      {
+        "instant": "2075-06-15T12:00:00.000Z",
+        "body": "neptune",
+        "astronomyDeg": 110.8169718178142,
+        "swissMoshierDeg": 110.8133561128371,
+        "differenceDeg": 0.003615704977164569
+      },
+      {
+        "instant": "2075-06-15T12:00:00.000Z",
+        "body": "pluto",
+        "astronomyDeg": 9.853690118471132,
+        "swissMoshierDeg": 9.855601172266438,
+        "differenceDeg": 0.0019110537953110907
+      },
+      {
+        "instant": "2080-06-15T12:00:00.000Z",
+        "body": "sun",
+        "astronomyDeg": 85.32112461939181,
+        "swissMoshierDeg": 85.32027210410908,
+        "differenceDeg": 0.000852515282758759
+      },
+      {
+        "instant": "2080-06-15T12:00:00.000Z",
+        "body": "moon",
+        "astronomyDeg": 53.91692327700766,
+        "swissMoshierDeg": 53.904511542865514,
+        "differenceDeg": 0.012411734142119712
+      },
+      {
+        "instant": "2080-06-15T12:00:00.000Z",
+        "body": "mercury",
+        "astronomyDeg": 84.18188996962992,
+        "swissMoshierDeg": 84.1828195763411,
+        "differenceDeg": 0.000929606711224551
+      },
+      {
+        "instant": "2080-06-15T12:00:00.000Z",
+        "body": "venus",
+        "astronomyDeg": 92.58130319473794,
+        "swissMoshierDeg": 92.58089875220077,
+        "differenceDeg": 0.0004044425371603211
+      },
+      {
+        "instant": "2080-06-15T12:00:00.000Z",
+        "body": "mars",
+        "astronomyDeg": 267.044783815734,
+        "swissMoshierDeg": 267.0450825613834,
+        "differenceDeg": 0.00029874564938836556
+      },
+      {
+        "instant": "2080-06-15T12:00:00.000Z",
+        "body": "jupiter",
+        "astronomyDeg": 321.78290069176614,
+        "swissMoshierDeg": 321.7827518121854,
+        "differenceDeg": 0.00014887958081999386
+      },
+      {
+        "instant": "2080-06-15T12:00:00.000Z",
+        "body": "saturn",
+        "astronomyDeg": 315.2639903893531,
+        "swissMoshierDeg": 315.26328434439364,
+        "differenceDeg": 0.0007060449595428508
+      },
+      {
+        "instant": "2080-06-15T12:00:00.000Z",
+        "body": "uranus",
+        "astronomyDeg": 305.2072362586155,
+        "swissMoshierDeg": 305.2064506280609,
+        "differenceDeg": 0.000785630554673844
+      },
+      {
+        "instant": "2080-06-15T12:00:00.000Z",
+        "body": "neptune",
+        "astronomyDeg": 121.57183875494283,
+        "swissMoshierDeg": 121.56807992176282,
+        "differenceDeg": 0.0037588331799724983
+      },
+      {
+        "instant": "2080-06-15T12:00:00.000Z",
+        "body": "pluto",
+        "astronomyDeg": 15.108239599979864,
+        "swissMoshierDeg": 15.110097903563675,
+        "differenceDeg": 0.0018583035838446449
+      },
+      {
+        "instant": "2085-06-15T12:00:00.000Z",
+        "body": "sun",
+        "astronomyDeg": 85.12302214940111,
+        "swissMoshierDeg": 85.12222599761772,
+        "differenceDeg": 0.0007961517833336984
+      },
+      {
+        "instant": "2085-06-15T12:00:00.000Z",
+        "body": "moon",
+        "astronomyDeg": 4.710136473494188,
+        "swissMoshierDeg": 4.696635113873867,
+        "differenceDeg": 0.013501359620363473
+      },
+      {
+        "instant": "2085-06-15T12:00:00.000Z",
+        "body": "mercury",
+        "astronomyDeg": 109.48602251247803,
+        "swissMoshierDeg": 109.48481115151259,
+        "differenceDeg": 0.0012113609654988977
+      },
+      {
+        "instant": "2085-06-15T12:00:00.000Z",
+        "body": "venus",
+        "astronomyDeg": 110.9575274740155,
+        "swissMoshierDeg": 110.95612867465805,
+        "differenceDeg": 0.0013987993575028668
+      },
+      {
+        "instant": "2085-06-15T12:00:00.000Z",
+        "body": "mars",
+        "astronomyDeg": 128.69886665003955,
+        "swissMoshierDeg": 128.698485943537,
+        "differenceDeg": 0.0003807065024830081
+      },
+      {
+        "instant": "2085-06-15T12:00:00.000Z",
+        "body": "jupiter",
+        "astronomyDeg": 109.73054448607361,
+        "swissMoshierDeg": 109.73072030316314,
+        "differenceDeg": 0.00017581708948455343
+      },
+      {
+        "instant": "2085-06-15T12:00:00.000Z",
+        "body": "saturn",
+        "astronomyDeg": 15.48939227991293,
+        "swissMoshierDeg": 15.491429878225707,
+        "differenceDeg": 0.002037598312767841
+      },
+      {
+        "instant": "2085-06-15T12:00:00.000Z",
+        "body": "uranus",
+        "astronomyDeg": 325.89471128434184,
+        "swissMoshierDeg": 325.8942991918057,
+        "differenceDeg": 0.0004120925361803529
+      },
+      {
+        "instant": "2085-06-15T12:00:00.000Z",
+        "body": "neptune",
+        "astronomyDeg": 132.31115801261348,
+        "swissMoshierDeg": 132.3062304028883,
+        "differenceDeg": 0.004927609725200455
+      },
+      {
+        "instant": "2085-06-15T12:00:00.000Z",
+        "body": "pluto",
+        "astronomyDeg": 20.236262611980198,
+        "swissMoshierDeg": 20.238283999556952,
+        "differenceDeg": 0.002021387576746747
+      },
+      {
+        "instant": "2090-06-15T12:00:00.000Z",
+        "body": "sun",
+        "astronomyDeg": 84.92380901402363,
+        "swissMoshierDeg": 84.92293080253498,
+        "differenceDeg": 0.0008782114886116688
+      },
+      {
+        "instant": "2090-06-15T12:00:00.000Z",
+        "body": "moon",
+        "astronomyDeg": 303.791649820481,
+        "swissMoshierDeg": 303.77826948001564,
+        "differenceDeg": 0.013380340465346308
+      },
+      {
+        "instant": "2090-06-15T12:00:00.000Z",
+        "body": "mercury",
+        "astronomyDeg": 89.64046123432443,
+        "swissMoshierDeg": 89.63934298363793,
+        "differenceDeg": 0.0011182506865452524
+      },
+      {
+        "instant": "2090-06-15T12:00:00.000Z",
+        "body": "venus",
+        "astronomyDeg": 126.31183850056854,
+        "swissMoshierDeg": 126.31110967869061,
+        "differenceDeg": 0.0007288218779422095
+      },
+      {
+        "instant": "2090-06-15T12:00:00.000Z",
+        "body": "mars",
+        "astronomyDeg": 57.5818862543612,
+        "swissMoshierDeg": 57.58132486113977,
+        "differenceDeg": 0.0005613932214600936
+      },
+      {
+        "instant": "2090-06-15T12:00:00.000Z",
+        "body": "jupiter",
+        "astronomyDeg": 253.6442867502041,
+        "swissMoshierDeg": 253.6443215972444,
+        "differenceDeg": 0.00003484704029688146
+      },
+      {
+        "instant": "2090-06-15T12:00:00.000Z",
+        "body": "saturn",
+        "astronomyDeg": 76.15665023093428,
+        "swissMoshierDeg": 76.15540383901205,
+        "differenceDeg": 0.001246391922222756
+      },
+      {
+        "instant": "2090-06-15T12:00:00.000Z",
+        "body": "uranus",
+        "astronomyDeg": 345.88556386822484,
+        "swissMoshierDeg": 345.8859471504504,
+        "differenceDeg": 0.00038328222558448033
+      },
+      {
+        "instant": "2090-06-15T12:00:00.000Z",
+        "body": "neptune",
+        "astronomyDeg": 143.07141017437667,
+        "swissMoshierDeg": 143.06619703964915,
+        "differenceDeg": 0.005213134727455326
+      },
+      {
+        "instant": "2090-06-15T12:00:00.000Z",
+        "body": "pluto",
+        "astronomyDeg": 25.209771436637965,
+        "swissMoshierDeg": 25.21197300030085,
+        "differenceDeg": 0.00220156366287938
+      },
+      {
+        "instant": "2095-06-15T12:00:00.000Z",
+        "body": "sun",
+        "astronomyDeg": 84.72402799634966,
+        "swissMoshierDeg": 84.72287112215211,
+        "differenceDeg": 0.001156874197590696
+      },
+      {
+        "instant": "2095-06-15T12:00:00.000Z",
+        "body": "moon",
+        "astronomyDeg": 236.12373910716033,
+        "swissMoshierDeg": 236.10865705622027,
+        "differenceDeg": 0.01508205094000914
+      },
+      {
+        "instant": "2095-06-15T12:00:00.000Z",
+        "body": "mercury",
+        "astronomyDeg": 63.63277492319443,
+        "swissMoshierDeg": 63.63153129862235,
+        "differenceDeg": 0.0012436245721119121
+      },
+      {
+        "instant": "2095-06-15T12:00:00.000Z",
+        "body": "venus",
+        "astronomyDeg": 124.527770226755,
+        "swissMoshierDeg": 124.52825834887835,
+        "differenceDeg": 0.0004881221233290489
+      },
+      {
+        "instant": "2095-06-15T12:00:00.000Z",
+        "body": "mars",
+        "astronomyDeg": 238.93571502954433,
+        "swissMoshierDeg": 238.93329963949594,
+        "differenceDeg": 0.0024153900483270263
+      },
+      {
+        "instant": "2095-06-15T12:00:00.000Z",
+        "body": "jupiter",
+        "astronomyDeg": 60.650618765852485,
+        "swissMoshierDeg": 60.64914286425651,
+        "differenceDeg": 0.0014759015959953103
+      },
+      {
+        "instant": "2095-06-15T12:00:00.000Z",
+        "body": "saturn",
+        "astronomyDeg": 137.7512182481059,
+        "swissMoshierDeg": 137.7501045432774,
+        "differenceDeg": 0.0011137048285263518
+      },
+      {
+        "instant": "2095-06-15T12:00:00.000Z",
+        "body": "uranus",
+        "astronomyDeg": 5.480826461104646,
+        "swissMoshierDeg": 5.48193564104402,
+        "differenceDeg": 0.0011091799393625479
+      },
+      {
+        "instant": "2095-06-15T12:00:00.000Z",
+        "body": "neptune",
+        "astronomyDeg": 153.83183303069862,
+        "swissMoshierDeg": 153.8267608021635,
+        "differenceDeg": 0.005072228535141221
+      },
+      {
+        "instant": "2095-06-15T12:00:00.000Z",
+        "body": "pluto",
+        "astronomyDeg": 30.096099564437665,
+        "swissMoshierDeg": 30.098511250176987,
+        "differenceDeg": 0.0024116857392755264
+      },
+      {
+        "instant": "2100-06-15T12:00:00.000Z",
+        "body": "sun",
+        "astronomyDeg": 84.52910692092824,
+        "swissMoshierDeg": 84.52784737725187,
+        "differenceDeg": 0.0012595436763831458
+      },
+      {
+        "instant": "2100-06-15T12:00:00.000Z",
+        "body": "moon",
+        "astronomyDeg": 175.78268672949088,
+        "swissMoshierDeg": 175.7648354283114,
+        "differenceDeg": 0.017851301179462098
+      },
+      {
+        "instant": "2100-06-15T12:00:00.000Z",
+        "body": "mercury",
+        "astronomyDeg": 76.78003936207824,
+        "swissMoshierDeg": 76.77971707443487,
+        "differenceDeg": 0.0003222876433710553
+      },
+      {
+        "instant": "2100-06-15T12:00:00.000Z",
+        "body": "venus",
+        "astronomyDeg": 46.48698965832846,
+        "swissMoshierDeg": 46.48524649073354,
+        "differenceDeg": 0.0017431675948955672
+      },
+      {
+        "instant": "2100-06-15T12:00:00.000Z",
+        "body": "mars",
+        "astronomyDeg": 123.42471895396561,
+        "swissMoshierDeg": 123.42406841688315,
+        "differenceDeg": 0.0006505370824925194
+      },
+      {
+        "instant": "2100-06-15T12:00:00.000Z",
+        "body": "jupiter",
+        "astronomyDeg": 193.35275426090814,
+        "swissMoshierDeg": 193.3535301917801,
+        "differenceDeg": 0.0007759308718959801
+      },
+      {
+        "instant": "2100-06-15T12:00:00.000Z",
+        "body": "saturn",
+        "astronomyDeg": 199.94720735693912,
+        "swissMoshierDeg": 199.94819556753592,
+        "differenceDeg": 0.000988210596801764
+      },
+      {
+        "instant": "2100-06-15T12:00:00.000Z",
+        "body": "uranus",
+        "astronomyDeg": 24.851329721223156,
+        "swissMoshierDeg": 24.85077601148813,
+        "differenceDeg": 0.0005537097350725162
+      },
+      {
+        "instant": "2100-06-15T12:00:00.000Z",
+        "body": "neptune",
+        "astronomyDeg": 164.66978311591257,
+        "swissMoshierDeg": 164.6650155514885,
+        "differenceDeg": 0.004767564424128068
+      },
+      {
+        "instant": "2100-06-15T12:00:00.000Z",
+        "body": "pluto",
+        "astronomyDeg": 34.894784903749226,
+        "swissMoshierDeg": 34.897418428373726,
+        "differenceDeg": 0.0026335246244570953
+      },
+      {
+        "instant": "1990-05-15T19:34:00.000Z",
+        "body": "sun",
+        "astronomyDeg": 54.699829745121704,
+        "swissMoshierDeg": 54.70009716656656,
+        "differenceDeg": 0.0002674214448461498
+      },
+      {
+        "instant": "1990-05-15T19:34:00.000Z",
+        "body": "moon",
+        "astronomyDeg": 301.06904597918845,
+        "swissMoshierDeg": 301.06884848910363,
+        "differenceDeg": 0.00019749008481539931
+      },
+      {
+        "instant": "1990-05-15T19:34:00.000Z",
+        "body": "mercury",
+        "astronomyDeg": 37.97778311579597,
+        "swissMoshierDeg": 37.97826960892865,
+        "differenceDeg": 0.0004864931327119848
+      },
+      {
+        "instant": "1990-05-15T19:34:00.000Z",
+        "body": "venus",
+        "astronomyDeg": 13.178091980637197,
+        "swissMoshierDeg": 13.178016080324008,
+        "differenceDeg": 0.00007590031316340173
+      },
+      {
+        "instant": "1990-05-15T19:34:00.000Z",
+        "body": "mars",
+        "astronomyDeg": 348.56820429257135,
+        "swissMoshierDeg": 348.56799591269555,
+        "differenceDeg": 0.00020837987585764495
+      },
+      {
+        "instant": "1990-05-15T19:34:00.000Z",
+        "body": "jupiter",
+        "astronomyDeg": 99.60152611300391,
+        "swissMoshierDeg": 99.60140222055671,
+        "differenceDeg": 0.00012389244716359826
+      },
+      {
+        "instant": "1990-05-15T19:34:00.000Z",
+        "body": "saturn",
+        "astronomyDeg": 295.24398219888985,
+        "swissMoshierDeg": 295.2440364720914,
+        "differenceDeg": 0.000054273201612886623
+      },
+      {
+        "instant": "1990-05-15T19:34:00.000Z",
+        "body": "uranus",
+        "astronomyDeg": 279.1748435407494,
+        "swissMoshierDeg": 279.17613047904877,
+        "differenceDeg": 0.0012869382993585532
+      },
+      {
+        "instant": "1990-05-15T19:34:00.000Z",
+        "body": "neptune",
+        "astronomyDeg": 284.34797955163583,
+        "swissMoshierDeg": 284.34824137834744,
+        "differenceDeg": 0.00026182671160768223
+      },
+      {
+        "instant": "1990-05-15T19:34:00.000Z",
+        "body": "pluto",
+        "astronomyDeg": 226.15935809481633,
+        "swissMoshierDeg": 226.1587060216155,
+        "differenceDeg": 0.0006520732008539198
+      },
+      {
+        "instant": "1992-10-12T15:30:00.000Z",
+        "body": "sun",
+        "astronomyDeg": 199.55617112068072,
+        "swissMoshierDeg": 199.55615216883785,
+        "differenceDeg": 0.00001895184288969176
+      },
+      {
+        "instant": "1992-10-12T15:30:00.000Z",
+        "body": "moon",
+        "astronomyDeg": 29.840605651683806,
+        "swissMoshierDeg": 29.840372269994617,
+        "differenceDeg": 0.0002333816892132745
+      },
+      {
+        "instant": "1992-10-12T15:30:00.000Z",
+        "body": "mercury",
+        "astronomyDeg": 217.75548965618557,
+        "swissMoshierDeg": 217.755553642833,
+        "differenceDeg": 0.00006398664743301197
+      },
+      {
+        "instant": "1992-10-12T15:30:00.000Z",
+        "body": "venus",
+        "astronomyDeg": 231.3668024097768,
+        "swissMoshierDeg": 231.3662944196379,
+        "differenceDeg": 0.0005079901388853614
+      },
+      {
+        "instant": "1992-10-12T15:30:00.000Z",
+        "body": "mars",
+        "astronomyDeg": 105.57643662904985,
+        "swissMoshierDeg": 105.57710883361116,
+        "differenceDeg": 0.0006722045612832517
+      },
+      {
+        "instant": "1992-10-12T15:30:00.000Z",
+        "body": "jupiter",
+        "astronomyDeg": 180.4392099485423,
+        "swissMoshierDeg": 180.43959484866338,
+        "differenceDeg": 0.00038490012104830384
+      },
+      {
+        "instant": "1992-10-12T15:30:00.000Z",
+        "body": "saturn",
+        "astronomyDeg": 311.82992307672305,
+        "swissMoshierDeg": 311.8300007302626,
+        "differenceDeg": 0.00007765353961985966
+      },
+      {
+        "instant": "1992-10-12T15:30:00.000Z",
+        "body": "uranus",
+        "astronomyDeg": 284.20705060798394,
+        "swissMoshierDeg": 284.2089001174406,
+        "differenceDeg": 0.0018495094566333137
+      },
+      {
+        "instant": "1992-10-12T15:30:00.000Z",
+        "body": "neptune",
+        "astronomyDeg": 286.24280197036444,
+        "swissMoshierDeg": 286.2425991634159,
+        "differenceDeg": 0.00020280694855046022
+      },
+      {
+        "instant": "1992-10-12T15:30:00.000Z",
+        "body": "pluto",
+        "astronomyDeg": 231.5816390547976,
+        "swissMoshierDeg": 231.5811581222237,
+        "differenceDeg": 0.00048093257385062316
+      },
+      {
+        "instant": "2000-02-29T00:00:00.000Z",
+        "body": "sun",
+        "astronomyDeg": 339.7038252379479,
+        "swissMoshierDeg": 339.7037190156136,
+        "differenceDeg": 0.00010622233435242379
+      },
+      {
+        "instant": "2000-02-29T00:00:00.000Z",
+        "body": "moon",
+        "astronomyDeg": 269.6305167253681,
+        "swissMoshierDeg": 269.6301073288678,
+        "differenceDeg": 0.00040939650034488295
+      },
+      {
+        "instant": "2000-02-29T00:00:00.000Z",
+        "body": "mercury",
+        "astronomyDeg": 343.00376160726825,
+        "swissMoshierDeg": 343.00328786857114,
+        "differenceDeg": 0.0004737386971100932
+      },
+      {
+        "instant": "2000-02-29T00:00:00.000Z",
+        "body": "venus",
+        "astronomyDeg": 313.33861992982105,
+        "swissMoshierDeg": 313.3388117883592,
+        "differenceDeg": 0.0001918585380735749
+      },
+      {
+        "instant": "2000-02-29T00:00:00.000Z",
+        "body": "mars",
+        "astronomyDeg": 12.846263731516515,
+        "swissMoshierDeg": 12.845551801805524,
+        "differenceDeg": 0.0007119297109738909
+      },
+      {
+        "instant": "2000-02-29T00:00:00.000Z",
+        "body": "jupiter",
+        "astronomyDeg": 32.48333536689846,
+        "swissMoshierDeg": 32.48265382272334,
+        "differenceDeg": 0.0006815441751086837
+      },
+      {
+        "instant": "2000-02-29T00:00:00.000Z",
+        "body": "saturn",
+        "astronomyDeg": 42.32596922617864,
+        "swissMoshierDeg": 42.32519755827548,
+        "differenceDeg": 0.0007716679031091189
+      },
+      {
+        "instant": "2000-02-29T00:00:00.000Z",
+        "body": "uranus",
+        "astronomyDeg": 318.09243462771707,
+        "swissMoshierDeg": 318.0954849983181,
+        "differenceDeg": 0.0030503706010449605
+      },
+      {
+        "instant": "2000-02-29T00:00:00.000Z",
+        "body": "neptune",
+        "astronomyDeg": 305.3364597090682,
+        "swissMoshierDeg": 305.3338856684455,
+        "differenceDeg": 0.002574040622675966
+      },
+      {
+        "instant": "2000-02-29T00:00:00.000Z",
+        "body": "pluto",
+        "astronomyDeg": 252.83355000082614,
+        "swissMoshierDeg": 252.83348417858198,
+        "differenceDeg": 0.00006582224409612536
+      },
+      {
+        "instant": "2026-11-05T00:00:00.000Z",
+        "body": "sun",
+        "astronomyDeg": 222.58133202980733,
+        "swissMoshierDeg": 222.5815913814613,
+        "differenceDeg": 0.0002593516539945995
+      },
+      {
+        "instant": "2026-11-05T00:00:00.000Z",
+        "body": "moon",
+        "astronomyDeg": 171.99790040100166,
+        "swissMoshierDeg": 171.9969164816568,
+        "differenceDeg": 0.0009839193448897277
+      },
+      {
+        "instant": "2026-11-05T00:00:00.000Z",
+        "body": "mercury",
+        "astronomyDeg": 221.66116181880787,
+        "swissMoshierDeg": 221.65980954492875,
+        "differenceDeg": 0.001352273879092536
+      },
+      {
+        "instant": "2026-11-05T00:00:00.000Z",
+        "body": "venus",
+        "astronomyDeg": 204.5133119023541,
+        "swissMoshierDeg": 204.51766975238303,
+        "differenceDeg": 0.004357850028895882
+      },
+      {
+        "instant": "2026-11-05T00:00:00.000Z",
+        "body": "mars",
+        "astronomyDeg": 140.6094865416545,
+        "swissMoshierDeg": 140.6095889739865,
+        "differenceDeg": 0.00010243233202800184
+      },
+      {
+        "instant": "2026-11-05T00:00:00.000Z",
+        "body": "jupiter",
+        "astronomyDeg": 144.78989939941408,
+        "swissMoshierDeg": 144.79049418710758,
+        "differenceDeg": 0.000594787693444232
+      },
+      {
+        "instant": "2026-11-05T00:00:00.000Z",
+        "body": "saturn",
+        "astronomyDeg": 9.040819274705333,
+        "swissMoshierDeg": 9.043674220013528,
+        "differenceDeg": 0.0028549453081723186
+      },
+      {
+        "instant": "2026-11-05T00:00:00.000Z",
+        "body": "uranus",
+        "astronomyDeg": 64.52702960209507,
+        "swissMoshierDeg": 64.52723933719224,
+        "differenceDeg": 0.00020973509720079164
+      },
+      {
+        "instant": "2026-11-05T00:00:00.000Z",
+        "body": "neptune",
+        "astronomyDeg": 2.0064818035897747,
+        "swissMoshierDeg": 2.0030101378117635,
+        "differenceDeg": 0.003471665777965427
+      },
+      {
+        "instant": "2026-11-05T00:00:00.000Z",
+        "body": "pluto",
+        "astronomyDeg": 303.1620555526482,
+        "swissMoshierDeg": 303.1623129710766,
+        "differenceDeg": 0.00025741842841853213
+      }
+    ]
+  },
+  "timezoneChecks": [
+    {
+      "name": "fall-back has two candidates",
+      "actual": [
+        "2025-11-02T05:30:00.000Z",
+        "2025-11-02T06:30:00.000Z"
+      ],
+      "expected": [
+        "2025-11-02T05:30:00.000Z",
+        "2025-11-02T06:30:00.000Z"
+      ],
+      "passed": true
+    },
+    {
+      "name": "spring gap has no candidate",
+      "actual": [],
+      "expected": [],
+      "passed": true
+    },
+    {
+      "name": "half-hour fold",
+      "actual": [
+        "2025-04-05T14:45:00.000Z",
+        "2025-04-05T15:15:00.000Z"
+      ],
+      "expected": [
+        "2025-04-05T14:45:00.000Z",
+        "2025-04-05T15:15:00.000Z"
+      ],
+      "passed": true
+    },
+    {
+      "name": "quarter-hour offset",
+      "actual": [
+        "1992-10-12T02:45:00.000Z"
+      ],
+      "expected": [
+        "1992-10-12T02:45:00.000Z"
+      ],
+      "passed": true
+    },
+    {
+      "name": "skipped local date",
+      "actual": [],
+      "expected": [],
+      "passed": true
+    },
+    {
+      "name": "historical second offset",
+      "actual": [
+        "1880-01-01T07:52:58.000Z"
+      ],
+      "expected": [
+        "1880-01-01T07:52:58.000Z"
+      ],
+      "passed": true
+    },
+    {
+      "name": "2026f Havana rule",
+      "actual": [
+        "2026-11-02T16:00:00.000Z"
+      ],
+      "expected": [
+        "2026-11-02T16:00:00.000Z"
+      ],
+      "passed": true
+    },
+    {
+      "name": "unknown-time spring day is 23 hours",
+      "actual": 23,
+      "expected": 23,
+      "passed": true
+    },
+    {
+      "name": "unknown-time autumn day is 25 hours",
+      "actual": 25,
+      "expected": 25,
+      "passed": true
+    },
+    {
+      "name": "unknown-time skipped date is empty",
+      "actual": 0,
+      "expected": 0,
+      "passed": true
+    },
+    {
+      "name": "ordinary local day is 24 hours",
+      "actual": 24,
+      "expected": 24,
+      "passed": true
+    }
+  ],
+  "workerProbe": {
+    "passed": true,
+    "runtime": "local workerd via Miniflare",
+    "compatibilityDate": "2026-10-26",
+    "response": {
+      "positions": [
+        {
+          "body": "Sun",
+          "degrees": 199.55617112068072
+        },
+        {
+          "body": "Moon",
+          "degrees": 29.840605651683806
+        },
+        {
+          "body": "Mercury",
+          "degrees": 217.75548965618557
+        },
+        {
+          "body": "Venus",
+          "degrees": 231.3668024097768
+        },
+        {
+          "body": "Mars",
+          "degrees": 105.57643662904985
+        },
+        {
+          "body": "Jupiter",
+          "degrees": 180.4392099485423
+        },
+        {
+          "body": "Saturn",
+          "degrees": 311.82992307672305
+        },
+        {
+          "body": "Uranus",
+          "degrees": 284.20705060798394
+        },
+        {
+          "body": "Neptune",
+          "degrees": 286.24280197036444
+        },
+        {
+          "body": "Pluto",
+          "degrees": 231.5816390547976
+        }
+      ],
+      "tzdb": "2026f",
+      "havanaOffsetMinutesWest": 240
+    },
+    "bundleBytes": 848877,
+    "gzipBytes": 83330,
+    "dependencyInputs": [
+      "astronomy-engine/esm/astronomy.js",
+      "moment/moment.js",
+      "moment-timezone/moment-timezone.js",
+      "moment-timezone/data/packed/latest.json",
+      "moment-timezone/index.js"
+    ]
+  },
+  "timing": {
+    "description": "49 synthetic instants × 10 bodies per run; local Node wall time, not Worker CPU qualification or a proof of interval stability",
+    "runs": 12,
+    "milliseconds": [
+      5.547530999999992,
+      4.670079000000001,
+      4.734577999999999,
+      4.653683000000001,
+      4.6854960000000005,
+      4.737429000000006,
+      4.317759999999993,
+      4.387926999999991,
+      4.286826999999988,
+      4.3956560000000025,
+      4.276933000000014,
+      4.322574000000003
+    ],
+    "maximumMilliseconds": 5.547530999999992
+  },
+  "limitations": [
+    "Finite date sampling does not qualify the entire supported date range.",
+    "No house, angle, aspect-interval, transit-window, birthplace lookup, storage, or browser implementation tested.",
+    "The local Worker smoke test is not hosted CPU, concurrency, or deployment acceptance.",
+    "The local Swiss reference dependency is research-only and is not an application dependency."
+  ]
+}
