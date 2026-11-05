@@ -746,6 +746,9 @@ for (const outcome of [
       await page.getByRole('button', { name: 'Edit reflection', exact: true }).click();
       await reflectionEditor.fill(reflectionDraft);
     }
+    // The child note editor is usable during its parent's refresh. This race
+    // must begin after that refresh, when a new focus refresh can be admitted.
+    await expect(page.getByRole('button', { name: 'Delete reading', exact: true })).toBeEnabled();
     let deleted = false;
     const fetched: string[] = [];
     page.on('request', (request) => {
