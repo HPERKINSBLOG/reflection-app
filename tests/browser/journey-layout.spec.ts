@@ -189,8 +189,7 @@ for (const width of [320, 390, 768, 1280]) {
       if (reading.kind !== 'tarot.accepted.v2')
         throw new Error('Expected the synthetic v2 fixture');
       for (const [index, unit] of reading.units.entries()) {
-        const position = accepted.locator('.position-card').nth(index);
-        await expect(position.getByText(unit.basisText, { exact: true })).toBeVisible();
+        const position = accepted.locator('.return-position').nth(index);
         await expect(position.getByText(unit.interpretation, { exact: true })).toBeVisible();
       }
       await expect(accepted.getByText(reading.synthesis.text, { exact: true })).toBeVisible();
@@ -199,6 +198,9 @@ for (const width of [320, 390, 768, 1280]) {
       await page.keyboard.press('Enter');
       for (const [index, source] of reading.sources.entries()) {
         const block = accepted.locator('.source').nth(index);
+        await expect(
+          block.getByText(reading.units[index]!.basisText, { exact: true }),
+        ).toBeVisible();
         await expect(block.getByText(source.meaning.core, { exact: true })).toBeVisible();
         await expect(block.getByText(source.rights.attribution, { exact: true })).toBeVisible();
       }

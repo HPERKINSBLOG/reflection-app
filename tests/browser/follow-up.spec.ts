@@ -9,7 +9,7 @@ async function original(page: Page, ip: string) {
   return savedSnapshot(page);
 }
 async function compose(page: Page, question: string) {
-  await page.getByRole('link', { name: 'Follow up on this edition', exact: true }).click();
+  await page.getByRole('link', { name: 'Ask a follow-up', exact: true }).click();
   await expect(page.getByText('No new draw', { exact: true })).toBeVisible();
   await expect(page.getByLabel('Include reversed cards')).toHaveCount(0);
   await expect(page.getByLabel('Photo of your spread')).toHaveCount(0);
@@ -80,7 +80,7 @@ test('follow-ups keep their exact parents, questions and saved family across rel
         .getByRole('button', { name: 'Tarot', exact: true }),
     ).toBeDisabled();
   }
-
+  await page.getByText('Parent and original reading', { exact: true }).click();
   await expect(
     page.getByRole('link', { name: 'Open parent edition', exact: true }),
   ).toHaveAttribute('href', `/saved/${saved.session.id}/${second.reading.editionId}`);

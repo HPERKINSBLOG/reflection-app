@@ -159,7 +159,7 @@ test('a follow-up starts its source browser at its parent while keeping every ex
   page,
 }) => {
   const { saved, note } = await savedNote(page, '198.51.100.219');
-  await page.getByRole('link', { name: 'Follow up on this edition', exact: true }).click();
+  await page.getByRole('link', { name: 'Ask a follow-up', exact: true }).click();
   const chooser = page.getByRole('region', { name: 'Selected context', exact: true });
   const sent: string[] = [];
   page.on('request', (request) => {

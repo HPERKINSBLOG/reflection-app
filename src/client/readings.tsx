@@ -1,14 +1,7 @@
 import { createPortal } from 'react-dom';
 import { PatternWorkspace, type PatternHandle } from './astrology/pattern.tsx';
 import type { BirthDraft } from '../contracts/astrology.ts';
-import {
-  Button,
-  Input,
-  ReflectionCard,
-  ReflectionField,
-  TextLink,
-  TopicChip,
-} from './design/components.tsx';
+import { Button, Input, ReflectionCard, ReflectionField, TextLink } from './design/components.tsx';
 import {
   type MouseEvent,
   type ReactNode,
@@ -49,10 +42,10 @@ import {
 import { ReadingDeletion, type ReadingDeletionTarget } from './reading-deletion.tsx';
 import { date } from './date.ts';
 import { Notice, type NoticeMessage } from './notice.tsx';
-import { cardName } from './card-names.ts';
 import { Art } from './art.tsx';
 import { Icon } from './icon.tsx';
-import { CardFace, CardThumbnail } from './card-face.tsx';
+import { ReturnInterpretation } from './return-interpretation.tsx';
+import returnBotanical from './design/art/return/header-botanical.png';
 import { RevisitNotes, type RevisitNotesHandle } from './revisit-notes.tsx';
 import {
   FollowUp,
@@ -307,6 +300,7 @@ export function ReadingWorkspace({
   const [busy, setBusy] = useState(false),
     [message, setMessage] = useState<NoticeMessage | null>(null),
     [conflict, setConflict] = useState(false);
+  const [journalNavigationPending, setJournalNavigationPending] = useState(false);
   const [deletionTarget, setDeletionTarget] = useState<ReadingDeletionTarget | null>(null);
   const activeDeletion = useRef(deletionTarget);
   activeDeletion.current = deletionTarget;
@@ -663,6 +657,7 @@ export function ReadingWorkspace({
     epoch.current++;
     inFlight.current = false;
     setBusy(false);
+    setJournalNavigationPending(false);
     setMessage(null);
     const previousEdition = selectedTarget.current;
     clearReading();
@@ -952,7 +947,7 @@ export function ReadingWorkspace({
         href={`${editionPath(record.id, reading.editionId)}/follow-up`}
         onClick={editionNavigation}
       >
-        Follow up on this edition
+        Ask a follow-up
       </TextLink>
     ) : null;
   const workspaceNavigation = (
@@ -1003,11 +998,16 @@ export function ReadingWorkspace({
         onClick={() => {
           if (!canLeave()) return;
           void run(async (current) => {
-            await loadHistory(current);
-            if (current()) {
-              setMode('history');
-              replacePath('/');
-              clearReading();
+            setJournalNavigationPending(true);
+            try {
+              await loadHistory(current);
+              if (current()) {
+                setMode('history');
+                replacePath('/');
+                clearReading();
+              }
+            } finally {
+              if (current()) setJournalNavigationPending(false);
             }
           });
         }}
@@ -1549,16 +1549,33 @@ export function ReadingWorkspace({
       )}
       {mode === 'reading' && record && selectedEditionId && (
         <section
-          className={`reading-detail${reading ? ' reading-detail-native' : pattern ? ' reading-detail-pattern' : ''}`}
+          className={`reading-detail${reading ? ' reading-detail-native reading-return' : pattern ? ' reading-detail-pattern' : ''}`}
           aria-label="Reading detail"
           hidden={!!deletionTarget}
         >
           {reading && (
-            <EditionHistory
-              ids={record.editionIds}
-              reading={reading}
-              details={editionDetails.details}
-            />
+            <div className="reading-return-navigation">
+              <img
+                className="reading-return-art"
+                src={returnBotanical}
+                alt=""
+                width="582"
+                height="280"
+              />
+              <p className="return-reading-meta">
+                {record.status === 'saved' ? 'Saved reading' : 'Reading'} · Started{' '}
+                <time dateTime={record.createdAt}>{date(record.createdAt)}</time>
+                {record.status === 'saved' && (
+                  <span className="return-retention-status">Saved until you delete it.</span>
+                )}
+              </p>
+              <EditionHistory
+                ids={record.editionIds}
+                reading={reading}
+                details={editionDetails.details}
+                compact
+              />
+            </div>
           )}
           {editionDetails.failed && (
             <p className="edition-details-retry">
@@ -1573,181 +1590,23 @@ export function ReadingWorkspace({
               data-testid="accepted-reading"
               className={`accepted-reading${reading.spreadPhoto ? ' has-spread-photo' : ''}`}
             >
-              <div className="reading-header">
+              <header className="reading-header reading-return-title">
                 <div className="reading-title">
-                  <p className="test-notice">
-                    <TopicChip tone="sage">
-                      {reading.provenance.provider === 'openai'
-                        ? 'AI reading'
-                        : localRuntime
-                          ? 'Local simulated reading'
-                          : 'Simulated reading'}
-                      {reading.mode === 'template' ? ' · Prepared reflection template' : ''}
-                    </TopicChip>
-                  </p>
-                  <time
-                    dateTime={reading.editionNumber === 1 ? record.createdAt : reading.acceptedAt}
-                  >
-                    {date(reading.editionNumber === 1 ? record.createdAt : reading.acceptedAt)}
-                  </time>
-                  {reading.parentEditionId && <p>Follow-up · Edition {reading.editionNumber}</p>}
                   <h2 ref={resultHeading} tabIndex={-1}>
                     {reading.question}
                   </h2>
-                  <ReadingOrigin reading={reading} details={editionDetails.details} />
-                  {notesLink}
-                  {deletionEntry}
-                  {followUpEntry}
-                </div>
-                {!reading.spreadPhoto && <Art name="study-inquiry" className="question-art" />}
-              </div>
-              {reading.spreadPhoto && (
-                <figure
-                  className="card spread-photo-card"
-                  data-testid="spread-photo-card"
-                  aria-labelledby="reading-spread-caption"
-                >
-                  <img
-                    src={reading.spreadPhoto}
-                    alt="Uploaded tarot spread for this reading"
-                    className="spread-photo-image"
-                  />
-                  <figcaption id="reading-spread-caption" className="muted">
-                    Uploaded spread photo · Recognized 3-card spread
-                  </figcaption>
-                </figure>
-              )}
-              {reading.units.map((unit, index) => {
-                const card = reading.basis.cards.find((item) => item.position === unit.position);
-                const name =
-                  reading.kind === 'tarot.accepted.v2'
-                    ? reading.draw.find((item) => item.position === unit.position)?.name
-                    : card && cardName(reading.basis.deckEdition, card.cardId);
-                return (
-                  <section key={unit.position} className="card position-card">
-                    <div className="position-title">
-                      <span className="position-number" aria-hidden="true">
-                        {index + 1}
-                      </span>
-                      <h3>{unit.position}</h3>
-                    </div>
-                    <div className="position-body">
-                      {card && !reading.spreadPhoto && (
-                        <CardFace cardId={card.cardId} orientation={card.orientation} name={name} />
-                      )}
-                      <div className="position-copy">
-                        <div>
-                          <h4>
-                            {reading.spreadPhoto
-                              ? 'Recognized card'
-                              : reading.parentEditionId
-                                ? 'Original card'
-                                : 'Drawn card'}
-                            {name ? `: ${name}` : ''}
-                          </h4>
-                          <p className="basis-text">{unit.basisText}</p>
-                        </div>
-                        <div>
-                          <h4>Interpretation</h4>
-                          <p>{unit.interpretation}</p>
-                        </div>
-                        {'reflectionQuestion' in unit && (
-                          <div className="reflection-prompt">
-                            <h4>Reflection prompt</h4>
-                            <p>{unit.reflectionQuestion}</p>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </section>
-                );
-              })}
-              {reading.kind === 'tarot.accepted.v2' ? (
-                <div className="card reading-closing">
-                  <section>
-                    <h3>Putting it together</h3>
-                    <p>{reading.synthesis.text}</p>
-                  </section>
-                  <section>
-                    <h3>An optional next step</h3>
-                    <p>{reading.action.text}</p>
-                  </section>
-                  {reading.reflectionQuestion && (
-                    <section className="reflection-prompt">
-                      <h3>A question to consider</h3>
-                      <p>{reading.reflectionQuestion.text}</p>
-                    </section>
+                  <ReadingOrigin reading={reading} details={editionDetails.details} compact />
+                  {!reading.parentEditionId && (
+                    <p className="return-draw-note">Original three-card draw</p>
                   )}
                 </div>
-              ) : (
-                <p className="reading-closing">{reading.closing}</p>
-              )}
-              <details className="reading-sources">
-                <summary>Cards and sources</summary>
-                <h3>Traditional source material</h3>
-                <p className="muted">
-                  These sources are saved with the reading. They are separate from the
-                  interpretation and your own reflection. These meanings are unapproved development
-                  material.
-                </p>
-                {reading.basis.cards.map((card, index) => {
-                  const name =
-                    reading.kind === 'tarot.accepted.v2'
-                      ? reading.draw[index]!.name
-                      : cardName(reading.basis.deckEdition, card.cardId);
-                  const position = card.position[0]!.toUpperCase() + card.position.slice(1);
-                  return (
-                    <div key={card.id} className="source">
-                      <CardThumbnail cardId={card.cardId} orientation={card.orientation} />
-                      <div className="source-copy">
-                        <h3>
-                          {position}: {name ? `${name} (${card.cardId})` : card.cardId} ·{' '}
-                          {card.orientation}
-                        </h3>
-                        {reading.kind === 'tarot.accepted.v2' ? (
-                          <>
-                            <p>{reading.sources[index]!.meaning.core}</p>
-                            <ul>
-                              {reading.sources[index]!.meaning.distinctions.map((text) => (
-                                <li key={text}>{text}</li>
-                              ))}
-                            </ul>
-                            <p>{reading.sources[index]!.meaning.positive}</p>
-                            <p>{reading.sources[index]!.meaning.limits.join(' ')}</p>
-                            {reading.sources[index]!.meaning.imagery && (
-                              <p>
-                                {reading.sources[index]!.meaning.imagery!.text} —{' '}
-                                {reading.sources[index]!.meaning.imagery!.reference}
-                              </p>
-                            )}
-                          </>
-                        ) : (
-                          <p>{reading.sources[index]!.text}</p>
-                        )}
-                        <p className="source-attribution">
-                          {reading.sources[index]!.rights.attribution}
-                        </p>
-                        <p className="muted source-id">
-                          Source {reading.sources[index]!.id} · version{' '}
-                          {reading.sources[index]!.version}
-                        </p>
-                      </div>
-                    </div>
-                  );
-                })}
-                <p className="muted">
-                  {reading.mode === 'template'
-                    ? 'Prepared reflection template.'
-                    : reading.provenance.provider === 'openai'
-                      ? 'Generated by OpenAI.'
-                      : runtimeMode === 'hosted-synthetic'
-                        ? 'Generated by the hosted simulation.'
-                        : localRuntime
-                          ? 'Generated by the local simulation.'
-                          : 'Generated by a simulation.'}{' '}
-                  This saved text is not rewritten when you return.
-                </p>
-              </details>
+                {followUpEntry}
+              </header>
+              <ReturnInterpretation
+                reading={reading}
+                runtimeMode={runtimeMode}
+                localRuntime={localRuntime}
+              />
             </article>
           ) : pattern ? (
             <PatternReading reading={pattern} headingRef={resultHeading} />
@@ -1780,30 +1639,33 @@ export function ReadingWorkspace({
             </ReflectionCard>
           )}
           <aside className="reading-personal-writing" aria-label="Your writing">
-            <div className={`save-reading ${record.status === 'saved' ? 'is-saved' : ''}`}>
-              {record.status === 'saved' ? (
-                <p className="saved-label">
-                  <Icon name="check" />
-                  Saved until you delete it.
-                </p>
-              ) : (
-                <>
-                  <div className="save-summary">
-                    <Icon name="clock" />
-                    <div className="save-copy">
-                      <p>
-                        <strong>Not saved</strong> · Temporary storage lasts 24 hours from creation.
-                      </p>
-                      <p className="muted">{READING_PRODUCT_COPY.saveReading}</p>
+            {(!reading || record.status !== 'saved') && (
+              <div className={`save-reading ${record.status === 'saved' ? 'is-saved' : ''}`}>
+                {record.status === 'saved' ? (
+                  <p className="saved-label">
+                    <Icon name="check" />
+                    Saved until you delete it.
+                  </p>
+                ) : (
+                  <>
+                    <div className="save-summary">
+                      <Icon name="clock" />
+                      <div className="save-copy">
+                        <p>
+                          <strong>Not saved</strong> · Temporary storage lasts 24 hours from
+                          creation.
+                        </p>
+                        <p className="muted">{READING_PRODUCT_COPY.saveReading}</p>
+                      </div>
                     </div>
-                  </div>
-                  <Button id="save-reading" type="button" onClick={save} disabled={busy}>
-                    <Icon name="bookmark" />
-                    Save reading
-                  </Button>
-                </>
-              )}
-            </div>
+                    <Button id="save-reading" type="button" onClick={save} disabled={busy}>
+                      <Icon name="bookmark" />
+                      Save reading
+                    </Button>
+                  </>
+                )}
+              </div>
+            )}
             {!reading && deletionEntry}
             <ReflectionCard
               id="personal-reflection"
@@ -1830,7 +1692,12 @@ export function ReadingWorkspace({
                     </Button>
                   </div>
                   <p className="muted">
-                    Saved {date(reflection.updatedAt)} · {stanceLabels[reflection.stance]}
+                    {reading
+                      ? reading.parentEditionId
+                        ? 'On this follow-up ·'
+                        : 'On this reading ·'
+                      : 'Saved'}{' '}
+                    {date(reflection.updatedAt)} · {stanceLabels[reflection.stance]}
                   </p>
                   <p className="saved-reflection-text">{reflection.text}</p>
                 </div>
@@ -1964,6 +1831,8 @@ export function ReadingWorkspace({
               editionId={selectedEditionId}
               saved={record.status === 'saved'}
               parentExpiresAt={record.retentionExpiresAt ?? null}
+              presentation={reading ? 'return' : 'default'}
+              disabled={journalNavigationPending}
               csrfToken={user.csrfToken}
               onExpired={onExpired}
               onChanged={() => {
@@ -1974,6 +1843,12 @@ export function ReadingWorkspace({
                 });
               }}
             />
+            {reading && (
+              <div className="return-reading-actions">
+                {notesLink}
+                {deletionEntry}
+              </div>
+            )}
             {reflection && (
               <details className="deletion-actions reflection-revisions">
                 <summary>Reflection revisions</summary>

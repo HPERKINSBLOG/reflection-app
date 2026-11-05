@@ -318,7 +318,7 @@ export async function continuityJourneyStates(
 ) {
   const original = page.getByTestId('accepted-reading').getByRole('heading', { level: 2 });
   const parentQuestion = await original.textContent();
-  const follow = page.getByRole('link', { name: 'Follow up on this edition', exact: true });
+  const follow = page.getByRole('link', { name: 'Ask a follow-up', exact: true });
   const target = await follow.getAttribute('href');
   if (!target) throw new Error('Missing saved parent link');
   await follow.focus();
@@ -361,6 +361,7 @@ export async function continuityJourneyStates(
   ).toBeFocused();
   await expect(page.getByRole('navigation', { name: 'Edition history' })).toBeVisible();
   await capture('follow-up-accepted');
+  await page.getByText('Parent and original reading', { exact: true }).click();
   await page.getByRole('link', { name: 'Open parent edition', exact: true }).click();
   await expect(original).toHaveText(parentQuestion!);
 }

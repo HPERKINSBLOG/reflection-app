@@ -112,14 +112,24 @@ export function FollowUp({ parent }: { parent: Reading }) {
     </section>
   );
 }
-export function ReadingOrigin({ reading, details }: { reading: Reading; details: EditionDetails }) {
+export function ReadingOrigin({
+  reading,
+  details,
+  compact = false,
+}: {
+  reading: Reading;
+  details: EditionDetails;
+  compact?: boolean;
+}) {
   if (!reading.parentEditionId) return null;
   const parent = details[reading.parentEditionId];
   return (
-    <div className="reading-origin">
-      <p>
-        <strong>No new draw</strong> · The original three cards and orientations are reused.
-      </p>
+    <div className={`reading-origin${compact ? ' reading-origin--return' : ''}`}>
+      {!compact && (
+        <p>
+          <strong>No new draw</strong> · The original three cards and orientations are reused.
+        </p>
+      )}
       <p>
         Follow-up to:{' '}
         <TextLink
@@ -130,6 +140,7 @@ export function ReadingOrigin({ reading, details }: { reading: Reading; details:
             (parent?.unavailable ? 'Parent edition unavailable' : 'View parent reading')}
         </TextLink>
       </p>
+      {compact && <p className="return-draw-note">Original three-card draw · No new draw</p>}
     </div>
   );
 }
@@ -138,13 +149,68 @@ export function EditionHistory({
   ids,
   reading,
   details = {},
+  compact = false,
 }: {
   ids: string[];
   reading: Reading;
   details?: EditionDetails;
+  compact?: boolean;
 }) {
-  if (ids.length < 2) return null;
+  if (ids.length < 2 && !compact) return null;
   const path = (id: string) => editionPath(reading.sessionId, id);
+  if (compact)
+    return (
+      <nav className="edition-history edition-history--return" aria-label="Edition history">
+        <h3 className="sr-only">Reading editions</h3>
+        <ol>
+          {ids.map((id, i) => {
+            const current = id === reading.editionId;
+            const detail = details[id];
+            const at = current ? reading.acceptedAt : detail?.at;
+            return (
+              <li key={id}>
+                <TextLink
+                  className="edition-return-choice"
+                  href={path(id)}
+                  onClick={editionNavigation}
+                  aria-current={current ? 'page' : undefined}
+                  title={current ? reading.question : (detail?.question ?? undefined)}
+                >
+                  <span>{i === 0 ? 'Original reading' : `Follow-up ${i}`}</span>
+                  {i > 0 && at && (
+                    <span>
+                      {' · '}
+                      <time dateTime={at} title={date(at)}>
+                        <span aria-hidden="true">{date(at, true)}</span>
+                        <span className="sr-only">{date(at)}</span>
+                      </time>
+                    </span>
+                  )}
+                  {detail?.unavailable && <span> · Unavailable</span>}
+                  {!current && !detail && <span className="sr-only"> · Loading details</span>}
+                  {current && <span className="sr-only"> · Current edition</span>}
+                </TextLink>
+              </li>
+            );
+          })}
+        </ol>
+        {reading.parentEditionId && (
+          <details className="edition-return-paths">
+            <summary>Parent and original reading</summary>
+            <div className="actions">
+              <TextLink href={path(reading.parentEditionId)} onClick={editionNavigation}>
+                Open parent edition
+              </TextLink>
+              {ids[0] && (
+                <TextLink href={path(ids[0])} onClick={editionNavigation}>
+                  Back to original reading
+                </TextLink>
+              )}
+            </div>
+          </details>
+        )}
+      </nav>
+    );
   return (
     <nav className="edition-history" aria-label="Edition history">
       <h3>Reading editions</h3>

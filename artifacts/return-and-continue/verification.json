@@ -1,0 +1,163 @@
+{
+  "recordedAt": "2026-11-05T20:09:08.260045+00:00",
+  "baseCommit": "9f9d6eb065776a479caf17e73f301c874745391e",
+  "sourceDigest": "fd2fae51737763b553c6d5ed7371539a97059d4403fe59686605893b4d417e56",
+  "files": {
+    "artifacts/your-pattern/qualification/current-status.md": "bc676c51faad3196fc3a6871083e08c355e2ade4468f8dfdc00e6cc14a3d340b",
+    "docs/design/merger-implementation-map.md": "955074f0eea9447c2d06c693bf149e56a65b9ee7f0c28c0baee3d3f99da04f1d",
+    "docs/design/return-and-continue.md": "acd418459fc33df3f993cf353552ac32fae2103b6f38f56a25ae533c4976858b",
+    "src/client/design/art/return/header-botanical.png": "9613966c5a6b85d4a78ec8ec5202152739a9e76177b016b4a2f4e96e6fea4e75",
+    "src/client/design/art/return/stance-resonates.svg": "a1abc1457dc8457a99b56d7c82de3b2846737c810abd6994cb17b14028b85899",
+    "src/client/design/art/return/stance-unsure.svg": "55d8540257d23336caf8a407c2232a45a17d0e2c77f199c4a760363e409bb4c0",
+    "src/client/follow-up.tsx": "e822196b713709161625a1a8656db939bc11b05164d695065d0434c854736803",
+    "src/client/reading-return.css": "b307117aefe8a26c25b9132fffe4e90c16bf65f90eca691a56f888d65af9e5a4",
+    "src/client/readings.tsx": "06dc77d1fcd95411416fe8680e26dc401680c002d3c8f8baa0967c27cd3b2779",
+    "src/client/return-interpretation.tsx": "38c85d6f4301fe8f120c5ceb987502b9817c7778895b07b8b1bda57af62b09b8",
+    "src/client/return-revisit.css": "dec987380776321ce875987482fa89298b32c90607fa7ba2935ed68b42eac53d",
+    "src/client/revisit-notes.tsx": "4a3ed42b082bb4e908cc4413270339ac03b991d1c51fa94ed2b98a16d606885e",
+    "tests/browser/follow-up.spec.ts": "bc9c654d77c0b2536596ee709eff53a11829a5ad234584f4befeaedcc683424b",
+    "tests/browser/imports.spec.ts": "9758c626558294bcd1947d38e7d5ecc975c105c64711a9da310da7da06fde6ca",
+    "tests/browser/journey-layout.spec.ts": "af559b88ae0408b13af9b9980d50c249cf90fdc33c443c3a145ad42751a0bd38",
+    "tests/browser/live-mode.spec.ts": "9b322afccd891a48757481d4c532c9703c41d1fb3ea05f90a2edb4b50c6353ba",
+    "tests/browser/pattern-journal.spec.ts": "829b6304203363308cbe9af6040a95faa7b0b2109d1c88eea3a45b2b5b90e390",
+    "tests/browser/reading-return.spec.ts": "ca0f6a7377edf71c161b2a516e9b89fb0ed2910ebbf1c28c846d80990cbcc63c",
+    "tests/browser/readings.spec.ts": "4081bda4f3c8e2bbbfdbd5793c3cbdf191f952940855aadb2dd5961e90a879e1",
+    "tests/browser/request-lifecycle.spec.ts": "66f20928e8377ab8a66949bfa31d7dab2405be607453530635a6bf51d0d8a19d",
+    "tests/browser/selected-context.spec.ts": "791ecf39678b6c6a910196337d033a2b905606bb89d0062c71cf11554bdd68f0",
+    "tests/browser/spread-photo.spec.ts": "20b973a2a56b84901c9d5c1b6a1cdcc0cb3144ff3dbe2acd9bba7f38fff57f43",
+    "tests/fixtures/browser-journey.ts": "a8e6e7ee6be0e625577de068aa7677bc5a508b228690c18191e0adfcdaf1828e"
+  },
+  "changes": [
+    "Adapt Return and continue to Paper and Evening for native Tarot, preserving exact saved editions and current shared controls.",
+    "Compact edition navigation, a full-width question and parent identity, primary follow-up action, editorial interpretation and adjacent personal writing.",
+    "Readable saved reflections and compact dated revisit notes, with complete cards/photos/basis text/source material in an accessible disclosure.",
+    "Lock revisit controls only during pending Journal navigation; background refreshes retain deletion and editor focus."
+  ],
+  "validation": {
+    "chromium": {
+      "command": "npx playwright test tests/browser/reading-return.spec.ts tests/browser/readings.spec.ts tests/browser/follow-up.spec.ts tests/browser/selected-context.spec.ts tests/browser/revisit-notes.spec.ts tests/browser/live-mode.spec.ts tests/browser/imports.spec.ts tests/browser/pattern-journal.spec.ts tests/browser/request-lifecycle.spec.ts tests/browser/spread-photo.spec.ts --reporter=line,json --output=/tmp/reflection-return-ui/test-final",
+      "startTime": "2026-11-05T20:00:57.031Z",
+      "duration": 286498.423,
+      "expected": 104,
+      "skipped": 0,
+      "unexpected": 0,
+      "flaky": 0
+    },
+    "focusRegressions": {
+      "command": "npx playwright test tests/browser/reading-return.spec.ts tests/browser/revisit-notes.spec.ts --grep 'a returned follow-up|conflicts keep the editable draft|an expired offline deletion|deletion restores (adjacent|add) focus' --reporter=line,json --output=/tmp/reflection-return-ui/test-focus-regressions",
+      "startTime": "2026-11-05T20:00:19.342Z",
+      "duration": 27103.218,
+      "expected": 5,
+      "skipped": 0,
+      "unexpected": 0,
+      "flaky": 0
+    },
+    "targetedCrossBrowser": {
+      "command": "npx playwright test --config playwright.journey.config.ts tests/browser/journey-layout.spec.ts --grep '390px (light|dark):' --reporter=line,json --output=/tmp/reflection-return-ui/journey-results",
+      "engines": [
+        "Chromium",
+        "Firefox",
+        "WebKit"
+      ],
+      "casesPerEngine": [
+        "390px Paper",
+        "390px Evening"
+      ],
+      "startTime": "2026-11-05T20:05:55.526Z",
+      "duration": 102290.587,
+      "expected": 6,
+      "skipped": 0,
+      "unexpected": 0,
+      "flaky": 0
+    },
+    "typecheck": "npm run typecheck: passed",
+    "lint": "Biome checked 17 changed source/test files: no errors; one existing innerText warning and two existing template-literal informational suggestions.",
+    "diffCheck": "git diff --check: passed",
+    "developmentFindings": [
+      "Corrected an initial test assumption: edition navigation synchronously removes the previous editor, while Journal waits with the editor mounted.",
+      "The first broad run passed 100 tests and exposed four deletion-focus failures caused by applying the parent busy flag during metadata refreshes. A navigation-only lock fixed them without changing note focus logic or weakening the assertions.",
+      "One focused rerun was interrupted by a full /tmp tmpfs (ENOSPC/SQLITE_FULL). Final runs used a task-specific TMPDIR on the larger workspace disk; no unrelated temporary files were deleted."
+    ],
+    "executionEnvironment": {
+      "TMPDIR": "/home/htper/.local/state/reflection-app/return-and-continue-20261105/tmp",
+      "outputAlias": "/tmp/reflection-return-ui is a symlink to the retained run directory."
+    }
+  },
+  "visualReview": {
+    "source": "https://www.figma.com/design/q9z9EumNoo7fLv0qwKyBQU?node-id=16-122",
+    "screenshots": {
+      "follow-up-evening-1440-full.png": "0d3b599e916cec15fe46377571645ce9f6527ac11fbd08d37718a205121efc87",
+      "follow-up-evening-320-full.png": "014c966d4b7da4cc44d0d6013c97b894655bd1adfcf361c175feacc429d22f16",
+      "follow-up-evening-390-full.png": "ad7faed73b27618baba6e724332a08b1199bcaf0b64a19488abe43e15e4b4e68",
+      "follow-up-paper-1440-full.png": "d3373d77388f493a20f4c333361ade596ea5ca1c5ffb1391baca63d14728c2fe",
+      "follow-up-paper-320-full.png": "d5877cfcc7f39a8a5dc54f2aec05389a2ab551fe756e2a3197ede2755ca9eb51",
+      "follow-up-paper-390-full.png": "0279f1b931379a12a30ad16b10581d0267b854c0e36aaa091eef8189b5672c9f",
+      "long-editions-evening-1440-full.png": "2b464351a9eb2c3356083001ba645852584625f5273d990ccc3e23b563ba100a",
+      "long-editions-evening-320-full.png": "f52573fa9ded391313b538b1ba346b858c3e5063132686a860fc3f238de0a9a0",
+      "long-editions-paper-1440-full.png": "da6b7e70abc2a970184fef655178ec1afd3cf2cd161c6426c4ce8d6db75983cb",
+      "long-editions-paper-320-full.png": "0d4935513693590817af94e2f40fa9b65fe325d8175307470f594fa4321033cd"
+    },
+    "crossBrowserArtifacts": {
+      "chromium-390-dark-evidence.json": "f3877b9d80bf55d1196fe7bc5f8f0d1bebc9edaa3d31cc031ad9e7d05ba3c278",
+      "chromium-390-dark-follow-up-accepted.png": "541b08d850b6e7567f05d16051b92ab7647ce07ad3fe995f3e0b231bb076d002",
+      "chromium-390-dark-notes-edit.png": "5ee352d45bc54830ecc879d3e4a0f03b466e0db0f807a401bb815498f4107823",
+      "chromium-390-dark-notes-receipt.png": "04397746641b5203ea99b47bfba1f79c7679cc9e266bd8229b5fb9855a75d74b",
+      "chromium-390-dark-sources.png": "483e873042610cc811a13340ae98718d049e699bc8fae0a2504fcb1a9be88ba0",
+      "chromium-390-light-evidence.json": "4547b327ffd29bc91a89e76cf84d73b191feb7f6014497afb8cf426c00a2b64b",
+      "chromium-390-light-follow-up-accepted.png": "f84266e2f6303522c8545e0f8b8fb9cfaf928437a7e19523d81c33a333be2e51",
+      "chromium-390-light-notes-edit.png": "d84754d712a2bb3151c72388eca0a41a46d452382f322f1f032e836807021d90",
+      "chromium-390-light-notes-receipt.png": "17968702d60f9df245f82334370f8d0131cae9e30b8b07e0516fd5d677a7a7d8",
+      "chromium-390-light-sources.png": "c21c489264ca6eb5c3025a7989dcfc9821a1565b286e8fb0282a0b1fc5d1a394",
+      "firefox-390-dark-evidence.json": "2a06bb644c01a38453a350d0b335655177915451ac2c54ae7f2316f97b60779b",
+      "firefox-390-dark-follow-up-accepted.png": "321d4f148ba707772e03e355424d31c46cb409f37e6cffb2f9e20e8468676b8b",
+      "firefox-390-dark-notes-edit.png": "b90254c12268a492f76d23615b1913e932d78db1e905379b8280c8be7e8280d7",
+      "firefox-390-dark-notes-receipt.png": "946e6a6d9d4cd4c84381593191708780757f0ffac8de40f8377050329e688793",
+      "firefox-390-dark-sources.png": "d38e29f28b3aa0616a210337fda59faea5c76c497c65fe56aea26030f6143481",
+      "firefox-390-light-evidence.json": "4dc5c36754187c2a1a093632418a4c072938ea6d1deb91ea1f56bfa1ceef2d7d",
+      "firefox-390-light-follow-up-accepted.png": "bf2c22e27b89795d30bb32020579386d6d75e19ef281510e9f4e8c28388ea880",
+      "firefox-390-light-notes-edit.png": "7a3d5449051340488481be1c3840816c95c20a155000baf72a3f5dd2da2b58a6",
+      "firefox-390-light-notes-receipt.png": "b709ca1e38156c540b09ac5acf12f0a06653cf8ca562b3d8209569ff62a5c6aa",
+      "firefox-390-light-sources.png": "3e7fe443b07faf204ada1641674f3b8ad2b53a0316da5058cdad5dfbb147f409",
+      "webkit-390-dark-evidence.json": "ef697196cec49cf9787b9e22f501a858664c5104efe3fdab0a7e8cd80eeb48d2",
+      "webkit-390-dark-follow-up-accepted.png": "210f53950fd5d8b55ed3b7aa5df82c6cb5185f89c756cf3e02f141e61da97e16",
+      "webkit-390-dark-notes-edit.png": "94a4e68914ec19e23930c7167375d3b611a8102ac169c52ef4850e67c7e2e6f2",
+      "webkit-390-dark-notes-receipt.png": "5234a7b2d02797ab5979f52aa3e6c96db09da6fa8a239e8119234435d104f295",
+      "webkit-390-dark-sources.png": "795786ab40f537018060c872294984a3f79d0bbb5db835c21813c6fe0e103aad",
+      "webkit-390-light-evidence.json": "31bb8fbdf69aa43aa88541c500ecae1166cfd8f6c9c092befb23618868af3060",
+      "webkit-390-light-follow-up-accepted.png": "25153777d00f33e2b4405e486c314fe5cc7243aab27921fb0977a8b25951e274",
+      "webkit-390-light-notes-edit.png": "8a6964c9614b2756597c6c538dc1c33aca38caa6fa95f185ede1dfbef831f062",
+      "webkit-390-light-notes-receipt.png": "15a3f22de382cf512e3fa54fe37311b582be68403004d1ca911cdb8beca466fa",
+      "webkit-390-light-sources.png": "b788607b1c226afc31218b35553b79ef9222fcdf84973dca9bd2ca36479113c2"
+    },
+    "referenceScreenshot": "ed678430e13a7e8840248e61845db6c6e5c8f6c0fda9bfc432cb80d3688a9ef9",
+    "checks": [
+      "Desktop interpretation and personal-writing columns are aligned and have usable widths.",
+      "Paper and Evening layouts stack without body overflow at 390px and 320px.",
+      "Botanical artwork loads at its intrinsic aspect and never overlaps the question.",
+      "Three real saved editions and a 500-character question preserve exact links and complete wrapping text.",
+      "Saved reflections remain read-only until Edit; dated notes retain text, stance and accessible edit/delete actions.",
+      "The question focus outline is intentional after exact-edition navigation."
+    ]
+  },
+  "retainedRawEvidenceDirectory": "/home/htper/.local/state/reflection-app/return-and-continue-20261105/run",
+  "reportHashes": {
+    "browser-final.json": "c7b3f311317590a7ec613043c9f4a9ea93aa4c6b761d882e1c3e4f5ef7b5f6a4",
+    "browser-final.log": "b05137bd28c103e4d513c21bfa1c656b977a83ce7bf05e07ab35af29c24122b9",
+    "journeys.json": "6400d1be572f82b3c60ad867d343fb7ac52cf1cf00a06dac1ecce17c39ffbc07",
+    "journeys.log": "a334e5c50a4ce5283d8c3feb54f75210b824cc3ae14efa962d5250edab1502c3",
+    "focus-regressions.json": "48e96a82e854fb4547918a03091e53a61a94b6d63d1f667e1cc47a9ec68706e2",
+    "focus-regressions.log": "6c6b8eded348a39e742cf9e2651cd5afc3fb65a34de2cf4d2d659ed24331db25",
+    "browser-before-focus-fix.json": "bdf1369a8f040d698f413ad7dbc130de9f8d642e03f453a85d97b5d389f5c788",
+    "browser-before-focus-fix.log": "cc232207e9148b5ca57880b591229c14c04c520dae083a0c06a4c6e4cc8db787",
+    "focus-enospc.log": "58c6007ff073404451e2feeb09c58d008aa25bf987d91dbadece0c596520ad63",
+    "typecheck.log": "1513ea1f8ab5b7ad2479a4bb354fe5a94d249c2aca58e7ce934537893ed2ff64",
+    "lint.log": "389a8f54599ff7b4fe0d3b81e12f16aa518577f879293bc11785ea71803ac343"
+  },
+  "limits": [
+    "This is targeted UI verification, not a new full release gate or complete cross-browser matrix.",
+    "No Worker, migration, calculation or catalogue implementation changed; domain/database/numerical suites were not rerun for this screen.",
+    "The new long-content fixture exercises three real editions within the service quota; it does not qualify the maximum family size.",
+    "No Figma edits or publication, merge, deployment or hosted activation.",
+    "Physical-device and screen-reader acceptance remain separate."
+  ]
+}

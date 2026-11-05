@@ -249,13 +249,16 @@ test('reading inspection has semantic labels, keyboard source expansion and comp
   await expect(
     accepted.getByRole('heading', { name: 'Synthetic source inspection' }),
   ).toBeFocused();
-  await expect(accepted.getByRole('heading', { name: /^Drawn card: / })).toHaveCount(3);
-  await expect(accepted.getByRole('heading', { name: 'Interpretation', exact: true })).toHaveCount(
-    3,
-  );
+  await expect(accepted.locator('.return-position')).toHaveCount(3);
+  await expect(accepted.locator('.return-position h3')).toHaveText([
+    'situation',
+    'tension',
+    'possibility',
+  ]);
   const summary = accepted.locator('summary');
   await summary.focus();
   await page.keyboard.press('Enter');
+  await expect(accepted.getByRole('heading', { name: 'Drawn card', exact: true })).toHaveCount(3);
   await expect(
     accepted.getByRole('heading', { name: 'Traditional source material' }),
   ).toBeVisible();

@@ -315,5 +315,5 @@ test('an imported deletion reopens as the recorded unavailable edition without o
   await page.locator('.history-link').click();
   await expect(page.getByText(/The import records this edition as deleted/)).toBeVisible();
   await expect(page.locator('time[datetime="2026-10-28T12:34:00.000Z"]')).toBeVisible();
-  await expect(page.getByRole('link', { name: 'Follow up on this edition' })).toHaveCount(0);
+  await expect(page.getByRole('link', { name: 'Ask a follow-up' })).toHaveCount(0);
 });

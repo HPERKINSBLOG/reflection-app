@@ -33,7 +33,7 @@ test('journal filters and reopens immutable Pattern facts, writing and dated rev
   });
   await page.reload();
   await expect(page.getByTestId('pattern-reading')).toHaveText(original, { useInnerText: true });
-  await expect(page.getByRole('link', { name: 'Follow up on this edition' })).toHaveCount(0);
+  await expect(page.getByRole('link', { name: 'Ask a follow-up' })).toHaveCount(0);
   await page.getByRole('button', { name: 'Add revisit note', exact: true }).click();
   await page
     .getByLabel('Your revisit note', { exact: true })
