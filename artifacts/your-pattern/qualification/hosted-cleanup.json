@@ -1,0 +1,37 @@
+{
+  "generatedAt": "2026-11-05T16:49:03.236Z",
+  "removed": [
+    {
+      "path": "/accounts/a77e479f6736120eadd99973dbeb705e/workers/scripts/reflection-pattern-qualification-20261105",
+      "success": true
+    },
+    {
+      "path": "/accounts/a77e479f6736120eadd99973dbeb705e/d1/database/b4bd3bac-ea2d-46a4-8ae3-8b42855cc711",
+      "success": true
+    },
+    {
+      "path": "/accounts/a77e479f6736120eadd99973dbeb705e/storage/kv/namespaces/4e6fe9d3e4eb4e4081c3dcb1fc0d75a9",
+      "success": true
+    }
+  ],
+  "verification": {
+    "verifiedAt": "2026-11-05T16:49:23.521Z",
+    "checks": [
+      {
+        "path": "/accounts/a77e479f6736120eadd99973dbeb705e/workers/scripts/reflection-pattern-qualification-20261105/settings",
+        "absent": true,
+        "result": "Error: Cloudflare API error: GET /accounts/a77e479f6736120eadd99973dbeb705e/workers/scripts/reflection-pattern-qualification-20261105/settings returned HTTP 404 (Ray ID a55d59f32c50a1e5-MSP).\n\n{\n  \"result\": null,\n  \"success\": false,\n  \"errors\": [\n    {\n      \"code\": 10007,\n      \"message\": \"This Worker does not exist on your account.\"\n    }\n  ],\n  \"messages\": []\n}"
+      },
+      {
+        "path": "/accounts/a77e479f6736120eadd99973dbeb705e/d1/database/b4bd3bac-ea2d-46a4-8ae3-8b42855cc711",
+        "absent": true,
+        "result": "Error: Cloudflare API error: GET /accounts/a77e479f6736120eadd99973dbeb705e/d1/database/b4bd3bac-ea2d-46a4-8ae3-8b42855cc711 returned HTTP 404 (Ray ID a55d59f57e94a1e5-MSP).\n\n{\n  \"messages\": [],\n  \"result\": null,\n  \"success\": false,\n  \"errors\": [\n    {\n      \"code\": 7404,\n      \"message\": \"The database b4bd3bac-ea2d-46a4-8ae3-8b42855cc711 could not be found\"\n    }\n  ]\n}"
+      },
+      {
+        "path": "/accounts/a77e479f6736120eadd99973dbeb705e/storage/kv/namespaces/4e6fe9d3e4eb4e4081c3dcb1fc0d75a9",
+        "absent": true,
+        "result": "Error: Cloudflare API error: GET /accounts/a77e479f6736120eadd99973dbeb705e/storage/kv/namespaces/4e6fe9d3e4eb4e4081c3dcb1fc0d75a9 returned HTTP 404 (Ray ID a55d59f7e96fa1e5-MSP).\n\n{\n  \"result\": null,\n  \"errors\": [\n    {\n      \"code\": 10013,\n      \"message\": \"get namespace: 'namespace not found'\"\n    }\n  ],\n  \"messages\": [],\n  \"success\": false\n}"
+      }
+    ]
+  }
+}

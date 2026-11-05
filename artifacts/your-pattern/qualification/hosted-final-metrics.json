@@ -1,0 +1,401 @@
+{
+  "statistics": {
+    "elapsed": 0.247555231,
+    "rows_read": 3195941,
+    "bytes_read": 154698767,
+    "abr_level": 1
+  },
+  "count": 39,
+  "events": [
+    {
+      "timestamp": 1793897221671,
+      "requestId": "939c02e8956d86eef1be9648c1b578d1",
+      "outcome": "ok",
+      "cpuTimeMs": 137,
+      "wallTimeMs": 154,
+      "scriptVersion": "a5e7f5e8-657c-4c76-8eb8-f954082a4bda",
+      "status": 200,
+      "path": "/budget-sun"
+    },
+    {
+      "timestamp": 1793897221661,
+      "requestId": "ce2ade5c94e6d9f03776369168cbdb16",
+      "outcome": "ok",
+      "cpuTimeMs": 53,
+      "wallTimeMs": 154,
+      "scriptVersion": "a5e7f5e8-657c-4c76-8eb8-f954082a4bda",
+      "status": 200,
+      "path": "/budget-saturn"
+    },
+    {
+      "timestamp": 1793897221564,
+      "requestId": "ae6ef547553c8340e90ce0353d6da695",
+      "outcome": "ok",
+      "cpuTimeMs": 84,
+      "wallTimeMs": 96,
+      "scriptVersion": "a5e7f5e8-657c-4c76-8eb8-f954082a4bda",
+      "status": 200,
+      "path": "/budget-saturn"
+    },
+    {
+      "timestamp": 1793897221559,
+      "requestId": "c3ea64cf28847480fa2bf548389432aa",
+      "outcome": "ok",
+      "cpuTimeMs": 68,
+      "wallTimeMs": 78,
+      "scriptVersion": "a5e7f5e8-657c-4c76-8eb8-f954082a4bda",
+      "status": 200,
+      "path": "/budget-sun"
+    },
+    {
+      "timestamp": 1793897221523,
+      "requestId": "0bd18063c4a565e20bb07df3d88204e1",
+      "outcome": "ok",
+      "cpuTimeMs": 72,
+      "wallTimeMs": 86,
+      "scriptVersion": "a5e7f5e8-657c-4c76-8eb8-f954082a4bda",
+      "status": 200,
+      "path": "/budget-sun"
+    },
+    {
+      "timestamp": 1793897221509,
+      "requestId": "4552d3c3c3e595584012958089ce65dc",
+      "outcome": "ok",
+      "cpuTimeMs": 1140,
+      "wallTimeMs": 1264,
+      "scriptVersion": "a5e7f5e8-657c-4c76-8eb8-f954082a4bda",
+      "status": 200,
+      "path": "/places"
+    },
+    {
+      "timestamp": 1793897221509,
+      "requestId": "568f4388ef6ef422d93ff672e0592600",
+      "outcome": "ok",
+      "cpuTimeMs": 919,
+      "wallTimeMs": 992,
+      "scriptVersion": "a5e7f5e8-657c-4c76-8eb8-f954082a4bda",
+      "status": 200,
+      "path": "/places"
+    },
+    {
+      "timestamp": 1793897221493,
+      "requestId": "c2c5eb0c0d57e0ed95a9947239936ff5",
+      "outcome": "ok",
+      "cpuTimeMs": 32,
+      "wallTimeMs": 258,
+      "scriptVersion": "a5e7f5e8-657c-4c76-8eb8-f954082a4bda",
+      "status": 200,
+      "path": "/places"
+    },
+    {
+      "timestamp": 1793897221453,
+      "requestId": "43c46cbccef3177de265eca5d2162a35",
+      "outcome": "ok",
+      "cpuTimeMs": 36,
+      "wallTimeMs": 229,
+      "scriptVersion": "a5e7f5e8-657c-4c76-8eb8-f954082a4bda",
+      "status": 200,
+      "path": "/mixed"
+    },
+    {
+      "timestamp": 1793897221294,
+      "requestId": "d99641cb9e32014d85089f547989d94c",
+      "outcome": "ok",
+      "cpuTimeMs": 48,
+      "wallTimeMs": 52,
+      "scriptVersion": "a5e7f5e8-657c-4c76-8eb8-f954082a4bda",
+      "status": 200,
+      "path": "/budget-saturn"
+    },
+    {
+      "timestamp": 1793897221267,
+      "requestId": "2a2c39c596ffdb7046d14fc5248b37d0",
+      "outcome": "ok",
+      "cpuTimeMs": 45,
+      "wallTimeMs": 47,
+      "scriptVersion": "a5e7f5e8-657c-4c76-8eb8-f954082a4bda",
+      "status": 200,
+      "path": "/mixed"
+    },
+    {
+      "timestamp": 1793897221262,
+      "requestId": "64b62898977b4aed4cbfd548bb0c4877",
+      "outcome": "ok",
+      "cpuTimeMs": 178,
+      "wallTimeMs": 189,
+      "scriptVersion": "a5e7f5e8-657c-4c76-8eb8-f954082a4bda",
+      "status": 200,
+      "path": "/mixed"
+    },
+    {
+      "timestamp": 1793897221261,
+      "requestId": "7bd83d5a94652d0dbf74e7ee1e40c14c",
+      "outcome": "ok",
+      "cpuTimeMs": 12,
+      "wallTimeMs": 13,
+      "scriptVersion": "a5e7f5e8-657c-4c76-8eb8-f954082a4bda",
+      "status": 200,
+      "path": "/places"
+    },
+    {
+      "timestamp": 1793897221261,
+      "requestId": "6cefd348a488a93fbdfe7dd6119d9ca4",
+      "outcome": "ok",
+      "cpuTimeMs": 83,
+      "wallTimeMs": 93,
+      "scriptVersion": "a5e7f5e8-657c-4c76-8eb8-f954082a4bda",
+      "status": 200,
+      "path": "/budget-saturn"
+    },
+    {
+      "timestamp": 1793897221261,
+      "requestId": "254e5420aa7365bf7da05230c523db3d",
+      "outcome": "ok",
+      "cpuTimeMs": 42,
+      "wallTimeMs": 45,
+      "scriptVersion": "a5e7f5e8-657c-4c76-8eb8-f954082a4bda",
+      "status": 200,
+      "path": "/budget-sun"
+    },
+    {
+      "timestamp": 1793897221260,
+      "requestId": "2fe542c84093c31c42ea532d4ba3acb4",
+      "outcome": "ok",
+      "cpuTimeMs": 1129,
+      "wallTimeMs": 1211,
+      "scriptVersion": "a5e7f5e8-657c-4c76-8eb8-f954082a4bda",
+      "status": 200,
+      "path": "/mixed"
+    },
+    {
+      "timestamp": 1793897220137,
+      "requestId": "779052fc58c8068df65c61245b667fdb",
+      "outcome": "ok",
+      "cpuTimeMs": 145,
+      "wallTimeMs": 153,
+      "scriptVersion": "a5e7f5e8-657c-4c76-8eb8-f954082a4bda",
+      "status": 200,
+      "path": "/budget-saturn"
+    },
+    {
+      "timestamp": 1793897220028,
+      "requestId": "106ca72e76dcb7bef3c19baf926b0e2d",
+      "outcome": "ok",
+      "cpuTimeMs": 1081,
+      "wallTimeMs": 1278,
+      "scriptVersion": "a5e7f5e8-657c-4c76-8eb8-f954082a4bda",
+      "status": 200,
+      "path": "/places"
+    },
+    {
+      "timestamp": 1793897219953,
+      "requestId": "ba60f036fe0f4e949cb1b76678030e12",
+      "outcome": "ok",
+      "cpuTimeMs": 64,
+      "wallTimeMs": 75,
+      "scriptVersion": "a5e7f5e8-657c-4c76-8eb8-f954082a4bda",
+      "status": 200,
+      "path": "/budget-sun"
+    },
+    {
+      "timestamp": 1793897219938,
+      "requestId": "bc080b674ae7590664951077ff581061",
+      "outcome": "ok",
+      "cpuTimeMs": 81,
+      "wallTimeMs": 90,
+      "scriptVersion": "a5e7f5e8-657c-4c76-8eb8-f954082a4bda",
+      "status": 200,
+      "path": "/budget-saturn"
+    },
+    {
+      "timestamp": 1793897219927,
+      "requestId": "cf89186359500952018fb6c1a4eabe69",
+      "outcome": "ok",
+      "cpuTimeMs": 1202,
+      "wallTimeMs": 1302,
+      "scriptVersion": "a5e7f5e8-657c-4c76-8eb8-f954082a4bda",
+      "status": 200,
+      "path": "/mixed"
+    },
+    {
+      "timestamp": 1793897219719,
+      "requestId": "b11e571f81a1840dfa2522260280dc28",
+      "outcome": "ok",
+      "cpuTimeMs": 39,
+      "wallTimeMs": 42,
+      "scriptVersion": "a5e7f5e8-657c-4c76-8eb8-f954082a4bda",
+      "status": 200,
+      "path": "/mixed"
+    },
+    {
+      "timestamp": 1793897219682,
+      "requestId": "cdf51c431a0700e6c955ec10aaf2e3fb",
+      "outcome": "ok",
+      "cpuTimeMs": 21,
+      "wallTimeMs": 23,
+      "scriptVersion": "a5e7f5e8-657c-4c76-8eb8-f954082a4bda",
+      "status": 200,
+      "path": "/places"
+    },
+    {
+      "timestamp": 1793897219682,
+      "requestId": "907b36a813fc87c57851ccef268729c3",
+      "outcome": "ok",
+      "cpuTimeMs": 31,
+      "wallTimeMs": 34,
+      "scriptVersion": "a5e7f5e8-657c-4c76-8eb8-f954082a4bda",
+      "status": 200,
+      "path": "/budget-sun"
+    },
+    {
+      "timestamp": 1793897217903,
+      "requestId": "bf7bc6e4169ba8adeada4c57ac512404",
+      "outcome": "ok",
+      "cpuTimeMs": 1616,
+      "wallTimeMs": 1749,
+      "scriptVersion": "a5e7f5e8-657c-4c76-8eb8-f954082a4bda",
+      "status": 200,
+      "path": "/mixed"
+    },
+    {
+      "timestamp": 1793897217886,
+      "requestId": "d8c187d3822c2f3c7f3e03a858e94c7c",
+      "outcome": "ok",
+      "cpuTimeMs": 1062,
+      "wallTimeMs": 1214,
+      "scriptVersion": "a5e7f5e8-657c-4c76-8eb8-f954082a4bda",
+      "status": 200,
+      "path": "/places"
+    },
+    {
+      "timestamp": 1793897217774,
+      "requestId": "52eea0700366a4f9c424c82f59d6bbf0",
+      "outcome": "ok",
+      "cpuTimeMs": 74,
+      "wallTimeMs": 92,
+      "scriptVersion": "a5e7f5e8-657c-4c76-8eb8-f954082a4bda",
+      "status": 200,
+      "path": "/budget-sun"
+    },
+    {
+      "timestamp": 1793897217535,
+      "requestId": "a60568f9f2a9c8bd03b6b157f9a4a4fc",
+      "outcome": "ok",
+      "cpuTimeMs": 52,
+      "wallTimeMs": 58,
+      "scriptVersion": "a5e7f5e8-657c-4c76-8eb8-f954082a4bda",
+      "status": 200,
+      "path": "/budget-saturn"
+    },
+    {
+      "timestamp": 1793897217445,
+      "requestId": "1dcd15d76159ef0f4bab1ac07e0d1270",
+      "outcome": "ok",
+      "cpuTimeMs": 44,
+      "wallTimeMs": 52,
+      "scriptVersion": "a5e7f5e8-657c-4c76-8eb8-f954082a4bda",
+      "status": 200,
+      "path": "/mixed"
+    },
+    {
+      "timestamp": 1793897217306,
+      "requestId": "f92dc8f31d6038037b9744594aa3037d",
+      "outcome": "ok",
+      "cpuTimeMs": 59,
+      "wallTimeMs": 68,
+      "scriptVersion": "a5e7f5e8-657c-4c76-8eb8-f954082a4bda",
+      "status": 200,
+      "path": "/budget-saturn"
+    },
+    {
+      "timestamp": 1793897217211,
+      "requestId": "5fe89d1315afdbb4763658b134c86d59",
+      "outcome": "ok",
+      "cpuTimeMs": 50,
+      "wallTimeMs": 54,
+      "scriptVersion": "a5e7f5e8-657c-4c76-8eb8-f954082a4bda",
+      "status": 200,
+      "path": "/budget-jupiter"
+    },
+    {
+      "timestamp": 1793897217095,
+      "requestId": "d1ed8f46b706dc30b30c87f6c9ab8185",
+      "outcome": "ok",
+      "cpuTimeMs": 75,
+      "wallTimeMs": 79,
+      "scriptVersion": "a5e7f5e8-657c-4c76-8eb8-f954082a4bda",
+      "status": 200,
+      "path": "/budget-sun"
+    },
+    {
+      "timestamp": 1793897217058,
+      "requestId": "4269c075b97133331fc16e2a097f8b9d",
+      "outcome": "ok",
+      "cpuTimeMs": 11,
+      "wallTimeMs": 11,
+      "scriptVersion": "a5e7f5e8-657c-4c76-8eb8-f954082a4bda",
+      "status": 200,
+      "path": "/boundary"
+    },
+    {
+      "timestamp": 1793897216991,
+      "requestId": "71db24fef174a98356e53cada056e045",
+      "outcome": "ok",
+      "cpuTimeMs": 6,
+      "wallTimeMs": 7,
+      "scriptVersion": "a5e7f5e8-657c-4c76-8eb8-f954082a4bda",
+      "status": 200,
+      "path": "/fold"
+    },
+    {
+      "timestamp": 1793897216915,
+      "requestId": "5a8e7b8ebc74997278d9dcff6d2291af",
+      "outcome": "ok",
+      "cpuTimeMs": 14,
+      "wallTimeMs": 15,
+      "scriptVersion": "a5e7f5e8-657c-4c76-8eb8-f954082a4bda",
+      "status": 200,
+      "path": "/unknown"
+    },
+    {
+      "timestamp": 1793897216811,
+      "requestId": "f7433db189cca1762668213b83432b7f",
+      "outcome": "ok",
+      "cpuTimeMs": 48,
+      "wallTimeMs": 53,
+      "scriptVersion": "a5e7f5e8-657c-4c76-8eb8-f954082a4bda",
+      "status": 200,
+      "path": "/exact"
+    },
+    {
+      "timestamp": 1793897216753,
+      "requestId": "a73d24bfd84458898a7cf4a6f7aacac0",
+      "outcome": "ok",
+      "cpuTimeMs": 27,
+      "wallTimeMs": 35,
+      "scriptVersion": "a5e7f5e8-657c-4c76-8eb8-f954082a4bda",
+      "status": 200,
+      "path": "/places"
+    },
+    {
+      "timestamp": 1793897215506,
+      "requestId": "2788c5d3eeb60317ebc85222ec51a340",
+      "outcome": "ok",
+      "cpuTimeMs": 1078,
+      "wallTimeMs": 1192,
+      "scriptVersion": "a5e7f5e8-657c-4c76-8eb8-f954082a4bda",
+      "status": 200,
+      "path": "/places"
+    },
+    {
+      "timestamp": 1793897215446,
+      "requestId": "5c733d81b54d2084a2f0580e5af0282d",
+      "outcome": "ok",
+      "cpuTimeMs": 0,
+      "wallTimeMs": 1,
+      "scriptVersion": "a5e7f5e8-657c-4c76-8eb8-f954082a4bda",
+      "status": 404,
+      "path": "/places"
+    }
+  ]
+}
