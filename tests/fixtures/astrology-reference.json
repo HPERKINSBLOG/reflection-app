@@ -1,0 +1,2257 @@
+{
+  "reference": "Swiss Ephemeris 2.10.03, explicit Moshier mode; not external Swiss ephemeris files or JPL Horizons",
+  "convention": "geocentric apparent true ecliptic of date",
+  "toleranceDeg": 0.05,
+  "samples": [
+    {
+      "instant": "1900-06-15T12:00:00.000Z",
+      "body": "sun",
+      "longitudeDeg": 83.89079957663203
+    },
+    {
+      "instant": "1900-06-15T12:00:00.000Z",
+      "body": "moon",
+      "longitudeDeg": 293.7948979854682
+    },
+    {
+      "instant": "1900-06-15T12:00:00.000Z",
+      "body": "mercury",
+      "longitudeDeg": 101.63304932847008
+    },
+    {
+      "instant": "1900-06-15T12:00:00.000Z",
+      "body": "venus",
+      "longitudeDeg": 113.96146547771436
+    },
+    {
+      "instant": "1900-06-15T12:00:00.000Z",
+      "body": "mars",
+      "longitudeDeg": 51.47034021812536
+    },
+    {
+      "instant": "1900-06-15T12:00:00.000Z",
+      "body": "jupiter",
+      "longitudeDeg": 243.71214873682084
+    },
+    {
+      "instant": "1900-06-15T12:00:00.000Z",
+      "body": "saturn",
+      "longitudeDeg": 272.3493400905072
+    },
+    {
+      "instant": "1900-06-15T12:00:00.000Z",
+      "body": "uranus",
+      "longitudeDeg": 249.91382455324077
+    },
+    {
+      "instant": "1900-06-15T12:00:00.000Z",
+      "body": "neptune",
+      "longitudeDeg": 86.60788272552014
+    },
+    {
+      "instant": "1900-06-15T12:00:00.000Z",
+      "body": "pluto",
+      "longitudeDeg": 76.36510561526676
+    },
+    {
+      "instant": "1905-06-15T12:00:00.000Z",
+      "body": "sun",
+      "longitudeDeg": 83.68504276324015
+    },
+    {
+      "instant": "1905-06-15T12:00:00.000Z",
+      "body": "moon",
+      "longitudeDeg": 240.31266373898038
+    },
+    {
+      "instant": "1905-06-15T12:00:00.000Z",
+      "body": "mercury",
+      "longitudeDeg": 73.03243639977133
+    },
+    {
+      "instant": "1905-06-15T12:00:00.000Z",
+      "body": "venus",
+      "longitudeDeg": 40.081588068860384
+    },
+    {
+      "instant": "1905-06-15T12:00:00.000Z",
+      "body": "mars",
+      "longitudeDeg": 218.34774912991946
+    },
+    {
+      "instant": "1905-06-15T12:00:00.000Z",
+      "body": "jupiter",
+      "longitudeDeg": 52.90169189315468
+    },
+    {
+      "instant": "1905-06-15T12:00:00.000Z",
+      "body": "saturn",
+      "longitudeDeg": 332.89342996424944
+    },
+    {
+      "instant": "1905-06-15T12:00:00.000Z",
+      "body": "uranus",
+      "longitudeDeg": 272.61213865855905
+    },
+    {
+      "instant": "1905-06-15T12:00:00.000Z",
+      "body": "neptune",
+      "longitudeDeg": 97.33539667469053
+    },
+    {
+      "instant": "1905-06-15T12:00:00.000Z",
+      "body": "pluto",
+      "longitudeDeg": 81.2616090201348
+    },
+    {
+      "instant": "1910-06-15T12:00:00.000Z",
+      "body": "sun",
+      "longitudeDeg": 83.4872586497034
+    },
+    {
+      "instant": "1910-06-15T12:00:00.000Z",
+      "body": "moon",
+      "longitudeDeg": 182.6725195379949
+    },
+    {
+      "instant": "1910-06-15T12:00:00.000Z",
+      "body": "mercury",
+      "longitudeDeg": 61.735604339051264
+    },
+    {
+      "instant": "1910-06-15T12:00:00.000Z",
+      "body": "venus",
+      "longitudeDeg": 43.47975083569656
+    },
+    {
+      "instant": "1910-06-15T12:00:00.000Z",
+      "body": "mars",
+      "longitudeDeg": 117.7294971058079
+    },
+    {
+      "instant": "1910-06-15T12:00:00.000Z",
+      "body": "jupiter",
+      "longitudeDeg": 184.89137650131354
+    },
+    {
+      "instant": "1910-06-15T12:00:00.000Z",
+      "body": "saturn",
+      "longitudeDeg": 33.17910202716264
+    },
+    {
+      "instant": "1910-06-15T12:00:00.000Z",
+      "body": "uranus",
+      "longitudeDeg": 294.4160595655644
+    },
+    {
+      "instant": "1910-06-15T12:00:00.000Z",
+      "body": "neptune",
+      "longitudeDeg": 108.08461455825926
+    },
+    {
+      "instant": "1910-06-15T12:00:00.000Z",
+      "body": "pluto",
+      "longitudeDeg": 86.30927326729852
+    },
+    {
+      "instant": "1915-06-15T12:00:00.000Z",
+      "body": "sun",
+      "longitudeDeg": 83.29922569459814
+    },
+    {
+      "instant": "1915-06-15T12:00:00.000Z",
+      "body": "moon",
+      "longitudeDeg": 113.2887690274185
+    },
+    {
+      "instant": "1915-06-15T12:00:00.000Z",
+      "body": "mercury",
+      "longitudeDeg": 99.2910377384435
+    },
+    {
+      "instant": "1915-06-15T12:00:00.000Z",
+      "body": "venus",
+      "longitudeDeg": 59.377486436904505
+    },
+    {
+      "instant": "1915-06-15T12:00:00.000Z",
+      "body": "mars",
+      "longitudeDeg": 45.071135358394095
+    },
+    {
+      "instant": "1915-06-15T12:00:00.000Z",
+      "body": "jupiter",
+      "longitudeDeg": 356.70606466371737
+    },
+    {
+      "instant": "1915-06-15T12:00:00.000Z",
+      "body": "saturn",
+      "longitudeDeg": 94.19740577832091
+    },
+    {
+      "instant": "1915-06-15T12:00:00.000Z",
+      "body": "uranus",
+      "longitudeDeg": 315.4218358805361
+    },
+    {
+      "instant": "1915-06-15T12:00:00.000Z",
+      "body": "neptune",
+      "longitudeDeg": 118.81077158107293
+    },
+    {
+      "instant": "1915-06-15T12:00:00.000Z",
+      "body": "pluto",
+      "longitudeDeg": 91.50756790781713
+    },
+    {
+      "instant": "1920-06-15T12:00:00.000Z",
+      "body": "sun",
+      "longitudeDeg": 84.04654727501631
+    },
+    {
+      "instant": "1920-06-15T12:00:00.000Z",
+      "body": "moon",
+      "longitudeDeg": 68.8040596912247
+    },
+    {
+      "instant": "1920-06-15T12:00:00.000Z",
+      "body": "mercury",
+      "longitudeDeg": 104.92691581752945
+    },
+    {
+      "instant": "1920-06-15T12:00:00.000Z",
+      "body": "venus",
+      "longitudeDeg": 79.00760691030754
+    },
+    {
+      "instant": "1920-06-15T12:00:00.000Z",
+      "body": "mars",
+      "longitudeDeg": 202.56095513547592
+    },
+    {
+      "instant": "1920-06-15T12:00:00.000Z",
+      "body": "jupiter",
+      "longitudeDeg": 135.1565140056938
+    },
+    {
+      "instant": "1920-06-15T12:00:00.000Z",
+      "body": "saturn",
+      "longitudeDeg": 156.13306959364996
+    },
+    {
+      "instant": "1920-06-15T12:00:00.000Z",
+      "body": "uranus",
+      "longitudeDeg": 335.6633291975051
+    },
+    {
+      "instant": "1920-06-15T12:00:00.000Z",
+      "body": "neptune",
+      "longitudeDeg": 129.59033840930212
+    },
+    {
+      "instant": "1920-06-15T12:00:00.000Z",
+      "body": "pluto",
+      "longitudeDeg": 96.94109162963701
+    },
+    {
+      "instant": "1925-06-15T12:00:00.000Z",
+      "body": "sun",
+      "longitudeDeg": 83.84111927890508
+    },
+    {
+      "instant": "1925-06-15T12:00:00.000Z",
+      "body": "moon",
+      "longitudeDeg": 18.082468867024318
+    },
+    {
+      "instant": "1925-06-15T12:00:00.000Z",
+      "body": "mercury",
+      "longitudeDeg": 78.0532474534781
+    },
+    {
+      "instant": "1925-06-15T12:00:00.000Z",
+      "body": "venus",
+      "longitudeDeg": 97.85072346106612
+    },
+    {
+      "instant": "1925-06-15T12:00:00.000Z",
+      "body": "mars",
+      "longitudeDeg": 113.13541716685278
+    },
+    {
+      "instant": "1925-06-15T12:00:00.000Z",
+      "body": "jupiter",
+      "longitudeDeg": 290.5918023312326
+    },
+    {
+      "instant": "1925-06-15T12:00:00.000Z",
+      "body": "saturn",
+      "longitudeDeg": 218.1781582143976
+    },
+    {
+      "instant": "1925-06-15T12:00:00.000Z",
+      "body": "uranus",
+      "longitudeDeg": 355.3797615579959
+    },
+    {
+      "instant": "1925-06-15T12:00:00.000Z",
+      "body": "neptune",
+      "longitudeDeg": 140.33912543666514
+    },
+    {
+      "instant": "1925-06-15T12:00:00.000Z",
+      "body": "pluto",
+      "longitudeDeg": 102.56136155699036
+    },
+    {
+      "instant": "1930-06-15T12:00:00.000Z",
+      "body": "sun",
+      "longitudeDeg": 83.64151660156128
+    },
+    {
+      "instant": "1930-06-15T12:00:00.000Z",
+      "body": "moon",
+      "longitudeDeg": 311.1118125372656
+    },
+    {
+      "instant": "1930-06-15T12:00:00.000Z",
+      "body": "mercury",
+      "longitudeDeg": 60.62235557532939
+    },
+    {
+      "instant": "1930-06-15T12:00:00.000Z",
+      "body": "venus",
+      "longitudeDeg": 115.5998654674129
+    },
+    {
+      "instant": "1930-06-15T12:00:00.000Z",
+      "body": "mars",
+      "longitudeDeg": 39.15103549724138
+    },
+    {
+      "instant": "1930-06-15T12:00:00.000Z",
+      "body": "jupiter",
+      "longitudeDeg": 87.37500891071484
+    },
+    {
+      "instant": "1930-06-15T12:00:00.000Z",
+      "body": "saturn",
+      "longitudeDeg": 279.70953519696684
+    },
+    {
+      "instant": "1930-06-15T12:00:00.000Z",
+      "body": "uranus",
+      "longitudeDeg": 14.855751195775838
+    },
+    {
+      "instant": "1930-06-15T12:00:00.000Z",
+      "body": "neptune",
+      "longitudeDeg": 151.1018156866719
+    },
+    {
+      "instant": "1930-06-15T12:00:00.000Z",
+      "body": "pluto",
+      "longitudeDeg": 108.47541307987115
+    },
+    {
+      "instant": "1935-06-15T12:00:00.000Z",
+      "body": "sun",
+      "longitudeDeg": 83.45458835117785
+    },
+    {
+      "instant": "1935-06-15T12:00:00.000Z",
+      "body": "moon",
+      "longitudeDeg": 246.2055248872558
+    },
+    {
+      "instant": "1935-06-15T12:00:00.000Z",
+      "body": "mercury",
+      "longitudeDeg": 92.70528136532573
+    },
+    {
+      "instant": "1935-06-15T12:00:00.000Z",
+      "body": "venus",
+      "longitudeDeg": 128.15846657158508
+    },
+    {
+      "instant": "1935-06-15T12:00:00.000Z",
+      "body": "mars",
+      "longitudeDeg": 190.675259104904
+    },
+    {
+      "instant": "1935-06-15T12:00:00.000Z",
+      "body": "jupiter",
+      "longitudeDeg": 224.4371998772312
+    },
+    {
+      "instant": "1935-06-15T12:00:00.000Z",
+      "body": "saturn",
+      "longitudeDeg": 340.1926900335244
+    },
+    {
+      "instant": "1935-06-15T12:00:00.000Z",
+      "body": "uranus",
+      "longitudeDeg": 34.243343946751544
+    },
+    {
+      "instant": "1935-06-15T12:00:00.000Z",
+      "body": "neptune",
+      "longitudeDeg": 161.93061488926338
+    },
+    {
+      "instant": "1935-06-15T12:00:00.000Z",
+      "body": "pluto",
+      "longitudeDeg": 114.74518355089985
+    },
+    {
+      "instant": "1940-06-15T12:00:00.000Z",
+      "body": "sun",
+      "longitudeDeg": 84.21161740369608
+    },
+    {
+      "instant": "1940-06-15T12:00:00.000Z",
+      "body": "moon",
+      "longitudeDeg": 206.1466456964998
+    },
+    {
+      "instant": "1940-06-15T12:00:00.000Z",
+      "body": "mercury",
+      "longitudeDeg": 107.3705626698788
+    },
+    {
+      "instant": "1940-06-15T12:00:00.000Z",
+      "body": "venus",
+      "longitudeDeg": 101.2887472059442
+    },
+    {
+      "instant": "1940-06-15T12:00:00.000Z",
+      "body": "mars",
+      "longitudeDeg": 108.56210440646068
+    },
+    {
+      "instant": "1940-06-15T12:00:00.000Z",
+      "body": "jupiter",
+      "longitudeDeg": 36.48689343731757
+    },
+    {
+      "instant": "1940-06-15T12:00:00.000Z",
+      "body": "saturn",
+      "longitudeDeg": 40.57801558362341
+    },
+    {
+      "instant": "1940-06-15T12:00:00.000Z",
+      "body": "uranus",
+      "longitudeDeg": 53.876279249385156
+    },
+    {
+      "instant": "1940-06-15T12:00:00.000Z",
+      "body": "neptune",
+      "longitudeDeg": 172.76501603301
+    },
+    {
+      "instant": "1940-06-15T12:00:00.000Z",
+      "body": "pluto",
+      "longitudeDeg": 121.41457925481323
+    },
+    {
+      "instant": "1945-06-15T12:00:00.000Z",
+      "body": "sun",
+      "longitudeDeg": 84.00053649808315
+    },
+    {
+      "instant": "1945-06-15T12:00:00.000Z",
+      "body": "moon",
+      "longitudeDeg": 150.45913957817362
+    },
+    {
+      "instant": "1945-06-15T12:00:00.000Z",
+      "body": "mercury",
+      "longitudeDeg": 83.38144202975316
+    },
+    {
+      "instant": "1945-06-15T12:00:00.000Z",
+      "body": "venus",
+      "longitudeDeg": 38.655346808473894
+    },
+    {
+      "instant": "1945-06-15T12:00:00.000Z",
+      "body": "mars",
+      "longitudeDeg": 32.958794032526626
+    },
+    {
+      "instant": "1945-06-15T12:00:00.000Z",
+      "body": "jupiter",
+      "longitudeDeg": 168.99115258299784
+    },
+    {
+      "instant": "1945-06-15T12:00:00.000Z",
+      "body": "saturn",
+      "longitudeDeg": 101.63015254441304
+    },
+    {
+      "instant": "1945-06-15T12:00:00.000Z",
+      "body": "uranus",
+      "longitudeDeg": 73.89219830433763
+    },
+    {
+      "instant": "1945-06-15T12:00:00.000Z",
+      "body": "neptune",
+      "longitudeDeg": 183.65203322100948
+    },
+    {
+      "instant": "1945-06-15T12:00:00.000Z",
+      "body": "pluto",
+      "longitudeDeg": 128.5688249891921
+    },
+    {
+      "instant": "1950-06-15T12:00:00.000Z",
+      "body": "sun",
+      "longitudeDeg": 83.80981382267406
+    },
+    {
+      "instant": "1950-06-15T12:00:00.000Z",
+      "body": "moon",
+      "longitudeDeg": 81.99923711349224
+    },
+    {
+      "instant": "1950-06-15T12:00:00.000Z",
+      "body": "mercury",
+      "longitudeDeg": 61.096976866606646
+    },
+    {
+      "instant": "1950-06-15T12:00:00.000Z",
+      "body": "venus",
+      "longitudeDeg": 46.04092333363621
+    },
+    {
+      "instant": "1950-06-15T12:00:00.000Z",
+      "body": "mars",
+      "longitudeDeg": 181.37388785535828
+    },
+    {
+      "instant": "1950-06-15T12:00:00.000Z",
+      "body": "jupiter",
+      "longitudeDeg": 337.2401510918584
+    },
+    {
+      "instant": "1950-06-15T12:00:00.000Z",
+      "body": "saturn",
+      "longitudeDeg": 163.40338127508718
+    },
+    {
+      "instant": "1950-06-15T12:00:00.000Z",
+      "body": "uranus",
+      "longitudeDeg": 94.47868350229537
+    },
+    {
+      "instant": "1950-06-15T12:00:00.000Z",
+      "body": "neptune",
+      "longitudeDeg": 194.60743401175733
+    },
+    {
+      "instant": "1950-06-15T12:00:00.000Z",
+      "body": "pluto",
+      "longitudeDeg": 136.28441359351348
+    },
+    {
+      "instant": "1955-06-15T12:00:00.000Z",
+      "body": "sun",
+      "longitudeDeg": 83.6131811272722
+    },
+    {
+      "instant": "1955-06-15T12:00:00.000Z",
+      "body": "moon",
+      "longitudeDeg": 18.799494142822446
+    },
+    {
+      "instant": "1955-06-15T12:00:00.000Z",
+      "body": "mercury",
+      "longitudeDeg": 84.78208103239072
+    },
+    {
+      "instant": "1955-06-15T12:00:00.000Z",
+      "body": "venus",
+      "longitudeDeg": 62.59790517081001
+    },
+    {
+      "instant": "1955-06-15T12:00:00.000Z",
+      "body": "mars",
+      "longitudeDeg": 103.32676865721558
+    },
+    {
+      "instant": "1955-06-15T12:00:00.000Z",
+      "body": "jupiter",
+      "longitudeDeg": 120.48866864891421
+    },
+    {
+      "instant": "1955-06-15T12:00:00.000Z",
+      "body": "saturn",
+      "longitudeDeg": 225.39181218880364
+    },
+    {
+      "instant": "1955-06-15T12:00:00.000Z",
+      "body": "uranus",
+      "longitudeDeg": 115.85868223710371
+    },
+    {
+      "instant": "1955-06-15T12:00:00.000Z",
+      "body": "neptune",
+      "longitudeDeg": 205.594447519222
+    },
+    {
+      "instant": "1955-06-15T12:00:00.000Z",
+      "body": "pluto",
+      "longitudeDeg": 144.6700961637434
+    },
+    {
+      "instant": "1960-06-15T12:00:00.000Z",
+      "body": "sun",
+      "longitudeDeg": 84.36388774320828
+    },
+    {
+      "instant": "1960-06-15T12:00:00.000Z",
+      "body": "moon",
+      "longitudeDeg": 345.8231525482627
+    },
+    {
+      "instant": "1960-06-15T12:00:00.000Z",
+      "body": "mercury",
+      "longitudeDeg": 108.78180774283572
+    },
+    {
+      "instant": "1960-06-15T12:00:00.000Z",
+      "body": "venus",
+      "longitudeDeg": 82.39642882765801
+    },
+    {
+      "instant": "1960-06-15T12:00:00.000Z",
+      "body": "mars",
+      "longitudeDeg": 26.42280932486438
+    },
+    {
+      "instant": "1960-06-15T12:00:00.000Z",
+      "body": "jupiter",
+      "longitudeDeg": 269.3217544909543
+    },
+    {
+      "instant": "1960-06-15T12:00:00.000Z",
+      "body": "saturn",
+      "longitudeDeg": 286.66817205154246
+    },
+    {
+      "instant": "1960-06-15T12:00:00.000Z",
+      "body": "uranus",
+      "longitudeDeg": 138.096534750915
+    },
+    {
+      "instant": "1960-06-15T12:00:00.000Z",
+      "body": "neptune",
+      "longitudeDeg": 216.63969108304337
+    },
+    {
+      "instant": "1960-06-15T12:00:00.000Z",
+      "body": "pluto",
+      "longitudeDeg": 153.83204011760864
+    },
+    {
+      "instant": "1965-06-15T12:00:00.000Z",
+      "body": "sun",
+      "longitudeDeg": 84.15755924901104
+    },
+    {
+      "instant": "1965-06-15T12:00:00.000Z",
+      "body": "moon",
+      "longitudeDeg": 279.7970263511796
+    },
+    {
+      "instant": "1965-06-15T12:00:00.000Z",
+      "body": "mercury",
+      "longitudeDeg": 88.73256043798841
+    },
+    {
+      "instant": "1965-06-15T12:00:00.000Z",
+      "body": "venus",
+      "longitudeDeg": 101.1828600554016
+    },
+    {
+      "instant": "1965-06-15T12:00:00.000Z",
+      "body": "mars",
+      "longitudeDeg": 173.58345028976873
+    },
+    {
+      "instant": "1965-06-15T12:00:00.000Z",
+      "body": "jupiter",
+      "longitudeDeg": 72.4255076847851
+    },
+    {
+      "instant": "1965-06-15T12:00:00.000Z",
+      "body": "saturn",
+      "longitudeDeg": 347.08648381168626
+    },
+    {
+      "instant": "1965-06-15T12:00:00.000Z",
+      "body": "uranus",
+      "longitudeDeg": 161.03859899666062
+    },
+    {
+      "instant": "1965-06-15T12:00:00.000Z",
+      "body": "neptune",
+      "longitudeDeg": 227.7183194962206
+    },
+    {
+      "instant": "1965-06-15T12:00:00.000Z",
+      "body": "pluto",
+      "longitudeDeg": 163.7974150610805
+    },
+    {
+      "instant": "1970-06-15T12:00:00.000Z",
+      "body": "sun",
+      "longitudeDeg": 83.96801578173364
+    },
+    {
+      "instant": "1970-06-15T12:00:00.000Z",
+      "body": "moon",
+      "longitudeDeg": 212.15054138318123
+    },
+    {
+      "instant": "1970-06-15T12:00:00.000Z",
+      "body": "mercury",
+      "longitudeDeg": 62.85325267688926
+    },
+    {
+      "instant": "1970-06-15T12:00:00.000Z",
+      "body": "venus",
+      "longitudeDeg": 118.53226134041297
+    },
+    {
+      "instant": "1970-06-15T12:00:00.000Z",
+      "body": "mars",
+      "longitudeDeg": 98.70738310993225
+    },
+    {
+      "instant": "1970-06-15T12:00:00.000Z",
+      "body": "jupiter",
+      "longitudeDeg": 206.1640378152114
+    },
+    {
+      "instant": "1970-06-15T12:00:00.000Z",
+      "body": "saturn",
+      "longitudeDeg": 47.4772701110355
+    },
+    {
+      "instant": "1970-06-15T12:00:00.000Z",
+      "body": "uranus",
+      "longitudeDeg": 184.65995072858345
+    },
+    {
+      "instant": "1970-06-15T12:00:00.000Z",
+      "body": "neptune",
+      "longitudeDeg": 238.86077805454212
+    },
+    {
+      "instant": "1970-06-15T12:00:00.000Z",
+      "body": "pluto",
+      "longitudeDeg": 174.70657332618893
+    },
+    {
+      "instant": "1975-06-15T12:00:00.000Z",
+      "body": "sun",
+      "longitudeDeg": 83.77859199842014
+    },
+    {
+      "instant": "1975-06-15T12:00:00.000Z",
+      "body": "moon",
+      "longitudeDeg": 158.8334512062444
+    },
+    {
+      "instant": "1975-06-15T12:00:00.000Z",
+      "body": "mercury",
+      "longitudeDeg": 76.76800245217456
+    },
+    {
+      "instant": "1975-06-15T12:00:00.000Z",
+      "body": "venus",
+      "longitudeDeg": 129.10305896015078
+    },
+    {
+      "instant": "1975-06-15T12:00:00.000Z",
+      "body": "mars",
+      "longitudeDeg": 18.686822395490033
+    },
+    {
+      "instant": "1975-06-15T12:00:00.000Z",
+      "body": "jupiter",
+      "longitudeDeg": 19.30643628278731
+    },
+    {
+      "instant": "1975-06-15T12:00:00.000Z",
+      "body": "saturn",
+      "longitudeDeg": 108.67318823614208
+    },
+    {
+      "instant": "1975-06-15T12:00:00.000Z",
+      "body": "uranus",
+      "longitudeDeg": 208.55870853356998
+    },
+    {
+      "instant": "1975-06-15T12:00:00.000Z",
+      "body": "neptune",
+      "longitudeDeg": 250.0512210336924
+    },
+    {
+      "instant": "1975-06-15T12:00:00.000Z",
+      "body": "pluto",
+      "longitudeDeg": 186.4819653505515
+    },
+    {
+      "instant": "1980-06-15T12:00:00.000Z",
+      "body": "sun",
+      "longitudeDeg": 84.51941467859119
+    },
+    {
+      "instant": "1980-06-15T12:00:00.000Z",
+      "body": "moon",
+      "longitudeDeg": 117.64063923644886
+    },
+    {
+      "instant": "1980-06-15T12:00:00.000Z",
+      "body": "mercury",
+      "longitudeDeg": 108.96193865978655
+    },
+    {
+      "instant": "1980-06-15T12:00:00.000Z",
+      "body": "venus",
+      "longitudeDeg": 84.21949186090309
+    },
+    {
+      "instant": "1980-06-15T12:00:00.000Z",
+      "body": "mars",
+      "longitudeDeg": 166.76501711559786
+    },
+    {
+      "instant": "1980-06-15T12:00:00.000Z",
+      "body": "jupiter",
+      "longitudeDeg": 153.77914555253963
+    },
+    {
+      "instant": "1980-06-15T12:00:00.000Z",
+      "body": "saturn",
+      "longitudeDeg": 170.68233906651705
+    },
+    {
+      "instant": "1980-06-15T12:00:00.000Z",
+      "body": "uranus",
+      "longitudeDeg": 232.30181486726082
+    },
+    {
+      "instant": "1980-06-15T12:00:00.000Z",
+      "body": "neptune",
+      "longitudeDeg": 261.21044501492867
+    },
+    {
+      "instant": "1980-06-15T12:00:00.000Z",
+      "body": "pluto",
+      "longitudeDeg": 199.01786440888836
+    },
+    {
+      "instant": "1985-06-15T12:00:00.000Z",
+      "body": "sun",
+      "longitudeDeg": 84.32071342248125
+    },
+    {
+      "instant": "1985-06-15T12:00:00.000Z",
+      "body": "moon",
+      "longitudeDeg": 50.63452851448178
+    },
+    {
+      "instant": "1985-06-15T12:00:00.000Z",
+      "body": "mercury",
+      "longitudeDeg": 93.83649665899439
+    },
+    {
+      "instant": "1985-06-15T12:00:00.000Z",
+      "body": "venus",
+      "longitudeDeg": 38.60068645449105
+    },
+    {
+      "instant": "1985-06-15T12:00:00.000Z",
+      "body": "mars",
+      "longitudeDeg": 94.03036825573292
+    },
+    {
+      "instant": "1985-06-15T12:00:00.000Z",
+      "body": "jupiter",
+      "longitudeDeg": 316.78577343173447
+    },
+    {
+      "instant": "1985-06-15T12:00:00.000Z",
+      "body": "saturn",
+      "longitudeDeg": 232.7078441271224
+    },
+    {
+      "instant": "1985-06-15T12:00:00.000Z",
+      "body": "uranus",
+      "longitudeDeg": 255.63311886492644
+    },
+    {
+      "instant": "1985-06-15T12:00:00.000Z",
+      "body": "neptune",
+      "longitudeDeg": 272.46316617870036
+    },
+    {
+      "instant": "1985-06-15T12:00:00.000Z",
+      "body": "pluto",
+      "longitudeDeg": 212.1212233403698
+    },
+    {
+      "instant": "1990-06-15T12:00:00.000Z",
+      "body": "sun",
+      "longitudeDeg": 84.12956685673697
+    },
+    {
+      "instant": "1990-06-15T12:00:00.000Z",
+      "body": "moon",
+      "longitudeDeg": 345.35793997376055
+    },
+    {
+      "instant": "1990-06-15T12:00:00.000Z",
+      "body": "mercury",
+      "longitudeDeg": 65.69070646946744
+    },
+    {
+      "instant": "1990-06-15T12:00:00.000Z",
+      "body": "venus",
+      "longitudeDeg": 48.777612211248105
+    },
+    {
+      "instant": "1990-06-15T12:00:00.000Z",
+      "body": "mars",
+      "longitudeDeg": 11.041312794175441
+    },
+    {
+      "instant": "1990-06-15T12:00:00.000Z",
+      "body": "jupiter",
+      "longitudeDeg": 105.88943731764725
+    },
+    {
+      "instant": "1990-06-15T12:00:00.000Z",
+      "body": "saturn",
+      "longitudeDeg": 294.03196247542286
+    },
+    {
+      "instant": "1990-06-15T12:00:00.000Z",
+      "body": "uranus",
+      "longitudeDeg": 278.1652400240266
+    },
+    {
+      "instant": "1990-06-15T12:00:00.000Z",
+      "body": "neptune",
+      "longitudeDeg": 283.7170973586039
+    },
+    {
+      "instant": "1990-06-15T12:00:00.000Z",
+      "body": "pluto",
+      "longitudeDeg": 225.4015508057338
+    },
+    {
+      "instant": "1995-06-15T12:00:00.000Z",
+      "body": "sun",
+      "longitudeDeg": 83.93221613760944
+    },
+    {
+      "instant": "1995-06-15T12:00:00.000Z",
+      "body": "moon",
+      "longitudeDeg": 296.9994750953342
+    },
+    {
+      "instant": "1995-06-15T12:00:00.000Z",
+      "body": "mercury",
+      "longitudeDeg": 69.93143846185478
+    },
+    {
+      "instant": "1995-06-15T12:00:00.000Z",
+      "body": "venus",
+      "longitudeDeg": 65.86633244183473
+    },
+    {
+      "instant": "1995-06-15T12:00:00.000Z",
+      "body": "mars",
+      "longitudeDeg": 160.1000911339501
+    },
+    {
+      "instant": "1995-06-15T12:00:00.000Z",
+      "body": "jupiter",
+      "longitudeDeg": 248.76734035480217
+    },
+    {
+      "instant": "1995-06-15T12:00:00.000Z",
+      "body": "saturn",
+      "longitudeDeg": 354.3900418347172
+    },
+    {
+      "instant": "1995-06-15T12:00:00.000Z",
+      "body": "uranus",
+      "longitudeDeg": 299.82053443967277
+    },
+    {
+      "instant": "1995-06-15T12:00:00.000Z",
+      "body": "neptune",
+      "longitudeDeg": 294.9667565119877
+    },
+    {
+      "instant": "1995-06-15T12:00:00.000Z",
+      "body": "pluto",
+      "longitudeDeg": 238.54473222249325
+    },
+    {
+      "instant": "2000-06-15T12:00:00.000Z",
+      "body": "sun",
+      "longitudeDeg": 84.68007940490105
+    },
+    {
+      "instant": "2000-06-15T12:00:00.000Z",
+      "body": "moon",
+      "longitudeDeg": 248.90428846013333
+    },
+    {
+      "instant": "2000-06-15T12:00:00.000Z",
+      "body": "mercury",
+      "longitudeDeg": 107.63950313076853
+    },
+    {
+      "instant": "2000-06-15T12:00:00.000Z",
+      "body": "venus",
+      "longitudeDeg": 85.7902727022653
+    },
+    {
+      "instant": "2000-06-15T12:00:00.000Z",
+      "body": "mars",
+      "longitudeDeg": 89.3146017315916
+    },
+    {
+      "instant": "2000-06-15T12:00:00.000Z",
+      "body": "jupiter",
+      "longitudeDeg": 56.79670511061766
+    },
+    {
+      "instant": "2000-06-15T12:00:00.000Z",
+      "body": "saturn",
+      "longitudeDeg": 54.902736670268084
+    },
+    {
+      "instant": "2000-06-15T12:00:00.000Z",
+      "body": "uranus",
+      "longitudeDeg": 320.645844592503
+    },
+    {
+      "instant": "2000-06-15T12:00:00.000Z",
+      "body": "neptune",
+      "longitudeDeg": 306.2038657797046
+    },
+    {
+      "instant": "2000-06-15T12:00:00.000Z",
+      "body": "pluto",
+      "longitudeDeg": 251.17234103691328
+    },
+    {
+      "instant": "2005-06-15T12:00:00.000Z",
+      "body": "sun",
+      "longitudeDeg": 84.48186998460785
+    },
+    {
+      "instant": "2005-06-15T12:00:00.000Z",
+      "body": "moon",
+      "longitudeDeg": 179.4966048516612
+    },
+    {
+      "instant": "2005-06-15T12:00:00.000Z",
+      "body": "mercury",
+      "longitudeDeg": 98.47523647394213
+    },
+    {
+      "instant": "2005-06-15T12:00:00.000Z",
+      "body": "venus",
+      "longitudeDeg": 104.48836651701237
+    },
+    {
+      "instant": "2005-06-15T12:00:00.000Z",
+      "body": "mars",
+      "longitudeDeg": 2.3569096297147056
+    },
+    {
+      "instant": "2005-06-15T12:00:00.000Z",
+      "body": "jupiter",
+      "longitudeDeg": 189.0864461792592
+    },
+    {
+      "instant": "2005-06-15T12:00:00.000Z",
+      "body": "saturn",
+      "longitudeDeg": 116.14940256434905
+    },
+    {
+      "instant": "2005-06-15T12:00:00.000Z",
+      "body": "uranus",
+      "longitudeDeg": 340.76449576102004
+    },
+    {
+      "instant": "2005-06-15T12:00:00.000Z",
+      "body": "neptune",
+      "longitudeDeg": 317.4202082347494
+    },
+    {
+      "instant": "2005-06-15T12:00:00.000Z",
+      "body": "pluto",
+      "longitudeDeg": 263.14277836851824
+    },
+    {
+      "instant": "2010-06-15T12:00:00.000Z",
+      "body": "sun",
+      "longitudeDeg": 84.29251963516103
+    },
+    {
+      "instant": "2010-06-15T12:00:00.000Z",
+      "body": "moon",
+      "longitudeDeg": 124.88895423446368
+    },
+    {
+      "instant": "2010-06-15T12:00:00.000Z",
+      "body": "mercury",
+      "longitudeDeg": 69.43945934329922
+    },
+    {
+      "instant": "2010-06-15T12:00:00.000Z",
+      "body": "venus",
+      "longitudeDeg": 121.3238914046162
+    },
+    {
+      "instant": "2010-06-15T12:00:00.000Z",
+      "body": "mars",
+      "longitudeDeg": 154.3677677619936
+    },
+    {
+      "instant": "2010-06-15T12:00:00.000Z",
+      "body": "jupiter",
+      "longitudeDeg": 1.1531334032597806
+    },
+    {
+      "instant": "2010-06-15T12:00:00.000Z",
+      "body": "saturn",
+      "longitudeDeg": 178.0425819721198
+    },
+    {
+      "instant": "2010-06-15T12:00:00.000Z",
+      "body": "uranus",
+      "longitudeDeg": 0.4273500737115963
+    },
+    {
+      "instant": "2010-06-15T12:00:00.000Z",
+      "body": "neptune",
+      "longitudeDeg": 328.6442763241052
+    },
+    {
+      "instant": "2010-06-15T12:00:00.000Z",
+      "body": "pluto",
+      "longitudeDeg": 274.37247443010796
+    },
+    {
+      "instant": "2015-06-15T12:00:00.000Z",
+      "body": "sun",
+      "longitudeDeg": 84.08543902086144
+    },
+    {
+      "instant": "2015-06-15T12:00:00.000Z",
+      "body": "moon",
+      "longitudeDeg": 70.39890592945923
+    },
+    {
+      "instant": "2015-06-15T12:00:00.000Z",
+      "body": "mercury",
+      "longitudeDeg": 65.04104098942125
+    },
+    {
+      "instant": "2015-06-15T12:00:00.000Z",
+      "body": "venus",
+      "longitudeDeg": 129.13993745095806
+    },
+    {
+      "instant": "2015-06-15T12:00:00.000Z",
+      "body": "mars",
+      "longitudeDeg": 83.85608180216042
+    },
+    {
+      "instant": "2015-06-15T12:00:00.000Z",
+      "body": "jupiter",
+      "longitudeDeg": 138.8397044045204
+    },
+    {
+      "instant": "2015-06-15T12:00:00.000Z",
+      "body": "saturn",
+      "longitudeDeg": 239.96928395598647
+    },
+    {
+      "instant": "2015-06-15T12:00:00.000Z",
+      "body": "uranus",
+      "longitudeDeg": 19.837069060384433
+    },
+    {
+      "instant": "2015-06-15T12:00:00.000Z",
+      "body": "neptune",
+      "longitudeDeg": 339.8147446258754
+    },
+    {
+      "instant": "2015-06-15T12:00:00.000Z",
+      "body": "pluto",
+      "longitudeDeg": 284.77464788841326
+    },
+    {
+      "instant": "2020-06-15T12:00:00.000Z",
+      "body": "sun",
+      "longitudeDeg": 84.83848437171582
+    },
+    {
+      "instant": "2020-06-15T12:00:00.000Z",
+      "body": "moon",
+      "longitudeDeg": 19.286540797786657
+    },
+    {
+      "instant": "2020-06-15T12:00:00.000Z",
+      "body": "mercury",
+      "longitudeDeg": 104.48620362948931
+    },
+    {
+      "instant": "2020-06-15T12:00:00.000Z",
+      "body": "venus",
+      "longitudeDeg": 67.21738706008641
+    },
+    {
+      "instant": "2020-06-15T12:00:00.000Z",
+      "body": "mars",
+      "longitudeDeg": 352.15825268352665
+    },
+    {
+      "instant": "2020-06-15T12:00:00.000Z",
+      "body": "jupiter",
+      "longitudeDeg": 295.6928304657105
+    },
+    {
+      "instant": "2020-06-15T12:00:00.000Z",
+      "body": "saturn",
+      "longitudeDeg": 300.9930284453906
+    },
+    {
+      "instant": "2020-06-15T12:00:00.000Z",
+      "body": "uranus",
+      "longitudeDeg": 39.248406905473146
+    },
+    {
+      "instant": "2020-06-15T12:00:00.000Z",
+      "body": "neptune",
+      "longitudeDeg": 350.94407649087447
+    },
+    {
+      "instant": "2020-06-15T12:00:00.000Z",
+      "body": "pluto",
+      "longitudeDeg": 294.4303335802242
+    },
+    {
+      "instant": "2025-06-15T12:00:00.000Z",
+      "body": "sun",
+      "longitudeDeg": 84.64136331482733
+    },
+    {
+      "instant": "2025-06-15T12:00:00.000Z",
+      "body": "moon",
+      "longitudeDeg": 313.4646270387703
+    },
+    {
+      "instant": "2025-06-15T12:00:00.000Z",
+      "body": "mercury",
+      "longitudeDeg": 102.48865318919053
+    },
+    {
+      "instant": "2025-06-15T12:00:00.000Z",
+      "body": "venus",
+      "longitudeDeg": 39.45448968780733
+    },
+    {
+      "instant": "2025-06-15T12:00:00.000Z",
+      "body": "mars",
+      "longitudeDeg": 148.96310548096392
+    },
+    {
+      "instant": "2025-06-15T12:00:00.000Z",
+      "body": "jupiter",
+      "longitudeDeg": 91.27844276786189
+    },
+    {
+      "instant": "2025-06-15T12:00:00.000Z",
+      "body": "saturn",
+      "longitudeDeg": 1.2981855536430535
+    },
+    {
+      "instant": "2025-06-15T12:00:00.000Z",
+      "body": "uranus",
+      "longitudeDeg": 58.916587681219895
+    },
+    {
+      "instant": "2025-06-15T12:00:00.000Z",
+      "body": "neptune",
+      "longitudeDeg": 2.072755061182264
+    },
+    {
+      "instant": "2025-06-15T12:00:00.000Z",
+      "body": "pluto",
+      "longitudeDeg": 303.4386030055267
+    },
+    {
+      "instant": "2030-06-15T12:00:00.000Z",
+      "body": "sun",
+      "longitudeDeg": 84.45151321495646
+    },
+    {
+      "instant": "2030-06-15T12:00:00.000Z",
+      "body": "moon",
+      "longitudeDeg": 260.5145808760353
+    },
+    {
+      "instant": "2030-06-15T12:00:00.000Z",
+      "body": "mercury",
+      "longitudeDeg": 73.92307679521677
+    },
+    {
+      "instant": "2030-06-15T12:00:00.000Z",
+      "body": "venus",
+      "longitudeDeg": 51.65780580222168
+    },
+    {
+      "instant": "2030-06-15T12:00:00.000Z",
+      "body": "mars",
+      "longitudeDeg": 78.97673348672798
+    },
+    {
+      "instant": "2030-06-15T12:00:00.000Z",
+      "body": "jupiter",
+      "longitudeDeg": 229.05115821610212
+    },
+    {
+      "instant": "2030-06-15T12:00:00.000Z",
+      "body": "saturn",
+      "longitudeDeg": 61.81090987764729
+    },
+    {
+      "instant": "2030-06-15T12:00:00.000Z",
+      "body": "uranus",
+      "longitudeDeg": 79.01551691834871
+    },
+    {
+      "instant": "2030-06-15T12:00:00.000Z",
+      "body": "neptune",
+      "longitudeDeg": 13.120205271945359
+    },
+    {
+      "instant": "2030-06-15T12:00:00.000Z",
+      "body": "pluto",
+      "longitudeDeg": 311.82042939440964
+    },
+    {
+      "instant": "2035-06-15T12:00:00.000Z",
+      "body": "sun",
+      "longitudeDeg": 84.2513710622581
+    },
+    {
+      "instant": "2035-06-15T12:00:00.000Z",
+      "body": "moon",
+      "longitudeDeg": 205.50267971782014
+    },
+    {
+      "instant": "2035-06-15T12:00:00.000Z",
+      "body": "mercury",
+      "longitudeDeg": 62.23143716400934
+    },
+    {
+      "instant": "2035-06-15T12:00:00.000Z",
+      "body": "venus",
+      "longitudeDeg": 69.17125862061741
+    },
+    {
+      "instant": "2035-06-15T12:00:00.000Z",
+      "body": "mars",
+      "longitudeDeg": 338.7386212626673
+    },
+    {
+      "instant": "2035-06-15T12:00:00.000Z",
+      "body": "jupiter",
+      "longitudeDeg": 40.52176141449825
+    },
+    {
+      "instant": "2035-06-15T12:00:00.000Z",
+      "body": "saturn",
+      "longitudeDeg": 123.19896658594148
+    },
+    {
+      "instant": "2035-06-15T12:00:00.000Z",
+      "body": "uranus",
+      "longitudeDeg": 99.73233434118849
+    },
+    {
+      "instant": "2035-06-15T12:00:00.000Z",
+      "body": "neptune",
+      "longitudeDeg": 24.129374883150785
+    },
+    {
+      "instant": "2035-06-15T12:00:00.000Z",
+      "body": "pluto",
+      "longitudeDeg": 319.6834901146057
+    },
+    {
+      "instant": "2040-06-15T12:00:00.000Z",
+      "body": "sun",
+      "longitudeDeg": 84.99735964728696
+    },
+    {
+      "instant": "2040-06-15T12:00:00.000Z",
+      "body": "moon",
+      "longitudeDeg": 147.82384475298264
+    },
+    {
+      "instant": "2040-06-15T12:00:00.000Z",
+      "body": "mercury",
+      "longitudeDeg": 99.30929020556286
+    },
+    {
+      "instant": "2040-06-15T12:00:00.000Z",
+      "body": "venus",
+      "longitudeDeg": 89.18661529953874
+    },
+    {
+      "instant": "2040-06-15T12:00:00.000Z",
+      "body": "mars",
+      "longitudeDeg": 143.81639742361557
+    },
+    {
+      "instant": "2040-06-15T12:00:00.000Z",
+      "body": "jupiter",
+      "longitudeDeg": 173.0501540121537
+    },
+    {
+      "instant": "2040-06-15T12:00:00.000Z",
+      "body": "saturn",
+      "longitudeDeg": 185.30374319874656
+    },
+    {
+      "instant": "2040-06-15T12:00:00.000Z",
+      "body": "uranus",
+      "longitudeDeg": 121.33701706063101
+    },
+    {
+      "instant": "2040-06-15T12:00:00.000Z",
+      "body": "neptune",
+      "longitudeDeg": 35.1126036853739
+    },
+    {
+      "instant": "2040-06-15T12:00:00.000Z",
+      "body": "pluto",
+      "longitudeDeg": 327.04985602919254
+    },
+    {
+      "instant": "2045-06-15T12:00:00.000Z",
+      "body": "sun",
+      "longitudeDeg": 84.80457753953722
+    },
+    {
+      "instant": "2045-06-15T12:00:00.000Z",
+      "body": "moon",
+      "longitudeDeg": 89.90846343049593
+    },
+    {
+      "instant": "2045-06-15T12:00:00.000Z",
+      "body": "mercury",
+      "longitudeDeg": 105.75317737886661
+    },
+    {
+      "instant": "2045-06-15T12:00:00.000Z",
+      "body": "venus",
+      "longitudeDeg": 107.75003757771383
+    },
+    {
+      "instant": "2045-06-15T12:00:00.000Z",
+      "body": "mars",
+      "longitudeDeg": 73.99458369153815
+    },
+    {
+      "instant": "2045-06-15T12:00:00.000Z",
+      "body": "jupiter",
+      "longitudeDeg": 341.92176325822453
+    },
+    {
+      "instant": "2045-06-15T12:00:00.000Z",
+      "body": "saturn",
+      "longitudeDeg": 247.25806016612103
+    },
+    {
+      "instant": "2045-06-15T12:00:00.000Z",
+      "body": "uranus",
+      "longitudeDeg": 143.69001554593453
+    },
+    {
+      "instant": "2045-06-15T12:00:00.000Z",
+      "body": "neptune",
+      "longitudeDeg": 46.01616462926521
+    },
+    {
+      "instant": "2045-06-15T12:00:00.000Z",
+      "body": "pluto",
+      "longitudeDeg": 334.0471953193088
+    },
+    {
+      "instant": "2050-06-15T12:00:00.000Z",
+      "body": "sun",
+      "longitudeDeg": 84.60510734365995
+    },
+    {
+      "instant": "2050-06-15T12:00:00.000Z",
+      "body": "moon",
+      "longitudeDeg": 37.403756197563474
+    },
+    {
+      "instant": "2050-06-15T12:00:00.000Z",
+      "body": "mercury",
+      "longitudeDeg": 78.95290322837387
+    },
+    {
+      "instant": "2050-06-15T12:00:00.000Z",
+      "body": "venus",
+      "longitudeDeg": 123.93063607164963
+    },
+    {
+      "instant": "2050-06-15T12:00:00.000Z",
+      "body": "mars",
+      "longitudeDeg": 321.51559076492634
+    },
+    {
+      "instant": "2050-06-15T12:00:00.000Z",
+      "body": "jupiter",
+      "longitudeDeg": 124.20899933645194
+    },
+    {
+      "instant": "2050-06-15T12:00:00.000Z",
+      "body": "saturn",
+      "longitudeDeg": 308.3103843210313
+    },
+    {
+      "instant": "2050-06-15T12:00:00.000Z",
+      "body": "uranus",
+      "longitudeDeg": 166.82225955167314
+    },
+    {
+      "instant": "2050-06-15T12:00:00.000Z",
+      "body": "neptune",
+      "longitudeDeg": 56.901856298547024
+    },
+    {
+      "instant": "2050-06-15T12:00:00.000Z",
+      "body": "pluto",
+      "longitudeDeg": 340.6853719157527
+    },
+    {
+      "instant": "2055-06-15T12:00:00.000Z",
+      "body": "sun",
+      "longitudeDeg": 84.40333967298035
+    },
+    {
+      "instant": "2055-06-15T12:00:00.000Z",
+      "body": "moon",
+      "longitudeDeg": 335.696812161807
+    },
+    {
+      "instant": "2055-06-15T12:00:00.000Z",
+      "body": "mercury",
+      "longitudeDeg": 61.24495382518146
+    },
+    {
+      "instant": "2055-06-15T12:00:00.000Z",
+      "body": "venus",
+      "longitudeDeg": 127.85913738937766
+    },
+    {
+      "instant": "2055-06-15T12:00:00.000Z",
+      "body": "mars",
+      "longitudeDeg": 138.27345241060848
+    },
+    {
+      "instant": "2055-06-15T12:00:00.000Z",
+      "body": "jupiter",
+      "longitudeDeg": 274.4885930379744
+    },
+    {
+      "instant": "2055-06-15T12:00:00.000Z",
+      "body": "saturn",
+      "longitudeDeg": 8.578334113655282
+    },
+    {
+      "instant": "2055-06-15T12:00:00.000Z",
+      "body": "uranus",
+      "longitudeDeg": 190.548446302722
+    },
+    {
+      "instant": "2055-06-15T12:00:00.000Z",
+      "body": "neptune",
+      "longitudeDeg": 67.71181547586343
+    },
+    {
+      "instant": "2055-06-15T12:00:00.000Z",
+      "body": "pluto",
+      "longitudeDeg": 346.9905413520361
+    },
+    {
+      "instant": "2060-06-15T12:00:00.000Z",
+      "body": "sun",
+      "longitudeDeg": 85.15690093238531
+    },
+    {
+      "instant": "2060-06-15T12:00:00.000Z",
+      "body": "moon",
+      "longitudeDeg": 281.15595333356293
+    },
+    {
+      "instant": "2060-06-15T12:00:00.000Z",
+      "body": "mercury",
+      "longitudeDeg": 92.26632770850877
+    },
+    {
+      "instant": "2060-06-15T12:00:00.000Z",
+      "body": "venus",
+      "longitudeDeg": 54.60071009901724
+    },
+    {
+      "instant": "2060-06-15T12:00:00.000Z",
+      "body": "mars",
+      "longitudeDeg": 68.89455691527789
+    },
+    {
+      "instant": "2060-06-15T12:00:00.000Z",
+      "body": "jupiter",
+      "longitudeDeg": 76.22307486745271
+    },
+    {
+      "instant": "2060-06-15T12:00:00.000Z",
+      "body": "saturn",
+      "longitudeDeg": 69.28372721668147
+    },
+    {
+      "instant": "2060-06-15T12:00:00.000Z",
+      "body": "uranus",
+      "longitudeDeg": 214.43858722179118
+    },
+    {
+      "instant": "2060-06-15T12:00:00.000Z",
+      "body": "neptune",
+      "longitudeDeg": 78.55174099929755
+    },
+    {
+      "instant": "2060-06-15T12:00:00.000Z",
+      "body": "pluto",
+      "longitudeDeg": 353.0551169868389
+    },
+    {
+      "instant": "2065-06-15T12:00:00.000Z",
+      "body": "sun",
+      "longitudeDeg": 84.96716631056476
+    },
+    {
+      "instant": "2065-06-15T12:00:00.000Z",
+      "body": "moon",
+      "longitudeDeg": 224.45747626535868
+    },
+    {
+      "instant": "2065-06-15T12:00:00.000Z",
+      "body": "mercury",
+      "longitudeDeg": 108.14428264544811
+    },
+    {
+      "instant": "2065-06-15T12:00:00.000Z",
+      "body": "venus",
+      "longitudeDeg": 40.9487422767837
+    },
+    {
+      "instant": "2065-06-15T12:00:00.000Z",
+      "body": "mars",
+      "longitudeDeg": 297.34295007655965
+    },
+    {
+      "instant": "2065-06-15T12:00:00.000Z",
+      "body": "jupiter",
+      "longitudeDeg": 210.53670737895047
+    },
+    {
+      "instant": "2065-06-15T12:00:00.000Z",
+      "body": "saturn",
+      "longitudeDeg": 130.74081085799295
+    },
+    {
+      "instant": "2065-06-15T12:00:00.000Z",
+      "body": "uranus",
+      "longitudeDeg": 238.188142097955
+    },
+    {
+      "instant": "2065-06-15T12:00:00.000Z",
+      "body": "neptune",
+      "longitudeDeg": 89.33868341130193
+    },
+    {
+      "instant": "2065-06-15T12:00:00.000Z",
+      "body": "pluto",
+      "longitudeDeg": 358.85717982904106
+    },
+    {
+      "instant": "2070-06-15T12:00:00.000Z",
+      "body": "sun",
+      "longitudeDeg": 84.77364950302896
+    },
+    {
+      "instant": "2070-06-15T12:00:00.000Z",
+      "body": "moon",
+      "longitudeDeg": 173.94874660231713
+    },
+    {
+      "instant": "2070-06-15T12:00:00.000Z",
+      "body": "mercury",
+      "longitudeDeg": 84.29419282212687
+    },
+    {
+      "instant": "2070-06-15T12:00:00.000Z",
+      "body": "venus",
+      "longitudeDeg": 54.64907930888228
+    },
+    {
+      "instant": "2070-06-15T12:00:00.000Z",
+      "body": "mars",
+      "longitudeDeg": 133.43846719119173
+    },
+    {
+      "instant": "2070-06-15T12:00:00.000Z",
+      "body": "jupiter",
+      "longitudeDeg": 23.537626569956952
+    },
+    {
+      "instant": "2070-06-15T12:00:00.000Z",
+      "body": "saturn",
+      "longitudeDeg": 192.72066696825473
+    },
+    {
+      "instant": "2070-06-15T12:00:00.000Z",
+      "body": "uranus",
+      "longitudeDeg": 261.38746746203077
+    },
+    {
+      "instant": "2070-06-15T12:00:00.000Z",
+      "body": "neptune",
+      "longitudeDeg": 100.06962064271397
+    },
+    {
+      "instant": "2070-06-15T12:00:00.000Z",
+      "body": "pluto",
+      "longitudeDeg": 4.45273051718815
+    },
+    {
+      "instant": "2075-06-15T12:00:00.000Z",
+      "body": "sun",
+      "longitudeDeg": 84.56087718855841
+    },
+    {
+      "instant": "2075-06-15T12:00:00.000Z",
+      "body": "moon",
+      "longitudeDeg": 105.02507856619647
+    },
+    {
+      "instant": "2075-06-15T12:00:00.000Z",
+      "body": "mercury",
+      "longitudeDeg": 61.80338820515852
+    },
+    {
+      "instant": "2075-06-15T12:00:00.000Z",
+      "body": "venus",
+      "longitudeDeg": 72.50185599158651
+    },
+    {
+      "instant": "2075-06-15T12:00:00.000Z",
+      "body": "mars",
+      "longitudeDeg": 62.96859042116175
+    },
+    {
+      "instant": "2075-06-15T12:00:00.000Z",
+      "body": "jupiter",
+      "longitudeDeg": 157.55753299947796
+    },
+    {
+      "instant": "2075-06-15T12:00:00.000Z",
+      "body": "saturn",
+      "longitudeDeg": 254.50873065154244
+    },
+    {
+      "instant": "2075-06-15T12:00:00.000Z",
+      "body": "uranus",
+      "longitudeDeg": 283.72895233194686
+    },
+    {
+      "instant": "2075-06-15T12:00:00.000Z",
+      "body": "neptune",
+      "longitudeDeg": 110.8133561128371
+    },
+    {
+      "instant": "2075-06-15T12:00:00.000Z",
+      "body": "pluto",
+      "longitudeDeg": 9.855601172266438
+    },
+    {
+      "instant": "2080-06-15T12:00:00.000Z",
+      "body": "sun",
+      "longitudeDeg": 85.32027210410908
+    },
+    {
+      "instant": "2080-06-15T12:00:00.000Z",
+      "body": "moon",
+      "longitudeDeg": 53.904511542865514
+    },
+    {
+      "instant": "2080-06-15T12:00:00.000Z",
+      "body": "mercury",
+      "longitudeDeg": 84.1828195763411
+    },
+    {
+      "instant": "2080-06-15T12:00:00.000Z",
+      "body": "venus",
+      "longitudeDeg": 92.58089875220077
+    },
+    {
+      "instant": "2080-06-15T12:00:00.000Z",
+      "body": "mars",
+      "longitudeDeg": 267.0450825613834
+    },
+    {
+      "instant": "2080-06-15T12:00:00.000Z",
+      "body": "jupiter",
+      "longitudeDeg": 321.7827518121854
+    },
+    {
+      "instant": "2080-06-15T12:00:00.000Z",
+      "body": "saturn",
+      "longitudeDeg": 315.26328434439364
+    },
+    {
+      "instant": "2080-06-15T12:00:00.000Z",
+      "body": "uranus",
+      "longitudeDeg": 305.2064506280609
+    },
+    {
+      "instant": "2080-06-15T12:00:00.000Z",
+      "body": "neptune",
+      "longitudeDeg": 121.56807992176282
+    },
+    {
+      "instant": "2080-06-15T12:00:00.000Z",
+      "body": "pluto",
+      "longitudeDeg": 15.110097903563675
+    },
+    {
+      "instant": "2085-06-15T12:00:00.000Z",
+      "body": "sun",
+      "longitudeDeg": 85.12222599761772
+    },
+    {
+      "instant": "2085-06-15T12:00:00.000Z",
+      "body": "moon",
+      "longitudeDeg": 4.696635113873867
+    },
+    {
+      "instant": "2085-06-15T12:00:00.000Z",
+      "body": "mercury",
+      "longitudeDeg": 109.48481115151259
+    },
+    {
+      "instant": "2085-06-15T12:00:00.000Z",
+      "body": "venus",
+      "longitudeDeg": 110.95612867465805
+    },
+    {
+      "instant": "2085-06-15T12:00:00.000Z",
+      "body": "mars",
+      "longitudeDeg": 128.698485943537
+    },
+    {
+      "instant": "2085-06-15T12:00:00.000Z",
+      "body": "jupiter",
+      "longitudeDeg": 109.73072030316314
+    },
+    {
+      "instant": "2085-06-15T12:00:00.000Z",
+      "body": "saturn",
+      "longitudeDeg": 15.491429878225707
+    },
+    {
+      "instant": "2085-06-15T12:00:00.000Z",
+      "body": "uranus",
+      "longitudeDeg": 325.8942991918057
+    },
+    {
+      "instant": "2085-06-15T12:00:00.000Z",
+      "body": "neptune",
+      "longitudeDeg": 132.3062304028883
+    },
+    {
+      "instant": "2085-06-15T12:00:00.000Z",
+      "body": "pluto",
+      "longitudeDeg": 20.238283999556952
+    },
+    {
+      "instant": "2090-06-15T12:00:00.000Z",
+      "body": "sun",
+      "longitudeDeg": 84.92293080253498
+    },
+    {
+      "instant": "2090-06-15T12:00:00.000Z",
+      "body": "moon",
+      "longitudeDeg": 303.77826948001564
+    },
+    {
+      "instant": "2090-06-15T12:00:00.000Z",
+      "body": "mercury",
+      "longitudeDeg": 89.63934298363793
+    },
+    {
+      "instant": "2090-06-15T12:00:00.000Z",
+      "body": "venus",
+      "longitudeDeg": 126.31110967869061
+    },
+    {
+      "instant": "2090-06-15T12:00:00.000Z",
+      "body": "mars",
+      "longitudeDeg": 57.58132486113977
+    },
+    {
+      "instant": "2090-06-15T12:00:00.000Z",
+      "body": "jupiter",
+      "longitudeDeg": 253.6443215972444
+    },
+    {
+      "instant": "2090-06-15T12:00:00.000Z",
+      "body": "saturn",
+      "longitudeDeg": 76.15540383901205
+    },
+    {
+      "instant": "2090-06-15T12:00:00.000Z",
+      "body": "uranus",
+      "longitudeDeg": 345.8859471504504
+    },
+    {
+      "instant": "2090-06-15T12:00:00.000Z",
+      "body": "neptune",
+      "longitudeDeg": 143.06619703964915
+    },
+    {
+      "instant": "2090-06-15T12:00:00.000Z",
+      "body": "pluto",
+      "longitudeDeg": 25.21197300030085
+    },
+    {
+      "instant": "2095-06-15T12:00:00.000Z",
+      "body": "sun",
+      "longitudeDeg": 84.72287112215211
+    },
+    {
+      "instant": "2095-06-15T12:00:00.000Z",
+      "body": "moon",
+      "longitudeDeg": 236.10865705622027
+    },
+    {
+      "instant": "2095-06-15T12:00:00.000Z",
+      "body": "mercury",
+      "longitudeDeg": 63.63153129862235
+    },
+    {
+      "instant": "2095-06-15T12:00:00.000Z",
+      "body": "venus",
+      "longitudeDeg": 124.52825834887835
+    },
+    {
+      "instant": "2095-06-15T12:00:00.000Z",
+      "body": "mars",
+      "longitudeDeg": 238.93329963949594
+    },
+    {
+      "instant": "2095-06-15T12:00:00.000Z",
+      "body": "jupiter",
+      "longitudeDeg": 60.64914286425651
+    },
+    {
+      "instant": "2095-06-15T12:00:00.000Z",
+      "body": "saturn",
+      "longitudeDeg": 137.7501045432774
+    },
+    {
+      "instant": "2095-06-15T12:00:00.000Z",
+      "body": "uranus",
+      "longitudeDeg": 5.48193564104402
+    },
+    {
+      "instant": "2095-06-15T12:00:00.000Z",
+      "body": "neptune",
+      "longitudeDeg": 153.8267608021635
+    },
+    {
+      "instant": "2095-06-15T12:00:00.000Z",
+      "body": "pluto",
+      "longitudeDeg": 30.098511250176987
+    },
+    {
+      "instant": "2100-06-15T12:00:00.000Z",
+      "body": "sun",
+      "longitudeDeg": 84.52784737725187
+    },
+    {
+      "instant": "2100-06-15T12:00:00.000Z",
+      "body": "moon",
+      "longitudeDeg": 175.7648354283114
+    },
+    {
+      "instant": "2100-06-15T12:00:00.000Z",
+      "body": "mercury",
+      "longitudeDeg": 76.77971707443487
+    },
+    {
+      "instant": "2100-06-15T12:00:00.000Z",
+      "body": "venus",
+      "longitudeDeg": 46.48524649073354
+    },
+    {
+      "instant": "2100-06-15T12:00:00.000Z",
+      "body": "mars",
+      "longitudeDeg": 123.42406841688315
+    },
+    {
+      "instant": "2100-06-15T12:00:00.000Z",
+      "body": "jupiter",
+      "longitudeDeg": 193.3535301917801
+    },
+    {
+      "instant": "2100-06-15T12:00:00.000Z",
+      "body": "saturn",
+      "longitudeDeg": 199.94819556753592
+    },
+    {
+      "instant": "2100-06-15T12:00:00.000Z",
+      "body": "uranus",
+      "longitudeDeg": 24.85077601148813
+    },
+    {
+      "instant": "2100-06-15T12:00:00.000Z",
+      "body": "neptune",
+      "longitudeDeg": 164.6650155514885
+    },
+    {
+      "instant": "2100-06-15T12:00:00.000Z",
+      "body": "pluto",
+      "longitudeDeg": 34.897418428373726
+    },
+    {
+      "instant": "1990-05-15T19:34:00.000Z",
+      "body": "sun",
+      "longitudeDeg": 54.70009716656656
+    },
+    {
+      "instant": "1990-05-15T19:34:00.000Z",
+      "body": "moon",
+      "longitudeDeg": 301.06884848910363
+    },
+    {
+      "instant": "1990-05-15T19:34:00.000Z",
+      "body": "mercury",
+      "longitudeDeg": 37.97826960892865
+    },
+    {
+      "instant": "1990-05-15T19:34:00.000Z",
+      "body": "venus",
+      "longitudeDeg": 13.178016080324008
+    },
+    {
+      "instant": "1990-05-15T19:34:00.000Z",
+      "body": "mars",
+      "longitudeDeg": 348.56799591269555
+    },
+    {
+      "instant": "1990-05-15T19:34:00.000Z",
+      "body": "jupiter",
+      "longitudeDeg": 99.60140222055671
+    },
+    {
+      "instant": "1990-05-15T19:34:00.000Z",
+      "body": "saturn",
+      "longitudeDeg": 295.2440364720914
+    },
+    {
+      "instant": "1990-05-15T19:34:00.000Z",
+      "body": "uranus",
+      "longitudeDeg": 279.17613047904877
+    },
+    {
+      "instant": "1990-05-15T19:34:00.000Z",
+      "body": "neptune",
+      "longitudeDeg": 284.34824137834744
+    },
+    {
+      "instant": "1990-05-15T19:34:00.000Z",
+      "body": "pluto",
+      "longitudeDeg": 226.1587060216155
+    },
+    {
+      "instant": "1992-10-12T15:30:00.000Z",
+      "body": "sun",
+      "longitudeDeg": 199.55615216883785
+    },
+    {
+      "instant": "1992-10-12T15:30:00.000Z",
+      "body": "moon",
+      "longitudeDeg": 29.840372269994617
+    },
+    {
+      "instant": "1992-10-12T15:30:00.000Z",
+      "body": "mercury",
+      "longitudeDeg": 217.755553642833
+    },
+    {
+      "instant": "1992-10-12T15:30:00.000Z",
+      "body": "venus",
+      "longitudeDeg": 231.3662944196379
+    },
+    {
+      "instant": "1992-10-12T15:30:00.000Z",
+      "body": "mars",
+      "longitudeDeg": 105.57710883361116
+    },
+    {
+      "instant": "1992-10-12T15:30:00.000Z",
+      "body": "jupiter",
+      "longitudeDeg": 180.43959484866338
+    },
+    {
+      "instant": "1992-10-12T15:30:00.000Z",
+      "body": "saturn",
+      "longitudeDeg": 311.8300007302626
+    },
+    {
+      "instant": "1992-10-12T15:30:00.000Z",
+      "body": "uranus",
+      "longitudeDeg": 284.2089001174406
+    },
+    {
+      "instant": "1992-10-12T15:30:00.000Z",
+      "body": "neptune",
+      "longitudeDeg": 286.2425991634159
+    },
+    {
+      "instant": "1992-10-12T15:30:00.000Z",
+      "body": "pluto",
+      "longitudeDeg": 231.5811581222237
+    },
+    {
+      "instant": "2000-02-29T00:00:00.000Z",
+      "body": "sun",
+      "longitudeDeg": 339.7037190156136
+    },
+    {
+      "instant": "2000-02-29T00:00:00.000Z",
+      "body": "moon",
+      "longitudeDeg": 269.6301073288678
+    },
+    {
+      "instant": "2000-02-29T00:00:00.000Z",
+      "body": "mercury",
+      "longitudeDeg": 343.00328786857114
+    },
+    {
+      "instant": "2000-02-29T00:00:00.000Z",
+      "body": "venus",
+      "longitudeDeg": 313.3388117883592
+    },
+    {
+      "instant": "2000-02-29T00:00:00.000Z",
+      "body": "mars",
+      "longitudeDeg": 12.845551801805524
+    },
+    {
+      "instant": "2000-02-29T00:00:00.000Z",
+      "body": "jupiter",
+      "longitudeDeg": 32.48265382272334
+    },
+    {
+      "instant": "2000-02-29T00:00:00.000Z",
+      "body": "saturn",
+      "longitudeDeg": 42.32519755827548
+    },
+    {
+      "instant": "2000-02-29T00:00:00.000Z",
+      "body": "uranus",
+      "longitudeDeg": 318.0954849983181
+    },
+    {
+      "instant": "2000-02-29T00:00:00.000Z",
+      "body": "neptune",
+      "longitudeDeg": 305.3338856684455
+    },
+    {
+      "instant": "2000-02-29T00:00:00.000Z",
+      "body": "pluto",
+      "longitudeDeg": 252.83348417858198
+    },
+    {
+      "instant": "2026-11-05T00:00:00.000Z",
+      "body": "sun",
+      "longitudeDeg": 222.5815913814613
+    },
+    {
+      "instant": "2026-11-05T00:00:00.000Z",
+      "body": "moon",
+      "longitudeDeg": 171.9969164816568
+    },
+    {
+      "instant": "2026-11-05T00:00:00.000Z",
+      "body": "mercury",
+      "longitudeDeg": 221.65980954492875
+    },
+    {
+      "instant": "2026-11-05T00:00:00.000Z",
+      "body": "venus",
+      "longitudeDeg": 204.51766975238303
+    },
+    {
+      "instant": "2026-11-05T00:00:00.000Z",
+      "body": "mars",
+      "longitudeDeg": 140.6095889739865
+    },
+    {
+      "instant": "2026-11-05T00:00:00.000Z",
+      "body": "jupiter",
+      "longitudeDeg": 144.79049418710758
+    },
+    {
+      "instant": "2026-11-05T00:00:00.000Z",
+      "body": "saturn",
+      "longitudeDeg": 9.043674220013528
+    },
+    {
+      "instant": "2026-11-05T00:00:00.000Z",
+      "body": "uranus",
+      "longitudeDeg": 64.52723933719224
+    },
+    {
+      "instant": "2026-11-05T00:00:00.000Z",
+      "body": "neptune",
+      "longitudeDeg": 2.0030101378117635
+    },
+    {
+      "instant": "2026-11-05T00:00:00.000Z",
+      "body": "pluto",
+      "longitudeDeg": 303.1623129710766
+    }
+  ]
+}

@@ -2,6 +2,16 @@ import { cloudflareTest, readD1Migrations } from '@cloudflare/vitest-plugin';
 import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
+  // moment-timezone requires the CommonJS entry. Vite's jsnext:main preference
+  // otherwise hands its require() an ESM file in workerd's test module loader.
+  resolve: {
+    alias: [
+      {
+        find: /^moment$/,
+        replacement: new URL('./node_modules/moment/moment.js', import.meta.url).pathname,
+      },
+    ],
+  },
   plugins: [
     cloudflareTest(async () => {
       const keys = await crypto.subtle.generateKey('Ed25519', true, ['sign', 'verify']);
