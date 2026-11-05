@@ -1,6 +1,6 @@
 # Astrology calculation foundation
 
-Decision date: 2026-11-05. Status: **selected for implementation; bounded local probe passed; application integration and full qualification remain open**.
+Decision date: 2026-11-05. Status: **implemented in the local Your Pattern slice; production qualification and activation remain open**. The original probe below remains bounded historical evidence; [integrated acceptance](../YOUR_PATTERN_RESULTS.md) records the application work.
 
 This records an engineering choice under the owner's approval to map the completed designs and define the calculation foundation. It does not attribute a new AGPL decision, a license purchase, or production approval to the owner.
 
@@ -30,7 +30,7 @@ Patternlike's [recorded owner decision](https://github.com/henryperkins/patternl
 | moment-timezone | 0.6.6; MIT in installed package | Access to pinned transition tables, not its default ambiguity-resolving parser. |
 | moment | 2.31.0; MIT in installed package | Required runtime dependency; pin explicitly rather than accepting an unrecorded transitive upgrade. |
 | IANA timezone data | 2026f; [upstream release](https://www.iana.org/time-zones/releases/2026f) | Full historical dataset, not the ten-year browser subset. Preserve data notices and a byte hash. |
-| GeoNames gazetteer | Proposed pinned `cities15000` plus administrative labels; [CC BY 4.0 and field definitions](https://download.geonames.org/export/dump/readme.txt) | First-party birthplace selection. Acquisition, byte hashes, attribution and coverage tests are implementation work; no dataset is bundled yet. |
+| GeoNames gazetteer | Pinned `cities15000` plus administrative labels; [CC BY 4.0 and field definitions](https://download.geonames.org/export/dump/readme.txt) | First-party birthplace selection. Pinned data, source/decompressed hashes, attribution, duplicate-name coverage and manual entry are now implemented in `content/astrology/places-manifest.json`. The Worker lazily verifies and decompresses public gzip/base64 chunks. |
 | Swiss reference | sweph 2.10.3-7 / Swiss Ephemeris 2.10.03, explicit Moshier mode | Isolated local research dependency only. Absent from Reflection's package manifest, lockfile and Worker bundle. Its license is not inherited by the selected runtime. |
 
 The [Swiss publisher](https://www.astro.com/swisseph/swisseph.htm) describes its two licensing paths; the [binding maintainer](https://github.com/timotejroiko/sweph) separately documents its terms. Neither public source availability nor a process boundary is a substitute for reviewing those terms if Swiss is adopted later.
@@ -69,7 +69,7 @@ The probe makes no external calculation calls. Installing dependencies uses the 
 8. Houses, angles and nodes are absent for every profile in this slice. Approximate/unknown inputs must not expose exact degrees or exact aspects in user-facing prose. Preserve the full interval and suppression reasons in each saved basis. Historical place-to-zone uncertainty before 1970 remains visible and requires confirmation of the chosen zone; a modern gazetteer cannot prove historical civil-time practice.
 9. Every calculation identity binds normalized input, UTC interval union, engine version and artifact hash, timezone version and data hash, adapter version, coordinate convention and reliability-policy version. The stored record carries that immutable identity. An update creates a new calculation; it cannot change a saved reading.
 
-## Qualification still required before enabling the feature
+## Qualification still required before hosted activation
 
 - [ ] Independent reference fixtures across the supported range, boundary cases and bodies, with reference conventions recorded. Never generate expected values solely with the implementation under test.
 - [ ] A justified interval-stability algorithm, refinement limits and conservative failure behavior; cases where endpoints agree but the interior crosses a boundary.
@@ -79,4 +79,4 @@ The probe makes no external calculation calls. Installing dependencies uses the 
 - [ ] Pinned gazetteer attribution, malformed rows, duplicate place names, missing localities and manual corrections.
 - [ ] Birth-profile and saved-basis export, deletion, rekey, accounting and restore replay; chapter-content review and activation.
 
-The [design](../superpowers/specs/2026-11-05-your-pattern-design.md) and [implementation plan](../superpowers/plans/2026-11-05-your-pattern.md) turn these requirements into the first working flow. Timing and Time Travel will need separate transit/event qualification; this probe does not close it.
+Local implementation now exercises interval enclosures, civil-time edge cases, Node/workerd identity parity, the pinned gazetteer and the complete private-data lifecycle. Those tests narrow these open items but do not independently certify the entire numerical domain or hosted limits. The [design](../superpowers/specs/2026-11-05-your-pattern-design.md), [implementation plan](../superpowers/plans/2026-11-05-your-pattern.md) and [integrated results](../YOUR_PATTERN_RESULTS.md) record the first working flow. Timing and Time Travel will need separate transit/event qualification; this probe does not close it.
