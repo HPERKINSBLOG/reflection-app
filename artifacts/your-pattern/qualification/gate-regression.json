@@ -1,0 +1,22 @@
+{
+  "kind": "pattern.qualification-gate-regression.v1",
+  "mutation": {
+    "body": "moon",
+    "instant": "2050-01-01T00:00:00.000Z",
+    "referenceDeltaDeg": 1,
+    "fixtureLocation": "isolated temporary directory; retained JPL fixtures unchanged"
+  },
+  "before": {
+    "sourceCommit": "3280bef98e6b67a1a5d9437f95606e835b3f9abd",
+    "runnerSha256": "64dbc3a286aa41dd1599398a3b06f3aab95eef0093a234a53c88974c2d1b2337",
+    "futureJplPassed": false,
+    "exitCode": 0
+  },
+  "after": {
+    "runnerSha256": "4c689f1ec695a38a0dda6691d30253beb94c0e860a2dca74a37c0036b4f76d28",
+    "futureJplPassed": false,
+    "exitCode": 1
+  },
+  "genuineCorpusPassed": true,
+  "positiveReceiptSha256": "3fa4ae0065b10b48c0bf3fb2a18aca2d30fdb093ad91aefb282c86e6915075b0"
+}

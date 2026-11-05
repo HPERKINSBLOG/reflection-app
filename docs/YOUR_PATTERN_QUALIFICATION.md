@@ -58,3 +58,11 @@ The temporary Worker, D1 database and transfer KV namespace were deleted and the
 4. Review the controlled application preview on physical devices and with a screen reader, then make the merge/activation decision. Playwright emulation does not establish these checks.
 
 No production deployment, live-provider acceptance, physical-device acceptance or human catalogue approval is claimed by this report. Timing and Time Travel remain later product work.
+
+## Final review and verification
+
+A fresh read-only whole-branch reviewer checked calculation/time handling, profile/save boundaries, migration/lifecycle integration, UI paths and the evidence package. The review identified one qualification-runner defect: future JPL failures were recorded but omitted from the final exit assertion. This is corrected. An isolated fixture with a deliberately added 1° at the 2050 Moon epoch reproduced exit 0 before the fix and exit 1 afterward; the genuine reference corpus then passed again. No application source or pinned calculation identity changed in this qualification pass.
+
+The reviewer independently matched all 541 final hosted bundle input hashes, the hosted evidence hashes, the numerical runner and JPL response hashes, the migration SQL and the exact 48-entry catalogue hash. Universal astronomical accuracy, peak heap, full hosted recovery and human/device acceptance remain outside that code-review verdict. [Review disposition](../artifacts/your-pattern/qualification/final-review.md), [negative-reference regression](../artifacts/your-pattern/qualification/gate-regression.json).
+
+The final local gate receipt and its source digest remain authoritative; see [acceptance evidence](../artifacts/your-pattern/acceptance-evidence.json). The 39-case cross-browser matrix is retained from the implementation pass, with unchanged application and journey sources during this qualification work.

@@ -351,6 +351,7 @@ assert(
   report.moshier.current.passed &&
     report.moshier.futureStress.passed &&
     report.horizons.current.passed &&
+    report.horizons.futureStress.passed &&
     report.intervals.passed,
   'Qualification discrepancy; inspect the saved report',
 );

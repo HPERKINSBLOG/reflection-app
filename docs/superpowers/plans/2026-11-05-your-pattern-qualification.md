@@ -1,6 +1,6 @@
 # Your Pattern Qualification Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [x]`) syntax for tracking.
 
 **Goal:** Make the completed Your Pattern PR reviewable with reproducible numerical, editorial and hosted evidence, retaining every activation boundary.
 
@@ -33,10 +33,10 @@
 
 **Interfaces:** Consume `natalLongitude`, `calculateNatal`, `resolveBirthTime` and `CALCULATION_IDENTITY`. Produce a versioned JSON receipt with source hashes, reference conventions, comparison counts/errors, interval outcomes and explicit limits.
 
-- [ ] Compare actual adapter results with independently calculated reference longitudes across the supported range, with a predeclared 0.05° threshold.
-- [ ] Add boundary/turning-point and time-union fixtures; check supported signs and conservative suppression against dense independent samples, recording the finite-corpus limitation.
-- [ ] Verify model/package hashes, preserve raw reference evidence, and run the existing focused calculation tests.
-- [ ] Commit the runner, fixtures and result.
+- [x] Compare actual adapter results with independently calculated reference longitudes across the supported range, with a predeclared 0.05° threshold.
+- [x] Add boundary/turning-point and time-union fixtures; check supported signs and conservative suppression against dense independent samples, recording the finite-corpus limitation.
+- [x] Verify model/package hashes, preserve raw reference evidence, and run the existing focused calculation tests.
+- [x] Commit the runner, fixtures and result.
 
 ### Task 2: Exact-catalogue editorial review
 
@@ -44,10 +44,10 @@
 
 **Interfaces:** Consume all 48 entries and canonical release hash. Produce an entry-by-entry assessment marked agent-reviewed with open human approval status.
 
-- [ ] Read every title, paragraph and prompt; assess agency, unsupported claims, distinctness and product tone.
-- [ ] Verify all four chapters cover twelve signs, exact source hashes match, and review output binds the catalogue hash.
-- [ ] Record any changes/findings and the concrete human decision required; do not manufacture a signature.
-- [ ] Commit the assessment.
+- [x] Read every title, paragraph and prompt; assess agency, unsupported claims, distinctness and product tone.
+- [x] Verify all four chapters cover twelve signs, exact source hashes match, and review output binds the catalogue hash.
+- [x] Record any changes/findings and the concrete human decision required; do not manufacture a signature.
+- [x] Commit the assessment.
 
 ### Task 3: Isolated hosted resource and migration rehearsal
 
@@ -55,11 +55,11 @@
 
 **Interfaces:** Use actual production calculation/place modules and real migrations. Accept fixed named synthetic cases only. Produce deployment/version identity, startup timing, request outcomes, CPU/wall evidence where available, migration/recovery results and cleanup receipts.
 
-- [ ] Inspect the current account/API permissions and deploy only a new isolated, authenticated, synthetic harness. Never log its token.
-- [ ] Exercise cold/warm place search, exact/uncertain calculations and bounded concurrency; preserve actual error outcomes and report unmeasured limits.
-- [ ] Rehearse populated Pattern migration and saved-reading recovery on isolated resources, preserving disabled publication after restore. If required isolation cannot be met, report that exact blocked gate instead of relabeling local tests as hosted acceptance.
-- [ ] Remove temporary hosted resources after evidence collection and verify cleanup.
-- [ ] Commit reproducible tooling and evidence.
+- [x] Inspect the current account/API permissions and deploy only a new isolated, authenticated, synthetic harness. Never log its token.
+- [x] Exercise cold/warm place search, exact/uncertain calculations and bounded concurrency; preserve actual error outcomes and report unmeasured limits.
+- [x] Rehearse populated Pattern migration and saved-reading recovery on isolated resources, preserving disabled publication after restore. If required isolation cannot be met, report that exact blocked gate instead of relabeling local tests as hosted acceptance.
+- [x] Remove temporary hosted resources after evidence collection and verify cleanup.
+- [x] Commit reproducible tooling and evidence.
 
 ### Task 4: Final review and PR handoff
 
