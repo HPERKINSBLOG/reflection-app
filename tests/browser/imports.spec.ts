@@ -2,6 +2,7 @@ import { readFile } from 'node:fs/promises';
 import { expect, test } from '@playwright/test';
 import { account, openAccount, backToReadings } from '../fixtures/browser-reading.ts';
 import { apiSchemas } from '../../src/contracts/index.ts';
+import { openImportSelection } from '../fixtures/browser-import.ts';
 import pattern7 from '../fixtures/imports/patternlike-0.7.0.json' with { type: 'json' };
 import pattern8 from '../fixtures/imports/patternlike-0.8.0.json' with { type: 'json' };
 
@@ -29,7 +30,7 @@ test('review, interrupted commit, resume and exact reopen of an imported Tarot r
   await expect(rows.getByRole('checkbox')).not.toBeChecked();
   await rows.getByRole('checkbox').check();
   await page.getByRole('button', { name: 'Review selected records', exact: true }).click();
-  const commit = page.getByRole('button', { name: 'Confirm this group', exact: true });
+  const commit = page.getByRole('button', { name: /^Import \d+ records?$/ });
   await expect(commit).toBeEnabled();
   let calls = 0;
   await page.route('**/api/v1/imports/groups/*/commit', async (route) => {
@@ -80,6 +81,7 @@ test('review, interrupted commit, resume and exact reopen of an imported Tarot r
     ],
     ['reflection-export.v1', downloaded],
   ] as const) {
+    await openImportSelection(page);
     await format.selectOption(kind);
     await file.setInputFiles({
       name: 'canonical.json',
@@ -93,7 +95,7 @@ test('review, interrupted commit, resume and exact reopen of an imported Tarot r
       .filter({ visible: true });
     await choice.first().check();
     await page.getByRole('button', { name: 'Review selected records' }).click();
-    await expect(page.locator('.import-group').first()).toContainText('duplicate');
+    await expect(page.locator('.import-group').first()).toContainText('Already saved — skipped');
   }
   await page.goto(savedPath);
   await page.getByRole('button', { name: 'Delete reading', exact: true }).click();
@@ -113,13 +115,16 @@ test('review, interrupted commit, resume and exact reopen of an imported Tarot r
   await page.getByRole('button', { name: 'Read file', exact: true }).click();
   await page.getByRole('group', { name: 'Records in the file' }).getByRole('checkbox').check();
   await page.getByRole('button', { name: 'Review selected records' }).click();
-  await expect(page.locator('.import-group')).toContainText('erased');
-  await expect(page.getByRole('button', { name: 'Confirm this group' })).toBeDisabled();
+  await expect(
+    page.getByRole('region', { name: 'Selected group preview', exact: true }),
+  ).toContainText('previously deleted');
+  await expect(page.getByRole('button', { name: /^Import \d+ records?$/ })).toBeDisabled();
+  await openImportSelection(page);
   await page.getByText('Resolve a conflict or erased record', { exact: true }).click();
   await page.getByLabel('Recovery action').selectOption('reimport_erased');
   await page.getByRole('button', { name: 'Review selected records' }).click();
   await expect(page.locator('.import-group')).toContainText('Recreation in a new namespace');
-  await page.getByRole('button', { name: 'Confirm this group' }).click();
+  await page.getByRole('button', { name: /^Import \d+ records?$/ }).click();
   await expect(page.getByText('Group complete.', { exact: true })).toBeVisible();
 });
 test('versioned Patternlike files, native Pixel and invalid input are distinguishable before staging', async ({
@@ -170,15 +175,17 @@ test('a staged group reopens by ID after reload and shows its original selection
   await page.getByRole('button', { name: 'Read file', exact: true }).click();
   await page.getByRole('group', { name: 'Records in the file' }).getByRole('checkbox').check();
   await page.getByRole('button', { name: 'Review selected records' }).click();
-  await expect(page.getByRole('button', { name: 'Confirm this group' })).toBeEnabled();
+  await expect(page.getByRole('button', { name: /^Import \d+ records?$/ })).toBeEnabled();
   const group = await page.getByLabel('Import ID', { exact: true }).inputValue();
   await page.reload();
   await page.getByRole('button', { name: 'Import records', exact: true }).click();
   await page.getByLabel('Import ID', { exact: true }).fill(group);
   await page.getByRole('button', { name: 'Check import status', exact: true }).click();
-  await expect(page.locator('.import-group')).toContainText('ready');
-  await expect(page.locator('.import-group')).toContainText(group);
-  await page.getByRole('button', { name: 'Confirm this group' }).click();
+  await expect(page.locator('.import-group')).toContainText('Ready to import');
+  await expect(
+    page.getByRole('region', { name: 'Selected group preview', exact: true }),
+  ).toContainText(group);
+  await page.getByRole('button', { name: /^Import \d+ records?$/ }).click();
   await expect(page.getByText('Group complete.', { exact: true })).toBeVisible();
 });
 
@@ -201,6 +208,7 @@ test('changed journal content needs an explicit new source revision and expired 
     ],
   };
   const choose = async (changed: boolean) => {
+    await openImportSelection(page);
     const doc = structuredClone(original);
     if (changed) doc.entries[0]!.question = 'What changed?';
     await page.getByLabel('Import file', { exact: true }).setInputFiles({
@@ -213,17 +221,20 @@ test('changed journal content needs an explicit new source revision and expired 
   };
   await choose(false);
   await page.getByRole('button', { name: 'Review selected records' }).click();
-  await page.getByRole('button', { name: 'Confirm this group' }).click();
+  await page.getByRole('button', { name: /^Import \d+ records?$/ }).click();
   await expect(page.getByText('Group complete.', { exact: true })).toBeVisible();
   await choose(true);
   await page.getByRole('button', { name: 'Review selected records' }).click();
-  await expect(page.locator('.import-group')).toContainText('conflict');
-  await expect(page.getByRole('button', { name: 'Confirm this group' })).toBeDisabled();
+  await expect(
+    page.getByRole('region', { name: 'Selected group preview', exact: true }),
+  ).toContainText('different content');
+  await expect(page.getByRole('button', { name: /^Import \d+ records?$/ })).toBeDisabled();
+  await openImportSelection(page);
   await page.getByText('Resolve a conflict or erased record', { exact: true }).click();
   await page.getByLabel('Recovery action').selectOption('new_revision');
   await page.getByLabel('New source revision', { exact: true }).fill('revision-2');
   await page.getByRole('button', { name: 'Review selected records' }).click();
-  await expect(page.getByRole('button', { name: 'Confirm this group' })).toBeEnabled();
+  await expect(page.getByRole('button', { name: /^Import \d+ records?$/ })).toBeEnabled();
   await expect(page.locator('.import-group')).toContainText('New source revision');
   await page.context().clearCookies();
   await page.getByRole('button', { name: 'Check import status' }).click();
@@ -298,7 +309,7 @@ test('an imported deletion reopens as the recorded unavailable edition without o
   await choices.nth(0).check();
   await choices.nth(1).check();
   await page.getByRole('button', { name: 'Review selected records' }).click();
-  await page.getByRole('button', { name: 'Confirm this group' }).click();
+  await page.getByRole('button', { name: /^Import \d+ records?$/ }).click();
   await expect(page.getByText('Group complete.', { exact: true })).toBeVisible();
   await backToReadings(page);
   await page.locator('.history-link').click();

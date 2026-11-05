@@ -17,6 +17,7 @@ import type {
 import { api, ApiFailure } from './api.ts';
 import { Button, TextLink } from './design/components.tsx';
 import { date } from './date.ts';
+import botanical from './design/art/import/botanical.png';
 import './import-review.css';
 
 const formats = [
@@ -37,6 +38,7 @@ type Review = {
   status: z.infer<typeof apiSchemas.ImportGroupStatus>;
   key: string;
   failure?: string;
+  results?: z.infer<typeof apiSchemas.ImportGroupResultPage>['items'];
 };
 type Progress = {
   status: z.infer<typeof apiSchemas.ImportGroupStatus>;
@@ -109,6 +111,64 @@ function recordStatus(status: Review['items'][number]['status']) {
     invalid: 'Cannot import yet',
   }[status];
 }
+function reviewSummary(review: Review) {
+  const complete = review.status.state === 'complete';
+  const ready = complete
+    ? (review.results?.filter((item) => item.status === 'imported').length ?? 0)
+    : review.items.filter((item) => item.status === 'ready').length;
+  const duplicates = complete
+    ? (review.results?.filter((item) => item.status === 'duplicate').length ?? 0)
+    : review.items.filter((item) => item.status === 'duplicate').length;
+  const invalid = review.items.length - ready - duplicates;
+  const failed = Boolean(review.failure) || ['failed', 'expired'].includes(review.status.state);
+  const blocked = !complete && (failed || invalid > 0);
+  const duplicateOnly = duplicates === review.status.totalItems;
+  const canConfirm = review.status.state === 'staged' && !!review.status.previewHash && !blocked;
+  const missingParent = review.items.some((item) =>
+    /DEPENDENCY_MISSING|MISSING_PARENT|PARENT_NOT_FOUND/.test(item.error ?? ''),
+  );
+  const erased = review.items.some((item) => item.status === 'erased');
+  const conflict = review.items.some((item) => item.status === 'conflict');
+  const remedy = erased
+    ? 'This record was previously deleted. To recreate it, choose “Recreate in a new namespace” in the recovery options, then review the group again. Other saved records are unchanged.'
+    : conflict
+      ? 'A saved record has different content. Keep it by leaving this group unconfirmed, or choose a new source revision in the recovery options and review again.'
+      : missingParent
+        ? 'The parent reading or a required source is missing. Include its original reading and required records, then review the selection again. Other independent groups can still be imported.'
+        : invalid
+          ? 'One or more records could not be validated. Correct the original file or leave those records unselected, then review again.'
+          : !review.status.previewHash && review.status.state === 'staged'
+            ? 'This group is not ready to confirm. Include all of its related records and review the original file again.'
+            : null;
+  const label = complete
+    ? duplicateOnly
+      ? 'Already saved — skipped'
+      : 'Import complete'
+    : blocked
+      ? missingParent
+        ? 'Blocked · Parent missing'
+        : 'Blocked · Needs review'
+      : duplicateOnly
+        ? 'Already saved — skipped'
+        : review.group.unresolved.length > 0
+          ? 'Parent check required'
+          : canConfirm
+            ? 'Ready to import'
+            : 'Checking import status';
+  return {
+    ready,
+    duplicates,
+    blocked,
+    complete,
+    duplicateOnly,
+    canConfirm,
+    erased,
+    conflict,
+    remedy,
+    label,
+  };
+}
+
 function externalDependencies(items: Review['items']) {
   const units = items.flatMap((item) => (item.unit ? [item.unit] : []));
   const entityKey = (identity: Unit['identity']) =>
@@ -346,6 +406,7 @@ export function ImportRecords({
   const [newRevision, setNewRevision] = useState(''),
     [freshNamespace, setFreshNamespace] = useState('');
   const [visible, setVisible] = useState(25);
+  const [setupOpen, setSetupOpen] = useState(true);
   const [reviews, setReviews] = useState<Review[]>([]),
     [progress, setProgress] = useState<Progress | null>(null);
   const [previewGroup, setPreviewGroup] = useState<string | null>(null),
@@ -376,6 +437,7 @@ export function ImportRecords({
     setError('');
   };
   const reset = () => {
+    setSetupOpen(true);
     setParsed(null);
     clearReview();
   };
@@ -493,6 +555,7 @@ export function ImportRecords({
         setPreviewGroup((previous) => previous ?? group.id);
         setResumeId(group.id);
       }
+      setSetupOpen(false);
       setMessage('Review each group before confirming. The encrypted preview expires in 24 hours.');
     });
   async function reconcile(id: string, current: () => boolean) {
@@ -527,6 +590,7 @@ export function ImportRecords({
       ]);
       setPreviewGroup(id);
       setPreviewLimit(25);
+      setSetupOpen(false);
     }
     if (status.state === 'complete' || status.state === 'failed') {
       let cursor: string | null = null;
@@ -544,7 +608,19 @@ export function ImportRecords({
       } while (cursor);
     }
     if (!current()) return;
-    setReviews((rs) => rs.map((r) => (r.group.id === id ? { ...r, status } : r)));
+    setReviews((rs) =>
+      rs.map((r) =>
+        r.group.id === id
+          ? {
+              ...r,
+              status,
+              ...(status.state === 'complete' || status.state === 'failed'
+                ? { results: items }
+                : {}),
+            }
+          : r,
+      ),
+    );
     const sessions = [
       ...new Set(items.flatMap((item) => (item.sessionId ? [item.sessionId] : []))),
     ].slice(0, 10);
@@ -625,8 +701,43 @@ export function ImportRecords({
     setRecoveryMode('none');
     requestAnimationFrame(() => opener.current?.focus());
   }
+  const selectedReview = reviews.find((r) => r.group.id === previewGroup) ?? reviews[0];
+  const selectedState = selectedReview ? reviewSummary(selectedReview) : null;
+  const selectedCount = selectedState?.canConfirm ? selectedState.ready : 0;
+  const importedCount = reviews.reduce(
+    (count, r) => count + (r.status.state === 'complete' ? reviewSummary(r).ready : 0),
+    0,
+  );
+  const duplicateCount = reviews.reduce((count, r) => count + reviewSummary(r).duplicates, 0);
+  const blockedCount = reviews.reduce((count, r) => {
+    const v = reviewSummary(r);
+    return count + (!v.complete && v.blocked ? r.items.length - v.duplicates : 0);
+  }, 0);
+  const openSetup = (target: 'file' | 'records' | 'recovery') => {
+    setSetupOpen(true);
+    requestAnimationFrame(() => {
+      const node = document.getElementById(
+        target === 'recovery'
+          ? 'import-recovery-options'
+          : target === 'records'
+            ? 'import-file-records'
+            : 'import-review',
+      );
+      if (node instanceof HTMLDetailsElement) node.open = true;
+      node?.scrollIntoView({ block: 'start' });
+      node
+        ?.querySelector<HTMLElement>(
+          target === 'file'
+            ? 'input[type="file"]'
+            : target === 'records'
+              ? 'input[type="checkbox"]'
+              : 'select',
+        )
+        ?.focus();
+    });
+  };
   return (
-    <div className="import-tools">
+    <div className={`import-tools${open ? ' is-open' : ''}`}>
       {!open && (
         <Button ref={opener} type="button" variant="secondary" onClick={() => setOpen(true)}>
           Import records
@@ -634,397 +745,507 @@ export function ImportRecords({
       )}
       {open && (
         <section id="import-review" aria-labelledby="import-title">
-          <h3 id="import-title" ref={heading} tabIndex={-1}>
-            Review an import
-          </h3>
-          <p>
-            Choose records from a journal or an earlier export. Saved imports are private and work
-            with AI readings off.
-          </p>
-          <fieldset disabled={busy}>
-            <legend>Choose a file</legend>
-            <label>
-              File format
-              <select
-                value={format}
-                onChange={(e) => {
-                  setFormat(e.target.value);
-                  reset();
-                }}
-              >
-                {formats.map(([v, t]) => (
-                  <option value={v} key={v}>
-                    {t}
-                  </option>
-                ))}
-              </select>
-            </label>
-            {format === 'pixel-json' && (
-              <p>Native Pixel files are unsupported. Choose a supported export to continue.</p>
-            )}
-            <label>
-              Import file
-              <input
-                type="file"
-                accept=".json,.ndjson,application/json,application/x-ndjson"
-                onChange={(e) => {
-                  setFile(e.target.files?.[0] ?? null);
-                  reset();
-                }}
-              />
-            </label>
-            <p>
-              UTF-8 JSON or NDJSON, up to 32 MiB. Only the records you select will be uploaded for
-              review.
-            </p>
-            {(format === 'tarot-json' || format === 'patternlike-export') && (
-              <details>
-                <summary>Dataset identity</summary>
+          <header className="import-introduction">
+            <div>
+              <h3 id="import-title" ref={heading} tabIndex={-1}>
+                Review your import
+              </h3>
+              <p>Bring earlier readings and your own reflections into one place.</p>
+            </div>
+            <img className="import-botanical" src={botanical} alt="" width="542" height="368" />
+          </header>
+          {(file || reviews.length > 0) && (
+            <div className="import-file-banner">
+              <span className="import-design-icon import-file-icon" aria-hidden="true" />
+              <div>
+                <strong>{file?.name ?? 'Resumed import'}</strong>
                 <p>
-                  The default identifies your {format === 'tarot-json' ? 'Tarot' : 'Patternlike'}{' '}
-                  journal in this account. Use the same namespace and revision for overlapping
-                  backups.
+                  {file ? formats.find(([key]) => key === format)?.[1] : 'Saved import preview'} ·{' '}
+                  {selectedReview?.items[0]?.unit?.identity.source.revision ?? sourceRevision}
                 </p>
-                <label>
-                  Dataset namespace (optional)
-                  <input
-                    value={namespace}
-                    onChange={(e) => {
-                      setNamespace(e.target.value);
-                      reset();
-                    }}
-                  />
-                </label>
-                <label>
-                  Dataset revision
-                  <input
-                    value={sourceRevision}
-                    onChange={(e) => {
-                      setSourceRevision(e.target.value);
-                      reset();
-                    }}
-                  />
-                </label>
-              </details>
-            )}
-            <Button type="button" disabled={!file || format === 'pixel-json'} onClick={read}>
-              Read file
-            </Button>
-          </fieldset>
-          {parsed && (
-            <fieldset disabled={busy} id="import-file-records">
-              <legend>Records in the file</legend>
-              {parsed.profileCandidates?.map((candidate) => (
-                <section key={candidate.id} className="notice">
-                  <h3>Birth profile in this file</h3>
-                  <p>
-                    {candidate.birth.date} · {candidate.birth.place.label}
-                  </p>
-                  <p>
-                    This profile is not included in reading imports. Review it separately before
-                    explicitly replacing your current birth details.
-                  </p>
-                  <Button variant="secondary" onClick={() => onRestoreProfile(candidate.birth)}>
-                    Review birth profile for restoration
-                  </Button>
-                </section>
-              ))}
-              {parsed.errors.map((e) => (
-                <p key={e.pointer}>
-                  {e.pointer} · Invalid record ({e.code})
-                </p>
-              ))}
-              {parsed.units.slice(0, visible).map((u) => (
-                <div className="import-file-record" key={u.key}>
-                  <label className="import-choice">
-                    <input
-                      type="checkbox"
-                      checked={selected.includes(u.key)}
-                      onChange={(e) => {
-                        setSelected((prev) =>
-                          e.target.checked ? [...prev, u.key] : prev.filter((k) => k !== u.key),
-                        );
-                        setReviews([]);
-                        setProgress(null);
-                      }}
-                    />
-                    <span>
-                      <strong>{importLabel(u)}</strong>
-                      <small>
-                        {unitDescription(u)} · {originalDate(u) ?? 'Original date unavailable'}
-                      </small>
-                      {u.kind === 'legacy-reading' && (
-                        <small>{u.record.generatedText ?? 'Interpretation unavailable'}</small>
-                      )}
-                      {u.kind === 'legacy-authored' && <small>{u.record.text}</small>}
-                      {u.dependencies.length > 0 && (
-                        <small>
-                          Includes related records. Its original reading and required sources must
-                          be available.
-                        </small>
-                      )}
-                    </span>
-                  </label>
-                  <RecordIdentifiers unit={u} />
-                </div>
-              ))}
-              {visible < parsed.units.length && (
-                <Button type="button" variant="secondary" onClick={() => setVisible((n) => n + 25)}>
-                  Show more records
-                </Button>
-              )}
-              <details id="import-recovery-options">
-                <summary>Resolve a conflict or erased record</summary>
-                <label>
-                  Recovery action
-                  <select
-                    value={recoveryMode}
-                    onChange={(e) => {
-                      const v = e.target.value as Recovery['kind'];
-                      setRecoveryMode(v);
-                      setReviews([]);
-                      setProgress(null);
-                      if (v === 'reimport_erased' && !freshNamespace)
-                        setFreshNamespace(crypto.randomUUID());
-                    }}
-                  >
-                    <option value="none">Keep existing records</option>
-                    <option value="new_revision">Confirm a new source revision</option>
-                    <option value="reimport_erased">Recreate in a new namespace</option>
-                  </select>
-                </label>
-                {recoveryMode === 'new_revision' && (
-                  <label>
-                    New source revision
-                    <input
-                      value={newRevision}
-                      onChange={(e) => {
-                        setNewRevision(e.target.value);
-                        setReviews([]);
-                      }}
-                    />
-                  </label>
-                )}
-                {recoveryMode === 'reimport_erased' && (
-                  <p>
-                    Explicit recreation uses new namespace {freshNamespace}. Review it before
-                    confirming the group.
-                  </p>
-                )}
-              </details>
-              <Button type="button" disabled={!selected.length} onClick={review}>
-                Review selected records
-              </Button>
-            </fieldset>
+              </div>
+              <p>Imports preserve the export. Missing dates and sources stay marked as unknown.</p>
+            </div>
           )}
-          {reviews.map((r) => {
-            const ready = r.items.filter((item) => item.status === 'ready').length;
-            const duplicates = r.items.filter((item) => item.status === 'duplicate').length;
-            const blocked = r.items.length - ready - duplicates;
-            const duplicateOnly = duplicates === r.status.totalItems;
-            const expanded = previewGroup === r.group.id;
-            const title = groupTitle(r);
-            const primary = groupPrimary(r);
-            const at = primary ? originalDate(primary) : null;
-            const erased = r.items.some((item) => item.status === 'erased');
-            const conflict = r.items.some((item) => item.status === 'conflict');
-            const missingParent = r.items.some((item) =>
-              /DEPENDENCY_MISSING|MISSING_PARENT|PARENT_NOT_FOUND/.test(item.error ?? ''),
-            );
-            const remedy = erased
-              ? 'This record was previously deleted. To recreate it, choose “Recreate in a new namespace” in the recovery options, then review the group again. Other saved records are unchanged.'
-              : conflict
-                ? 'A saved record has different content. Keep it by leaving this group unconfirmed, or choose a new source revision in the recovery options and review again.'
-                : missingParent
-                  ? 'The parent reading or a required source is missing. Include its original reading and required records, then review the selection again. Other independent groups can still be imported.'
-                  : blocked
-                    ? 'One or more records could not be validated. Correct the original file or leave those records unselected, then review again.'
-                    : !r.status.previewHash && r.status.state === 'staged'
-                      ? 'This group is not ready to confirm. Include all of its related records and review the original file again.'
-                      : null;
-            return (
-              <section
-                className="import-group"
-                key={r.group.id}
-                aria-labelledby={`import-group-title-${r.group.id}`}
-              >
-                <h4 id={`import-group-title-${r.group.id}`}>{title}</h4>
-                <p className="muted">{at ?? 'Original date unavailable'}</p>
-                <p className="import-group-counts">
-                  {r.status.state === 'complete'
-                    ? `${r.status.totalItems} records reviewed · Finished`
-                    : `${ready} ready · ${duplicates} already saved · ${blocked} need review`}
-                </p>
-                {r.status.state === 'complete' && (
-                  <p>
-                    Review complete.{' '}
-                    {duplicateOnly
-                      ? 'No new records were added.'
-                      : 'The confirmed records are saved.'}
-                  </p>
-                )}
-                {duplicateOnly && <p>Already saved — skipped</p>}
-                {duplicateOnly && (
-                  <p className="muted">
-                    Finishing this review adds no new records. Your existing reading stays saved.
-                  </p>
-                )}
-                <Button
-                  variant="text-button"
-                  disabled={busy}
-                  aria-expanded={expanded}
-                  aria-controls={`import-group-preview-${r.group.id}`}
-                  onClick={() => {
-                    setPreviewGroup(expanded ? null : r.group.id);
-                    setPreviewLimit(25);
+          <details
+            className="import-setup"
+            open={setupOpen}
+            onToggle={(event) => setSetupOpen(event.currentTarget.open)}
+          >
+            <summary>File and record selection</summary>
+            <fieldset disabled={busy}>
+              <legend>Choose a file</legend>
+              <label>
+                File format
+                <select
+                  value={format}
+                  onChange={(e) => {
+                    setFormat(e.target.value);
+                    reset();
                   }}
                 >
-                  {expanded ? 'Hide record preview' : 'Preview this group'}
-                </Button>
-                {expanded && (
-                  <div className="import-group-preview" id={`import-group-preview-${r.group.id}`}>
-                    <p className="muted">
-                      {r.status.totalItems} selected{' '}
-                      {r.status.totalItems === 1 ? 'record' : 'records'}. Readings and related
-                      personal writing are kept together in this group.
+                  {formats.map(([v, t]) => (
+                    <option value={v} key={v}>
+                      {t}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              {format === 'pixel-json' && (
+                <p>Native Pixel files are unsupported. Choose a supported export to continue.</p>
+              )}
+              <label>
+                Import file
+                <input
+                  type="file"
+                  accept=".json,.ndjson,application/json,application/x-ndjson"
+                  onChange={(e) => {
+                    setFile(e.target.files?.[0] ?? null);
+                    reset();
+                  }}
+                />
+              </label>
+              <p>
+                UTF-8 JSON or NDJSON, up to 32 MiB. Only the records you select will be uploaded for
+                review.
+              </p>
+              {(format === 'tarot-json' || format === 'patternlike-export') && (
+                <details>
+                  <summary>Dataset identity</summary>
+                  <p>
+                    The default identifies your {format === 'tarot-json' ? 'Tarot' : 'Patternlike'}{' '}
+                    journal in this account. Use the same namespace and revision for overlapping
+                    backups.
+                  </p>
+                  <label>
+                    Dataset namespace (optional)
+                    <input
+                      value={namespace}
+                      onChange={(e) => {
+                        setNamespace(e.target.value);
+                        reset();
+                      }}
+                    />
+                  </label>
+                  <label>
+                    Dataset revision
+                    <input
+                      value={sourceRevision}
+                      onChange={(e) => {
+                        setSourceRevision(e.target.value);
+                        reset();
+                      }}
+                    />
+                  </label>
+                </details>
+              )}
+              <Button type="button" disabled={!file || format === 'pixel-json'} onClick={read}>
+                Read file
+              </Button>
+            </fieldset>
+            {parsed && (
+              <fieldset disabled={busy} id="import-file-records">
+                <legend>Records in the file</legend>
+                {parsed.profileCandidates?.map((candidate) => (
+                  <section key={candidate.id} className="notice">
+                    <h3>Birth profile in this file</h3>
+                    <p>
+                      {candidate.birth.date} · {candidate.birth.place.label}
                     </p>
-                    {r.items.slice(0, previewLimit).map((item, j) => (
-                      <section className="import-record-preview" key={item.index}>
-                        <h5>
-                          {item.unit
-                            ? unitDescription(item.unit)
-                            : (item.label ?? `Record ${j + 1}`)}
-                        </h5>
-                        {item.unit && (
-                          <p className="import-record-date">
-                            {originalDate(item.unit) ?? 'Original date unavailable'}
-                          </p>
+                    <p>
+                      This profile is not included in reading imports. Review it separately before
+                      explicitly replacing your current birth details.
+                    </p>
+                    <Button variant="secondary" onClick={() => onRestoreProfile(candidate.birth)}>
+                      Review birth profile for restoration
+                    </Button>
+                  </section>
+                ))}
+                {parsed.errors.map((e) => (
+                  <p key={e.pointer}>
+                    {e.pointer} · Invalid record ({e.code})
+                  </p>
+                ))}
+                {parsed.units.slice(0, visible).map((u) => (
+                  <div className="import-file-record" key={u.key}>
+                    <label className="import-choice">
+                      <input
+                        type="checkbox"
+                        checked={selected.includes(u.key)}
+                        onChange={(e) => {
+                          setSelected((prev) =>
+                            e.target.checked ? [...prev, u.key] : prev.filter((k) => k !== u.key),
+                          );
+                          setReviews([]);
+                          setProgress(null);
+                        }}
+                      />
+                      <span>
+                        <strong>{importLabel(u)}</strong>
+                        <small>
+                          {unitDescription(u)} · {originalDate(u) ?? 'Original date unavailable'}
+                        </small>
+                        {u.kind === 'legacy-reading' && (
+                          <small>{u.record.generatedText ?? 'Interpretation unavailable'}</small>
                         )}
-                        <p className={`import-record-status is-${item.status}`}>
-                          {duplicateOnly
-                            ? 'This record is already saved.'
-                            : recordStatus(item.status)}
+                        {u.kind === 'legacy-authored' && <small>{u.record.text}</small>}
+                        {u.dependencies.length > 0 && (
+                          <small>
+                            Includes related records. Its original reading and required sources must
+                            be available.
+                          </small>
+                        )}
+                      </span>
+                    </label>
+                    <RecordIdentifiers unit={u} />
+                  </div>
+                ))}
+                {visible < parsed.units.length && (
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    onClick={() => setVisible((n) => n + 25)}
+                  >
+                    Show more records
+                  </Button>
+                )}
+                <details id="import-recovery-options">
+                  <summary>Resolve a conflict or erased record</summary>
+                  <label>
+                    Recovery action
+                    <select
+                      value={recoveryMode}
+                      onChange={(e) => {
+                        const v = e.target.value as Recovery['kind'];
+                        setRecoveryMode(v);
+                        setReviews([]);
+                        setProgress(null);
+                        if (v === 'reimport_erased' && !freshNamespace)
+                          setFreshNamespace(crypto.randomUUID());
+                      }}
+                    >
+                      <option value="none">Keep existing records</option>
+                      <option value="new_revision">Confirm a new source revision</option>
+                      <option value="reimport_erased">Recreate in a new namespace</option>
+                    </select>
+                  </label>
+                  {recoveryMode === 'new_revision' && (
+                    <label>
+                      New source revision
+                      <input
+                        value={newRevision}
+                        onChange={(e) => {
+                          setNewRevision(e.target.value);
+                          setReviews([]);
+                        }}
+                      />
+                    </label>
+                  )}
+                  {recoveryMode === 'reimport_erased' && (
+                    <p>
+                      Explicit recreation uses new namespace {freshNamespace}. Review it before
+                      confirming the group.
+                    </p>
+                  )}
+                </details>
+                <Button type="button" disabled={!selected.length} onClick={review}>
+                  Review selected records
+                </Button>
+              </fieldset>
+            )}
+          </details>
+          {reviews.length > 0 && selectedReview && (
+            <>
+              <div className="import-review-layout">
+                <section className="import-group-list" aria-label="Reading groups">
+                  <h4>Reading groups</h4>
+                  <p className="muted">
+                    Choose a group to review. Import one related group at a time.
+                  </p>
+                  {[
+                    {
+                      label: 'Available to import',
+                      rows: reviews.filter((r) => {
+                        const v = reviewSummary(r);
+                        return !v.complete && !v.duplicateOnly && !v.blocked;
+                      }),
+                    },
+                    {
+                      label: 'Not included in a new import',
+                      rows: reviews.filter((r) => {
+                        const v = reviewSummary(r);
+                        return v.complete || v.duplicateOnly || v.blocked;
+                      }),
+                    },
+                  ].map(
+                    ({ label, rows }) =>
+                      rows.length > 0 && (
+                        <div className="import-group-category" key={label}>
+                          <p className="eyebrow">{label}</p>
+                          {rows.map((r) => {
+                            const v = reviewSummary(r);
+                            const primary = groupPrimary(r);
+                            const chosen = selectedReview.group.id === r.group.id;
+                            return (
+                              <section
+                                key={r.group.id}
+                                className={`import-group${chosen ? ' is-selected' : ''}`}
+                              >
+                                <Button
+                                  variant="text-button"
+                                  className="import-group-choice"
+                                  aria-label={`Preview ${groupTitle(r)}`}
+                                  aria-pressed={chosen}
+                                  aria-controls="import-selected-preview"
+                                  disabled={busy}
+                                  onClick={() => {
+                                    setError('');
+                                    setPreviewGroup(r.group.id);
+                                    setPreviewLimit(25);
+                                  }}
+                                >
+                                  <span className="import-group-association">
+                                    {chosen ? 'Preview shown' : 'Preview this group'}
+                                    <span
+                                      className="import-design-icon import-arrow-icon"
+                                      aria-hidden="true"
+                                    />
+                                  </span>
+                                  <span className="import-group-identity">
+                                    <strong>{groupTitle(r)}</strong>
+                                    <span>
+                                      {primary
+                                        ? (originalDate(primary) ?? 'Original date unavailable')
+                                        : 'Original date unavailable'}
+                                    </span>
+                                    <span>
+                                      {r.status.totalItems} related{' '}
+                                      {r.status.totalItems === 1 ? 'record' : 'records'}
+                                    </span>
+                                  </span>
+                                  <span
+                                    className={`import-row-status${v.blocked ? ' is-blocked' : v.duplicateOnly || v.complete ? ' is-muted' : ''}`}
+                                  >
+                                    {v.label}
+                                  </span>
+                                </Button>
+                                {v.duplicateOnly && (
+                                  <p>
+                                    Finishing this review adds no new records. Your existing reading
+                                    stays saved.
+                                  </p>
+                                )}
+                                {r.recovery.kind !== 'none' && (
+                                  <p>
+                                    {r.recovery.kind === 'new_revision'
+                                      ? 'New source revision'
+                                      : 'Recreation in a new namespace'}{' '}
+                                    · Existing records remain unchanged.
+                                  </p>
+                                )}
+                              </section>
+                            );
+                          })}
+                        </div>
+                      ),
+                  )}
+                </section>
+                {(() => {
+                  const r = selectedReview;
+                  const v = reviewSummary(r);
+                  const duplicateOnly = v.duplicateOnly;
+                  const primary = groupPrimary(r);
+                  const resultStatuses = new Map(
+                    r.results?.map((result) => [result.index, result.status]),
+                  );
+                  return (
+                    <section
+                      id="import-selected-preview"
+                      className="import-preview-panel"
+                      aria-label="Selected group preview"
+                    >
+                      <div className="import-preview-association">
+                        <span className="import-design-icon import-book-icon" aria-hidden="true" />
+                        <span>
+                          Selected group preview · {r.status.totalItems}{' '}
+                          {r.status.totalItems === 1 ? 'record' : 'records'}
+                        </span>
+                      </div>
+                      <div className="import-group-preview">
+                        <h4>{groupTitle(r)}</h4>
+                        <p className="muted">
+                          {primary
+                            ? (originalDate(primary) ?? 'Original date unavailable')
+                            : 'Original date unavailable'}
                         </p>
-                        {item.unit ? (
-                          <ImportRecordContent unit={item.unit} />
-                        ) : (
-                          <p>
-                            Original content is unavailable in this review. Read the original file
-                            again to inspect it.
+                        <p className="import-group-counts">
+                          {v.complete
+                            ? `${v.ready} imported · ${v.duplicates} already saved · Finished`
+                            : `${v.ready} ready · ${v.duplicates} already saved · ${r.items.length - v.ready - v.duplicates} need review`}
+                        </p>
+                        {r.items.slice(0, previewLimit).map((item, j) => (
+                          <section className="import-record-preview" key={item.index}>
+                            <h5>
+                              {item.unit
+                                ? unitDescription(item.unit)
+                                : (item.label ?? `Record ${j + 1}`)}
+                            </h5>
+                            {item.unit && (
+                              <p className="import-record-date">
+                                {originalDate(item.unit) ?? 'Original date unavailable'}
+                              </p>
+                            )}
+                            <p className={`import-record-status is-${item.status}`}>
+                              {duplicateOnly
+                                ? 'This record is already saved.'
+                                : v.complete
+                                  ? resultStatuses.get(item.index) === 'duplicate'
+                                    ? 'This record was already saved.'
+                                    : resultStatuses.get(item.index) === 'imported'
+                                      ? 'Imported and saved.'
+                                      : 'Review complete.'
+                                  : recordStatus(item.status)}
+                            </p>
+                            {item.unit ? (
+                              <ImportRecordContent unit={item.unit} />
+                            ) : (
+                              <p>
+                                Original content is unavailable in this review. Read the original
+                                file again to inspect it.
+                              </p>
+                            )}
+                            {item.unit && <RecordIdentifiers unit={item.unit} />}
+                          </section>
+                        ))}
+                        {r.items.length > previewLimit && (
+                          <Button
+                            variant="secondary"
+                            disabled={busy}
+                            onClick={() => setPreviewLimit((n) => n + 25)}
+                          >
+                            Show more related records
+                          </Button>
+                        )}
+
+                        {v.remedy && (
+                          <p className="import-remedy" id={`import-remedy-${r.group.id}`}>
+                            {v.remedy}
                           </p>
                         )}
-                        {item.unit && <RecordIdentifiers unit={item.unit} />}
-                      </section>
-                    ))}
-                    {r.items.length > previewLimit && (
+                        {r.group.unresolved.length > 0 && (
+                          <p className="import-remedy">
+                            This group references a parent reading or source outside this selection.
+                            It must already be saved with the same source and revision. Otherwise,
+                            include its original reading and required records, then review the
+                            selection again.
+                          </p>
+                        )}
+                        {r.failure && (
+                          <p className="import-remedy" role="alert">
+                            {r.failure}
+                          </p>
+                        )}
+                        {r.failure && parsed && (
+                          <Button
+                            variant="text-button"
+                            disabled={busy}
+                            onClick={() => openSetup('records')}
+                          >
+                            Review record selection
+                          </Button>
+                        )}
+                        {(v.erased || v.conflict) && parsed && (
+                          <Button
+                            variant="text-button"
+                            disabled={busy}
+                            onClick={() => openSetup('recovery')}
+                          >
+                            Review recovery options
+                          </Button>
+                        )}
+                        <details className="import-identifiers">
+                          <summary>Import details</summary>
+                          <dl>
+                            <dt>Import ID</dt>
+                            <dd>{r.group.id}</dd>
+                            <dt>Review state</dt>
+                            <dd>{r.status.state}</dd>
+                            {r.recovery.kind !== 'none' && (
+                              <>
+                                <dt>Previous source namespace</dt>
+                                <dd>{r.recovery.previousSource.namespaceId}</dd>
+                                <dt>Previous source revision</dt>
+                                <dd>{r.recovery.previousSource.revision}</dd>
+                              </>
+                            )}
+                            {r.items.map((item) => (
+                              <div key={item.index}>
+                                <dt>Record status</dt>
+                                <dd>
+                                  {item.status}
+                                  {item.error ? ` · ${item.error}` : ''}
+                                </dd>
+                              </div>
+                            ))}
+                          </dl>
+                        </details>
+                      </div>
+                    </section>
+                  );
+                })()}
+              </div>
+              <section className="import-outcome" aria-label="Import summary">
+                <div className="import-outcome-main">
+                  <div>
+                    <h4>
+                      {importedCount
+                        ? `${importedCount} ${importedCount === 1 ? 'record' : 'records'} imported.`
+                        : 'No new records imported yet.'}
+                    </h4>
+                    <ul className="import-outcome-counts">
+                      <li>
+                        <strong>{selectedCount}</strong>{' '}
+                        {selectedCount === 1 ? 'record' : 'records'} selected for this import
+                      </li>
+                      <li>
+                        <strong>{duplicateCount}</strong>{' '}
+                        {duplicateCount === 1 ? 'duplicate' : 'duplicates'} skipped
+                      </li>
+                      <li>
+                        <strong>{blockedCount}</strong> {blockedCount === 1 ? 'record' : 'records'}{' '}
+                        blocked
+                      </li>
+                    </ul>
+                  </div>
+                  <div className="import-outcome-actions">
+                    <Button variant="text-button" disabled={busy} onClick={() => openSetup('file')}>
+                      Choose a different file
+                    </Button>
+                    {selectedReview.status.state === 'staged' && (
                       <Button
-                        variant="secondary"
-                        disabled={busy}
-                        onClick={() => setPreviewLimit((n) => n + 25)}
+                        disabled={busy || !selectedState?.canConfirm}
+                        aria-describedby={
+                          selectedState?.remedy
+                            ? `import-remedy-${selectedReview.group.id}`
+                            : undefined
+                        }
+                        onClick={() => commit(selectedReview)}
                       >
-                        Show more related records
+                        {selectedState?.duplicateOnly
+                          ? 'Finish review — no new records'
+                          : `Import ${selectedState?.ready ?? 0} ${selectedState?.ready === 1 ? 'record' : 'records'}`}
                       </Button>
                     )}
                   </div>
-                )}
-                {r.recovery.kind !== 'none' && (
-                  <p>
-                    {r.recovery.kind === 'new_revision'
-                      ? 'New source revision'
-                      : 'Recreation in a new namespace'}{' '}
-                    · Existing records remain unchanged.
-                  </p>
-                )}
-                {remedy && (
-                  <p className="import-remedy" id={`import-remedy-${r.group.id}`}>
-                    {remedy}
-                  </p>
-                )}
-                {r.group.unresolved.length > 0 && (
-                  <p className="import-remedy">
-                    This group references a parent reading or source outside this selection. It must
-                    already be saved with the same source and revision. Otherwise, include its
-                    original reading and required records, then review the selection again.
-                  </p>
-                )}
-                {r.failure && (
-                  <p className="import-remedy" role="alert">
-                    {r.failure}
-                  </p>
-                )}
-                {r.failure && parsed && (
-                  <Button
-                    variant="text-button"
-                    disabled={busy}
-                    onClick={() => {
-                      const records = document.getElementById('import-file-records');
-                      records?.scrollIntoView({ block: 'start' });
-                      records?.querySelector<HTMLInputElement>('input[type="checkbox"]')?.focus();
-                    }}
-                  >
-                    Review record selection
-                  </Button>
-                )}
-                {(erased || conflict) && parsed && (
-                  <Button
-                    variant="text-button"
-                    disabled={busy}
-                    onClick={() => {
-                      const details = document.getElementById('import-recovery-options');
-                      if (details instanceof HTMLDetailsElement) {
-                        details.open = true;
-                        details.scrollIntoView({ block: 'center' });
-                        details.querySelector('select')?.focus();
-                      }
-                    }}
-                  >
-                    Review recovery options
-                  </Button>
-                )}
-                {r.status.state === 'staged' && (
-                  <Button
-                    type="button"
-                    onClick={() => commit(r)}
-                    aria-describedby={remedy ? `import-remedy-${r.group.id}` : undefined}
-                    disabled={
-                      busy ||
-                      Boolean(r.failure) ||
-                      !r.status.previewHash ||
-                      r.items.some((x) => !['ready', 'duplicate'].includes(x.status))
-                    }
-                  >
-                    {duplicateOnly ? 'Finish review — no new records' : 'Confirm this group'}
-                  </Button>
-                )}
-                <details className="import-identifiers">
-                  <summary>Import details</summary>
-                  <dl>
-                    <dt>Import ID</dt>
-                    <dd>{r.group.id}</dd>
-                    <dt>Review state</dt>
-                    <dd>{r.status.state}</dd>
-                    {r.recovery.kind !== 'none' && (
-                      <>
-                        <dt>Previous source namespace</dt>
-                        <dd>{r.recovery.previousSource.namespaceId}</dd>
-                        <dt>Previous source revision</dt>
-                        <dd>{r.recovery.previousSource.revision}</dd>
-                      </>
-                    )}
-                    {r.items.map((item) => (
-                      <div key={item.index}>
-                        <dt>Record status</dt>
-                        <dd>
-                          {item.status}
-                          {item.error ? ` · ${item.error}` : ''}
-                        </dd>
-                      </div>
-                    ))}
-                  </dl>
-                </details>
+                </div>
+                <p className="import-privacy">
+                  <span className="import-design-icon import-shield-icon" aria-hidden="true" />
+                  Importing saves this group’s eligible records. It does not send them to an AI
+                  provider. Other groups need their own confirmation.
+                </p>
               </section>
-            );
-          })}
+            </>
+          )}
           {reviews.length > 0 && (
             <Button
               type="button"

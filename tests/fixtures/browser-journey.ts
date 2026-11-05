@@ -369,7 +369,9 @@ export async function continuityJourneyStates(
 export async function importReviewState(page: Page, capture: (state: string) => Promise<void>) {
   const opener = page.getByRole('button', { name: 'Import records', exact: true });
   await opener.click();
-  await expect(page.getByRole('heading', { name: 'Review an import', exact: true })).toBeVisible();
+  await expect(
+    page.getByRole('heading', { name: 'Review your import', exact: true }),
+  ).toBeVisible();
   await page.getByLabel('File format').selectOption('tarot-json');
   await page
     .getByLabel('Import file', { exact: true })

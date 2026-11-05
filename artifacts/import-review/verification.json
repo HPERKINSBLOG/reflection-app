@@ -1,0 +1,120 @@
+{
+  "recordedAt": "2026-11-05T19:20:20.187134+00:00",
+  "baseCommit": "02f904a3592d3dd7150e1805b1ff3d541cb8ac55",
+  "sourceDigest": "72cc4bf53a5fd80732d7674e6945c1684c318f95a5773dc96099ae370abe7e89",
+  "files": {
+    "artifacts/your-pattern/qualification/current-status.md": "9b61111c494b0f794db446731a459351655b151b3910b8f29fcc59b54487789e",
+    "docs/design/import-library-handoff.md": "c1375a4f472de3142edfd389961d5793bb415cb72fdbf6dd20eb23f9e6e7fa47",
+    "docs/design/import-review.md": "12831c282fd1727d7054f872b7a7f7734065202f6547f6ffca2815577f6b6c6b",
+    "docs/design/merger-implementation-map.md": "936b5d92d4a30038efd7d628715c665a75615b64c1f179e58a575219734707b4",
+    "src/client/design/art/import/arrow-right.svg": "3222e984cb1df0a2f9e5a82d6912c631fdb0ccef13bf213cf70bc671b974d100",
+    "src/client/design/art/import/book-open.svg": "ff830c836b747a4e97e8e70fd4655397e04b478c497b37d2b125d5da1f7e4737",
+    "src/client/design/art/import/botanical.png": "8e46b92d0a60f864e26c22f565e87893debd171b4700e2239e477de56b5f562c",
+    "src/client/design/art/import/file-json.svg": "2ba6b1914408d9af35f02cf24e5855aff47145fba10d5e511e955b22f2d460d5",
+    "src/client/design/art/import/shield-check.svg": "813a0479bbc5b503aab876f22565c79bf202f64ce56ee6a22e9dacfeb38f1357",
+    "src/client/import-review.css": "5ea3e79f558f85972e504404033baa235e6ad2f178cc8ec4785ac0c5ad108479",
+    "src/client/imports.tsx": "d0a6ef3917dd66b458ce61a15ad7691f108b6ca464e5aef37fb9593789cc5529",
+    "tests/browser/import-redesign.spec.ts": "c11447e234dc9b01b12cad0a38ccbf81b8504642bfc9f4d20900b56abd20057b",
+    "tests/browser/import-review.spec.ts": "9a79ffa7ce295e935476aa63b68f5618ba97cfe330e866b0e19c0c0739b4799b",
+    "tests/browser/imports.spec.ts": "51af1c330ecd4234d02fec16dc6bc047d689d4ec7d9735f4b97ee7388d5261a0",
+    "tests/fixtures/browser-import.ts": "890c210f71a4d6f82f3c4447b2a9cb4fbd8f39abc8d0910ddcfe86309536c334",
+    "tests/fixtures/browser-journey.ts": "bc16a08da78957bd32101872a1564bb0b802d46056f5bfe3bf60beab9857fef1"
+  },
+  "changes": [
+    "Adapt the source Figma import review to the canonical Paper and Evening tokens and exact botanical/SVG assets.",
+    "Separate the group list and selected exact-text preview, with one-group confirmation and authoritative completed counts.",
+    "Preserve explicit selection, duplicate reconciliation, parent validation, recovery, resume, profile restoration and safe source text.",
+    "Consolidate six reusable Figma component families with 19 variants into the canonical library."
+  ],
+  "validation": {
+    "domainTooling": {
+      "command": "npx vitest run --config vitest.domain.config.ts --maxWorkers=2",
+      "passed": 477,
+      "failed": 0,
+      "skipped": 0,
+      "scope": "Domain and tooling code is unchanged by the later UI-only refinements."
+    },
+    "chromium": {
+      "command": "npx playwright test tests/browser/imports.spec.ts tests/browser/import-review.spec.ts tests/browser/import-redesign.spec.ts tests/browser/your-pattern.spec.ts --grep 'import|restoration' --reporter=line,json",
+      "startTime": "2026-11-05T19:16:27.399Z",
+      "duration": 22814.076,
+      "expected": 11,
+      "skipped": 0,
+      "unexpected": 0,
+      "flaky": 0
+    },
+    "targetedCrossBrowser": {
+      "command": "npx playwright test --config playwright.journey.config.ts tests/browser/journey-layout.spec.ts --grep '(320px light|1280px dark):' --reporter=line,json --output=/tmp/reflection-import-ui/journey-results",
+      "startTime": "2026-11-05T19:17:29.039Z",
+      "duration": 93977.529,
+      "expected": 6,
+      "skipped": 0,
+      "unexpected": 0,
+      "flaky": 0,
+      "engines": [
+        "Chromium",
+        "Firefox",
+        "WebKit"
+      ],
+      "casesPerEngine": [
+        "320px Paper",
+        "1280px Evening"
+      ]
+    },
+    "typecheck": "npm run typecheck: passed",
+    "lint": "Biome check passed for seven changed source/test files; 11 existing informational template-literal suggestions, no errors.",
+    "diffCheck": "git diff --check: passed",
+    "developmentFindings": "Early test runs required updated selectors and a wait for asynchronous file parsing. Visual inspection then caught the retained account label column and invalid unquoted SVG mask data URLs. Both were fixed, and the final tests now assert panel geometry and decoded masks. Accessible confirmation names now match visible labels, and switching groups clears unrelated errors while preserving the failed group."
+  },
+  "visualReview": {
+    "source": "https://www.figma.com/design/q9z9EumNoo7fLv0qwKyBQU?node-id=60-1831",
+    "screenshots": {
+      "import-paper-desktop-full.png": "02cfd40787f11be581a1745b565bc02261689dd2bbc98a46495c77dacfe1a992",
+      "import-evening-desktop-full.png": "d0a4832239ad8762d7d3d80700c36ffd3e5047b3ef13e5bf4fa9911a8d868ae6",
+      "import-paper-390.png": "66e21813912cf46eb54a5b5d3ee5303529e4f730694b6c4eacf2e3f6fd701f1e",
+      "import-evening-390.png": "a658e3f38e1b8a4217b8169a9dfd3c5b52990bc2b93921ed0517995ff317f7c0",
+      "import-long-paper-320.png": "4e0cfa0dddcab6a8f20adde9eab88ae8bf9f5f00fb479957d8bf85bbe37369b3",
+      "import-long-evening-320.png": "817392755fd74a2da63a87e8c00502b116b5a002537604fc910b6a949516e95b"
+    },
+    "checks": [
+      "Desktop columns fill the account workspace and align.",
+      "Mobile panels stack without horizontal overflow.",
+      "Long source text remains complete and wraps at 320px.",
+      "Exact botanical proportions and all four SVG masks render.",
+      "Paper and Evening selection text, button labels and recovery controls are readable."
+    ]
+  },
+  "figma": {
+    "fileKey": "a0u0Ok74iKTMjp1L5osRnU",
+    "pageId": "129:55",
+    "componentSets": 6,
+    "variants": 19,
+    "paperBoard": "131:76",
+    "eveningBoard": "131:229",
+    "newComponentsPublication": "UNPUBLISHED",
+    "canonicalButtonPublication": "CURRENT",
+    "publicationPerformed": false,
+    "reviewedImages": {
+      "reflection-import-library-paper.png": "b54a25f6c03593fe4d5c518da93dc6d095781cd1ed762ebd49de5c8cac09450d",
+      "reflection-import-library-evening-final.png": "5fd051d104558bad04af2f484f72c402a535df35eaf5a2db49c7c552084661d0",
+      "reflection-evening-selected-pixel-check.png": "ba924775d5d108099712969f5da15f0c2c7ec22a15045d601cf41f563e715d24",
+      "reflection-evening-pending-pixel-check.png": "b672218e953d2ff62293b17f79ed7915cf838164748d52b180f396f746c70aac",
+      "reflection-evening-saved-pixel-check.png": "fc16215aa8b0a36a9e89a104952c8793d31cca7ee5d83526e71a39c0c6f094df"
+    }
+  },
+  "retainedRawEvidenceDirectory": "/home/htper/.local/state/reflection-app/import-review-20261105",
+  "reportHashes": {
+    "browser-final.json": "76c57790474086a569028ed43bff05531162989b60bd3027385841d59cd22d36",
+    "domain.json": "f321fc7d5108628bc2f0e3421cb24a72da73e2089bdaa666aa7bea89e7e51e04",
+    "journeys.json": "fff22d032b854a79dfdffdcd3681cd57bc5d699c662ac526a3a92bb05122bc2b",
+    "typecheck.log": "1513ea1f8ab5b7ad2479a4bb354fe5a94d249c2aca58e7ce934537893ed2ff64",
+    "lint.log": "dd4de95f453ca506615008939e5a58373873991eade9ee3fa663c9eb28f4e2c3",
+    "reflection-import-library-ledger.json": "22ac0a31604ff8c6c214debe3d830ba91eca693c10312ebbf51daa0c2d7c7ff2"
+  },
+  "limits": [
+    "This is focused UI/import verification, not a new full release gate or full 39-case journey matrix.",
+    "No new Worker, database, migration, calculation or catalogue implementation.",
+    "No library publication, merge, deployment or hosted activation.",
+    "Physical-device and screen-reader acceptance remain separate."
+  ]
+}
