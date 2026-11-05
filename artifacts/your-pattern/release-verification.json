@@ -1,0 +1,194 @@
+{
+  "version": 1,
+  "checkedAt": "2026-11-05T22:12:07.661Z",
+  "status": "local-verified-hosted-pending",
+  "scope": "synthetic-local-only",
+  "sourceCommitAtRunStart": "a629d1570abd62cb93bff0c6a78b543b5d23ad2d",
+  "sourceDigest": "135407f80bfae8a32cb0ee1559b74dd74ba7601dac4d05fc9b582a5ac99b5b76",
+  "sourceChangedDuringChecks": false,
+  "node": "v26.13.0",
+  "fullGate": {
+    "stages": 14,
+    "durationMs": 481930,
+    "deadlineMs": 540000,
+    "domain": {
+      "passed": 477,
+      "files": 64
+    },
+    "database": {
+      "passed": 652,
+      "files": 70
+    },
+    "chromium": {
+      "passed": 183,
+      "files": 26
+    },
+    "skipped": 0,
+    "flaky": 0
+  },
+  "crossBrowser": {
+    "passed": 39,
+    "files": 4,
+    "projects": [
+      "chromium",
+      "firefox",
+      "webkit"
+    ],
+    "durationMs": 312581.252,
+    "skipped": 0,
+    "flaky": 0
+  },
+  "catalogue": {
+    "checkedAt": "2026-11-05T21:58:33.880Z",
+    "status": "passed",
+    "releaseHash": "3a730caeb64a87cacc981f55df0558164bbe5ff77b00257d778d0045dae73e11",
+    "reviewKind": "human_approved",
+    "publicKeySha256": "bc5fb3edf117e2483150495743cedda3e3369f7723b839c29e0995a9646393e9",
+    "registryPublication": "not-run",
+    "hostedTrustInstallation": "not-run"
+  },
+  "figmaRelease": {
+    "sessionId": "5faf33ae-5db4-426d-beaa-1ba2149d9309",
+    "date": "2026-11-05",
+    "canonicalSetStatus": "All four updated Import families CURRENT",
+    "workingDraft": "All 10 remote component variant layouts and text match canonical masters; selected-group contrast and theme fixes present in remote masters.",
+    "behaviorDraft": "Library enabled; 30 checkbox and 18 status instances reference published canonical components. No instances of the four updated families require refresh.",
+    "guides": "Stale publish and accept reminders removed from all three guides.",
+    "limitation": "No per-file UI acceptance history API; current linked remote components and library availability verified directly.",
+    "status": "Library release, design migration and validation complete",
+    "remaining": []
+  },
+  "accountInventory": {
+    "checkedAt": "2026-11-05 22:00:46 UTC",
+    "method": "Cloudflare connector GET /accounts, page 1 per_page 50",
+    "accounts": [
+      {
+        "id": "a77e479f6736120eadd99973dbeb705e",
+        "name": "Henry Flare",
+        "type": "standard"
+      }
+    ],
+    "pagination": {
+      "page": 1,
+      "per_page": 50,
+      "total_pages": 1,
+      "count": 1,
+      "total_count": 1
+    },
+    "qualificationIsolationAvailable": false
+  },
+  "releaseInspection": {
+    "localVerification": "passed",
+    "deploymentAllowed": false,
+    "applicationDigest": "071980c4ca5eccbca98ae15e6d40cf076f8f1c55ed976c74ed8431496bb630c3",
+    "qualification": [
+      {
+        "id": "identity",
+        "label": "hosted identity and automated recovery",
+        "status": "pending",
+        "reason": "Exact hosted origin/RP ID and automated same-account recovery journeys on the frozen candidate remain open. Physical/synced authenticators are untested limitations, not human-review gates."
+      },
+      {
+        "id": "keys",
+        "label": "production key rotation and retained-key receipts",
+        "status": "pending",
+        "reason": "Retained DEKs, journaled replacement, complete authenticated inventory, checkpoint rollover and guarded retirement pass local tests. Actual hosted secret custody, recovery and backup-retention evidence remain open."
+      },
+      {
+        "id": "content",
+        "label": "verified launch content and attribution",
+        "status": "pending",
+        "reason": "Automated validation of the final catalog, attribution, source provenance, product copy and signed content artifact is not recorded. No human sign-off is required by owner instruction."
+      },
+      {
+        "id": "provider",
+        "label": "provider qualification and billing reconciliation",
+        "status": "pending",
+        "reason": "Production qualification for reading-provider-policy.v2 remains open: content integrity, frozen-corpus automated evaluation, project privacy/access evidence and billing reconciliation. The four-case development check and hosted smoke establish development behavior only."
+      },
+      {
+        "id": "release",
+        "label": "hosted release isolation and failing-test proof",
+        "status": "pending",
+        "reason": "Hosted main failing-test proof, non-main rejection and separate preview resource/token evidence have not been run."
+      },
+      {
+        "id": "database",
+        "label": "hosted D1 concurrency and scheduled recovery",
+        "status": "pending",
+        "reason": "Hosted D1 transaction/race behavior, Cron overlap/missed wake and backlog recovery remain unverified."
+      },
+      {
+        "id": "restore",
+        "label": "hosted erasure/security restore and independent backups",
+        "status": "pending",
+        "reason": "Hosted snapshot/restore and independent backup inventory/loss tests including erased records, used codes, removed passkeys and pre-dispatch requests remain unrun."
+      },
+      {
+        "id": "accessibility",
+        "label": "automated browser and accessibility acceptance",
+        "status": "pending",
+        "reason": "Automated keyboard, focus, zoom, viewport, accessibility-tree and browser checks against the final hosted candidate remain open. Physical devices and screen-reader experience are unverified limitations, not human approval gates."
+      },
+      {
+        "id": "operations",
+        "label": "operational monitoring and runbooks",
+        "status": "pending",
+        "reason": "Content-free completed heartbeats, configured spend alerts, independent missing-wake checks and runbooks are implemented locally. Independent monitor, alert delivery and hosted recovery drills remain unverified."
+      },
+      {
+        "id": "owner",
+        "label": "owner decisions",
+        "status": "pending",
+        "reason": "Production domain, spend caps and operational ownership await owner decisions. Launch geography, minimum-age policy and human-review sign-offs are excluded by owner instruction."
+      }
+    ]
+  },
+  "changes": [
+    "Refresh published Figma library and migration documentation",
+    "Add titles to six SVGs rejected by the full accessibility lint gate",
+    "Refresh integrated test reports and source-bound release checklist"
+  ],
+  "review": {
+    "scope": "Documentation, SVG titles and readiness checklist",
+    "findings": 0
+  },
+  "receipts": [
+    {
+      "path": "artifacts/verify.json",
+      "sha256": "a5a3ca9092a53ffe0db13e08dd88b3798576bd1e5bb913003293e3baa6f4e847"
+    },
+    {
+      "path": "artifacts/domain-tests.json",
+      "sha256": "b6bb5c51d9e7006181b35e3561f2bf6aa3ce2550ff0b5363e72c14a1c19883bb"
+    },
+    {
+      "path": "artifacts/db-tests.json",
+      "sha256": "2ff3b058533115c8d8136b8d2a270d905fbb42c35ef85f5f75123a06e5ac86db"
+    },
+    {
+      "path": "artifacts/browser-tests.json",
+      "sha256": "8f7aafa10db61a3c8dfad06fd4009f6f3b1dc5d7addb9a6a4e8d4618a1e38003"
+    },
+    {
+      "path": "artifacts/visual-pass/browser-matrix.json",
+      "sha256": "3589d7c4f7a83401c093dd213bb0fc1cb4ab42cd17dae871d173011bc9922d4a"
+    }
+  ],
+  "commands": [
+    "TMPDIR=/home/htper/.cache/pattern-tmp npm run verify",
+    "TMPDIR=/home/htper/.cache/pattern-tmp npm run test:journey -- --workers=2",
+    "node --import tsx scripts/release.ts --check"
+  ],
+  "limits": {
+    "hostedApplicationQualification": "not-run",
+    "hostedPatternAdmission": "implementation-pending",
+    "hostedRecoveryOperator": "implementation-and-provisioning-pending",
+    "distinctCloudflareAccount": "not-connected",
+    "physicalDevicesAndScreenReader": "unverified-limitations-not-extra-human-approval-gates",
+    "numericalEvidence": "retained-from-earlier-qualified-calculation-source-not-rerun",
+    "liveProviderQualification": "not-run",
+    "merge": "not-performed",
+    "deployment": "not-performed"
+  }
+}

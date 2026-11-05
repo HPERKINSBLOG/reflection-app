@@ -2,6 +2,8 @@
 
 Date: 2026-11-05. This supplements [local acceptance](YOUR_PATTERN_RESULTS.md) and [PR #11](https://github.com/HPERKINSBLOG/reflection-app/pull/11). Calculation/reference checks, agent editorial review, a protected hosted resource benchmark and a populated hosted migration rehearsal are complete. **The PR remains draft and production activation remains closed.**
 
+See the [current release status](../artifacts/your-pattern/qualification/current-status.md) for subsequent verification, completed Figma publication and the exact catalogue's human approval. Approval-pending statements below describe this report's earlier cutoff and are superseded by that status record.
+
 ## Numerical evidence
 
 The reproducible runner exercises the actual adapter, not a reimplementation of it. Swiss Ephemeris remains an isolated research dependency; no Swiss code or data was added to the application's package, lockfile or bundle. The independent references and comparison conventions are recorded in the [numerical receipt](../artifacts/your-pattern/qualification/numerical.json). Raw JPL responses and their request/hash manifests are retained alongside it.

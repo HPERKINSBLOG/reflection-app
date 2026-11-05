@@ -2,6 +2,8 @@
 
 Date: 2026-11-05. Branch: `codex/your-pattern`. Implementation starts at `a30a278`; the first complete desktop/mobile flow is `eba4eca`. Review and visual fixes follow in `3866e37` and `f24297b`. The final gate receipt records the complete source digest; acceptance requires its `passed` status to match the checkout. This record covers local behavior and does not authorize hosted activation.
 
+See the [current release status](../artifacts/your-pattern/qualification/current-status.md) for subsequent verification, completed Figma publication and the exact catalogue's human approval. Approval-pending statements below describe this report's earlier cutoff and are superseded by that status record.
+
 ## Delivered behavior
 
 The local preview supports birth setup → calculated chapter → optional own reflection → atomic save → exact shared-journal reopening → dated revisit. Paper and Evening use the existing design system on desktop and mobile. A profile change never recalculates or rewrites a saved chapter.
