@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+npm run build
+[[ -d "dist/client" ]] || {
+  echo "Expected build output at dist/client" >&2
+  exit 1
+}
+figma make deploy --build-dir "dist/client"
