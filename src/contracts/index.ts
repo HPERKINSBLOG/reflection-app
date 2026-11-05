@@ -5,6 +5,7 @@
 import { z } from 'zod';
 import { REVISIT_LIMITS, revisitTextLength } from './revisit-policy.ts';
 import { CONTEXT_LIMITS, codePointLength } from './context-policy.ts';
+export * from './astrology.ts';
 
 export const Id = z.uuid();
 export const Hash = z.string().regex(/^[a-f0-9]{64}$/);

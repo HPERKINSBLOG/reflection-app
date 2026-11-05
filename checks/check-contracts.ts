@@ -3,6 +3,8 @@ import {readFileSync} from 'node:fs';
 import {webcrypto} from 'node:crypto';
 import {z} from 'zod';
 import {TarotBasis,ModelCandidate,StartRequest,Reading,apiSchemas,Ciphertext,AstrologyInput} from '../src/contracts/index.ts';
+import { BirthDraft, AstrologyInputV2, PatternReadingV1, PatternSaveInput } from '../src/contracts/astrology.ts';
+for (const schema of [BirthDraft, AstrologyInputV2, PatternReadingV1, PatternSaveInput]) z.toJSONSchema(schema, {target:'draft-2020-12',unrepresentable:'throw'});
 const corpus=JSON.parse(readFileSync('docs/architecture/EVAL_CORPUS.json','utf8')) as {
   fixtures:{tarotBasis:unknown;candidate:unknown;start:unknown};cases:Array<{id:string;expected:{kind:string};rationale:string;assertions:string[]}>};
 TarotBasis.parse(corpus.fixtures.tarotBasis);ModelCandidate.parse(corpus.fixtures.candidate);StartRequest.parse(corpus.fixtures.start);
