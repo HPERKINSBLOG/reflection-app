@@ -12,6 +12,1199 @@ servers:
 security:
   - sessionCookie: []
 paths:
+  /astrology/places/search:
+    post:
+      operationId: birthplaces
+      summary: birthplaces
+      description: Authenticated first-party place search. Body query 2–120 Unicode
+        code points; no query retention, max20 candidates. 32KiB body; no-store.
+      security:
+        - sessionCookie: []
+      parameters:
+        - name: X-CSRF-Token
+          in: header
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Successful result; private,no-store.
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                const: private, no-store
+            X-Correlation-ID:
+              schema:
+                type: string
+                format: uuid
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BirthPlaceResults"
+        "400":
+          description: Invalid shape/range.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+        "401":
+          description: Sign in again.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+        "403":
+          description: Permission or recent authentication required.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+        "404":
+          description: Absent or not owned.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+        "409":
+          description: Refresh state; preserve local draft.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+        "410":
+          description: Owned resource erased/withdrawn/expired.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+        "413":
+          description: Payload exceeds budget.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+        "422":
+          description: Unsupported language, safety boundary or invalid content.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+        "428":
+          description: If-Match required.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+        "429":
+          description: Quota or rate limit; honor Retry-After.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+        "500":
+          description: Internal failure; use correlation ID.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+        "503":
+          description: Dependency, key, spend or recovery unavailable.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BirthPlaceSearch"
+  /astrology/birth/resolve:
+    post:
+      operationId: resolveBirth
+      summary: resolveBirth
+      description: Resolve selected-zone civil time without persistence. Exact folds
+        require a choice; gaps reject; approximate/full-day uncertainty stays
+        explicit.
+      security:
+        - sessionCookie: []
+      parameters:
+        - name: X-CSRF-Token
+          in: header
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Successful result; private,no-store.
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                const: private, no-store
+            X-Correlation-ID:
+              schema:
+                type: string
+                format: uuid
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BirthTimeResolution"
+        "400":
+          description: Invalid shape/range.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+        "401":
+          description: Sign in again.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+        "403":
+          description: Permission or recent authentication required.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+        "404":
+          description: Absent or not owned.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+        "409":
+          description: Refresh state; preserve local draft.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+        "410":
+          description: Owned resource erased/withdrawn/expired.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+        "413":
+          description: Payload exceeds budget.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+        "422":
+          description: Unsupported language, safety boundary or invalid content.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+        "428":
+          description: If-Match required.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+        "429":
+          description: Quota or rate limit; honor Retry-After.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+        "500":
+          description: Internal failure; use correlation ID.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+        "503":
+          description: Dependency, key, spend or recovery unavailable.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BirthDraft"
+  /astrology/profile:
+    get:
+      operationId: birthProfile
+      summary: birthProfile
+      description: Current encrypted profile or absent state with monotonic revision.
+        No calculation or AI call.
+      security:
+        - sessionCookie: []
+      parameters: []
+      responses:
+        "200":
+          description: Successful result; private,no-store.
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                const: private, no-store
+            X-Correlation-ID:
+              schema:
+                type: string
+                format: uuid
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BirthProfileView"
+        "400":
+          description: Invalid shape/range.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+        "401":
+          description: Sign in again.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+        "403":
+          description: Permission or recent authentication required.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+        "404":
+          description: Absent or not owned.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+        "409":
+          description: Refresh state; preserve local draft.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+        "410":
+          description: Owned resource erased/withdrawn/expired.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+        "413":
+          description: Payload exceeds budget.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+        "422":
+          description: Unsupported language, safety boundary or invalid content.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+        "428":
+          description: If-Match required.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+        "429":
+          description: Quota or rate limit; honor Retry-After.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+        "500":
+          description: Internal failure; use correlation ID.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+        "503":
+          description: Dependency, key, spend or recovery unavailable.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+    put:
+      operationId: saveBirthProfile
+      summary: saveBirthProfile
+      description: Explicit retention acknowledgement, recovery kit and
+        expectedRevision required. Owner encryption; updates affect future
+        calculations only.
+      security:
+        - sessionCookie: []
+      parameters:
+        - name: Idempotency-Key
+          in: header
+          required: true
+          schema:
+            type: string
+            minLength: 16
+            maxLength: 128
+          description: Same key+payload returns same committed logical result; changed
+            payload409.
+        - name: X-CSRF-Token
+          in: header
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Successful result; private,no-store.
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                const: private, no-store
+            X-Correlation-ID:
+              schema:
+                type: string
+                format: uuid
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BirthProfileView"
+        "400":
+          description: Invalid shape/range.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+        "401":
+          description: Sign in again.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+        "403":
+          description: Permission or recent authentication required.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+        "404":
+          description: Absent or not owned.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+        "409":
+          description: Refresh state; preserve local draft.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+        "410":
+          description: Owned resource erased/withdrawn/expired.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+        "413":
+          description: Payload exceeds budget.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+        "422":
+          description: Unsupported language, safety boundary or invalid content.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+        "428":
+          description: If-Match required.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+        "429":
+          description: Quota or rate limit; honor Retry-After.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+        "500":
+          description: Internal failure; use correlation ID.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+        "503":
+          description: Dependency, key, spend or recovery unavailable.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BirthProfileWrite"
+    delete:
+      operationId: deleteBirthProfile
+      summary: deleteBirthProfile
+      description: Ledger-backed current profile removal. Saved reading bases retain
+        original inputs and must be deleted separately.
+      security:
+        - sessionCookie: []
+      parameters:
+        - name: If-Match
+          in: header
+          required: true
+          schema:
+            type: string
+            pattern: ^"[1-9][0-9]*"$
+          description: Quoted current integer revision. Missing428; stale409.
+        - name: Idempotency-Key
+          in: header
+          required: true
+          schema:
+            type: string
+            minLength: 16
+            maxLength: 128
+          description: Same key+payload returns same committed logical result; changed
+            payload409.
+        - name: X-CSRF-Token
+          in: header
+          required: true
+          schema:
+            type: string
+      responses:
+        "202":
+          description: Successful result; private,no-store.
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                const: private, no-store
+            X-Correlation-ID:
+              schema:
+                type: string
+                format: uuid
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DeletionReceipt"
+        "400":
+          description: Invalid shape/range.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+        "401":
+          description: Sign in again.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+        "403":
+          description: Permission or recent authentication required.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+        "404":
+          description: Absent or not owned.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+        "409":
+          description: Refresh state; preserve local draft.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+        "410":
+          description: Owned resource erased/withdrawn/expired.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+        "413":
+          description: Payload exceeds budget.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+        "422":
+          description: Unsupported language, safety boundary or invalid content.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+        "428":
+          description: If-Match required.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+        "429":
+          description: Quota or rate limit; honor Retry-After.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+        "500":
+          description: Internal failure; use correlation ID.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+        "503":
+          description: Dependency, key, spend or recovery unavailable.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DeleteRequest"
+  /astrology/pattern:
+    get:
+      operationId: patternPreview
+      summary: patternPreview
+      description: Four deterministic supported/unavailable chapters. Thirty new
+        semantic calculations per UTC day; repeated inputs reuse HMAC admission.
+        No AI permission or writer calls; 2048 evaluation cap. Hosted activation
+        remains closed pending qualification.
+      security:
+        - sessionCookie: []
+      parameters: []
+      responses:
+        "200":
+          description: Successful result; private,no-store.
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                const: private, no-store
+            X-Correlation-ID:
+              schema:
+                type: string
+                format: uuid
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PatternPreview"
+        "400":
+          description: Invalid shape/range.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+        "401":
+          description: Sign in again.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+        "403":
+          description: Permission or recent authentication required.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+        "404":
+          description: Absent or not owned.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+        "409":
+          description: Refresh state; preserve local draft.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+        "410":
+          description: Owned resource erased/withdrawn/expired.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+        "413":
+          description: Payload exceeds budget.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+        "422":
+          description: Unsupported language, safety boundary or invalid content.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+        "428":
+          description: If-Match required.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+        "429":
+          description: Quota or rate limit; honor Retry-After.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+        "500":
+          description: Internal failure; use correlation ID.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+        "503":
+          description: Dependency, key, spend or recovery unavailable.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+  /astrology/pattern/saves:
+    post:
+      operationId: savePattern
+      summary: savePattern
+      description: Recalculate server-owned profile, compare preview identities and
+        atomically save immutable basis/chapter plus optional reflection. Replay
+        committed keys before current-profile/content checks. Different-key
+        writing against an existing family returns409 with existingPattern;
+        losing draft remains unsaved.
+      security:
+        - sessionCookie: []
+      parameters:
+        - name: Idempotency-Key
+          in: header
+          required: true
+          schema:
+            type: string
+            minLength: 16
+            maxLength: 128
+          description: Same key+payload returns same committed logical result; changed
+            payload409.
+        - name: X-CSRF-Token
+          in: header
+          required: true
+          schema:
+            type: string
+      responses:
+        "201":
+          description: Successful result; private,no-store.
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                const: private, no-store
+            X-Correlation-ID:
+              schema:
+                type: string
+                format: uuid
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PatternSavedIdentity"
+        "400":
+          description: Invalid shape/range.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+        "401":
+          description: Sign in again.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+        "403":
+          description: Permission or recent authentication required.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+        "404":
+          description: Absent or not owned.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+        "409":
+          description: Refresh state; preserve local draft.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+        "410":
+          description: Owned resource erased/withdrawn/expired.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+        "413":
+          description: Payload exceeds budget.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+        "422":
+          description: Unsupported language, safety boundary or invalid content.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+        "428":
+          description: If-Match required.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+        "429":
+          description: Quota or rate limit; honor Retry-After.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+        "500":
+          description: Internal failure; use correlation ID.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+        "503":
+          description: Dependency, key, spend or recovery unavailable.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PatternSaveInput"
   /auth/options:
     post:
       operationId: authOptions
@@ -8787,6 +9980,1435 @@ components:
       in: cookie
       name: __Host-session
   schemas:
+    BirthProfileView:
+      type: object
+      properties:
+        profile:
+          anyOf:
+            - type: object
+              properties:
+                kind:
+                  type: string
+                  const: birth.profile.v1
+                id:
+                  type: string
+                  format: uuid
+                  pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+                revision:
+                  type: integer
+                  exclusiveMinimum: 0
+                  maximum: 9007199254740991
+                birth:
+                  type: object
+                  properties:
+                    date:
+                      type: string
+                      format: date
+                      pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))$
+                    place:
+                      oneOf:
+                        - type: object
+                          properties:
+                            source:
+                              type: string
+                              const: manual
+                            label:
+                              type: string
+                              minLength: 1
+                              maxLength: 200
+                            latitudeDeg:
+                              type: number
+                              minimum: -90
+                              maximum: 90
+                            longitudeEastDeg:
+                              type: number
+                              minimum: -180
+                              maximum: 180
+                            zone:
+                              type: string
+                              minLength: 1
+                              maxLength: 100
+                          required:
+                            - source
+                            - label
+                            - latitudeDeg
+                            - longitudeEastDeg
+                            - zone
+                          additionalProperties: false
+                        - type: object
+                          properties:
+                            source:
+                              type: string
+                              const: geonames
+                            label:
+                              type: string
+                              minLength: 1
+                              maxLength: 200
+                            latitudeDeg:
+                              type: number
+                              minimum: -90
+                              maximum: 90
+                            longitudeEastDeg:
+                              type: number
+                              minimum: -180
+                              maximum: 180
+                            zone:
+                              type: string
+                              minLength: 1
+                              maxLength: 100
+                            sourceId:
+                              type: string
+                              pattern: ^\d+$
+                            datasetHash:
+                              type: string
+                              pattern: ^[a-f0-9]{64}$
+                            country:
+                              type: string
+                              minLength: 1
+                              maxLength: 100
+                            administrativeArea:
+                              type: string
+                              maxLength: 150
+                          required:
+                            - source
+                            - label
+                            - latitudeDeg
+                            - longitudeEastDeg
+                            - zone
+                            - sourceId
+                            - datasetHash
+                            - country
+                            - administrativeArea
+                          additionalProperties: false
+                    time:
+                      oneOf:
+                        - type: object
+                          properties:
+                            certainty:
+                              type: string
+                              const: exact
+                            localTime:
+                              type: string
+                              pattern: ^(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d)?$
+                            fold:
+                              type: string
+                              enum:
+                                - earlier
+                                - later
+                                - unambiguous
+                            offsetSeconds:
+                              type: integer
+                              minimum: -86400
+                              maximum: 86400
+                          required:
+                            - certainty
+                            - localTime
+                          additionalProperties: false
+                        - type: object
+                          properties:
+                            certainty:
+                              type: string
+                              const: approximate
+                            earliestLocalTime:
+                              type: string
+                              pattern: ^(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d)?$
+                            latestLocalTime:
+                              type: string
+                              pattern: ^(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d)?$
+                          required:
+                            - certainty
+                            - earliestLocalTime
+                            - latestLocalTime
+                          additionalProperties: false
+                        - type: object
+                          properties:
+                            certainty:
+                              type: string
+                              const: unknown
+                          required:
+                            - certainty
+                          additionalProperties: false
+                    historicalZoneConfirmed:
+                      type: boolean
+                  required:
+                    - date
+                    - place
+                    - time
+                    - historicalZoneConfirmed
+                  additionalProperties: false
+                resolved:
+                  oneOf:
+                    - type: object
+                      properties:
+                        kind:
+                          type: string
+                          const: instant
+                        certainty:
+                          type: string
+                          const: exact
+                        at:
+                          type: string
+                          format: date-time
+                          pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?(?:Z))$
+                        offsetSeconds:
+                          type: integer
+                          minimum: -9007199254740991
+                          maximum: 9007199254740991
+                        fold:
+                          type: string
+                          enum:
+                            - earlier
+                            - later
+                            - unambiguous
+                        historicalZone:
+                          type: boolean
+                      required:
+                        - kind
+                        - certainty
+                        - at
+                        - offsetSeconds
+                        - fold
+                        - historicalZone
+                      additionalProperties: false
+                    - type: object
+                      properties:
+                        kind:
+                          type: string
+                          const: intervals
+                        certainty:
+                          type: string
+                          enum:
+                            - approximate
+                            - unknown
+                        intervals:
+                          minItems: 1
+                          maxItems: 10
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              startsAt:
+                                type: string
+                                format: date-time
+                                pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?(?:Z))$
+                              endsAt:
+                                type: string
+                                format: date-time
+                                pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?(?:Z))$
+                            required:
+                              - startsAt
+                              - endsAt
+                            additionalProperties: false
+                        historicalZone:
+                          type: boolean
+                      required:
+                        - kind
+                        - certainty
+                        - intervals
+                        - historicalZone
+                      additionalProperties: false
+                createdAt:
+                  type: string
+                  format: date-time
+                  pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?(?:Z))$
+                updatedAt:
+                  type: string
+                  format: date-time
+                  pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?(?:Z))$
+              required:
+                - kind
+                - id
+                - revision
+                - birth
+                - resolved
+                - createdAt
+                - updatedAt
+              additionalProperties: false
+            - type: "null"
+        revision:
+          type: integer
+          minimum: 0
+          maximum: 9007199254740991
+      required:
+        - profile
+        - revision
+      additionalProperties: false
+    BirthProfileWrite:
+      type: object
+      properties:
+        birth:
+          type: object
+          properties:
+            date:
+              type: string
+              format: date
+              pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))$
+            place:
+              oneOf:
+                - type: object
+                  properties:
+                    source:
+                      type: string
+                      const: manual
+                    label:
+                      type: string
+                      minLength: 1
+                      maxLength: 200
+                    latitudeDeg:
+                      type: number
+                      minimum: -90
+                      maximum: 90
+                    longitudeEastDeg:
+                      type: number
+                      minimum: -180
+                      maximum: 180
+                    zone:
+                      type: string
+                      minLength: 1
+                      maxLength: 100
+                  required:
+                    - source
+                    - label
+                    - latitudeDeg
+                    - longitudeEastDeg
+                    - zone
+                  additionalProperties: false
+                - type: object
+                  properties:
+                    source:
+                      type: string
+                      const: geonames
+                    label:
+                      type: string
+                      minLength: 1
+                      maxLength: 200
+                    latitudeDeg:
+                      type: number
+                      minimum: -90
+                      maximum: 90
+                    longitudeEastDeg:
+                      type: number
+                      minimum: -180
+                      maximum: 180
+                    zone:
+                      type: string
+                      minLength: 1
+                      maxLength: 100
+                    sourceId:
+                      type: string
+                      pattern: ^\d+$
+                    datasetHash:
+                      type: string
+                      pattern: ^[a-f0-9]{64}$
+                    country:
+                      type: string
+                      minLength: 1
+                      maxLength: 100
+                    administrativeArea:
+                      type: string
+                      maxLength: 150
+                  required:
+                    - source
+                    - label
+                    - latitudeDeg
+                    - longitudeEastDeg
+                    - zone
+                    - sourceId
+                    - datasetHash
+                    - country
+                    - administrativeArea
+                  additionalProperties: false
+            time:
+              oneOf:
+                - type: object
+                  properties:
+                    certainty:
+                      type: string
+                      const: exact
+                    localTime:
+                      type: string
+                      pattern: ^(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d)?$
+                    fold:
+                      type: string
+                      enum:
+                        - earlier
+                        - later
+                        - unambiguous
+                    offsetSeconds:
+                      type: integer
+                      minimum: -86400
+                      maximum: 86400
+                  required:
+                    - certainty
+                    - localTime
+                  additionalProperties: false
+                - type: object
+                  properties:
+                    certainty:
+                      type: string
+                      const: approximate
+                    earliestLocalTime:
+                      type: string
+                      pattern: ^(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d)?$
+                    latestLocalTime:
+                      type: string
+                      pattern: ^(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d)?$
+                  required:
+                    - certainty
+                    - earliestLocalTime
+                    - latestLocalTime
+                  additionalProperties: false
+                - type: object
+                  properties:
+                    certainty:
+                      type: string
+                      const: unknown
+                  required:
+                    - certainty
+                  additionalProperties: false
+            historicalZoneConfirmed:
+              type: boolean
+          required:
+            - date
+            - place
+            - time
+            - historicalZoneConfirmed
+          additionalProperties: false
+        expectedRevision:
+          type: integer
+          minimum: 0
+          maximum: 9007199254740991
+        confirmedRetention:
+          type: boolean
+          const: true
+      required:
+        - birth
+        - expectedRevision
+        - confirmedRetention
+      additionalProperties: false
+    BirthDraft:
+      type: object
+      properties:
+        date:
+          type: string
+          format: date
+          pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))$
+        place:
+          oneOf:
+            - type: object
+              properties:
+                source:
+                  type: string
+                  const: manual
+                label:
+                  type: string
+                  minLength: 1
+                  maxLength: 200
+                latitudeDeg:
+                  type: number
+                  minimum: -90
+                  maximum: 90
+                longitudeEastDeg:
+                  type: number
+                  minimum: -180
+                  maximum: 180
+                zone:
+                  type: string
+                  minLength: 1
+                  maxLength: 100
+              required:
+                - source
+                - label
+                - latitudeDeg
+                - longitudeEastDeg
+                - zone
+              additionalProperties: false
+            - type: object
+              properties:
+                source:
+                  type: string
+                  const: geonames
+                label:
+                  type: string
+                  minLength: 1
+                  maxLength: 200
+                latitudeDeg:
+                  type: number
+                  minimum: -90
+                  maximum: 90
+                longitudeEastDeg:
+                  type: number
+                  minimum: -180
+                  maximum: 180
+                zone:
+                  type: string
+                  minLength: 1
+                  maxLength: 100
+                sourceId:
+                  type: string
+                  pattern: ^\d+$
+                datasetHash:
+                  type: string
+                  pattern: ^[a-f0-9]{64}$
+                country:
+                  type: string
+                  minLength: 1
+                  maxLength: 100
+                administrativeArea:
+                  type: string
+                  maxLength: 150
+              required:
+                - source
+                - label
+                - latitudeDeg
+                - longitudeEastDeg
+                - zone
+                - sourceId
+                - datasetHash
+                - country
+                - administrativeArea
+              additionalProperties: false
+        time:
+          oneOf:
+            - type: object
+              properties:
+                certainty:
+                  type: string
+                  const: exact
+                localTime:
+                  type: string
+                  pattern: ^(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d)?$
+                fold:
+                  type: string
+                  enum:
+                    - earlier
+                    - later
+                    - unambiguous
+                offsetSeconds:
+                  type: integer
+                  minimum: -86400
+                  maximum: 86400
+              required:
+                - certainty
+                - localTime
+              additionalProperties: false
+            - type: object
+              properties:
+                certainty:
+                  type: string
+                  const: approximate
+                earliestLocalTime:
+                  type: string
+                  pattern: ^(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d)?$
+                latestLocalTime:
+                  type: string
+                  pattern: ^(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d)?$
+              required:
+                - certainty
+                - earliestLocalTime
+                - latestLocalTime
+              additionalProperties: false
+            - type: object
+              properties:
+                certainty:
+                  type: string
+                  const: unknown
+              required:
+                - certainty
+              additionalProperties: false
+        historicalZoneConfirmed:
+          type: boolean
+      required:
+        - date
+        - place
+        - time
+        - historicalZoneConfirmed
+      additionalProperties: false
+    BirthTimeResolution:
+      oneOf:
+        - type: object
+          properties:
+            kind:
+              type: string
+              const: resolved
+            time:
+              oneOf:
+                - type: object
+                  properties:
+                    kind:
+                      type: string
+                      const: instant
+                    certainty:
+                      type: string
+                      const: exact
+                    at:
+                      type: string
+                      format: date-time
+                      pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?(?:Z))$
+                    offsetSeconds:
+                      type: integer
+                      minimum: -9007199254740991
+                      maximum: 9007199254740991
+                    fold:
+                      type: string
+                      enum:
+                        - earlier
+                        - later
+                        - unambiguous
+                    historicalZone:
+                      type: boolean
+                  required:
+                    - kind
+                    - certainty
+                    - at
+                    - offsetSeconds
+                    - fold
+                    - historicalZone
+                  additionalProperties: false
+                - type: object
+                  properties:
+                    kind:
+                      type: string
+                      const: intervals
+                    certainty:
+                      type: string
+                      enum:
+                        - approximate
+                        - unknown
+                    intervals:
+                      minItems: 1
+                      maxItems: 10
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          startsAt:
+                            type: string
+                            format: date-time
+                            pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?(?:Z))$
+                          endsAt:
+                            type: string
+                            format: date-time
+                            pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?(?:Z))$
+                        required:
+                          - startsAt
+                          - endsAt
+                        additionalProperties: false
+                    historicalZone:
+                      type: boolean
+                  required:
+                    - kind
+                    - certainty
+                    - intervals
+                    - historicalZone
+                  additionalProperties: false
+          required:
+            - kind
+            - time
+          additionalProperties: false
+        - type: object
+          properties:
+            kind:
+              type: string
+              const: fold
+            choices:
+              minItems: 2
+              maxItems: 4
+              type: array
+              items:
+                type: object
+                properties:
+                  kind:
+                    type: string
+                    const: instant
+                  certainty:
+                    type: string
+                    const: exact
+                  at:
+                    type: string
+                    format: date-time
+                    pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?(?:Z))$
+                  offsetSeconds:
+                    type: integer
+                    minimum: -9007199254740991
+                    maximum: 9007199254740991
+                  fold:
+                    type: string
+                    enum:
+                      - earlier
+                      - later
+                      - unambiguous
+                  historicalZone:
+                    type: boolean
+                required:
+                  - kind
+                  - certainty
+                  - at
+                  - offsetSeconds
+                  - fold
+                  - historicalZone
+                additionalProperties: false
+          required:
+            - kind
+            - choices
+          additionalProperties: false
+        - type: object
+          properties:
+            kind:
+              type: string
+              const: gap
+            message:
+              type: string
+          required:
+            - kind
+            - message
+          additionalProperties: false
+        - type: object
+          properties:
+            kind:
+              type: string
+              const: invalid
+            message:
+              type: string
+          required:
+            - kind
+            - message
+          additionalProperties: false
+        - type: object
+          properties:
+            kind:
+              type: string
+              const: historical_confirmation_required
+            message:
+              type: string
+          required:
+            - kind
+            - message
+          additionalProperties: false
+    BirthPlaceSearch:
+      type: object
+      properties:
+        query:
+          type: string
+          minLength: 2
+          maxLength: 240
+      required:
+        - query
+      additionalProperties: false
+    BirthPlaceResults:
+      type: object
+      properties:
+        items:
+          maxItems: 20
+          type: array
+          items:
+            type: object
+            properties:
+              source:
+                type: string
+                const: geonames
+              label:
+                type: string
+                minLength: 1
+                maxLength: 200
+              latitudeDeg:
+                type: number
+                minimum: -90
+                maximum: 90
+              longitudeEastDeg:
+                type: number
+                minimum: -180
+                maximum: 180
+              zone:
+                type: string
+                minLength: 1
+                maxLength: 100
+              sourceId:
+                type: string
+                pattern: ^\d+$
+              datasetHash:
+                type: string
+                pattern: ^[a-f0-9]{64}$
+              country:
+                type: string
+                minLength: 1
+                maxLength: 100
+              administrativeArea:
+                type: string
+                maxLength: 150
+            required:
+              - source
+              - label
+              - latitudeDeg
+              - longitudeEastDeg
+              - zone
+              - sourceId
+              - datasetHash
+              - country
+              - administrativeArea
+            additionalProperties: false
+      required:
+        - items
+      additionalProperties: false
+    PatternPreview:
+      type: object
+      properties:
+        profileRevision:
+          type: integer
+          exclusiveMinimum: 0
+          maximum: 9007199254740991
+        basisHash:
+          type: string
+          pattern: ^[a-f0-9]{64}$
+        releaseHash:
+          type: string
+          pattern: ^[a-f0-9]{64}$
+        basis:
+          type: object
+          properties:
+            kind:
+              type: string
+              const: astrology.natal.v2
+            schemaVersion:
+              type: number
+              const: 2
+            basisId:
+              type: string
+              format: uuid
+              pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+            calculationId:
+              type: string
+              format: uuid
+              pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+            profileId:
+              type: string
+              format: uuid
+              pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+            profileRevision:
+              type: integer
+              exclusiveMinimum: 0
+              maximum: 9007199254740991
+            calculatedAt:
+              type: string
+              format: date-time
+              pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?(?:Z))$
+            semanticHash:
+              type: string
+              pattern: ^[a-f0-9]{64}$
+            calculation:
+              type: object
+              properties:
+                kind:
+                  type: string
+                  const: calculated
+                input:
+                  type: object
+                  properties:
+                    kind:
+                      type: string
+                      const: astrology.natal.v2
+                    birth:
+                      type: object
+                      properties:
+                        date:
+                          type: string
+                          format: date
+                          pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))$
+                        place:
+                          oneOf:
+                            - type: object
+                              properties:
+                                source:
+                                  type: string
+                                  const: manual
+                                label:
+                                  type: string
+                                  minLength: 1
+                                  maxLength: 200
+                                latitudeDeg:
+                                  type: number
+                                  minimum: -90
+                                  maximum: 90
+                                longitudeEastDeg:
+                                  type: number
+                                  minimum: -180
+                                  maximum: 180
+                                zone:
+                                  type: string
+                                  minLength: 1
+                                  maxLength: 100
+                              required:
+                                - source
+                                - label
+                                - latitudeDeg
+                                - longitudeEastDeg
+                                - zone
+                              additionalProperties: false
+                            - type: object
+                              properties:
+                                source:
+                                  type: string
+                                  const: geonames
+                                label:
+                                  type: string
+                                  minLength: 1
+                                  maxLength: 200
+                                latitudeDeg:
+                                  type: number
+                                  minimum: -90
+                                  maximum: 90
+                                longitudeEastDeg:
+                                  type: number
+                                  minimum: -180
+                                  maximum: 180
+                                zone:
+                                  type: string
+                                  minLength: 1
+                                  maxLength: 100
+                                sourceId:
+                                  type: string
+                                  pattern: ^\d+$
+                                datasetHash:
+                                  type: string
+                                  pattern: ^[a-f0-9]{64}$
+                                country:
+                                  type: string
+                                  minLength: 1
+                                  maxLength: 100
+                                administrativeArea:
+                                  type: string
+                                  maxLength: 150
+                              required:
+                                - source
+                                - label
+                                - latitudeDeg
+                                - longitudeEastDeg
+                                - zone
+                                - sourceId
+                                - datasetHash
+                                - country
+                                - administrativeArea
+                              additionalProperties: false
+                        time:
+                          oneOf:
+                            - type: object
+                              properties:
+                                certainty:
+                                  type: string
+                                  const: exact
+                                localTime:
+                                  type: string
+                                  pattern: ^(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d)?$
+                                fold:
+                                  type: string
+                                  enum:
+                                    - earlier
+                                    - later
+                                    - unambiguous
+                                offsetSeconds:
+                                  type: integer
+                                  minimum: -86400
+                                  maximum: 86400
+                              required:
+                                - certainty
+                                - localTime
+                              additionalProperties: false
+                            - type: object
+                              properties:
+                                certainty:
+                                  type: string
+                                  const: approximate
+                                earliestLocalTime:
+                                  type: string
+                                  pattern: ^(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d)?$
+                                latestLocalTime:
+                                  type: string
+                                  pattern: ^(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d)?$
+                              required:
+                                - certainty
+                                - earliestLocalTime
+                                - latestLocalTime
+                              additionalProperties: false
+                            - type: object
+                              properties:
+                                certainty:
+                                  type: string
+                                  const: unknown
+                              required:
+                                - certainty
+                              additionalProperties: false
+                        historicalZoneConfirmed:
+                          type: boolean
+                      required:
+                        - date
+                        - place
+                        - time
+                        - historicalZoneConfirmed
+                      additionalProperties: false
+                    calendar:
+                      type: string
+                      const: gregorian
+                    zodiac:
+                      type: string
+                      const: tropical
+                    houses:
+                      type: string
+                      const: not_calculated
+                  required:
+                    - kind
+                    - birth
+                    - calendar
+                    - zodiac
+                    - houses
+                  additionalProperties: false
+                resolved:
+                  oneOf:
+                    - type: object
+                      properties:
+                        kind:
+                          type: string
+                          const: instant
+                        certainty:
+                          type: string
+                          const: exact
+                        at:
+                          type: string
+                          format: date-time
+                          pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?(?:Z))$
+                        offsetSeconds:
+                          type: integer
+                          minimum: -9007199254740991
+                          maximum: 9007199254740991
+                        fold:
+                          type: string
+                          enum:
+                            - earlier
+                            - later
+                            - unambiguous
+                        historicalZone:
+                          type: boolean
+                      required:
+                        - kind
+                        - certainty
+                        - at
+                        - offsetSeconds
+                        - fold
+                        - historicalZone
+                      additionalProperties: false
+                    - type: object
+                      properties:
+                        kind:
+                          type: string
+                          const: intervals
+                        certainty:
+                          type: string
+                          enum:
+                            - approximate
+                            - unknown
+                        intervals:
+                          minItems: 1
+                          maxItems: 10
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              startsAt:
+                                type: string
+                                format: date-time
+                                pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?(?:Z))$
+                              endsAt:
+                                type: string
+                                format: date-time
+                                pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?(?:Z))$
+                            required:
+                              - startsAt
+                              - endsAt
+                            additionalProperties: false
+                        historicalZone:
+                          type: boolean
+                      required:
+                        - kind
+                        - certainty
+                        - intervals
+                        - historicalZone
+                      additionalProperties: false
+                identity:
+                  type: object
+                  properties:
+                    engine:
+                      type: string
+                      const: astronomy-engine
+                    engineVersion:
+                      type: string
+                      const: 2.1.19
+                    engineArtifactHash:
+                      type: string
+                      pattern: ^[a-f0-9]{64}$
+                    tzdbVersion:
+                      type: string
+                      const: 2026f
+                    tzdbHash:
+                      type: string
+                      pattern: ^[a-f0-9]{64}$
+                    adapterVersion:
+                      type: string
+                      const: natal.v2.1
+                    reliabilityPolicy:
+                      type: string
+                      minLength: 1
+                      maxLength: 100
+                    reliabilityHash:
+                      type: string
+                      pattern: ^[a-f0-9]{64}$
+                  required:
+                    - engine
+                    - engineVersion
+                    - engineArtifactHash
+                    - tzdbVersion
+                    - tzdbHash
+                    - adapterVersion
+                    - reliabilityPolicy
+                    - reliabilityHash
+                  additionalProperties: false
+                placements:
+                  minItems: 10
+                  maxItems: 10
+                  type: array
+                  items:
+                    oneOf:
+                      - type: object
+                        properties:
+                          status:
+                            type: string
+                            const: supported
+                          id:
+                            type: string
+                          body:
+                            type: string
+                            enum:
+                              - sun
+                              - moon
+                              - mercury
+                              - venus
+                              - mars
+                              - jupiter
+                              - saturn
+                              - uranus
+                              - neptune
+                              - pluto
+                          sign:
+                            type: string
+                            enum:
+                              - aries
+                              - taurus
+                              - gemini
+                              - cancer
+                              - leo
+                              - virgo
+                              - libra
+                              - scorpio
+                              - sagittarius
+                              - capricorn
+                              - aquarius
+                              - pisces
+                          representativeLongitudeDeg:
+                            type: number
+                            minimum: 0
+                            exclusiveMaximum: 360
+                          maximumDeviationDeg:
+                            type: number
+                            minimum: 0
+                            maximum: 180
+                          guardDeg:
+                            type: number
+                            minimum: 0.05
+                        required:
+                          - status
+                          - id
+                          - body
+                          - sign
+                          - representativeLongitudeDeg
+                          - maximumDeviationDeg
+                          - guardDeg
+                        additionalProperties: false
+                      - type: object
+                        properties:
+                          status:
+                            type: string
+                            const: suppressed
+                          body:
+                            type: string
+                            enum:
+                              - sun
+                              - moon
+                              - mercury
+                              - venus
+                              - mars
+                              - jupiter
+                              - saturn
+                              - uranus
+                              - neptune
+                              - pluto
+                          reason:
+                            type: string
+                            enum:
+                              - boundary
+                              - interval_unqualified
+                              - budget_exhausted
+                              - engine_unavailable
+                        required:
+                          - status
+                          - body
+                          - reason
+                        additionalProperties: false
+                evaluatedInstants:
+                  type: integer
+                  minimum: 1
+                  maximum: 2048
+              required:
+                - kind
+                - input
+                - resolved
+                - identity
+                - placements
+                - evaluatedInstants
+              additionalProperties: false
+          required:
+            - kind
+            - schemaVersion
+            - basisId
+            - calculationId
+            - profileId
+            - profileRevision
+            - calculatedAt
+            - semanticHash
+            - calculation
+          additionalProperties: false
+        chapters:
+          minItems: 4
+          maxItems: 4
+          type: array
+          items:
+            oneOf:
+              - type: object
+                properties:
+                  status:
+                    type: string
+                    const: available
+                  chapter:
+                    type: object
+                    properties:
+                      kind:
+                        type: string
+                        const: pattern.chapter.v1
+                      id:
+                        type: string
+                        enum:
+                          - self
+                          - connection
+                          - rest
+                          - growth
+                      body:
+                        type: string
+                        enum:
+                          - sun
+                          - venus
+                          - saturn
+                          - jupiter
+                      factId:
+                        type: string
+                      sign:
+                        type: string
+                        enum:
+                          - aries
+                          - taurus
+                          - gemini
+                          - cancer
+                          - leo
+                          - virgo
+                          - libra
+                          - scorpio
+                          - sagittarius
+                          - capricorn
+                          - aquarius
+                          - pisces
+                      title:
+                        type: string
+                        minLength: 1
+                        maxLength: 150
+                      text:
+                        type: string
+                        minLength: 1
+                        maxLength: 1600
+                      prompt:
+                        type: string
+                        minLength: 1
+                        maxLength: 180
+                      factualLabel:
+                        type: string
+                        minLength: 1
+                        maxLength: 100
+                      sourceId:
+                        type: string
+                        minLength: 1
+                        maxLength: 100
+                      releaseHash:
+                        type: string
+                        pattern: ^[a-f0-9]{64}$
+                      editorialStatus:
+                        type: string
+                        enum:
+                          - synthetic_local
+                          - human_approved
+                    required:
+                      - kind
+                      - id
+                      - body
+                      - factId
+                      - sign
+                      - title
+                      - text
+                      - prompt
+                      - factualLabel
+                      - sourceId
+                      - releaseHash
+                      - editorialStatus
+                    additionalProperties: false
+                required:
+                  - status
+                  - chapter
+                additionalProperties: false
+              - type: object
+                properties:
+                  status:
+                    type: string
+                    const: unavailable
+                  id:
+                    type: string
+                    enum:
+                      - self
+                      - connection
+                      - rest
+                      - growth
+                  reason:
+                    type: string
+                    enum:
+                      - placement_suppressed
+                      - content_unavailable
+                required:
+                  - status
+                  - id
+                  - reason
+                additionalProperties: false
+        saved:
+          maxItems: 4
+          type: array
+          items:
+            type: object
+            properties:
+              sessionId:
+                type: string
+                format: uuid
+                pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+              editionId:
+                type: string
+                format: uuid
+                pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+              reflectionId:
+                anyOf:
+                  - type: string
+                    format: uuid
+                    pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+                  - type: "null"
+              chapterId:
+                type: string
+                enum:
+                  - self
+                  - connection
+                  - rest
+                  - growth
+            required:
+              - sessionId
+              - editionId
+              - reflectionId
+              - chapterId
+            additionalProperties: false
+      required:
+        - profileRevision
+        - basisHash
+        - releaseHash
+        - basis
+        - chapters
+        - saved
+      additionalProperties: false
+    PatternSaveInput:
+      type: object
+      properties:
+        chapterId:
+          type: string
+          enum:
+            - self
+            - connection
+            - rest
+            - growth
+        expectedProfileRevision:
+          type: integer
+          exclusiveMinimum: 0
+          maximum: 9007199254740991
+        basisHash:
+          type: string
+          pattern: ^[a-f0-9]{64}$
+        releaseHash:
+          type: string
+          pattern: ^[a-f0-9]{64}$
+        reflection:
+          anyOf:
+            - type: object
+              properties:
+                text:
+                  type: string
+                  maxLength: 10000
+                stance:
+                  type: string
+                  enum:
+                    - resonates
+                    - unsure
+                    - disagree
+                    - unspecified
+              required:
+                - text
+                - stance
+              additionalProperties: false
+            - type: "null"
+      required:
+        - chapterId
+        - expectedProfileRevision
+        - basisHash
+        - releaseHash
+        - reflection
+      additionalProperties: false
+    PatternSavedIdentity:
+      type: object
+      properties:
+        sessionId:
+          type: string
+          format: uuid
+          pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+        editionId:
+          type: string
+          format: uuid
+          pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+        reflectionId:
+          anyOf:
+            - type: string
+              format: uuid
+              pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+            - type: "null"
+      required:
+        - sessionId
+        - editionId
+        - reflectionId
+      additionalProperties: false
     ErrorEnvelope:
       type: object
       properties:
@@ -8855,6 +11477,28 @@ components:
                   minimum: 1
                   maximum: 9007199254740991
                 - type: "null"
+            existingPattern:
+              type: object
+              properties:
+                sessionId:
+                  type: string
+                  format: uuid
+                  pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+                editionId:
+                  type: string
+                  format: uuid
+                  pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+                reflectionId:
+                  anyOf:
+                    - type: string
+                      format: uuid
+                      pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+                    - type: "null"
+              required:
+                - sessionId
+                - editionId
+                - reflectionId
+              additionalProperties: false
           required:
             - code
             - message

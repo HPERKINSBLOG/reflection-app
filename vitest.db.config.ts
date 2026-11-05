@@ -47,6 +47,52 @@ export default defineConfig({
         },
       };
     }),
+    {
+      name: 'workerd-bounded-module-transport',
+      configureVitest({ project }) {
+        const pool = project.config.poolRunner;
+        if (!pool) throw new Error('Cloudflare pool must be configured first');
+        const create = pool.createPoolWorker.bind(pool);
+        pool.createPoolWorker = (options) => {
+          const worker = create(options);
+          const on = worker.on.bind(worker),
+            send = worker.send.bind(worker);
+          const warmRequests = new Set<string>();
+          worker.on = (event, callback) =>
+            on(event, (...args: unknown[]) => {
+              const message = args[0];
+              if (
+                event === 'message' &&
+                message &&
+                typeof message === 'object' &&
+                'm' in message &&
+                message.m === 'fetchWarmModules' &&
+                'i' in message &&
+                typeof message.i === 'string'
+              )
+                warmRequests.add(message.i);
+              callback(...args);
+            });
+          worker.send = (message) => {
+            // Plugin 1.4.8 inlines the entire warm graph into one WebSocket frame.
+            // The public gazetteer makes it exceed workerd's 32 MiB frame limit.
+            // An empty warm cache makes Vitest fetch the SAME modules individually;
+            // this preserves per-file isolation and every test's actual Worker code.
+            if (
+              't' in message &&
+              message.t === 's' &&
+              'i' in message &&
+              typeof message.i === 'string' &&
+              warmRequests.delete(message.i)
+            ) {
+              const reply = { ...message, r: {} };
+              send(reply);
+            } else send(message);
+          };
+          return worker;
+        };
+      },
+    },
   ],
   test: {
     include: ['tests/db/**/*.test.ts'],

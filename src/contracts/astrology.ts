@@ -319,3 +319,15 @@ export const PatternContentRelease = z.strictObject({
     ),
 });
 export type PatternContentRelease = z.infer<typeof PatternContentRelease>;
+
+export const BirthProfileView = z.strictObject({
+  profile: BirthProfileV1.nullable(),
+  revision: z.number().int().min(0),
+});
+export const BirthProfileWrite = z.strictObject({
+  birth: BirthDraft,
+  expectedRevision: z.number().int().min(0),
+  confirmedRetention: z.literal(true),
+});
+export const BirthPlaceSearch = z.strictObject({ query: z.string().min(2).max(240) });
+export const BirthPlaceResults = z.strictObject({ items: z.array(PlaceCandidate).max(20) });

@@ -6,7 +6,19 @@ import { z } from 'zod';
 import { REVISIT_LIMITS, revisitTextLength } from './revisit-policy.ts';
 import { CONTEXT_LIMITS, codePointLength } from './context-policy.ts';
 export * from './astrology.ts';
-import { BirthProfileV1, PatternReadingV1 } from './astrology.ts';
+import {
+  BirthProfileV1,
+  PatternReadingV1,
+  BirthProfileView,
+  BirthProfileWrite,
+  BirthDraft,
+  BirthTimeResolution,
+  BirthPlaceSearch,
+  BirthPlaceResults,
+  PatternPreview,
+  PatternSaveInput,
+  PatternSavedIdentity,
+} from './astrology.ts';
 
 export const Id = z.uuid();
 export const Hash = z.string().regex(/^[a-f0-9]{64}$/);
@@ -86,6 +98,7 @@ export const ErrorEnvelope = z.strictObject({
     retry: z.enum(['never', 'same_request', 'after_delay', 'refresh_then_retry']),
     retryAfterSeconds: z.number().int().min(1).max(3600).nullable(),
     currentRevision: Revision.nullable(),
+    existingPattern: PatternSavedIdentity.optional(),
   }),
 });
 export type ErrorCode = z.infer<typeof ErrorCode>;
@@ -1187,6 +1200,15 @@ export const PasswordRegistration = z.strictObject({
 });
 
 export const apiSchemas = {
+  BirthProfileView,
+  BirthProfileWrite,
+  BirthDraft,
+  BirthTimeResolution,
+  BirthPlaceSearch,
+  BirthPlaceResults,
+  PatternPreview,
+  PatternSaveInput,
+  PatternSavedIdentity,
   ErrorEnvelope,
   StartRequest,
   StartResponse,

@@ -1,5 +1,6 @@
+import { gzipSync } from 'node:zlib';
 import { createHash } from 'node:crypto';
-import { readFileSync, writeFileSync } from 'node:fs';
+import { mkdirSync, readFileSync, readdirSync, unlinkSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import moment from 'moment-timezone';
 import { PlaceCandidate } from '../src/contracts/astrology.ts';
@@ -49,6 +50,25 @@ export function buildGazetteer(cities: string, admins: string, countries: string
     .sort((a, b) => b.population - a.population || a.sourceId.localeCompare(b.sourceId));
 }
 
+/** Bound individual module messages while preserving the exact dataset byte identity. */
+export function writeGazetteerChunks(rows: GazetteerRow[], directory = 'content/astrology/places') {
+  mkdirSync(directory, { recursive: true });
+  for (const name of readdirSync(directory))
+    if (/^part-\d+\.json$/.test(name)) unlinkSync(`${directory}/${name}`);
+  const encoded = gzipSync(`${JSON.stringify(rows)}\n`).toString('base64');
+  const parts = encoded.match(/.{1,262144}/g)!;
+  for (const [i, part] of parts.entries())
+    writeFileSync(`${directory}/part-${i}.json`, `${JSON.stringify(part)}\n`);
+  writeFileSync(
+    `${directory}/index.ts`,
+    '// Generated gzip/base64 chunks. Decompressed JSON bytes retain places-manifest artifactSha256.\n' +
+      parts.map((_, i) => `import part${i} from './part-${i}.json';`).join('\n') +
+      '\nexport default [' +
+      parts.map((_, i) => `part${i}`).join(',') +
+      "].join('');\n",
+  );
+}
+
 // Acquisition is explicit: pass the local downloaded source directory; runtime never calls GeoNames.
 if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
   const directory = process.argv[2];
@@ -72,6 +92,6 @@ if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
     scope:
       'Cities over 15,000 population or capitals. Missing localities require manual confirmation; coordinates and historical time zones may need correction.',
   };
-  writeFileSync('content/astrology/places.json', output);
+  writeGazetteerChunks(JSON.parse(output));
   writeFileSync('content/astrology/places-manifest.json', `${JSON.stringify(manifest, null, 2)}\n`);
 }
