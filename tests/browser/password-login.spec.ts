@@ -13,6 +13,32 @@ async function signIn(page: Page, identifier: string, secret = password) {
   await page.getByRole('button', { name: 'Sign in', exact: true }).click();
 }
 
+test('password screen focus cannot interrupt input after the form is visible', async ({ page }) => {
+  await page.goto('/');
+  await page.evaluate(() => {
+    const queued: FrameRequestCallback[] = [];
+    const schedule = window.requestAnimationFrame.bind(window);
+    window.requestAnimationFrame = (callback) => {
+      queued.push(callback);
+      return 0;
+    };
+    Object.assign(window, {
+      releasePasswordFocus: () => {
+        window.requestAnimationFrame = schedule;
+        for (const callback of queued) callback(performance.now());
+      },
+    });
+  });
+  await page.getByRole('button', { name: 'Create a password account', exact: true }).click();
+  const username = page.getByLabel('Username', { exact: true });
+  await username.fill('EarlyReader');
+  await page.evaluate(() =>
+    (window as unknown as { releasePasswordFocus: () => void }).releasePasswordFocus(),
+  );
+  await expect(username).toBeFocused();
+  await expect(username).toHaveValue('EarlyReader');
+});
+
 test('a password account returns to its saved reading by username, email and kit recovery without a passkey', async ({
   page,
 }) => {

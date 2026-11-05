@@ -153,6 +153,12 @@ export function IdentityApp() {
     heading = useRef<HTMLHeadingElement>(null);
   const receiptHeading = useRef<HTMLHeadingElement>(null);
   const hadReceipt = useRef(false);
+  const previousPasswordScreen = useRef(passwordScreen);
+  useLayoutEffect(() => {
+    if (previousPasswordScreen.current === passwordScreen) return;
+    previousPasswordScreen.current = passwordScreen;
+    heading.current?.focus();
+  }, [passwordScreen]);
   useLayoutEffect(() => {
     // The receipt and the welcome screen replace each other's primary heading.
     if (deletionReceipt) receiptHeading.current?.focus();
@@ -490,7 +496,6 @@ export function IdentityApp() {
   const choosePasswordScreen = (screen: typeof passwordScreen) => {
     setPasswordScreen(screen);
     setMessage(null);
-    requestAnimationFrame(() => heading.current?.focus());
   };
   return (
     <div className={`app-shell${accountPage ? ' account-shell' : ''}`}>
