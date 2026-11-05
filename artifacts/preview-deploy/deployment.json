@@ -1,0 +1,111 @@
+{
+  "version": 1,
+  "status": "deployed",
+  "target": "https://reflection-preview.lfd.workers.dev/",
+  "scope": "hosted-development-preview-only",
+  "verifiedAt": "2026-11-05T23:18:34.651Z",
+  "deploymentId": "76d4ca42-62ac-4089-a2af-bf73d24cba87",
+  "workerVersionId": "81aa64a3-2832-4261-be51-70c63ff85799",
+  "trafficPercentage": 100,
+  "hashes": {
+    "worker": "92476e8116680bdd7b7ae8dcf60352e20e2f7e4e1a1e0d4ef79956f3ebfcf19e",
+    "assetHelper": "722ba3249c12015270c170029f32fd945e4f42bdc7cfc24e92c623c277e93c15",
+    "entryWrapper": "26d20dbb1370dac1eb7c615b9c78243f0fffeccdb50a97feed2b4b409a2b412d",
+    "publicAssetsModule": "b0afcbbf3e858b7da9edcc7ee62ab52d321eb2bfd4565e538e837bf1b71274f0"
+  },
+  "assetDelivery": "32 exact public assets embedded in modules; original application fetch receives only a replacement ASSETS Fetcher",
+  "health": {
+    "httpStatus": 200,
+    "status": "ok",
+    "milestone": 1,
+    "mode": "live-preview",
+    "provider": "openai",
+    "patternReady": true
+  },
+  "migration": {
+    "name": "0021_astrology_pattern.sql",
+    "success": true,
+    "statementResults": 85,
+    "preMigrationBookmark": "0000003b-00000006-0000511a-71f2439c83bd131cdc71c68881900d0c",
+    "originalTablesCompared": 43,
+    "allOriginalProjectionsMatched": true,
+    "accountsPreserved": 5,
+    "readingEditionsPreserved": 3,
+    "foreignKeyViolations": 0
+  },
+  "publication": {
+    "releaseHash": "3a730caeb64a87cacc981f55df0558164bbe5ff77b00257d778d0045dae73e11",
+    "calculationHash": "21518ac44c5b14b443c662d2836f2b6c9a237d86bff43a54121d2d5758e21d2b",
+    "review": "human_approved",
+    "explicitDevelopmentRegistryInstallation": true,
+    "requestBootstrap": false
+  },
+  "verification": {
+    "domainTooling": {
+      "passed": 477,
+      "files": 64
+    },
+    "patternAndAdjacentDatabase": {
+      "passed": 41,
+      "files": 5
+    },
+    "patternImportReturnBrowser": {
+      "passed": 34,
+      "files": 6
+    },
+    "embeddedAssetUnit": {
+      "passed": 4,
+      "files": 1
+    },
+    "strictTypes": "passed",
+    "lint": "passed",
+    "contracts": "passed",
+    "generatedSchemas": "passed",
+    "clientBuild": "passed",
+    "previewWorkerDryRun": "passed",
+    "independentAdmissionReview": "no-actionable-findings",
+    "publicAssetsMatched": 32,
+    "mobileLanding": {
+      "width": 390,
+      "scrollWidth": 390,
+      "rendered": true
+    },
+    "authenticatedHostedSmoke": {
+      "status": "blocked-by-existing-signup-rate-limit",
+      "httpStatus": 429,
+      "accountCreated": false,
+      "cleanup": "not-created",
+      "requests": 2,
+      "paidAIRequestsMade": 0
+    }
+  },
+  "preservation": {
+    "existingAccounts": 5,
+    "existingReadingEditions": 3,
+    "originalGenerationSettingsRestored": [
+      {
+        "revision": 7,
+        "restore_in_progress": 0,
+        "generation_enabled": 1,
+        "dispatch_mode": "model",
+        "recovery_epoch": 0
+      }
+    ],
+    "existingSecretBindingsRetained": 4,
+    "originalCompiledApplicationUnchanged": true
+  },
+  "cleanup": {
+    "namespace": "cf2ae63fe51c4cc39213eb0fb1978e34",
+    "deleted": true,
+    "absenceVerified": true,
+    "at": "2026-11-05T23:17:28.063Z"
+  },
+  "limits": [
+    "The authenticated hosted Pattern/import smoke did not run because registration was rate-limited before account creation.",
+    "Native Tarot Return is covered by focused local browser tests and deployed byte-verified assets, not a new hosted native reading.",
+    "Full production qualification and activation remain closed; the earlier full release gate is bound to its original source.",
+    "No live AI generation, signup-rate bypass, existing-account mutation or production deployment was performed."
+  ],
+  "sourceCommitAtDeployment": "d3d4c4f704ea2fb3ba0f27f5fd5a0ceb55aebee3",
+  "sourceDigestAtReport": "7a634e659e177b906fba37f717c33f704153797620fdc11ef75e879f8db6c1ea"
+}
