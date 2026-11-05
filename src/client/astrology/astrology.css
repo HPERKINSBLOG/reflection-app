@@ -235,8 +235,8 @@
   border-bottom: 1px solid var(--border);
 }
 .pattern-chapters button {
-  flex: 1;
-  min-width: 0;
+  flex: 1 1 auto;
+  min-width: max-content;
   padding-inline: 8px;
   border-radius: 0;
   text-decoration: none;
@@ -347,9 +347,9 @@
   margin-bottom: 8px;
 }
 .birth-certainty button {
-  flex: 1;
+  flex: 1 1 auto;
   padding-inline: 12px;
-  min-width: 0;
+  min-width: max-content;
 }
 .place-search {
   display: flex;

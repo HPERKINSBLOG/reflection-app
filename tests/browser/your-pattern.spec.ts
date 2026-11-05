@@ -251,6 +251,14 @@ test('Paper and Evening birth, review, chapter and saved layouts fit every targe
           await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth),
           `${state} ${theme} ${width}`,
         ).toBe(true);
+        expect(
+          await page
+            .locator('.birth-certainty button, .pattern-chapters button')
+            .evaluateAll((buttons) =>
+              buttons.every((button) => button.scrollWidth <= button.clientWidth),
+            ),
+          `Birth-time and chapter labels fit at ${width}px`,
+        ).toBe(true);
         await page.screenshot({
           path: `artifacts/your-pattern/${state}-${theme}-${width}.png`,
           fullPage: true,

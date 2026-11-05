@@ -62,16 +62,22 @@ for (const width of [320, 390, 768, 1280]) {
         await expect
           .poll(() =>
             page.evaluate(() =>
-              [...document.images].every((image) => {
-                const box = image.getBoundingClientRect();
-                if (!box.width || !box.height) return true;
-                if (image.loading === 'lazy' && (box.top > innerHeight || box.bottom < 0))
-                  return true;
-                return image.complete && image.naturalWidth > 0;
-              }),
+              [...document.images]
+                .filter((image) => {
+                  const box = image.getBoundingClientRect();
+                  if (!box.width || !box.height) return false;
+                  if (image.loading === 'lazy' && (box.top > innerHeight || box.bottom < 0))
+                    return false;
+                  return !image.complete || image.naturalWidth === 0;
+                })
+                .map((image) => ({
+                  source: image.currentSrc || image.src,
+                  complete: image.complete,
+                  naturalWidth: image.naturalWidth,
+                })),
             ),
           )
-          .toBe(true);
+          .toEqual([]);
         const layout = await page.evaluate(() => ({
           viewport: innerWidth,
           content: document.documentElement.scrollWidth,

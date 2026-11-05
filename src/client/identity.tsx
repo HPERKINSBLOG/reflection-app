@@ -598,12 +598,11 @@ export function IdentityApp() {
                 )}
               </div>
               {kit && <Art name="study-perspective" className="title-art" />}
-              {!kit && !grant && session && (
+              {!kit && !grant && session && accountPage && (
                 <Art
-                  name={accountPage ? 'account-sprig' : 'study-stillness'}
-                  {...(accountPage ? { mobileName: 'mobile-corner' as const } : {})}
-                  className={`title-art ${accountPage ? 'account-title-art' : 'readings-title-art'}`}
-                  loading={accountPage ? 'eager' : 'lazy'}
+                  name="account-sprig"
+                  mobileName="mobile-corner"
+                  className="title-art account-title-art"
                 />
               )}
             </div>
