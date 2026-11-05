@@ -1,0 +1,77 @@
+{
+  "format": "reflection.your-pattern.local-acceptance.v1",
+  "testedSourceCommit": "01c9670eda697755c84c583b4d537b9c39824155",
+  "sourceDigest": "48aac5ab645ecba5d485e2b29a6ad70d0c2e19e5383a0717bb056525516b1040",
+  "gate": {
+    "path": "artifacts/verify.json",
+    "sha256": "72c879241bfeb1d06c14707531c910d818967d10953747137cdf17652c555e58",
+    "stages": 14,
+    "durationMs": 492205,
+    "deadlineMs": 540000,
+    "finishedAt": "2026-11-05T15:55:43.650Z"
+  },
+  "tests": {
+    "domain": {
+      "passed": 472,
+      "files": 64,
+      "report": {
+        "path": "artifacts/domain-tests.json",
+        "sha256": "947ab5852d3eac7a59bda8b28a315a973221d4907804619fc7e81527d1e3ee66"
+      }
+    },
+    "database": {
+      "passed": 652,
+      "files": 70,
+      "report": {
+        "path": "artifacts/db-tests.json",
+        "sha256": "56cde7091ae435f2e4d19afe6433ff8c8fe5af47db12f6377e97e12710a500f6"
+      }
+    },
+    "chromium": {
+      "passed": 176,
+      "files": 24,
+      "report": {
+        "path": "artifacts/browser-tests.json",
+        "sha256": "f8f2cabc532d8de84d79728254dfd5fbdd89b7d22d4174c6488953a246ead2e8"
+      }
+    },
+    "crossBrowser": {
+      "passed": 39,
+      "files": 4,
+      "report": {
+        "path": "artifacts/visual-pass/browser-matrix.json",
+        "sha256": "a52be4f99648dd669ed111fe4918bd80af4b4c09cfd7b92b667391b7cc693027"
+      }
+    }
+  },
+  "crossBrowser": {
+    "command": "npm run test:journey -- --workers=2",
+    "sourceCommit": "ad885485cf181caf3b6eff5126ec1af382311886",
+    "sourceDigest": "c958454a114fd6d80193447e2b5ae9cef3d76281f43cb22455466453f5edda65",
+    "changesSinceMatrix": [
+      "docs/YOUR_PATTERN_RESULTS.md",
+      "scripts/verify.ts",
+      "tests/browser/revisit-notes.spec.ts"
+    ],
+    "applicationAndJourneySourcesUnchanged": true
+  },
+  "bundleEvidence": {
+    "path": "artifacts/your-pattern/bundle-evidence.json",
+    "sha256": "d3ade0aa97c572293574747d7a3e49f46fd12637854d1091141dc30ccaae4a15"
+  },
+  "screenshots": [
+    {
+      "path": "artifacts/your-pattern/pattern-paper-1280.png",
+      "sha256": "46ba1f3c109305c95ae024d40fe233e1e337c7b87eef6ff088908a33fcc92110"
+    },
+    {
+      "path": "artifacts/your-pattern/birth-evening-390.png",
+      "sha256": "7587467ffb000b247a01c6e53da12ed245fece0aa2fca5319d3d330f35376e00"
+    },
+    {
+      "path": "artifacts/your-pattern/saved-paper-320.png",
+      "sha256": "a1448ba613df494baf1e15765e4d8f680128d84f1fa5641b1287ffb6fb007109"
+    }
+  ],
+  "scope": "Local synthetic-data acceptance only. Production activation requires independent numerical/uncertainty qualification, exact-catalogue editorial review and hosted resource acceptance."
+}

@@ -1,0 +1,36 @@
+{
+  "kind": "your-pattern-bundle-evidence.v1",
+  "worker": {
+    "path": "dist/worker/index.js",
+    "bytes": 9461168,
+    "gzipBytes": 5011170,
+    "sha256": "67fe3d64bad2f2d08170d00cad3bedb1009f8e501fb5d976644d4fd20c6e1d3e"
+  },
+  "client": [
+    {
+      "path": "dist/client/assets/index-C3lSFqWv.js",
+      "bytes": 567854,
+      "gzipBytes": 165176,
+      "sha256": "4deab19bedcb8e400f70c0520717dce7dc0874b4ec313664e6402f50293cd842"
+    }
+  ],
+  "calculationIdentity": {
+    "engine": "astronomy-engine",
+    "engineVersion": "2.1.19",
+    "engineArtifactHash": "068f1445ed0c636c94818fe6d20d7d125120e605e0bab9fc4675c3d531be5ad7",
+    "tzdbVersion": "2026f",
+    "tzdbHash": "3103c5c0eaa879615da630b74e2373ad9b571e0eae992e0b2a3db6e4475de2ce",
+    "adapterVersion": "natal.v2.1",
+    "reliabilityPolicy": "vsop-vector-enclosure.v1",
+    "reliabilityHash": "7a8be427e640a50501790253ff9d50785e2d33716f49f090f464f801975a4251"
+  },
+  "checks": {
+    "bundledEsmSourceMatchesPinnedHash": true,
+    "bundledTzdbSourceMatchesPinnedHash": true,
+    "identityPresentInCompiledWorker": true,
+    "dataAndCatalogueMarkersPresentInWorkerAbsentInClient": 26,
+    "astronomyLibraryAbsentInClient": true,
+    "swissRuntimeAbsent": true
+  },
+  "limits": "Local production builds only. Marker/source-map inspection is not hosted CPU, memory, concurrency or numerical qualification."
+}
