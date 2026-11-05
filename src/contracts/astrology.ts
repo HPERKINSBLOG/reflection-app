@@ -266,3 +266,56 @@ export const PatternSaveInput = z.strictObject({
     .nullable(),
 });
 export type PatternSaveInput = z.infer<typeof PatternSaveInput>;
+
+export const PatternCatalogueEntry = z
+  .strictObject({
+    id: z.string().min(1).max(100),
+    chapterId: ChapterId,
+    body: z.enum(['sun', 'venus', 'saturn', 'jupiter']),
+    sign: z.enum(ZODIAC_SIGNS),
+    title: z.string().min(1).max(150),
+    text: z.string().min(1).max(1600),
+    prompt: z.string().min(1).max(180),
+    sourceHash: Hash,
+  })
+  .refine(
+    (e) => CHAPTER_BODIES[e.chapterId] === e.body && e.id === `${e.chapterId}.${e.sign}`,
+    'Catalogue source binding mismatch',
+  );
+export const PatternCatalogue = z
+  .strictObject({
+    kind: z.literal('pattern.catalogue.v1'),
+    version: Revision,
+    language: z.literal('en'),
+    rights: z.strictObject({
+      status: z.literal('original'),
+      attribution: z.string().min(1).max(500),
+    }),
+    entries: z.array(PatternCatalogueEntry).length(48),
+  })
+  .refine(
+    (c) => new Set(c.entries.map((e) => e.id)).size === 48,
+    'Catalogue must contain all 48 unique chapter/sign entries',
+  );
+export type PatternCatalogue = z.infer<typeof PatternCatalogue>;
+export const PatternContentRelease = z.strictObject({
+  kind: z.literal('pattern.content.v1'),
+  catalogue: PatternCatalogue,
+  releaseHash: Hash,
+  state: z.enum(['active', 'withdrawn']),
+  review: z
+    .strictObject({
+      kind: z.enum(['unreviewed', 'synthetic_local', 'human_approved']),
+      reviewedHash: Hash,
+      reviewer: z.string().min(1).max(200).nullable(),
+      reviewedAt: Instant.nullable(),
+      signature: z.string().max(200).nullable(),
+    })
+    .refine(
+      (r) =>
+        r.kind !== 'human_approved' ||
+        (r.reviewer !== null && r.reviewedAt !== null && r.signature !== null),
+      'Human approval requires a signed review',
+    ),
+});
+export type PatternContentRelease = z.infer<typeof PatternContentRelease>;
