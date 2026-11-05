@@ -148,6 +148,7 @@ export function ReadingWorkspace({
   user,
   live = false,
   runtimeMode = null,
+  patternReady = false,
   connectionRetry,
   onSession,
   onExpired,
@@ -160,6 +161,7 @@ export function ReadingWorkspace({
   user: View;
   live?: boolean | null;
   runtimeMode?: string | null;
+  patternReady?: boolean;
   connectionRetry: ReactNode;
   onSession: (value: View) => void;
   onExpired: () => void;
@@ -1087,7 +1089,10 @@ export function ReadingWorkspace({
         <PatternWorkspace
           ref={patternWorkspace}
           csrf={user.csrfToken}
-          enabled={['synthetic-only', 'synthetic-local'].includes(runtimeMode ?? '')}
+          enabled={
+            ['synthetic-only', 'synthetic-local'].includes(runtimeMode ?? '') ||
+            (runtimeMode === 'live-preview' && patternReady)
+          }
           navigationPending={busy}
           initialBirth={restoredBirth ?? null}
           {...(onRestoreConsumed ? { onRestoreConsumed } : {})}

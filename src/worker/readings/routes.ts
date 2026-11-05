@@ -1,5 +1,5 @@
 import { astrologyRoute } from '../astrology/routes.ts';
-import { PatternConflict } from '../astrology/patterns.ts';
+import { PatternConflict, previewPatternReady } from '../astrology/patterns.ts';
 import { ASTROLOGY_LIMITS } from '../../contracts/astrology-policy.ts';
 import { READING_PRODUCT_COPY } from '../../contracts/product-copy.ts';
 import { z } from 'zod';
@@ -18,6 +18,7 @@ import { Reflections } from './reflections.ts';
 import { ReadingExports } from './export.ts';
 import { SessionErasure } from './erasure.ts';
 import type { ApplicationRuntime } from '../runtime/application.ts';
+import type { DevelopmentPreviewCapability } from '../index.ts';
 
 export interface ReadingBindings extends IdentityBindings {
   READING_MODE?: string;
@@ -97,6 +98,7 @@ export async function readingRoute(
   defer?: (work: Promise<void>) => void,
   factory?: GenerationFactory,
   runtime?: ApplicationRuntime,
+  preview?: DevelopmentPreviewCapability,
 ): Promise<Response | null> {
   if (
     !runtime &&
@@ -171,6 +173,17 @@ export async function readingRoute(
         .max(Number.MAX_SAFE_INTEGER)
         .parse(Number(value.slice(1, -1)));
     };
+    const approvedPreviewRelease =
+      !runtime &&
+      factory &&
+      env.READING_MODE === 'live-preview' &&
+      preview?.patternRelease &&
+      // Let Patterns.save reconcile an already committed key before consulting
+      // changed publication state. Fresh saves still enforce content guards.
+      (path === '/astrology/pattern/saves' ||
+        (await previewPatternReady(env.DB, preview.patternRelease)))
+        ? preview.patternRelease
+        : undefined;
     const astrology = await astrologyRoute(
       request,
       base,
@@ -180,6 +193,7 @@ export async function readingRoute(
       revision,
       erasure,
       runtime ? runtime.health.mode === 'synthetic-local' : env.READING_MODE === 'synthetic-local',
+      approvedPreviewRelease,
     );
     if (astrology) return astrology;
     const match = (pattern: RegExp) => path.match(pattern);

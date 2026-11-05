@@ -75,6 +75,7 @@ function environmentNotice(mode: string | null, live: boolean | null) {
 export function IdentityApp() {
   const [live, setLive] = useState<boolean | null>(null);
   const [runtimeMode, setRuntimeMode] = useState<string | null>(null);
+  const [patternReady, setPatternReady] = useState(false);
   const connectionRequest = useRef<AbortController | null>(null);
   const [checkingConnection, setCheckingConnection] = useState(true);
   const checkConnection = useCallback(() => {
@@ -82,6 +83,7 @@ export function IdentityApp() {
     const controller = new AbortController();
     connectionRequest.current = controller;
     setCheckingConnection(true);
+    setPatternReady(false);
     void fetch('/health', { cache: 'no-store', signal: controller.signal })
       .then((response) => (response.ok ? response.json() : null))
       .then((runtime) => {
@@ -90,6 +92,9 @@ export function IdentityApp() {
           const mode = String(runtime.mode);
           const ready = 'generationReady' in runtime && runtime.generationReady === true;
           setRuntimeMode(mode);
+          setPatternReady(
+            mode === 'live-preview' && 'patternReady' in runtime && runtime.patternReady === true,
+          );
           if (mode === 'live-local' || mode === 'live-preview') setLive(true);
           if (mode === 'synthetic-only') setLive(false);
           if (ready && ['synthetic-local', 'hosted-synthetic'].includes(mode)) setLive(false);
@@ -1119,6 +1124,7 @@ export function IdentityApp() {
                     onRestoreConsumed={() => setPatternRestore(null)}
                     live={live}
                     runtimeMode={runtimeMode}
+                    patternReady={patternReady}
                     connectionRetry={connectionRetry}
                     key={session.subjectId}
                     user={session}

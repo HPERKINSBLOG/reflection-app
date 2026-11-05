@@ -9,6 +9,35 @@ import {
   reading,
 } from '../fixtures/browser-reading.ts';
 
+for (const [index, mode, patternReady] of [
+  [0, 'live-preview', undefined],
+  [1, 'live-preview', false],
+  [2, 'live-preview', true],
+  [3, 'production', true],
+] as const) {
+  test(`Pattern readiness requires an explicit development-preview capability: ${mode}/${patternReady}`, async ({
+    page,
+  }) => {
+    await account(page, `192.0.2.${210 + index}`);
+    await page.route('**/health', (route) =>
+      route.fulfill({ json: { mode, provider: 'openai', patternReady } }),
+    );
+    await page.goto('/astrology/pattern');
+    if (mode === 'live-preview' && patternReady) {
+      await expect(
+        page.getByRole('heading', { name: 'Your birth details', exact: true }),
+      ).toBeVisible();
+    } else {
+      await expect(
+        page.getByText(/Your Pattern is not available in this environment yet/),
+      ).toBeVisible();
+      await expect(
+        page.getByRole('heading', { name: 'Your birth details', exact: true }),
+      ).toHaveCount(0);
+    }
+  });
+}
+
 test('retrying the reading connection keeps the question and photo in the open form', async ({
   page,
 }) => {

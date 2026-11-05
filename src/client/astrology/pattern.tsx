@@ -338,7 +338,11 @@ export function PatternWorkspace({
             <Art name="account-sprig" className="pattern-sprig" sizes="320px" />
           </header>
           <p className="field-hint">
-            Local preview · Calculated chart positions with chapter text awaiting editorial review.
+            {chapter
+              ? chapter.editorialStatus === 'human_approved'
+                ? 'Development preview · Calculated chart positions with reviewed symbolic chapter text.'
+                : 'Local preview · Calculated chart positions with chapter text awaiting editorial review.'
+              : 'Calculated chart positions. Chapter availability depends on birth-time uncertainty.'}
           </p>
           <div className="pattern-columns">
             <div className="pattern-main">

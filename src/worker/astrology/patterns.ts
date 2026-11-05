@@ -27,6 +27,50 @@ type State = {
   release_json: string;
   state: string;
 };
+export type PatternAccess = {
+  allowSynthetic?: boolean;
+  approvedPreviewRelease?: PatternContentRelease;
+};
+
+async function activeContent(db: D1Database, options: PatternAccess) {
+  const row = await q(
+    db,
+    'SELECT s.*,p.release_json,p.state FROM pattern_state s JOIN pattern_content_releases p ON p.hash=s.content_hash WHERE s.id=1',
+  ).first<State>();
+  if (
+    (!options.allowSynthetic && !options.approvedPreviewRelease) ||
+    !row ||
+    !row.enabled ||
+    row.state !== 'active' ||
+    row.calculation_hash !== (await sha256Json(CALCULATION_IDENTITY))
+  )
+    throw new RecordError(410, 'CONTENT_UNAVAILABLE');
+  const release = PatternContentRelease.parse(JSON.parse(row.release_json));
+  if (
+    release.state !== 'active' ||
+    release.releaseHash !== row.content_hash ||
+    (options.approvedPreviewRelease
+      ? release.review.kind !== 'human_approved' ||
+        canonicalJson(release) !== canonicalJson(options.approvedPreviewRelease)
+      : release.review.kind !== 'synthetic_local')
+  )
+    throw new RecordError(410, 'CONTENT_UNAVAILABLE');
+  return { row, release };
+}
+
+/** Readiness never creates registry/state rows or repairs stopped/withdrawn content. */
+export async function previewPatternReady(
+  db: D1Database,
+  release: PatternContentRelease | null,
+): Promise<boolean> {
+  if (!release) return false;
+  try {
+    await activeContent(db, { approvedPreviewRelease: release });
+    return true;
+  } catch {
+    return false;
+  }
+}
 export class PatternConflict extends RecordError {
   constructor(readonly existing: PatternSavedIdentity) {
     super(409, 'CONFLICT');
@@ -36,7 +80,7 @@ export class Patterns {
   readonly profiles: BirthProfiles;
   constructor(
     readonly base: RecordBase,
-    readonly options: { allowSynthetic?: boolean } = {},
+    readonly options: PatternAccess = {},
   ) {
     this.profiles = new BirthProfiles(base);
   }
@@ -61,31 +105,16 @@ export class Patterns {
         ),
       ]);
     }
-    const row = await q(
-      this.base.db,
-      'SELECT s.*,p.release_json,p.state FROM pattern_state s JOIN pattern_content_releases p ON p.hash=s.content_hash WHERE s.id=1',
-    ).first<State>();
-    // Hosted activation remains closed pending exact editorial and numerical qualification.
-    if (
-      !this.options.allowSynthetic ||
-      !row ||
-      !row.enabled ||
-      row.state !== 'active' ||
-      row.calculation_hash !== (await sha256Json(CALCULATION_IDENTITY))
-    )
-      throw new RecordError(410, 'CONTENT_UNAVAILABLE');
-    const release = PatternContentRelease.parse(JSON.parse(row.release_json));
-    if (release.releaseHash !== row.content_hash || release.review.kind !== 'synthetic_local')
-      throw new RecordError(410, 'CONTENT_UNAVAILABLE');
-    return { row, release };
+    return activeContent(this.base.db, this.options);
   }
   private contentGuard(state: State) {
     return assertion(
       this.base.db,
-      "EXISTS(SELECT 1 FROM pattern_state s JOIN pattern_content_releases p ON p.hash=s.content_hash WHERE s.id=1 AND s.enabled=1 AND s.revision=? AND s.content_hash=? AND s.calculation_hash=? AND p.state='active')",
+      "EXISTS(SELECT 1 FROM pattern_state s JOIN pattern_content_releases p ON p.hash=s.content_hash WHERE s.id=1 AND s.enabled=1 AND s.revision=? AND s.content_hash=? AND s.calculation_hash=? AND p.state='active' AND p.release_json=?)",
       state.revision,
       state.content_hash,
       state.calculation_hash,
+      state.release_json,
     );
   }
   private source(

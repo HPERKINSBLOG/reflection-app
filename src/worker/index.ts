@@ -7,6 +7,8 @@ import { generationService, type GenerationFactory } from './readings/runtime.ts
 import { RetentionMaintenance } from './maintenance/retention.ts';
 import { maintenanceHealth } from './maintenance/health.ts';
 import type { ApplicationRuntime } from './runtime/application.ts';
+import type { PatternContentRelease } from '../contracts/astrology.ts';
+import { previewPatternReady } from './astrology/patterns.ts';
 
 export interface Env extends IdentityBindings, ReadingBindings {
   ASSETS?: Fetcher;
@@ -14,7 +16,12 @@ export interface Env extends IdentityBindings, ReadingBindings {
 }
 
 /** Protected bootstrap seam. The default export still has no live factory or secrets. */
-export function createWorker(factory?: GenerationFactory, runtime?: ApplicationRuntime) {
+export type DevelopmentPreviewCapability = { patternRelease: PatternContentRelease | null };
+export function createWorker(
+  factory?: GenerationFactory,
+  runtime?: ApplicationRuntime,
+  preview?: DevelopmentPreviewCapability,
+) {
   const app = new Hono<{ Bindings: Env }>();
   app.use('*', async (c, next) => {
     await next();
@@ -26,7 +33,7 @@ export function createWorker(factory?: GenerationFactory, runtime?: ApplicationR
     c.header('X-Content-Type-Options', 'nosniff');
     c.header('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
   });
-  app.get('/health', (c) =>
+  app.get('/health', async (c) =>
     c.json(
       runtime?.health ?? {
         status: 'ok',
@@ -37,6 +44,9 @@ export function createWorker(factory?: GenerationFactory, runtime?: ApplicationR
             : 'synthetic-only',
         ...(factory && ['live-local', 'live-preview'].includes(c.env.READING_MODE ?? '')
           ? { provider: 'openai' }
+          : {}),
+        ...(preview && factory && c.env.READING_MODE === 'live-preview'
+          ? { patternReady: await previewPatternReady(c.env.DB, preview.patternRelease) }
           : {}),
       },
     ),
@@ -79,7 +89,7 @@ export function createWorker(factory?: GenerationFactory, runtime?: ApplicationR
     } catch {
       /* No execution context for direct application calls. */
     }
-    const reading = await readingRoute(c.req.raw, c.env, defer, factory, runtime);
+    const reading = await readingRoute(c.req.raw, c.env, defer, factory, runtime, preview);
     if (reading) return reading;
     await next();
   });

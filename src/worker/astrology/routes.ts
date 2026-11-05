@@ -5,6 +5,7 @@ import {
   BirthPlaceSearch,
   BirthPlaceResults,
   PatternSaveInput,
+  type PatternContentRelease,
 } from '../../contracts/astrology.ts';
 import { ASTROLOGY_LIMITS } from '../../contracts/astrology-policy.ts';
 import type { Session } from '../identity/types.ts';
@@ -25,12 +26,16 @@ export async function astrologyRoute(
   revision: () => number,
   erasure: SessionErasure,
   allowSynthetic: boolean,
+  approvedPreviewRelease?: PatternContentRelease,
 ): Promise<Response | null> {
   const path = new URL(request.url).pathname.replace('/api/v1', ''),
     method = request.method;
   if (!path.startsWith('/astrology/')) return null;
   const profiles = new BirthProfiles(base),
-    patterns = new Patterns(base, { allowSynthetic });
+    patterns = new Patterns(base, {
+      allowSynthetic,
+      ...(approvedPreviewRelease ? { approvedPreviewRelease } : {}),
+    });
   if (method === 'GET' && path === '/astrology/profile')
     return recordResponse(await profiles.read(session));
   if (method === 'DELETE' && path === '/astrology/profile') {
@@ -51,7 +56,7 @@ export async function astrologyRoute(
       202,
     );
   }
-  if (!allowSynthetic) throw new RecordError(410, 'CONTENT_UNAVAILABLE');
+  if (!allowSynthetic && !approvedPreviewRelease) throw new RecordError(410, 'CONTENT_UNAVAILABLE');
   if (method === 'POST' && path === '/astrology/places/search') {
     const { query } = BirthPlaceSearch.parse(body),
       length = [...query.trim()].length;

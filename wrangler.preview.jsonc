@@ -4,7 +4,9 @@
   "account_id": "a77e479f6736120eadd99973dbeb705e",
   "main": "src/worker/hosted-preview.ts",
   "compatibility_date": "2026-10-23",
-  "compatibility_flags": ["nodejs_compat"],
+  "compatibility_flags": [
+    "nodejs_compat"
+  ],
   "workers_dev": true,
   "preview_urls": false,
   "assets": {
@@ -16,16 +18,35 @@
   "vars": {
     "IDENTITY_MODE": "live-preview",
     "READING_MODE": "live-preview",
-    "IDENTITY_ORIGIN": "https://reflection-preview.lfd.workers.dev"
+    "IDENTITY_ORIGIN": "https://reflection-preview.lfd.workers.dev",
+    "PATTERN_PREVIEW_ENABLED": "true",
+    "PATTERN_PREVIEW_RELEASE_HASH": "3a730caeb64a87cacc981f55df0558164bbe5ff77b00257d778d0045dae73e11",
+    "PATTERN_PREVIEW_REVIEW_KEY": "{\"kty\":\"OKP\",\"crv\":\"Ed25519\",\"x\":\"dpNkAvIo8WsylFauQ43jJVaSHCY-OE91nZEQgE-W8wg\",\"ext\":true,\"key_ops\":[\"verify\"]}"
   },
-  "d1_databases": [{
-    "binding": "DB",
-    "database_name": "reflection-preview",
-    "database_id": "9c8f40ce-b602-4946-bce0-19ddbbdf403f",
-    "migrations_dir": "src/worker/db/migrations"
-  }],
-  "r2_buckets": [{"binding":"RECOVERY", "bucket_name":"reflection-preview-recovery"}],
-  "triggers": {"crons":["* * * * *"]},
-  "observability": {"enabled":false},
-  "send_metrics": false
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "reflection-preview",
+      "database_id": "9c8f40ce-b602-4946-bce0-19ddbbdf403f",
+      "migrations_dir": "src/worker/db/migrations"
+    }
+  ],
+  "r2_buckets": [
+    {
+      "binding": "RECOVERY",
+      "bucket_name": "reflection-preview-recovery"
+    }
+  ],
+  "triggers": {
+    "crons": [
+      "* * * * *"
+    ]
+  },
+  "observability": {
+    "enabled": false
+  },
+  "send_metrics": false,
+  "limits": {
+    "cpu_ms": 30000
+  }
 }
