@@ -1,0 +1,14 @@
+{
+  "kind": "pattern.human-approval-record.v1",
+  "releaseHash": "3a730caeb64a87cacc981f55df0558164bbe5ff77b00257d778d0045dae73e11",
+  "recordedAt": "2026-11-05T17:12:20.000Z",
+  "reviewer": "Henry Perkins (explicit catalogue approval in Codex)",
+  "question": "Do you approve all 48 Your Pattern entries as written in the catalogue review packet? This applies only to catalogue hash 3a730cae…3e11, not to deployment.",
+  "answer": "Approve this exact catalogue",
+  "source": "Direct user reply in this Codex chat",
+  "signatureExecution": "Codex signed the approved payload on behalf of the human reviewer after the explicit approval",
+  "signingPublicKeySha256": "bc5fb3edf117e2483150495743cedda3e3369f7723b839c29e0995a9646393e9",
+  "keyStatus": "New local review-signing key; public verification artifact included; not installed as a hosted trust root",
+  "registryPublished": false,
+  "hostedActivated": false
+}

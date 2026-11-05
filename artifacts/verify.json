@@ -1,81 +1,81 @@
 {
   "version": 1,
   "status": "passed",
-  "sourceDigest": "48aac5ab645ecba5d485e2b29a6ad70d0c2e19e5383a0717bb056525516b1040",
+  "sourceDigest": "029d13408ff58cd540357e867685d7be16b096bc8ab94209d8801a20fc33e780",
   "node": "v26.13.0",
   "platform": "linux",
-  "finishedAt": "2026-11-05T15:55:43.650Z",
-  "durationMs": 492205,
+  "finishedAt": "2026-11-05T17:12:37.773Z",
+  "durationMs": 483780,
   "deadlineMs": 540000,
   "stages": [
     {
       "name": "format and lint",
-      "durationMs": 325,
+      "durationMs": 320,
       "status": "passed"
     },
     {
       "name": "strict TypeScript",
-      "durationMs": 6454,
+      "durationMs": 6282,
       "status": "passed"
     },
     {
       "name": "generated schema drift",
-      "durationMs": 302,
+      "durationMs": 301,
       "status": "passed"
     },
     {
       "name": "publication guard drift",
-      "durationMs": 56,
+      "durationMs": 53,
       "status": "passed"
     },
     {
       "name": "contract and reference checks",
-      "durationMs": 177,
+      "durationMs": 175,
       "status": "passed"
     },
     {
       "name": "private field coverage",
-      "durationMs": 108,
+      "durationMs": 106,
       "status": "passed"
     },
     {
       "name": "SQLite constraints",
-      "durationMs": 1811,
+      "durationMs": 1805,
       "status": "passed"
     },
     {
       "name": "OpenAPI",
-      "durationMs": 548,
+      "durationMs": 541,
       "status": "passed"
     },
     {
       "name": "domain and verification behavior",
-      "durationMs": 15138,
+      "durationMs": 14926,
       "status": "passed"
     },
     {
       "name": "workerd D1 batches",
-      "durationMs": 214249,
+      "durationMs": 223294,
       "status": "passed"
     },
     {
       "name": "client production build",
-      "durationMs": 254,
+      "durationMs": 255,
       "status": "passed"
     },
     {
       "name": "Worker dry-run build",
-      "durationMs": 995,
+      "durationMs": 1191,
       "status": "passed"
     },
     {
       "name": "identity and saved-reading browser journeys",
-      "durationMs": 251684,
+      "durationMs": 234433,
       "status": "passed"
     },
     {
       "name": "specification package links",
-      "durationMs": 30,
+      "durationMs": 26,
       "status": "passed"
     }
   ],

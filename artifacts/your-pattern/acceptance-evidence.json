@@ -1,14 +1,14 @@
 {
   "format": "reflection.your-pattern.local-acceptance.v1",
-  "testedSourceCommit": "01c9670eda697755c84c583b4d537b9c39824155",
-  "sourceDigest": "48aac5ab645ecba5d485e2b29a6ad70d0c2e19e5383a0717bb056525516b1040",
+  "testedSourceCommit": "dd4c1386080c943b6b7b78e8e75995393d9a85b7",
+  "sourceDigest": "029d13408ff58cd540357e867685d7be16b096bc8ab94209d8801a20fc33e780",
   "gate": {
     "path": "artifacts/verify.json",
-    "sha256": "72c879241bfeb1d06c14707531c910d818967d10953747137cdf17652c555e58",
+    "sha256": "7aea41903710483ec632a13b6f5c1e9a3066768ac6cd135f95f7131f82ece707",
     "stages": 14,
-    "durationMs": 492205,
+    "durationMs": 483780,
     "deadlineMs": 540000,
-    "finishedAt": "2026-11-05T15:55:43.650Z"
+    "finishedAt": "2026-11-05T17:12:37.773Z"
   },
   "tests": {
     "domain": {
@@ -16,7 +16,7 @@
       "files": 64,
       "report": {
         "path": "artifacts/domain-tests.json",
-        "sha256": "947ab5852d3eac7a59bda8b28a315a973221d4907804619fc7e81527d1e3ee66"
+        "sha256": "b2b98e6c325caab1f049529e78eaa5de320e019f3b348eb842c310de40fbcba8"
       }
     },
     "database": {
@@ -24,7 +24,7 @@
       "files": 70,
       "report": {
         "path": "artifacts/db-tests.json",
-        "sha256": "56cde7091ae435f2e4d19afe6433ff8c8fe5af47db12f6377e97e12710a500f6"
+        "sha256": "dd1f819cebeda3125bc2b9e2d1b6e2b92b69a4d0933b85d8c335f00453563272"
       }
     },
     "chromium": {
@@ -32,7 +32,7 @@
       "files": 24,
       "report": {
         "path": "artifacts/browser-tests.json",
-        "sha256": "f8f2cabc532d8de84d79728254dfd5fbdd89b7d22d4174c6488953a246ead2e8"
+        "sha256": "31f39bfa8f2aaf924950505a2644ff3eaf411a1adf7905f3f65cfac203a8cfec"
       }
     },
     "crossBrowser": {
@@ -49,7 +49,18 @@
     "sourceCommit": "ad885485cf181caf3b6eff5126ec1af382311886",
     "sourceDigest": "c958454a114fd6d80193447e2b5ae9cef3d76281f43cb22455466453f5edda65",
     "changesSinceMatrix": [
+      "docs/YOUR_PATTERN_QUALIFICATION.md",
       "docs/YOUR_PATTERN_RESULTS.md",
+      "docs/content-review/2026-11-05-pattern-editorial-assessment.md",
+      "docs/superpowers/plans/2026-11-05-your-pattern-qualification.md",
+      "scripts/qualification/README.md",
+      "scripts/qualification/build.ts",
+      "scripts/qualification/d1-rehearsal.js",
+      "scripts/qualification/fetch-horizons.py",
+      "scripts/qualification/prepare-d1.ts",
+      "scripts/qualification/probe.ts",
+      "scripts/qualification/worker.ts",
+      "scripts/qualify-pattern.ts",
       "scripts/verify.ts",
       "tests/browser/revisit-notes.spec.ts"
     ],
@@ -73,5 +84,13 @@
       "sha256": "a1448ba613df494baf1e15765e4d8f680128d84f1fa5641b1287ffb6fb007109"
     }
   ],
-  "scope": "Local synthetic-data acceptance only. Production activation requires independent numerical/uncertainty qualification, exact-catalogue editorial review and hosted resource acceptance."
+  "scope": "Local synthetic-data acceptance, plus separately bounded numerical and hosted resource/migration evidence. Human catalogue approval is recorded; full hosted recovery, trust/admission and device acceptance remain release gates.",
+  "qualification": {
+    "technicalReport": "docs/YOUR_PATTERN_QUALIFICATION.md",
+    "currentStatus": "artifacts/your-pattern/qualification/current-status.md",
+    "catalogue": "human-approved; signed artifact prepared; hosted trust not configured",
+    "resourceBenchmark": "passed; protected synthetic harness, not full application acceptance",
+    "fullHostedRecovery": "pending distinct-account environment",
+    "productionActivated": false
+  }
 }

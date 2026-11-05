@@ -1,0 +1,19 @@
+# Your Pattern release status — after human catalogue approval
+
+Updated 2026-11-05 after the final technical gate and the user's explicit catalogue decision. This supersedes the **pending human approval** status in the earlier qualification report and agent editorial assessment; those remain the record of their review cutoff.
+
+- **Local gate passed:** 14 stages in 483.780 seconds, source commit `dd4c1386080c943b6b7b78e8e75995393d9a85b7`, source digest `029d13408ff58cd540357e867685d7be16b096bc8ab94209d8801a20fc33e780`. 472 domain/tooling, 652 Workerd/D1 and 176 Chromium tests; no skipped/flaky cases. The 39-case cross-browser matrix remains valid for unchanged application/journey sources.
+- **Numerical evidence passed:** 15,220 current-range Moshier comparisons, 110 JPL comparisons and 192,409 supported-interval samples. Future stress comparisons also passed; the runner now fails on future JPL discrepancies. This is empirical evidence, not a universal physical-error certification.
+- **Exact catalogue approved by the human user:** the direct answer was “Approve this exact catalogue” for release hash `3a730caeb64a87cacc981f55df0558164bbe5ff77b00257d778d0045dae73e11`. [Decision record](human-approval-record.json).
+- **Signed approval artifact prepared and verified:** [approval payload/signature](content-approval.json), [reviewed release](approved-pattern-release.json), [public verification key](content-review-public.jwk.json). Codex performed signing on the reviewer's behalf only after the explicit approval. The private signing key remains in the user's protected local state and is not committed. Public-key canonical SHA-256: `bc5fb3edf117e2483150495743cedda3e3369f7723b839c29e0995a9646393e9`.
+- **Hosted resource/migration checks passed:** 38 authorized requests plus denial; 53 calculation parity checks; concurrency 4/8/16; maximum final CPU 1,616 ms; populated migration rollback/preservation and owner/method constraints passed. All temporary hosted resources were deleted and absence verified.
+
+The new review key has **not** been installed as a hosted trust root, and the signed release has **not** been published to a registry. Creating a locally verified approval artifact does not establish hosted trust or activate the app.
+
+Remaining release gates:
+
+1. Connect/provision a distinct Cloudflare account for the full hosted-synthetic runtime and recovery tests required by `validateHostedTarget`. The same-account benchmark does not satisfy that isolation condition.
+2. Configure the intended content-review trust root, implement qualified hosted Pattern admission, and run full application/recovery scenarios against the actual deployment artifact. Preserve publication stop switches and disabled writes after restore.
+3. Complete physical-device and screen-reader acceptance, then decide on merge and deployment.
+
+PR #11 remains draft. Production activation is closed. The existing preview, live provider credentials and existing account data were not changed. See the [technical qualification report](../../../docs/YOUR_PATTERN_QUALIFICATION.md) for methods, evidence and limitations.
