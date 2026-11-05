@@ -48,7 +48,7 @@ test('failed runtime discovery never describes a possible live call as simulatio
   await expect(page.getByText(/never contacts an AI provider|local simulated writer/)).toHaveCount(
     0,
   );
-  await page.getByRole('button', { name: 'Create an account', exact: true }).click();
+  await page.getByRole('button', { name: 'Create an account with a passkey', exact: true }).click();
   await keepKit(page);
   await expect(page.getByRole('button', { name: 'Saved readings', exact: true })).toBeEnabled();
   await expect(page.getByRole('button', { name: 'New reading', exact: true })).toBeDisabled();
@@ -76,7 +76,9 @@ for (const mode of ['live-local', 'live-preview', 'production'] as const) {
       production: 'New readings can be sent to a live AI provider.',
     }[mode];
     await expect(page.getByText(environment, { exact: true })).toBeVisible();
-    await page.getByRole('button', { name: 'Create an account', exact: true }).click();
+    await page
+      .getByRole('button', { name: 'Create an account with a passkey', exact: true })
+      .click();
     await keepKit(page);
     await openAccount(page);
     await expect(
@@ -135,9 +137,11 @@ test('explicit hosted synthetic readiness retains simulation disclosure', async 
   ).toBeVisible();
   await expect(page.getByText(/local build|local simulation/)).toHaveCount(0);
   await expect(
-    page.getByRole('button', { name: 'Create a test account', exact: true }),
+    page.getByRole('button', { name: 'Create a test account with a passkey', exact: true }),
   ).toBeVisible();
-  await page.getByRole('button', { name: 'Create a test account', exact: true }).click();
+  await page
+    .getByRole('button', { name: 'Create a test account with a passkey', exact: true })
+    .click();
   await keepKit(page);
   await enableAi(page);
   await page.getByRole('button', { name: 'New reading', exact: true }).click();
@@ -161,7 +165,7 @@ test('unavailable hosted synthetic generation retains its environment without en
   await page.getByRole('link', { name: 'Recover with your saved kit', exact: true }).click();
   await expect(environment).toBeVisible();
   await page.getByRole('link', { name: 'Back to sign in', exact: true }).click();
-  await page.getByRole('button', { name: 'Create an account', exact: true }).click();
+  await page.getByRole('button', { name: 'Create an account with a passkey', exact: true }).click();
   await expect(environment).toBeVisible();
   await keepKit(page);
   await expect(page.getByRole('button', { name: 'Saved readings', exact: true })).toBeEnabled();

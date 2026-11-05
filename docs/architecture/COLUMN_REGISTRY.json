@@ -169,6 +169,30 @@
           "nullable": false,
           "default": null,
           "export": "profile metadata"
+        },
+        "login_username_hash": {
+          "aadRule": null,
+          "class": "S",
+          "sqlType": "TEXT",
+          "nullable": true,
+          "default": null,
+          "export": "never"
+        },
+        "login_email_hash": {
+          "aadRule": null,
+          "class": "S",
+          "sqlType": "TEXT",
+          "nullable": true,
+          "default": null,
+          "export": "never"
+        },
+        "password_verifier": {
+          "aadRule": null,
+          "class": "S",
+          "sqlType": "TEXT",
+          "nullable": true,
+          "default": null,
+          "export": "never"
         }
       }
     },
@@ -333,6 +357,14 @@
           "export": "never"
         },
         "passkey_authenticated_at": {
+          "aadRule": null,
+          "class": "M",
+          "sqlType": "INTEGER",
+          "nullable": true,
+          "default": null,
+          "export": "never"
+        },
+        "password_authenticated_at": {
           "aadRule": null,
           "class": "M",
           "sqlType": "INTEGER",

@@ -11,6 +11,7 @@ export interface Session {
   epoch: number;
   authenticatedAt: number;
   passkeyAuthenticatedAt: number | null;
+  passwordAuthenticatedAt: number | null;
   tokenHash: string;
   csrfToken: string;
   writeFence: string | null;

@@ -4,6 +4,13 @@ import { apiSchemas, AuthOptions, IdentityCheckpoint } from '../../contracts/ind
 import { assertion, onlineGuard, DB_NOW, IdentityCheckpoints, statement } from './checkpoint.ts';
 import { type Checkpoint, encode, type IdentityCrypto, randomToken, uuidBytes } from './crypto.ts';
 import { IdentitySessions } from './sessions.ts';
+import {
+  loginHash,
+  makePasswordFactor,
+  type PasswordInput,
+  passwordVerifier,
+  verifyPassword,
+} from './password.ts';
 import { type Challenge, type CredentialRow, IdentityError, type Session } from './types.ts';
 
 // Map SimpleWebAuthn verification failures to safe, actionable categories. The
@@ -99,9 +106,12 @@ export class IdentityService {
   async begin(purpose: z.infer<typeof apiSchemas.AuthBegin>['purpose'], session?: Session) {
     if (purpose === 'reauthenticate' && !session) throw new IdentityError(401, 'AUTH_REQUIRED');
     let excluded: string[] = [];
+    let factor: 'passkey' | 'password' | undefined;
     if (purpose === 'add') {
-      const current = this.recentPasskey(session);
-      excluded = (await this.credentials(current)).items.map((credential) => credential.id);
+      if (!session) throw new IdentityError(401, 'AUTH_REQUIRED');
+      excluded = (await this.credentials(session)).items.map((credential) => credential.id);
+      factor = excluded.length ? 'passkey' : 'password';
+      this.requireRecentFactor(session, factor);
       if (excluded.length >= 10) throw new IdentityError(409, 'CREDENTIAL_LIMIT');
     }
     const made = await this.newChallenge(
@@ -112,22 +122,17 @@ export class IdentityService {
     made.options.excludeCredentialIds = excluded;
     await this.db.batch([
       onlineGuard(this.db),
-      ...(session
-        ? [this.sessions.guard(session, purpose === 'add', true, purpose === 'add')]
-        : []),
+      ...(session ? [this.sessions.guard(session, purpose === 'add', true, factor)] : []),
       made.insert,
     ]);
     return made;
   }
-  private recentPasskey(session?: Session): Session {
-    if (
-      !session ||
-      session.authenticatedAt <= Date.now() - 300_000 ||
-      session.passkeyAuthenticatedAt === null ||
-      session.passkeyAuthenticatedAt <= Date.now() - 300_000
-    )
+  private requireRecentFactor(session: Session, factor: 'passkey' | 'password') {
+    const cutoff = Date.now() - 300_000;
+    const confirmedAt =
+      factor === 'passkey' ? session.passkeyAuthenticatedAt : session.passwordAuthenticatedAt;
+    if (session.authenticatedAt <= cutoff || confirmedAt === null || confirmedAt <= cutoff)
       throw new IdentityError(401, 'REAUTH_REQUIRED');
-    return session;
   }
   async credentials(session: Session) {
     if (session.writeFence) throw new IdentityError(503, 'DEPENDENCY_UNAVAILABLE');
@@ -210,7 +215,14 @@ export class IdentityService {
       this.db,
       "SELECT * FROM accounts WHERE id=? AND status='active' AND write_fence IS NULL",
       subjectId,
-    ).first<{ auth_epoch: number; recovery_handle_hash: string; recovery_ack_at: number | null }>();
+    ).first<{
+      auth_epoch: number;
+      recovery_handle_hash: string;
+      recovery_ack_at: number | null;
+      login_username_hash: string | null;
+      login_email_hash: string | null;
+      password_verifier: string | null;
+    }>();
     if (!account) throw new IdentityError(401, 'ACCOUNT_UNAVAILABLE');
     const credentials = await statement(
       this.db,
@@ -229,6 +241,15 @@ export class IdentityService {
       epoch: account.auth_epoch,
       createdAt: new Date().toISOString(),
       recoveryHandleHash: account.recovery_handle_hash,
+      ...(account.password_verifier
+        ? {
+            password: {
+              usernameHash: account.login_username_hash,
+              emailHash: account.login_email_hash,
+              verifier: account.password_verifier,
+            },
+          }
+        : {}),
       recoveryAcknowledgedAt:
         account.recovery_ack_at === null ? null : new Date(account.recovery_ack_at).toISOString(),
       credentials: credentials.results.map((c) => ({
@@ -258,7 +279,8 @@ export class IdentityService {
       'recover',
       'add',
     ]);
-    const current = challenge.purpose === 'add' ? this.recentPasskey(session) : undefined;
+    const current = challenge.purpose === 'add' ? session : undefined;
+    if (challenge.purpose === 'add' && !current) throw new IdentityError(401, 'AUTH_REQUIRED');
     if (current) {
       if (csrfToken !== current.csrfToken) throw new IdentityError(403, 'FORBIDDEN');
       if (current.subjectId !== challenge.owner_id || current.epoch !== challenge.auth_epoch)
@@ -297,6 +319,8 @@ export class IdentityService {
       throw new IdentityError(401, 'PASSKEY_UNSUPPORTED');
     if (current) {
       const previous = await this.snapshot(current.subjectId);
+      const factor = previous.credentials.length ? 'passkey' : 'password';
+      this.requireRecentFactor(current, factor);
       if (previous.credentials.length >= 10) throw new IdentityError(409, 'CREDENTIAL_LIMIT');
       const info = verified.registrationInfo;
       if (
@@ -324,7 +348,7 @@ export class IdentityService {
       await this.checkpoints.commit(snapshot, {
         expected: previous,
         guards: [
-          this.sessions.guard(current, true, true, true),
+          this.sessions.guard(current, true, true, factor),
           ...this.consume(challenge),
           assertion(
             this.db,
@@ -343,47 +367,156 @@ export class IdentityService {
         snapshot.epoch,
         current.authenticatedAt,
         [],
-        current.passkeyAuthenticatedAt,
+        current,
       );
     }
     if (challenge.purpose === 'register') await this.rate('registration', ip, 3, 86_400_000);
     const subjectId = challenge.owner_id ?? challenge.id,
       previous = challenge.purpose === 'recover' ? await this.snapshot(subjectId) : undefined;
-    const kit = await this.kit(),
-      now = new Date().toISOString(),
-      info = verified.registrationInfo;
-    const snapshot: Checkpoint = {
-      v: 1,
-      operationId: crypto.randomUUID(),
+    if (previous && previous.epoch !== challenge.auth_epoch)
+      throw new IdentityError(401, 'CHALLENGE_INVALID');
+    const info = verified.registrationInfo;
+    return this.establishAccount(
       subjectId,
-      epoch: previous ? previous.epoch + 1 : 1,
-      createdAt: now,
-      recoveryHandleHash: kit.hash,
-      recoveryAcknowledgedAt: null,
-      credentials: [
+      [
         {
           id: info.credential.id,
           publicKey: encode(info.credential.publicKey),
           signCount: info.credential.counter,
           backedUp: info.credentialBackedUp,
           transports: credential.response.transports,
-          createdAt: now,
+          createdAt: new Date().toISOString(),
         },
       ],
+      undefined,
+      this.consume(challenge),
+      previous,
+    );
+  }
+  private async establishAccount(
+    subjectId: string,
+    credentials: Checkpoint['credentials'],
+    password: Checkpoint['password'],
+    guards: D1PreparedStatement[],
+    previous?: Checkpoint,
+  ) {
+    const kit = await this.kit();
+    const snapshot: Checkpoint = {
+      v: 1,
+      operationId: crypto.randomUUID(),
+      subjectId,
+      epoch: previous ? previous.epoch + 1 : 1,
+      createdAt: new Date().toISOString(),
+      recoveryHandleHash: kit.hash,
+      recoveryAcknowledgedAt: null,
+      credentials,
+      ...(password ? { password } : {}),
       recoveryCodes: kit.verifiers,
     };
-    if (previous && previous.epoch !== challenge.auth_epoch)
-      throw new IdentityError(401, 'CHALLENGE_INVALID');
     await this.checkpoints.commit(snapshot, {
       ...(previous
         ? { expected: previous }
         : { initialKeys: await this.crypt.createAccountKeys(subjectId) }),
-      guards: this.consume(challenge),
+      guards,
     });
     const issued = await this.sessions.issue(subjectId, snapshot.epoch);
     issued.result.recoveryHandle = kit.recoveryHandle;
     issued.result.recoveryCodes = kit.codes;
     return issued;
+  }
+  async registerPassword(input: PasswordInput, ip: string) {
+    await this.rate('registration', ip, 3, 86_400_000);
+    const owner = crypto.randomUUID();
+    return this.establishAccount(owner, [], await makePasswordFactor(this.crypt, owner, input), []);
+  }
+  async enrollPassword(input: PasswordInput, session: Session) {
+    this.requireRecentFactor(session, 'passkey');
+    const previous = await this.snapshot(session.subjectId);
+    if (previous.password) throw new IdentityError(409, 'PASSWORD_ALREADY_ENABLED');
+    const snapshot = {
+      ...previous,
+      operationId: crypto.randomUUID(),
+      epoch: previous.epoch + 1,
+      createdAt: new Date().toISOString(),
+      password: await makePasswordFactor(this.crypt, session.subjectId, input),
+    };
+    await this.checkpoints.commit(snapshot, {
+      expected: previous,
+      guards: [this.sessions.guard(session, true, true, 'passkey')],
+    });
+    return this.sessions.issue(
+      session.subjectId,
+      snapshot.epoch,
+      session.authenticatedAt,
+      [],
+      session,
+    );
+  }
+  async authenticatePassword(
+    password: string,
+    subject: { identifier: string } | { session: Session },
+    ip: string,
+  ) {
+    await this.rate('password-ip', ip, 20, 600_000);
+    const current = 'session' in subject ? subject.session : undefined;
+    const lookup =
+      'identifier' in subject
+        ? await loginHash(this.crypt, subject.identifier)
+        : subject.session.subjectId;
+    await this.rate('password-identifier', lookup, 10, 600_000);
+    const column =
+      'identifier' in subject
+        ? subject.identifier.includes('@')
+          ? 'login_email_hash'
+          : 'login_username_hash'
+        : 'id';
+    const row = await statement(
+      this.db,
+      `SELECT id,auth_epoch,password_verifier FROM accounts WHERE ${column}=? AND status='active' AND write_fence IS NULL AND password_verifier IS NOT NULL`,
+      lookup,
+    ).first<{ id: string; auth_epoch: number; password_verifier: string }>();
+    const valid = await verifyPassword(
+      this.crypt,
+      row?.id ?? '00000000-0000-0000-0000-000000000000',
+      password,
+      row?.password_verifier ?? null,
+    );
+    if (!valid || !row)
+      throw new IdentityError(401, current ? 'PASSWORD_CONFIRMATION_FAILED' : 'PASSWORD_FAILED');
+    const now = Date.now();
+    return this.sessions.issue(
+      row.id,
+      row.auth_epoch,
+      now,
+      current
+        ? [
+            this.sessions.guard(current),
+            statement(this.db, 'DELETE FROM auth_sessions WHERE token_hash=?', current.tokenHash),
+          ]
+        : [],
+      { passwordAuthenticatedAt: now },
+    );
+  }
+  async recoverPassword(
+    input: z.infer<typeof apiSchemas.PasswordRecovery>,
+    browser: string | undefined,
+  ) {
+    const challenge = await this.challenge(input.challengeId, browser, ['recover']);
+    if (!challenge.owner_id) throw new IdentityError(401, 'CHALLENGE_INVALID');
+    const previous = await this.snapshot(challenge.owner_id);
+    if (previous.epoch !== challenge.auth_epoch || !previous.password)
+      throw new IdentityError(401, 'CHALLENGE_INVALID');
+    const password = {
+      ...previous.password,
+      verifier: await passwordVerifier(this.crypt, previous.subjectId, input.password),
+    };
+    return this.establishAccount(
+      previous.subjectId,
+      [],
+      password,
+      this.consume(challenge),
+      previous,
+    );
   }
   async authenticate(
     input: z.infer<typeof apiSchemas.AuthenticateFinish>,
@@ -466,7 +599,7 @@ export class IdentityService {
           ? [statement(this.db, 'DELETE FROM auth_sessions WHERE token_hash=?', session.tokenHash)]
           : []),
       ],
-      now,
+      { passkeyAuthenticatedAt: now },
     );
   }
   async recover(input: z.infer<typeof apiSchemas.Recover>, ip = 'loopback') {
@@ -551,7 +684,11 @@ export class IdentityService {
     });
     return {
       browser: made.browser,
-      result: { challengeId: made.options.challengeId, options: made.options },
+      result: {
+        challengeId: made.options.challengeId,
+        options: made.options,
+        ...(previous.password ? { passwordEnabled: true } : {}),
+      },
     };
   }
   async acknowledge(session: Session) {
@@ -573,7 +710,7 @@ export class IdentityService {
       snapshot.epoch,
       session.authenticatedAt,
       [],
-      session.passkeyAuthenticatedAt,
+      session,
     );
   }
   async rotate(session: Session) {
@@ -598,7 +735,7 @@ export class IdentityService {
         snapshot.epoch,
         session.authenticatedAt,
         [],
-        session.passkeyAuthenticatedAt,
+        session,
       )),
       kit: { recoveryHandle: kit.recoveryHandle, codes: kit.codes },
     };
@@ -618,7 +755,7 @@ export class IdentityService {
     );
   }
   async removeCredential(session: Session, id: string) {
-    this.recentPasskey(session);
+    this.requireRecentFactor(session, 'passkey');
     const previous = await this.snapshot(session.subjectId);
     if (!previous.credentials.some((credential) => credential.id === id))
       throw new IdentityError(404, 'NOT_FOUND');
@@ -633,7 +770,7 @@ export class IdentityService {
     await this.checkpoints.commit(snapshot, {
       expected: previous,
       guards: [
-        this.sessions.guard(session, true, true, true),
+        this.sessions.guard(session, true, true, 'passkey'),
         assertion(
           this.db,
           '(SELECT count(*) FROM credentials WHERE owner_id=?)>1',
@@ -646,7 +783,7 @@ export class IdentityService {
       snapshot.epoch,
       session.authenticatedAt,
       [],
-      session.passkeyAuthenticatedAt,
+      session,
     );
   }
 }

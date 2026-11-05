@@ -17,9 +17,10 @@ paths:
       operationId: authOptions
       summary: authOptions
       description: 10/10 min/IP. Same-origin challenge cookie. Register/authenticate
-        public; add/reauthenticate require current session; add also requires
-        recent passkey authentication and CSRF. Five-minute single-use
-        challenge; no private record.
+        public; add/reauthenticate require current session; adding a passkey
+        requires CSRF and recent verification of an existing passkey, or recent
+        authentication for the first passkey on a password account. Five-minute
+        single-use challenge; no private record.
       security: []
       parameters: []
       responses:
@@ -509,6 +510,833 @@ paths:
           application/json:
             schema:
               $ref: "#/components/schemas/AuthenticateFinish"
+  /auth/password/register:
+    post:
+      operationId: registerPassword
+      summary: registerPassword
+      description: Create an account with unique case-insensitive username and email,
+        a salted password verifier and a complete recovery kit. Shares the
+        registration limit of 3/day/IP with passkeys.
+      security: []
+      parameters: []
+      responses:
+        "200":
+          description: Successful result; private,no-store.
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                const: private, no-store
+            X-Correlation-ID:
+              schema:
+                type: string
+                format: uuid
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResult"
+        "400":
+          description: Invalid shape/range.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+        "401":
+          description: Sign in again.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+        "403":
+          description: Permission or recent authentication required.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+        "404":
+          description: Absent or not owned.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+        "409":
+          description: Refresh state; preserve local draft.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+        "410":
+          description: Owned resource erased/withdrawn/expired.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+        "413":
+          description: Payload exceeds budget.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+        "422":
+          description: Unsupported language, safety boundary or invalid content.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+        "428":
+          description: If-Match required.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+        "429":
+          description: Quota or rate limit; honor Retry-After.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+        "500":
+          description: Internal failure; use correlation ID.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+        "503":
+          description: Dependency, key, spend or recovery unavailable.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PasswordRegistration"
+  /auth/password/login:
+    post:
+      operationId: loginPassword
+      summary: loginPassword
+      description: Sign in with either identifier and the exact password. Returns the
+        session cookie. Limit 20 attempts per IP and 10 per identifier in ten
+        minutes. Unknown accounts and incorrect passwords receive the same
+        failure.
+      security: []
+      parameters: []
+      responses:
+        "200":
+          description: Successful result; private,no-store.
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                const: private, no-store
+            X-Correlation-ID:
+              schema:
+                type: string
+                format: uuid
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResult"
+        "400":
+          description: Invalid shape/range.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+        "401":
+          description: Sign in again.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+        "403":
+          description: Permission or recent authentication required.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+        "404":
+          description: Absent or not owned.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+        "409":
+          description: Refresh state; preserve local draft.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+        "410":
+          description: Owned resource erased/withdrawn/expired.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+        "413":
+          description: Payload exceeds budget.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+        "422":
+          description: Unsupported language, safety boundary or invalid content.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+        "428":
+          description: If-Match required.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+        "429":
+          description: Quota or rate limit; honor Retry-After.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+        "500":
+          description: Internal failure; use correlation ID.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+        "503":
+          description: Dependency, key, spend or recovery unavailable.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PasswordLogin"
+  /auth/password/enroll:
+    post:
+      operationId: enrollPassword
+      summary: enrollPassword
+      description: Add password sign-in to the current passkey account after verifying
+        an existing passkey. Checkpoints the new factor and revokes other
+        sessions. Recent authentication within five minutes.
+      security:
+        - sessionCookie: []
+      parameters:
+        - name: X-CSRF-Token
+          in: header
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Successful result; private,no-store.
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                const: private, no-store
+            X-Correlation-ID:
+              schema:
+                type: string
+                format: uuid
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResult"
+        "400":
+          description: Invalid shape/range.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+        "401":
+          description: Sign in again.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+        "403":
+          description: Permission or recent authentication required.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+        "404":
+          description: Absent or not owned.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+        "409":
+          description: Refresh state; preserve local draft.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+        "410":
+          description: Owned resource erased/withdrawn/expired.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+        "413":
+          description: Payload exceeds budget.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+        "422":
+          description: Unsupported language, safety boundary or invalid content.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+        "428":
+          description: If-Match required.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+        "429":
+          description: Quota or rate limit; honor Retry-After.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+        "500":
+          description: Internal failure; use correlation ID.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+        "503":
+          description: Dependency, key, spend or recovery unavailable.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PasswordRegistration"
+  /auth/password/reauthenticate:
+    post:
+      operationId: confirmPassword
+      summary: confirmPassword
+      description: Confirm the current account password and rotate the current session
+        and CSRF token.
+      security:
+        - sessionCookie: []
+      parameters:
+        - name: X-CSRF-Token
+          in: header
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Successful result; private,no-store.
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                const: private, no-store
+            X-Correlation-ID:
+              schema:
+                type: string
+                format: uuid
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResult"
+        "400":
+          description: Invalid shape/range.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+        "401":
+          description: Sign in again.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+        "403":
+          description: Permission or recent authentication required.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+        "404":
+          description: Absent or not owned.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+        "409":
+          description: Refresh state; preserve local draft.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+        "410":
+          description: Owned resource erased/withdrawn/expired.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+        "413":
+          description: Payload exceeds budget.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+        "422":
+          description: Unsupported language, safety boundary or invalid content.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+        "428":
+          description: If-Match required.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+        "429":
+          description: Quota or rate limit; honor Retry-After.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+        "500":
+          description: Internal failure; use correlation ID.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+        "503":
+          description: Dependency, key, spend or recovery unavailable.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PasswordConfirmation"
+  /auth/password/recover:
+    post:
+      operationId: recoverPassword
+      summary: recoverPassword
+      description: Consume the browser-bound recovery grant for a password-enabled
+        account. Preserve its username and email, replace all sign-in factors
+        and issue a new recovery kit.
+      security: []
+      parameters: []
+      responses:
+        "200":
+          description: Successful result; private,no-store.
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                const: private, no-store
+            X-Correlation-ID:
+              schema:
+                type: string
+                format: uuid
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResult"
+        "400":
+          description: Invalid shape/range.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+        "401":
+          description: Sign in again.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+        "403":
+          description: Permission or recent authentication required.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+        "404":
+          description: Absent or not owned.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+        "409":
+          description: Refresh state; preserve local draft.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+        "410":
+          description: Owned resource erased/withdrawn/expired.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+        "413":
+          description: Payload exceeds budget.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+        "422":
+          description: Unsupported language, safety boundary or invalid content.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+        "428":
+          description: If-Match required.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+        "429":
+          description: Quota or rate limit; honor Retry-After.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+        "500":
+          description: Internal failure; use correlation ID.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+        "503":
+          description: Dependency, key, spend or recovery unavailable.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PasswordRecovery"
   /auth/recover:
     post:
       operationId: recoverIdentity
@@ -518,8 +1346,8 @@ paths:
         required to begin. Verify the pair, then fence and checkpoint code
         consumption through the security saga. Final D1 apply revokes sessions
         and creates a new browser-bound registration challenge only after
-        independent checkpoint durability. Grants no data access before
-        replacement passkey enrollment completes. 401 generic failure;503 while
+        independent checkpoint durability. Grants no data access before a
+        replacement passkey or password is set. 401 generic failure;503 while
         durability is uncertain.
       security: []
       parameters: []
@@ -1336,8 +2164,8 @@ paths:
       description: Recent passkey auth required; cannot remove last credential (409).
         Security saga durably checkpoints removal before final D1 apply,
         auth-epoch advance and replacement caller session. No success on
-        uncertain checkpoint write. No identity merge. Recent passkey
-        authentication <=5 minutes.
+        uncertain checkpoint write. No identity merge. Recent authentication
+        within five minutes.
       security:
         - sessionCookie: []
       parameters:
@@ -1503,9 +2331,9 @@ paths:
         before invalidating old codes and returning the new recoveryHandle plus
         ten codes together once. Client offers a complete replacement recovery
         kit by explicit download/copy. Never retry after losing response: sign
-        in with a passkey, reauthenticate and rotate again. Secret response
-        no-store; never persist factors silently in browser storage. Recent
-        passkey authentication <=5 minutes."
+        in, reauthenticate and rotate again. Secret response no-store; never
+        persist factors silently in browser storage. Recent authentication
+        within five minutes."
       security:
         - sessionCookie: []
       parameters:
@@ -6895,7 +7723,7 @@ paths:
       summary: createExport
       description: 2/hour/account. Capture account.data_revision, sixty-minute ticket,
         no stored plaintext/file. Does not grant model permission. Recent
-        passkey authentication <=5 minutes.
+        authentication within five minutes.
       security:
         - sessionCookie: []
       parameters:
@@ -7611,7 +8439,7 @@ paths:
       summary: deleteAccount
       description: Fence account, revoke auth and cancel work atomically. Receipt
         token provides status after logout. Completion requires durable erasure
-        ledger and active-store/key removal. Recent passkey authentication <=5
+        ledger and active-store/key removal. Recent authentication within five
         minutes.
       security:
         - sessionCookie: []
@@ -20861,6 +21689,8 @@ components:
           type: string
           format: uuid
           pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+        passwordEnabled:
+          type: boolean
         continuityReady:
           type: boolean
         csrfToken:
@@ -21171,6 +22001,68 @@ components:
         - challengeId
         - credential
       additionalProperties: false
+    PasswordRegistration:
+      type: object
+      properties:
+        username:
+          type: string
+          minLength: 3
+          maxLength: 32
+          pattern: ^[a-zA-Z0-9_-]+$
+        email:
+          type: string
+          maxLength: 254
+          format: email
+          pattern: ^(?:[A-Za-z0-9_'+\-]+\.)*[A-Za-z0-9_'+\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\-]*\.)+[A-Za-z]{2,}$
+        password:
+          type: string
+          minLength: 15
+          maxLength: 128
+      required:
+        - username
+        - email
+        - password
+      additionalProperties: false
+    PasswordLogin:
+      type: object
+      properties:
+        identifier:
+          type: string
+          minLength: 1
+          maxLength: 254
+        password:
+          type: string
+          minLength: 1
+          maxLength: 128
+      required:
+        - identifier
+        - password
+      additionalProperties: false
+    PasswordConfirmation:
+      type: object
+      properties:
+        password:
+          type: string
+          minLength: 1
+          maxLength: 128
+      required:
+        - password
+      additionalProperties: false
+    PasswordRecovery:
+      type: object
+      properties:
+        challengeId:
+          type: string
+          format: uuid
+          pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+        password:
+          type: string
+          minLength: 15
+          maxLength: 128
+      required:
+        - challengeId
+        - password
+      additionalProperties: false
     Recover:
       type: object
       properties:
@@ -21264,6 +22156,8 @@ components:
             - algorithms
             - excludeCredentialIds
           additionalProperties: false
+        passwordEnabled:
+          type: boolean
       required:
         - challengeId
         - options

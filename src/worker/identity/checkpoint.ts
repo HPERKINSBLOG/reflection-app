@@ -1,5 +1,6 @@
 import { recoveryWrite, type RecoveryLease } from '../recovery/coordination.ts';
 import { IdentityCheckpoint } from '../../contracts/index.ts';
+import { writePasswordFactor } from './password.ts';
 import { type Checkpoint, decode, type IdentityCrypto, type WrappedKeys } from './crypto.ts';
 
 export const DB_NOW = "CAST(unixepoch('subsec') * 1000 AS INTEGER)";
@@ -149,6 +150,10 @@ export class IdentityCheckpoints {
         ),
       );
     }
+    if (snapshot.password && !options.expected?.password) {
+      // Reserve both aliases before writing an immutable checkpoint.
+      writes.push(writePasswordFactor(this.db, snapshot.subjectId, snapshot.password));
+    }
     // Reserve newly introduced IDs in the same transaction as the account fence.
     // The global credentials PK rejects cross-account races before any R2 write;
     // write_fence keeps these provisional factors unusable until final apply.
@@ -230,6 +235,7 @@ export class IdentityCheckpoints {
       ),
       statement(this.db, 'DELETE FROM credentials WHERE owner_id=?', op.owner_id),
       statement(this.db, 'DELETE FROM recovery_codes WHERE owner_id=?', op.owner_id),
+      writePasswordFactor(this.db, op.owner_id, snapshot.password),
       statement(this.db, 'DELETE FROM auth_sessions WHERE owner_id=?', op.owner_id),
       // Only a preallocated, future-epoch restricted recovery challenge survives.
       statement(

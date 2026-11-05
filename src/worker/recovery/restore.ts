@@ -17,6 +17,7 @@ import {
   type Checkpoint,
 } from '../identity/crypto.ts';
 import { localIdentity } from '../identity/routes.ts';
+import { writePasswordFactor } from '../identity/password.ts';
 import { assertion } from '../identity/checkpoint.ts';
 import { RecordBase } from '../readings/base.ts';
 import { SessionErasure } from '../readings/erasure.ts';
@@ -204,12 +205,20 @@ export class OfflineRestore {
         const complete = await this.erasure.ledger.finish(chain, pass, this.now());
         await this.erasure.project(chain.intent, chain.target, complete);
       }
-      for (const account of accounts) {
-        if (erasedAccounts.has(account.id)) continue;
+      const survivingAccounts = accounts.filter((account) => !erasedAccounts.has(account.id));
+      for (const account of survivingAccounts) {
         const checkpoint = checkpoints.get(account.id);
         if (!checkpoint || checkpoint.epoch < account.auth_epoch)
           throw new Error('Missing current identity checkpoint');
-        await this.applyCheckpoint(checkpoint);
+      }
+      // An alias in the old backup may have been released and claimed by a
+      // different account. Rebuild unique lookups under the offline fence.
+      await q(
+        this.env.DB,
+        'UPDATE accounts SET login_username_hash=NULL,login_email_hash=NULL,password_verifier=NULL WHERE password_verifier IS NOT NULL',
+      ).run();
+      for (const account of survivingAccounts) {
+        await this.applyCheckpoint(checkpoints.get(account.id)!);
         await this.validateAccountKeys(account.id, account.key_version);
       }
       await this.resetRuntime();
@@ -344,6 +353,7 @@ export class OfflineRestore {
       q(this.env.DB, 'DELETE FROM credentials WHERE owner_id=?', owner),
       q(this.env.DB, 'DELETE FROM recovery_codes WHERE owner_id=?', owner),
       q(this.env.DB, 'DELETE FROM security_operations WHERE owner_id=?', owner),
+      writePasswordFactor(this.env.DB, owner, snapshot.password),
     ];
     for (const credential of snapshot.credentials)
       statements.push(

@@ -34,7 +34,7 @@ The browser suite covers offline first-list retry, failed saves, conflicts, seve
 
 ## November 1 — Entry and return (historical scope)
 
-The owner confirmed this scope: apply the concept boards' visual direction to existing screens and document the proposed flows. PR [#7](https://github.com/henryperkins/reflection-app/pull/7) was merged first as `08e227753f6942d71a5b7dfe717c6d39d6e693df`; this refinement starts from that merged baseline. **Automated verification passed; manual device/assistive-technology acceptance remains open.**
+The owner confirmed this scope: apply the concept boards' visual direction to existing screens and document the proposed flows. PR [#7](https://github.com/HPERKINSBLOG/reflection-app/pull/7) was merged first as `08e227753f6942d71a5b7dfe717c6d39d6e693df`; this refinement starts from that merged baseline. **Automated verification passed; manual device/assistive-technology acceptance remains open.**
 
 ### Delivered surfaces and boundaries
 
@@ -69,7 +69,7 @@ The original implementation record stored receipts/logs and its capture manifest
 
 ### Integration verification — November 1
 
-The combined recovery/design source at [`acc06ae`](https://github.com/henryperkins/reflection-app/commit/acc06ae5c7295560fd6a953d0191dd2e87f47572) passed all 14 stages of `npm run verify` in 322.45 seconds: 397 domain/tooling, 467 database and 91 Chromium browser tests. The fresh Chromium/Firefox/WebKit matrix passed all 36 cases in 289.22 seconds. Both runs had zero skipped, unexpected or flaky tests. The matrix includes the computed hover-contrast assertions and supported forced-colors/native-zoom cases.
+The combined recovery/design source at [`acc06ae`](https://github.com/HPERKINSBLOG/reflection-app/commit/acc06ae5c7295560fd6a953d0191dd2e87f47572) passed all 14 stages of `npm run verify` in 322.45 seconds: 397 domain/tooling, 467 database and 91 Chromium browser tests. The fresh Chromium/Firefox/WebKit matrix passed all 36 cases in 289.22 seconds. Both runs had zero skipped, unexpected or flaky tests. The matrix includes the computed hover-contrast assertions and supported forced-colors/native-zoom cases.
 
 Published evidence: [full design verification receipt](docs/verification/2026-11-01/design-verify.json), [test counts, browser statistics and contrast regression](docs/verification/2026-11-01/test-summary.json), and [PR #4 verification receipt](docs/verification/2026-11-01/pr4-verify.json). These receipts identify the tested source; subsequent changes publish this evidence and clarify documentation only. No application, test or runtime-configuration file changed after these runs. Complete logs and reports are retained in the local integration backup.
 

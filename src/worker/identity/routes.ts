@@ -70,7 +70,12 @@ export async function identityRoute(
   const messages: Record<string, string> = {
     AUTH_REQUIRED: 'Your session has ended. Please sign in again.',
     REAUTH_REQUIRED:
-      'Please verify with your passkey again to continue. This confirmation lasts five minutes.',
+      'Please confirm your sign-in again to continue. This confirmation lasts five minutes.',
+    PASSWORD_FAILED: 'The username, email, or password was incorrect. Try again.',
+    PASSWORD_CONFIRMATION_FAILED: 'That password was incorrect. Please try again.',
+    PASSWORD_UNAVAILABLE:
+      'That username or email is already in use. Try signing in or choose different details.',
+    PASSWORD_ALREADY_ENABLED: 'Password sign-in is already set up for this account.',
     AUTH_FAILED:
       'That passkey could not be verified. Start again and choose the passkey for this account, or recover your account with your recovery kit.',
     RECOVERY_FAILED:
@@ -240,6 +245,34 @@ export async function identityRoute(
     const setSession = (token: string) =>
       headers.append('Set-Cookie', cookie('__Host-session', token, 604800));
     const clearChallenge = () => headers.append('Set-Cookie', cookie('__Host-challenge', '', 0));
+    const signedIn = (issued: Awaited<ReturnType<IdentityService['sessions']['issue']>>) => {
+      setSession(issued.token);
+      clearChallenge();
+      return reply(issued.result);
+    };
+    if (path === '/auth/password/register')
+      return signedIn(
+        await service.registerPassword(apiSchemas.PasswordRegistration.parse(body), ip),
+      );
+    if (path === '/auth/password/login') {
+      const { identifier, password } = apiSchemas.PasswordLogin.parse(body);
+      return signedIn(await service.authenticatePassword(password, { identifier }, ip));
+    }
+    if (path === '/auth/password/enroll')
+      return signedIn(
+        await service.enrollPassword(apiSchemas.PasswordRegistration.parse(body), await csrf(true)),
+      );
+    if (path === '/auth/password/reauthenticate') {
+      const { password } = apiSchemas.PasswordConfirmation.parse(body);
+      return signedIn(await service.authenticatePassword(password, { session: await csrf() }, ip));
+    }
+    if (path === '/auth/password/recover')
+      return signedIn(
+        await service.recoverPassword(
+          apiSchemas.PasswordRecovery.parse(body),
+          jar.get('__Host-challenge'),
+        ),
+      );
     if (removingCredential) {
       apiSchemas.Empty.parse(body);
       const id = Base64url.parse(path.slice('/auth/credentials/'.length));
@@ -271,9 +304,7 @@ export async function identityRoute(
         current,
         request.headers.get('X-CSRF-Token') ?? undefined,
       );
-      setSession(issued.token);
-      clearChallenge();
-      return reply(issued.result);
+      return signedIn(issued);
     }
     if (path === '/auth/authenticate') {
       const input = apiSchemas.AuthenticateFinish.parse(body);
@@ -282,9 +313,7 @@ export async function identityRoute(
         ? await service.sessions.get(sessionToken).catch(() => undefined)
         : undefined;
       const issued = await service.authenticate(input, jar.get('__Host-challenge'), current);
-      setSession(issued.token);
-      clearChallenge();
-      return reply(issued.result);
+      return signedIn(issued);
     }
     if (path === '/auth/recover') {
       const input = apiSchemas.Recover.parse(body);
@@ -319,6 +348,11 @@ export async function identityRoute(
     if (error instanceof IdentityError)
       return reply({ error: error.code }, error.status, error.code);
     if (error instanceof z.ZodError) return reply({ error: 'BAD_INPUT' }, 400, 'BAD_INPUT');
+    if (
+      error instanceof Error &&
+      /UNIQUE constraint failed: accounts\.login_(username|email)_hash/.test(error.message)
+    )
+      return reply(null, 409, 'PASSWORD_UNAVAILABLE');
     // Constraint races are generic authentication failures; dependency details never leave the server.
     if (
       error instanceof Error &&

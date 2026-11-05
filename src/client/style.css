@@ -682,6 +682,9 @@ main {
   font-size: clamp(2.75rem, 5vw, 4rem);
   text-wrap: initial;
 }
+.landing-card:where(:has(.password-entry)) h1 {
+  max-width: 18ch;
+}
 .landing-card > .identity-content {
   padding: 24px 0 0;
 }
@@ -697,12 +700,56 @@ main {
   font-size: 20px;
   line-height: 30px;
 }
-.landing-content .account-explainer {
-  font-size: 16px;
-  line-height: 24px;
-}
 .landing-content .actions {
   margin-bottom: 8px;
+}
+.signup-options {
+  padding-block: 20px 8px;
+  text-align: center;
+}
+.signup-options h2 {
+  margin-bottom: 4px;
+  font-size: 22px;
+}
+.signup-options button,
+.password-links button {
+  width: auto;
+  padding-inline: 8px;
+  font-size: 1rem;
+}
+.password-form {
+  margin-block: 16px;
+}
+.password-form fieldset {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+:where(.password-form) .field-hint {
+  margin: -8px 0 16px;
+}
+.password-form button {
+  width: 100%;
+}
+.password-links {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0 12px;
+}
+.password-dialog {
+  position: fixed;
+  width: min(400px, calc(100% - 32px));
+  margin: auto;
+  padding: 24px;
+}
+.password-dialog::backdrop {
+  background: color-mix(in srgb, var(--reflection-ink) 45%, transparent);
+}
+.password-dialog > button {
+  width: 100%;
 }
 @media (max-width: 900px) {
   .landing-layout {

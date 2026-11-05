@@ -2,6 +2,8 @@
 
 The development app supports live OpenAI readings, local identity/recovery and saved-reading return workflows. Save without a reflection, sign back in to dated history, recover in a fresh browser, and reopen identical content. History, reflection editing, export and session deletion work with AI permission off.
 
+Choose **Create a password account** to register a username, email and password. On return, choose **Sign in with a password** and enter either identifier. Passkey users can add password access under **Account → Password sign-in**. Save the recovery kit when creating an account. Its handle and one unused code let you reset a forgotten password.
+
 ## Hosted development preview
 
 **https://reflection-preview.lfd.workers.dev**
@@ -11,7 +13,7 @@ GPT-6.1 Terra with fast service and xhigh reasoning. Its accounts and saved read
 use a separate Cloudflare D1 database and recovery bucket from the local app.
 
 The deployment is configured in `wrangler.preview.jsonc`. With Wrangler authenticated
-to the configured account, redeploy using `npm run deploy:preview`. Server secrets
+to the configured account, apply pending D1 migrations with `npx wrangler d1 migrations apply DB --remote --config wrangler.preview.jsonc`, then redeploy using `npm run deploy:preview`. Server secrets
 are already installed and retained across deployments. The minute-by-minute maintenance
 schedule handles unfinished work and retention. Start keeps its HTTP request open
 while generating so longer readings can finish within the provider deadline.

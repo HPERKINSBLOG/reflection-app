@@ -856,6 +856,7 @@ export const AuthResult = z.strictObject({
 });
 export const SessionView = z.strictObject({
   subjectId: Id,
+  passwordEnabled: z.boolean().optional(),
   continuityReady: z.boolean().optional(),
   csrfToken: Base64url,
   permission: Permission,
@@ -1140,6 +1141,19 @@ export const DeletionReceipt = z.strictObject({
   backupExpiresBy: Instant.nullable(),
 });
 
+const newPassword = z.string().min(15).max(128);
+const enteredPassword = z.string().min(1).max(128);
+export const PasswordRegistration = z.strictObject({
+  username: z
+    .string()
+    .trim()
+    .min(3)
+    .max(32)
+    .regex(/^[a-zA-Z0-9_-]+$/),
+  email: z.string().trim().max(254).check(z.email()),
+  password: newPassword,
+});
+
 export const apiSchemas = {
   ErrorEnvelope,
   StartRequest,
@@ -1170,8 +1184,19 @@ export const apiSchemas = {
   }),
   RegisterFinish: z.strictObject({ challengeId: Id, credential: RegistrationCredential }),
   AuthenticateFinish: z.strictObject({ challengeId: Id, credential: AuthenticationCredential }),
+  PasswordRegistration,
+  PasswordLogin: z.strictObject({
+    identifier: z.string().trim().min(1).max(254),
+    password: enteredPassword,
+  }),
+  PasswordConfirmation: z.strictObject({ password: enteredPassword }),
+  PasswordRecovery: z.strictObject({ challengeId: Id, password: newPassword }),
   Recover: z.strictObject({ recoveryHandle: z.string().min(1).max(100), code: Base64url }),
-  RecoveryGrant: z.strictObject({ challengeId: Id, options: AuthOptions }),
+  RecoveryGrant: z.strictObject({
+    challengeId: Id,
+    options: AuthOptions,
+    passwordEnabled: z.boolean().optional(),
+  }),
   Credentials: z.strictObject({
     items: z
       .array(z.strictObject({ id: Base64url, createdAt: Instant, backedUp: z.boolean() }))
@@ -1499,6 +1524,13 @@ export const IdentityCheckpoint = z.strictObject({
   createdAt: Instant,
   recoveryHandleHash: Hash,
   recoveryAcknowledgedAt: Instant.nullable(),
+  password: z
+    .strictObject({
+      usernameHash: Hash,
+      emailHash: Hash,
+      verifier: z.string().regex(/^scrypt-v1\$[\w-]{22}\$[\w-]{43}$/),
+    })
+    .optional(),
   credentials: z
     .array(
       z.strictObject({

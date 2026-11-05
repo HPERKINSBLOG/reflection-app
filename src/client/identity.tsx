@@ -6,6 +6,13 @@ import { READING_PRODUCT_COPY, SPREAD_PHOTO_COPY } from '../contracts/product-co
 import { api, ApiFailure } from './api.ts';
 import { enroll, signIn } from './passkeys.ts';
 import {
+  type ConfirmationAnswer,
+  PasswordDialog,
+  PasswordLoginForm,
+  PasswordOnlyForm,
+  PasswordSetupForm,
+} from './password-forms.tsx';
+import {
   ReadingWorkspace,
   savedEditionFromPath,
   type WorkspaceHandle,
@@ -29,7 +36,7 @@ function kitText(kit: Kit) {
     {
       format: 'reflection-recovery-kit.v1',
       origin: window.location.origin,
-      instructions: `Visit ${window.location.origin}/recover. Enter the recovery handle and one unused code, then create a replacement passkey. Keep this complete kit somewhere private.`,
+      instructions: `Visit ${window.location.origin}/recover. Enter the recovery handle and one unused code, then follow the steps to replace your sign-in method. Keep this complete kit somewhere private.`,
       recoveryHandle: kit.recoveryHandle,
       codes: kit.codes,
     },
@@ -111,6 +118,9 @@ export function IdentityApp() {
   const [session, setSession] = useState<View | null>(null);
   const [kit, setKit] = useState<Kit | null>(null);
   const [grant, setGrant] = useState<Grant | null>(null);
+  const [passwordScreen, setPasswordScreen] = useState<'login' | 'register' | null>(null);
+  const [confirmingPassword, setConfirmingPassword] = useState(false);
+  const passwordAnswer = useRef<((answer: ConfirmationAnswer) => void) | null>(null);
   const [credentials, setCredentials] = useState<z.infer<typeof apiSchemas.Credentials> | null>(
     null,
   );
@@ -157,6 +167,10 @@ export function IdentityApp() {
     setSession(null);
     setKit(null);
     setGrant(null);
+    setPasswordScreen(null);
+    passwordAnswer.current?.(null);
+    passwordAnswer.current = null;
+    setConfirmingPassword(false);
     setCredentials(null);
     setReadingResume(null);
     setHandle('');
@@ -290,7 +304,7 @@ export function IdentityApp() {
                 : error.message
               : error instanceof Error && error.message
                 ? error.message
-                : 'The passkey action was not completed. Please try again.',
+                : 'The account action could not be completed. Please try again.',
         });
     } finally {
       if (isCurrent()) {
@@ -320,15 +334,32 @@ export function IdentityApp() {
     if (!isCurrent()) return;
     setSession(current);
     setGrant(null);
+    setPasswordScreen(null);
     // Saved readings are the default destination; a requested reading or the account page stays.
     if (!requestFromPath() && !savedEditionFromPath() && window.location.pathname !== '/account')
       navigate('/');
   };
-  const verifyExistingPasskey = async (isCurrent: () => boolean) => {
+  const verifyIdentity = async (isCurrent: () => boolean, requirePasskey = false) => {
     if (!session) throw new Error('Your session has ended. Sign in again.');
-    const verified = await signIn('reauthenticate', session.csrfToken);
+    let answer: ConfirmationAnswer = 'passkey';
+    if (session.passwordEnabled && !requirePasskey) {
+      answer = await new Promise<ConfirmationAnswer>((resolve) => {
+        passwordAnswer.current = resolve;
+        setConfirmingPassword(true);
+      });
+      if (answer === null || !isCurrent()) return null;
+    }
+    const verified =
+      answer === 'passkey'
+        ? await signIn('reauthenticate', session.csrfToken)
+        : await api(
+            '/auth/password/reauthenticate',
+            apiSchemas.AuthResult,
+            answer,
+            session.csrfToken,
+          );
     if (!isCurrent()) return null;
-    // Keep the rotated session usable if the following passkey prompt is cancelled.
+    // Keep the rotated session usable if a subsequent action is cancelled.
     setSession({
       ...session,
       csrfToken: verified.csrfToken,
@@ -394,8 +425,7 @@ export function IdentityApp() {
       if (!session) return;
       let view = session;
       if (Date.parse(view.recentAuthUntil) <= Date.now()) {
-        await signIn('reauthenticate', view.csrfToken);
-        if (!isCurrent()) return;
+        if (!(await verifyIdentity(isCurrent))) return;
         view = await readSession(isCurrent);
         if (!isCurrent()) return;
         setSession(view);
@@ -438,18 +468,39 @@ export function IdentityApp() {
   const title = kit
     ? 'Keep your recovery kit'
     : grant
-      ? 'Create your replacement passkey'
+      ? grant.passwordEnabled
+        ? 'Reset your sign-in'
+        : 'Create your replacement passkey'
       : session
         ? accountPage
           ? 'Your account'
           : 'Your readings'
         : route === '/recover'
           ? 'Recover your account'
-          : 'A little space to reflect.';
+          : passwordScreen === 'login'
+            ? 'Sign in with a password'
+            : passwordScreen === 'register'
+              ? 'Create a password account'
+              : 'A little space to reflect.';
   const authPage = !kit && (Boolean(grant) || !session);
   const landing = authPage && !grant && route !== '/recover';
+  const choosePasswordScreen = (screen: typeof passwordScreen) => {
+    setPasswordScreen(screen);
+    setMessage(null);
+    requestAnimationFrame(() => heading.current?.focus());
+  };
   return (
     <div className={`app-shell${accountPage ? ' account-shell' : ''}`}>
+      {confirmingPassword && (
+        <PasswordDialog
+          allowPasskey={Boolean(credentials?.items.length)}
+          onAnswer={(answer) => {
+            passwordAnswer.current?.(answer);
+            passwordAnswer.current = null;
+            setConfirmingPassword(false);
+          }}
+        />
+      )}
       <header className="site-header">
         <div className="shell-width">
           <Brand />
@@ -518,7 +569,7 @@ export function IdentityApp() {
                     {title}
                   </h1>
                 )}
-                {landing && !deletionReceipt && (
+                {landing && !passwordScreen && !deletionReceipt && (
                   <p className="brand-promise">
                     Draw three tarot cards or bring your own spread. Save your reading and return
                     with a note.
@@ -530,7 +581,7 @@ export function IdentityApp() {
                 {kit && (
                   <p className="lead">
                     Your kit contains a recovery handle and ten one-time codes. You need the handle
-                    and one unused code if your passkeys are unavailable.
+                    and one unused code if you lose access to your account.
                   </p>
                 )}
               </div>
@@ -558,8 +609,8 @@ export function IdentityApp() {
                       <Icon name="warning" />
                       <span>
                         Keep the complete file somewhere private, outside this browser. Anyone with
-                        the handle and an unused code can replace your passkey. This kit is shown
-                        only once.
+                        the handle and an unused code can replace your sign-in method. This kit is
+                        shown only once.
                       </span>
                     </p>
                     <details>
@@ -637,18 +688,40 @@ export function IdentityApp() {
               ) : grant ? (
                 <section className="replacement-content">
                   <p className="lead">
-                    Your recovery code was verified. Create a new passkey to finish recovering your
-                    account. This step expires after five minutes.
+                    {grant.passwordEnabled
+                      ? 'Set a new password or create a passkey to open your account again.'
+                      : 'Your recovery code was verified. Create a new passkey to finish recovering your account.'}{' '}
+                    This step expires after five minutes.
                   </p>
                   <p className="callout">
                     <Icon name="info" />
                     <span>
-                      Completing recovery replaces your previous passkeys and recovery kit. Your
-                      account stays the same.
+                      {grant.passwordEnabled
+                        ? 'Either choice replaces your old password, passkeys and recovery kit. A new password works with your existing username and email.'
+                        : 'Completing recovery replaces your previous passkeys and recovery kit.'}{' '}
+                      Your readings stay in this account.
                     </span>
                   </p>
+                  {grant.passwordEnabled && (
+                    <PasswordOnlyForm
+                      creating
+                      busy={busy}
+                      onSubmit={(password) =>
+                        void run(async (isCurrent) => {
+                          await complete(
+                            await api('/auth/password/recover', apiSchemas.AuthResult, {
+                              challengeId: grant.challengeId,
+                              password,
+                            }),
+                            isCurrent,
+                          );
+                        })
+                      }
+                    />
+                  )}
                   <Button
                     type="button"
+                    variant={grant.passwordEnabled ? 'secondary' : 'primary'}
                     disabled={busy}
                     onClick={() =>
                       void run(async (isCurrent) => {
@@ -667,7 +740,7 @@ export function IdentityApp() {
                       setGrant(null);
                       setMessage({
                         tone: 'notice',
-                        text: 'Recovery cancelled. That code has been used; use a remaining code or an existing passkey.',
+                        text: 'Recovery cancelled. That code has been used. Sign in as usual or try another unused code.',
                       });
                     }}
                   >
@@ -709,11 +782,55 @@ export function IdentityApp() {
                       {connectionRetry}
                     </div>
                   </section>
+                  <section className="account-tool-group" aria-labelledby="account-password-title">
+                    <h2 id="account-password-title">Password sign-in</h2>
+                    {session.passwordEnabled ? (
+                      <p>
+                        You can sign in with your username or email. If you forget your password,
+                        use your saved recovery kit.
+                      </p>
+                    ) : (
+                      <details>
+                        <summary>Add password sign-in</summary>
+                        <p>
+                          Choose a username, email and password for this account. You’ll confirm
+                          with your passkey.
+                        </p>
+                        <PasswordSetupForm
+                          busy={busy}
+                          submitLabel="Save password sign-in"
+                          onSubmit={(input) =>
+                            void run(async (isCurrent) => {
+                              const csrf = await verifyIdentity(isCurrent, true);
+                              if (!csrf) return;
+                              await complete(
+                                await api(
+                                  '/auth/password/enroll',
+                                  apiSchemas.AuthResult,
+                                  input,
+                                  csrf,
+                                ),
+                                isCurrent,
+                              );
+                              if (!isCurrent()) return;
+                              channel.current?.postMessage('changed');
+                              setMessage({
+                                tone: 'success',
+                                text: 'Password sign-in added. You can use either your username or your email.',
+                              });
+                            })
+                          }
+                        />
+                      </details>
+                    )}
+                  </section>
                   <section className="card passkeys-card" aria-label="Manage passkeys">
                     <h2>Your passkeys</h2>
                     <p>
-                      Add a passkey on another device before removing one. You’ll verify an existing
-                      passkey before each change. Changing passkeys signs out your other sessions.
+                      {session.passwordEnabled && credentials?.items.length === 0
+                        ? 'Add a passkey to sign in with your device. You’ll confirm your password first.'
+                        : 'Add a passkey on another device before removing one. You’ll verify an existing passkey before each change.'}{' '}
+                      Changing passkeys signs out your other sessions.
                     </p>
                     {credentials ? (
                       <ul aria-label="Passkeys">
@@ -740,7 +857,7 @@ export function IdentityApp() {
                               aria-label={`Remove passkey ${credential.id.slice(0, 8)}`}
                               onClick={() =>
                                 void run(async (isCurrent) => {
-                                  const csrf = await verifyExistingPasskey(isCurrent);
+                                  const csrf = await verifyIdentity(isCurrent, true);
                                   if (!csrf || !isCurrent()) return;
                                   await api(
                                     `/auth/credentials/${credential.id}`,
@@ -781,7 +898,10 @@ export function IdentityApp() {
                       disabled={busy || checking || !credentials || credentials.items.length >= 10}
                       onClick={() =>
                         void run(async (isCurrent) => {
-                          const csrf = await verifyExistingPasskey(isCurrent);
+                          const csrf = await verifyIdentity(
+                            isCurrent,
+                            Boolean(credentials?.items.length),
+                          );
                           if (!csrf || !isCurrent()) return;
                           const options = await api(
                             '/auth/options',
@@ -832,7 +952,7 @@ export function IdentityApp() {
                         disabled={busy}
                         onClick={() =>
                           void run(async (isCurrent) => {
-                            const csrf = await verifyExistingPasskey(isCurrent);
+                            const csrf = await verifyIdentity(isCurrent);
                             if (!csrf || !isCurrent()) return;
                             const rotated = await api(
                               '/auth/recovery-codes',
@@ -927,9 +1047,9 @@ export function IdentityApp() {
                         void run(async (isCurrent) => {
                           let csrf = session.csrfToken;
                           if (Date.parse(session.recentAuthUntil) <= Date.now()) {
-                            const verified = await signIn('reauthenticate', csrf);
-                            if (!isCurrent()) return;
-                            csrf = verified.csrfToken;
+                            const verifiedCsrf = await verifyIdentity(isCurrent);
+                            if (!verifiedCsrf) return;
+                            csrf = verifiedCsrf;
                           }
                           const intent = deletionIntent(),
                             proof = {
@@ -1033,32 +1153,74 @@ export function IdentityApp() {
                     Verify recovery kit
                   </Button>
                   <p className="muted recovery-note">
-                    You’ll create a replacement passkey before you can access your account. If a
-                    connection is interrupted after verification, that code may already be used; try
-                    an existing passkey or another unused code.
+                    Once verified, you can replace your passkey or reset a password you previously
+                    set up. If the connection is interrupted, try another unused code.
                   </p>
                   <TextLink href="/">Back to sign in</TextLink>
                 </form>
-              ) : (
-                <section className="landing-content">
-                  <p className="lead account-explainer">
-                    Create a passkey to access your account without an email address or password.
-                    Then save a complete recovery kit for the times your passkeys are unavailable.
-                  </p>
-                  <div className="actions">
-                    <Button
-                      type="button"
-                      disabled={busy}
-                      onClick={() =>
+              ) : passwordScreen ? (
+                <section className="password-entry">
+                  {passwordScreen === 'login' ? (
+                    <PasswordLoginForm
+                      busy={busy}
+                      onLogin={(input) =>
                         void run(async (isCurrent) => {
-                          const options = await api('/auth/options', apiSchemas.AuthOptions, {
-                            purpose: 'register',
-                          });
-                          await complete(await enroll(options), isCurrent);
+                          await complete(
+                            await api('/auth/password/login', apiSchemas.AuthResult, input),
+                            isCurrent,
+                          );
                         })
                       }
+                    />
+                  ) : (
+                    <>
+                      <p>
+                        Choose a username and enter your email. Either one will work when you sign
+                        in.
+                      </p>
+                      <PasswordSetupForm
+                        busy={busy}
+                        submitLabel="Create account"
+                        onSubmit={(input) =>
+                          void run(async (isCurrent) => {
+                            await complete(
+                              await api('/auth/password/register', apiSchemas.AuthResult, input),
+                              isCurrent,
+                            );
+                          })
+                        }
+                      />
+                    </>
+                  )}
+                  <div className="password-links">
+                    {passwordScreen === 'login' && (
+                      <TextLink href="/recover">Forgot your password?</TextLink>
+                    )}
+                    <Button
+                      variant="text-button"
+                      disabled={busy}
+                      onClick={() =>
+                        choosePasswordScreen(passwordScreen === 'login' ? 'register' : 'login')
+                      }
                     >
-                      {live === false ? 'Create a test account' : 'Create an account'}
+                      {passwordScreen === 'login'
+                        ? 'Create a password account'
+                        : 'I already have an account'}
+                    </Button>
+                    <Button
+                      variant="text-button"
+                      disabled={busy}
+                      onClick={() => choosePasswordScreen(null)}
+                    >
+                      Back to sign-in options
+                    </Button>
+                  </div>
+                </section>
+              ) : (
+                <section className="landing-content">
+                  <div className="actions">
+                    <Button disabled={busy} onClick={() => choosePasswordScreen('login')}>
+                      Sign in with a password
                     </Button>
                     <Button
                       type="button"
@@ -1073,6 +1235,34 @@ export function IdentityApp() {
                       <Icon name="key" />
                       Sign in with a passkey
                     </Button>
+                  </div>
+                  <div className="signup-options">
+                    <h2>New to Reflection?</h2>
+                    <Button
+                      variant="text-button"
+                      disabled={busy}
+                      onClick={() => choosePasswordScreen('register')}
+                    >
+                      Create a password account
+                    </Button>
+                    <Button
+                      variant="text-button"
+                      disabled={busy}
+                      onClick={() =>
+                        void run(async (isCurrent) => {
+                          const options = await api('/auth/options', apiSchemas.AuthOptions, {
+                            purpose: 'register',
+                          });
+                          await complete(await enroll(options), isCurrent);
+                        })
+                      }
+                    >
+                      {live === false ? 'Create a test account' : 'Create an account'} with a
+                      passkey
+                    </Button>
+                    <p className="field-hint">
+                      A passkey lets you join without an email address or password.
+                    </p>
                   </div>
                   <TextLink href="/recover">Recover with your saved kit</TextLink>
                 </section>

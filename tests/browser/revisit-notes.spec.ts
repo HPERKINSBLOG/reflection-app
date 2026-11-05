@@ -490,7 +490,9 @@ test('session expiry removes private drafts and sign-in restores only saved note
   await expect(page.getByLabel('Your revisit note', { exact: true })).toHaveCount(0);
   await openAccount(page);
   await page.getByRole('button', { name: 'Sign out', exact: true }).click();
-  await page.getByRole('button', { name: 'Create a test account', exact: true }).click();
+  await page
+    .getByRole('button', { name: 'Create a test account with a passkey', exact: true })
+    .click();
   await keepKit(page);
   await expect(page.getByText('No saved readings yet.', { exact: true })).toBeVisible();
   await expect(page.getByText('Synthetic saved before expiry', { exact: true })).toHaveCount(0);

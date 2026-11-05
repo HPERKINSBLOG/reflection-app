@@ -20,7 +20,7 @@ The three positions are Situation, Tension, and Possibility, read from left to r
 
 ## Operating Context
 
-- A reader signs in with a passkey and keeps a recovery kit for use if they lose access. Returning readers can open **Saved readings** directly.
+- A reader signs in with a passkey or with their username or email and a password. Their recovery kit lets them regain access. Returning readers can open **Saved readings** directly.
 - **Save reading** works even when the reader has nothing to write. **Save reflection** keeps the reader’s words and also saves the reading if it was temporary.
 - A reader can edit their initial reflection or add a separate dated revisit note to the same edition. Reopening a reading and saving a note both work without a new AI call.
 
