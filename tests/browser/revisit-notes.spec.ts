@@ -646,6 +646,9 @@ test('parent deletion during reading fetch clears a workspace with no reflection
   await page.getByRole('button', { name: 'Edit note', exact: true }).click();
   const editor = page.getByLabel('Your revisit note', { exact: true });
   await editor.fill('Synthetic private draft on the deleted parent');
+  // Note saving also refreshes its parent. Let that request settle before
+  // installing the separate deletion-during-reading-fetch race below.
+  await expect(page.getByRole('button', { name: 'Delete reading', exact: true })).toBeEnabled();
   const sessionPath = `/api/v1/sessions/${original.session.id}`;
   let deleted = false;
   await page.route(`**${sessionPath}`, async (route) => {
