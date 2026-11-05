@@ -81,7 +81,7 @@
     },
     {
       "path": "artifacts/your-pattern/saved-paper-320.png",
-      "sha256": "a1448ba613df494baf1e15765e4d8f680128d84f1fa5641b1287ffb6fb007109"
+      "sha256": "51162e72c9fcc86bb002bdc859cb7a77474643b4c3842f2113bb56e7fedd6b06"
     }
   ],
   "scope": "Local synthetic-data acceptance, plus separately bounded numerical and hosted resource/migration evidence. Human catalogue approval is recorded; full hosted recovery, trust/admission and device acceptance remain release gates.",
