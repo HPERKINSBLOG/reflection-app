@@ -32,8 +32,10 @@ for (const width of [320, 390, 768, 1280]) {
       await page.emulateMedia({ colorScheme: theme, reducedMotion: 'reduce' });
       const capture = async (state: string) => {
         if (['saved-empty', 'saved-populated', 'new-empty'].includes(state)) {
-          const destination = state === 'new-empty' ? 'New reading' : 'Saved readings';
-          const current = page.getByRole('button', { name: destination, exact: true });
+          const destination = state === 'new-empty' ? 'Tarot' : 'Journal';
+          const current = page
+            .getByRole('navigation', { name: 'Reading actions' })
+            .getByRole('button', { name: destination, exact: true });
           await expect(current).toHaveAttribute('aria-current', 'page');
           await current.hover();
           const contrast = await themeContrast(

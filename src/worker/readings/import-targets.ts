@@ -474,8 +474,8 @@ export function publishImportTargets(
     eid = meta('editionId'),
     rev = meta('revision');
   return [
-    sql(`INSERT INTO reading_sessions(id,owner_id,status,question_enc,created_at,saved_at)
-      SELECT s.target_id,s.owner_id,'saved',s.field_enc,${meta('createdAt')},${meta('savedAt')} FROM import_staging s WHERE ${where} AND s.kind='session'`),
+    sql(`INSERT INTO reading_sessions(id,owner_id,status,method,question_enc,created_at,saved_at)
+      SELECT s.target_id,s.owner_id,'saved','imported',s.field_enc,${meta('createdAt')},${meta('savedAt')} FROM import_staging s WHERE ${where} AND s.kind='session'`),
     assertion(
       db,
       `NOT EXISTS(SELECT 1 FROM import_staging s LEFT JOIN reading_sessions family ON family.owner_id=s.owner_id AND family.id=${sid}

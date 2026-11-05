@@ -44,7 +44,11 @@ test('exact setup, chapter choice, lost save response and journal return keep th
 }) => {
   await account(page, '192.0.2.225');
   await manualBirth(page);
+  await page.getByLabel('Local birth time', { exact: true }).fill('08:30:15');
   await createChart(page);
+  expect(await patternRequest(page, '/profile')).toMatchObject({
+    profile: { birth: { time: { certainty: 'exact', localTime: '08:30:15' } } },
+  });
   await page.getByRole('button', { name: 'Connection', exact: true }).click();
   await page
     .getByLabel('Your reflection', { exact: true })
@@ -83,11 +87,20 @@ for (const certainty of ['Approximate', 'Unknown'])
   }) => {
     await account(page, certainty === 'Unknown' ? '192.0.2.227' : '192.0.2.226');
     await manualBirth(page, certainty);
+    if (certainty === 'Approximate') {
+      await page.getByLabel('Earliest local time', { exact: true }).fill('08:00:15');
+      await page.getByLabel('Latest local time', { exact: true }).fill('10:00:45');
+    }
     await createChart(page);
     const profile = (await patternRequest(page, '/profile')) as {
       profile: { birth: { time: { certainty: string } }; resolved: { kind: string } };
     };
     expect(profile.profile.birth.time.certainty).toBe(certainty.toLowerCase());
+    if (certainty === 'Approximate')
+      expect(profile.profile.birth.time).toMatchObject({
+        earliestLocalTime: '08:00:15',
+        latestLocalTime: '10:00:45',
+      });
     expect(profile.profile.resolved.kind).toBe('intervals');
     await page.getByRole('button', { name: 'Save to journal', exact: true }).click();
     await page.getByRole('button', { name: 'View saved chapter', exact: true }).click();
@@ -136,6 +149,8 @@ test('an unsupported chapter has no fabricated fact or save action', async ({ pa
     page.getByRole('heading', { name: 'This chapter needs more certainty.', exact: true }),
   ).toBeVisible();
   await expect(page.getByRole('button', { name: 'Save to journal', exact: true })).toHaveCount(0);
+  await mkdir('artifacts/your-pattern', { recursive: true });
+  await page.screenshot({ path: 'artifacts/your-pattern/unsupported-chapter.png', fullPage: true });
   await page.getByRole('button', { name: 'Connection', exact: true }).click();
   await expect(page.getByRole('button', { name: 'Save to journal', exact: true })).toBeEnabled();
 });
@@ -312,4 +327,37 @@ test('profile restoration is explicit and removing the current profile preserves
   await expect(page.getByTestId('pattern-reading')).toBeVisible();
   await page.getByText('Explore chart details', { exact: true }).click();
   await expect(page.getByText(/Birth profile version 1/)).toBeVisible();
+});
+
+test('a chart refresh that suppresses a chapter keeps its unsaved writing visible', async ({
+  page,
+}) => {
+  await account(page, '192.0.2.236');
+  await manualBirth(page);
+  await createChart(page);
+  const words = 'Keep these words even when my chart becomes less certain.';
+  await page.getByLabel('Your reflection', { exact: true }).fill(words);
+  await patternRequest(
+    page,
+    '/profile',
+    {
+      birth: {
+        ...patternBirth,
+        date: '2024-03-20',
+        place: { ...patternBirth.place, zone: 'UTC' },
+        time: { certainty: 'unknown' },
+      },
+      expectedRevision: 1,
+      confirmedRetention: true,
+    },
+    'PUT',
+  );
+  await page.getByRole('button', { name: 'Save to journal', exact: true }).click();
+  await page.getByRole('button', { name: 'Refresh chart and keep draft', exact: true }).click();
+  await expect(
+    page.getByRole('heading', { name: 'This chapter needs more certainty.', exact: true }),
+  ).toBeVisible();
+  await expect(page.getByLabel('Your reflection', { exact: true })).toBeVisible();
+  await expect(page.getByLabel('Your reflection', { exact: true })).toHaveValue(words);
+  await expect(page.getByRole('button', { name: 'Save to journal', exact: true })).toHaveCount(0);
 });

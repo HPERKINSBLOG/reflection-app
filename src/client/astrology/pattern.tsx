@@ -89,7 +89,6 @@ export function PatternWorkspace({
       setPreview(value);
       setStale(false);
       setExisting(null);
-      requestAnimationFrame(() => heading.current?.focus());
     }
   }, []);
   const load = useCallback(
@@ -110,6 +109,11 @@ export function PatternWorkspace({
     consumed.current?.();
     if (enabled) load();
   }, [enabled, load]);
+  useEffect(() => {
+    // Focus the committed screen: a frame callback can run before React replaces
+    // the loading heading, leaving keyboard focus on a detached element.
+    if (!busy && !editing && (preview || saved)) heading.current?.focus();
+  }, [busy, editing, preview, saved]);
   const state = preview?.chapters.find(
     (c) => (c.status === 'available' ? c.chapter.id : c.id) === chapterId,
   );
@@ -147,7 +151,6 @@ export function PatternWorkspace({
                 }
               : prev,
           );
-          requestAnimationFrame(() => heading.current?.focus());
         }
       } catch (error) {
         if (current() && error instanceof ApiFailure && error.code === 'CONFLICT') {
@@ -449,6 +452,21 @@ export function PatternWorkspace({
                   <Button variant="secondary" onClick={() => setEditing(true)}>
                     Review birth details
                   </Button>
+                  <div className="pattern-writing">
+                    <h3>There is still room for your own words.</h3>
+                    <ReflectionField
+                      id="pattern-reflection"
+                      label="Your reflection"
+                      rows={4}
+                      maxLength={10000}
+                      value={draft}
+                      disabled={busy}
+                      onChange={(e) =>
+                        setDrafts((prev) => ({ ...prev, [chapterId]: e.target.value }))
+                      }
+                      hint="This chapter cannot be saved without a supported placement. Your unsaved words stay in this window until you leave or reload; you can copy them before leaving."
+                    />
+                  </div>
                 </section>
               )}
             </div>

@@ -95,7 +95,7 @@ test('an ended session clears the workspace and announces signing in again as a 
   page,
 }) => {
   await account(page, '192.0.2.178');
-  await page.route(/\/api\/v1\/sessions\?status=saved$/, (route) =>
+  await page.route(/\/api\/v1\/sessions\?status=saved(?:&[^#]*)?$/, (route) =>
     route.fulfill({
       status: 401,
       contentType: 'application/json',

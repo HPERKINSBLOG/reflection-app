@@ -494,7 +494,7 @@ test('session expiry removes private drafts and sign-in restores only saved note
     .getByRole('button', { name: 'Create a test account with a passkey', exact: true })
     .click();
   await keepKit(page);
-  await expect(page.getByText('No saved readings yet.', { exact: true })).toBeVisible();
+  await expect(page.getByText(/^No saved readings yet\./)).toBeVisible();
   await expect(page.getByText('Synthetic saved before expiry', { exact: true })).toHaveCount(0);
   await expect(
     page.getByText('Synthetic draft must die with account state', { exact: true }),

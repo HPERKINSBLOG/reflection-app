@@ -455,6 +455,7 @@ export function BirthDetails({
                     <Input
                       id="birth-clock"
                       type="time"
+                      step={1}
                       value={clock}
                       onChange={(e) => setClock(e.target.value)}
                       required
@@ -468,6 +469,7 @@ export function BirthDetails({
                       <Input
                         id="birth-earliest"
                         type="time"
+                        step={1}
                         value={earliest}
                         onChange={(e) => setEarliest(e.target.value)}
                         required
@@ -478,6 +480,7 @@ export function BirthDetails({
                       <Input
                         id="birth-latest"
                         type="time"
+                        step={1}
                         value={latest}
                         onChange={(e) => setLatest(e.target.value)}
                         required

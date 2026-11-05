@@ -98,7 +98,7 @@ function roundTrip(question:string){
     originalSha256:createHash('sha256').update(raw).digest('hex'),provenanceGaps:['timestamp','review'],review:'legacy_unknown'});
   const imported=ImportedReading.parse({kind:'legacy.imported.v1',editionId,sessionId,editionNumber:1,record,importedAt:stamp});
   const history=HistoryItem.parse({id:sessionId,revision:1,...questionPreview(record.question),createdAt:stamp,
-    savedAt:stamp,latestEditionId:editionId,requestId:null,imported:true});
+    savedAt:stamp,latestEditionId:editionId,requestId:null,imported:true,method:'imported'});
   const reopened=SessionRecord.parse({id:sessionId,revision:1,status:'saved',question:record.question,
     editionIds:[editionId],reflectionIds:[],savedAt:stamp,createdAt:stamp,requests:[]});
   const exported=PortableRecord.parse(JSON.parse(JSON.stringify({kind:'reading',identity,originalId:identity.recordId,value:imported})));

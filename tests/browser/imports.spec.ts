@@ -98,7 +98,7 @@ test('review, interrupted commit, resume and exact reopen of an imported Tarot r
   await page.goto(savedPath);
   await page.getByRole('button', { name: 'Delete reading', exact: true }).click();
   await page.getByRole('button', { name: 'Delete permanently', exact: true }).click();
-  await expect(page.getByText('No saved readings yet.', { exact: true })).toBeVisible();
+  await expect(page.getByText(/^No saved readings yet\./)).toBeVisible();
   expect((await page.request.get('/api/v1/readings/' + archived.value.editionId)).status()).toBe(
     410,
   );

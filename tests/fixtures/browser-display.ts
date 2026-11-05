@@ -9,6 +9,7 @@ import {
   continuityJourneyStates,
   importReviewState,
   spreadPhotoPath,
+  patternJourneyStates,
 } from './browser-journey.ts';
 import { enableAi } from './browser-reading.ts';
 
@@ -245,4 +246,5 @@ export async function displayJourney(page: Page, capture: (state: string) => Pro
   await importReviewState(page, capture);
   await page.getByRole('link', { name: 'Back to readings', exact: true }).click();
   await expect(accepted.getByRole('heading', { name: longQuestion, exact: true })).toBeVisible();
+  await patternJourneyStates(page, capture);
 }

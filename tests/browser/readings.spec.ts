@@ -343,7 +343,7 @@ test('save, sign in, recover from the downloaded kit, and manage the same readin
   await backToReadings(recovered);
   await recovered.getByRole('button', { name: 'Delete reading', exact: true }).click();
   await recovered.getByRole('button', { name: 'Delete permanently', exact: true }).click();
-  await expect(recovered.getByText('No saved readings yet.', { exact: true })).toBeVisible();
+  await expect(recovered.getByText(/^No saved readings yet\./)).toBeVisible();
   expect((await fresh.request.get(`/api/v1/readings/${original.reading.editionId}`)).status()).toBe(
     410,
   );
@@ -595,11 +595,11 @@ test('a lost deletion response checks the original receipt without resending an 
   await expect(page.getByRole('heading', { name: 'Reading deleted', exact: true })).toBeVisible();
 });
 
-for (const destination of ['Saved readings', 'New reading']) {
+for (const destination of ['Journal', 'Tarot']) {
   test(`leaving a dirty reflection for ${destination} requires a local stay or discard choice`, async ({
     page,
   }) => {
-    await account(page, destination === 'Saved readings' ? '192.0.2.92' : '192.0.2.94');
+    await account(page, destination === 'Journal' ? '192.0.2.92' : '192.0.2.94');
     const question = `Synthetic navigation to ${destination}`;
     await reading(page, question);
     await page.getByRole('button', { name: 'Save reading', exact: true }).click();
@@ -612,15 +612,21 @@ for (const destination of ['Saved readings', 'New reading']) {
       expect(dialog.message()).toContain('Discard');
       await (discard ? dialog.accept() : dialog.dismiss());
     });
-    await page.getByRole('button', { name: destination, exact: true }).click();
+    await page
+      .getByRole('navigation', { name: 'Reading actions' })
+      .getByRole('button', { name: destination, exact: true })
+      .click();
     await expect(page.getByTestId('accepted-reading')).toBeVisible();
     await expect(page.getByLabel('Your reflection', { exact: true })).toHaveValue(
       'Unsubmitted local thought',
     );
     expect(dialogs).toBe(1);
     discard = true;
-    await page.getByRole('button', { name: destination, exact: true }).click();
-    if (destination === 'New reading') {
+    await page
+      .getByRole('navigation', { name: 'Reading actions' })
+      .getByRole('button', { name: destination, exact: true })
+      .click();
+    if (destination === 'Tarot') {
       await expect(page.getByRole('heading', { name: 'A new reading', exact: true })).toBeVisible();
       await page.evaluate(() => window.dispatchEvent(new Event('focus')));
       await expect(page.getByRole('heading', { name: 'A new reading', exact: true })).toBeVisible();

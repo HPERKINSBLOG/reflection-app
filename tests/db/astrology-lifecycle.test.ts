@@ -67,10 +67,19 @@ test('v2 exports exact Pattern and profile; imports keep historical identity and
   }
   // The importer owns a new edition and never grants the original native authority.
   const editions = await env.DB.prepare(
-    "SELECT id FROM reading_editions WHERE owner_id=? AND mode='legacy'",
+    "SELECT id,session_id FROM reading_editions WHERE owner_id=? AND mode='legacy'",
   )
     .bind(destination.session.subjectId)
-    .all<{ id: string }>();
+    .all<{ id: string; session_id: string }>();
+  const journal = new ReadingRecords(destination.base);
+  const imported = await journal.history(destination.session, 'saved', 50, null, 'imported');
+  expect(imported.items.map((item) => item.id)).toEqual(
+    expect.arrayContaining(editions.results.map((edition) => edition.session_id)),
+  );
+  const tarot = await journal.history(destination.session, 'saved', 50, null, 'tarot');
+  expect(
+    tarot.items.some((item) => editions.results.some((edition) => edition.session_id === item.id)),
+  ).toBe(false);
   const values = await Promise.all(
     editions.results.map((e) =>
       new ReadingRecords(destination.base).reading(destination.session, e.id),
