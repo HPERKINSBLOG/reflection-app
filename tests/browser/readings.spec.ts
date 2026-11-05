@@ -201,8 +201,15 @@ test('save, sign in, recover from the downloaded kit, and manage the same readin
   const { auth, kit } = await account(page, '192.0.2.71');
   const question = 'Synthetic reading to return to after recovery';
   await reading(page, question);
-  // biome-ignore lint/performance/useDomNodeTextContent: compare the actual rendered text, excluding collapsed source details.
-  const acceptedText = await page.getByTestId('accepted-reading').innerText();
+  // Save and AI permission change header actions; the interpretation remains the same edition.
+  const acceptedContent = page
+    .getByTestId('accepted-reading')
+    .locator(':scope > :not(.reading-header)');
+  const acceptedText = await acceptedContent.allInnerTexts();
+  const acceptedHeader = page
+    .getByTestId('accepted-reading')
+    .locator('.reading-title > :not(.follow-up-link)');
+  const acceptedHeaderText = await acceptedHeader.allInnerTexts();
   await page.getByRole('button', { name: 'Save reading', exact: true }).click();
   await expect(page.getByText('Saved until you delete it.', { exact: true })).toBeVisible();
   const original = await savedSnapshot(page);
@@ -213,9 +220,11 @@ test('save, sign in, recover from the downloaded kit, and manage the same readin
   await page.getByRole('button', { name: 'Sign out', exact: true }).click();
   await page.getByRole('button', { name: 'Sign in with a passkey' }).click();
   await page.getByRole('button', { name: question, exact: true }).click();
-  await expect(page.getByTestId('accepted-reading')).toHaveText(acceptedText, {
-    useInnerText: true,
-  });
+  await expect(acceptedContent).toHaveText(acceptedText, { useInnerText: true });
+  await expect(acceptedHeader).toHaveText(acceptedHeaderText, { useInnerText: true });
+  await expect(
+    page.getByTestId('accepted-reading').getByRole('heading', { name: question, exact: true }),
+  ).toBeVisible();
   expect((await savedSnapshot(page)).reading).toEqual(original.reading);
   expect(generationRequests).toHaveLength(1);
   await auth.cdp.send('WebAuthn.removeVirtualAuthenticator', {
@@ -250,9 +259,15 @@ test('save, sign in, recover from the downloaded kit, and manage the same readin
   const replacement = await keepKit(recovered);
   expect(replacement.recoveryHandle).not.toBe(kit.recoveryHandle);
   await recovered.getByRole('button', { name: question, exact: true }).click();
-  await expect(recovered.getByTestId('accepted-reading')).toHaveText(acceptedText, {
-    useInnerText: true,
-  });
+  await expect(
+    recovered.getByTestId('accepted-reading').locator(':scope > :not(.reading-header)'),
+  ).toHaveText(acceptedText, { useInnerText: true });
+  await expect(
+    recovered.getByTestId('accepted-reading').locator('.reading-title > :not(.follow-up-link)'),
+  ).toHaveText(acceptedHeaderText, { useInnerText: true });
+  await expect(
+    recovered.getByTestId('accepted-reading').getByRole('heading', { name: question, exact: true }),
+  ).toBeVisible();
   const returned = await savedSnapshot(recovered);
   expect(returned.reading).toEqual(original.reading);
   expect(returned.me.subjectId).toBe(original.me.subjectId);
@@ -265,9 +280,15 @@ test('save, sign in, recover from the downloaded kit, and manage the same readin
     recovered.getByRole('heading', { name: 'AI readings are off', exact: true }),
   ).toBeVisible();
   await backToReadings(recovered);
-  await expect(recovered.getByTestId('accepted-reading')).toHaveText(acceptedText, {
-    useInnerText: true,
-  });
+  await expect(
+    recovered.getByTestId('accepted-reading').locator(':scope > :not(.reading-header)'),
+  ).toHaveText(acceptedText, { useInnerText: true });
+  await expect(
+    recovered.getByTestId('accepted-reading').locator('.reading-title > :not(.follow-up-link)'),
+  ).toHaveText(acceptedHeaderText, { useInnerText: true });
+  await expect(
+    recovered.getByTestId('accepted-reading').getByRole('heading', { name: question, exact: true }),
+  ).toBeVisible();
   await expect(recovered.getByRole('button', { name: 'New reading', exact: true })).toBeDisabled();
   await recovered.getByRole('button', { name: 'Saved readings', exact: true }).click();
   await recovered.getByRole('button', { name: question, exact: true }).click();
@@ -276,14 +297,25 @@ test('save, sign in, recover from the downloaded kit, and manage the same readin
     .fill('Synthetic thought added after recovery.');
   await recovered.getByRole('button', { name: 'Save reflection', exact: true }).click();
   await expect(recovered.getByText('Reflection saved.', { exact: true })).toBeVisible();
+  await expect(recovered.locator('.saved-reflection-text')).toHaveText(
+    'Synthetic thought added after recovery.',
+  );
+  await expect(recovered.locator('.saved-reflection-text')).toBeVisible();
+  await recovered.getByRole('button', { name: 'Edit reflection', exact: true }).click();
   await recovered
     .getByLabel('Your reflection', { exact: true })
     .fill('Synthetic reflection edited with AI off.');
   await recovered.getByRole('button', { name: 'Save reflection', exact: true }).click();
   await expect(recovered.getByText('Reflection saved.', { exact: true })).toBeVisible();
-  await expect(recovered.getByTestId('accepted-reading')).toHaveText(acceptedText, {
-    useInnerText: true,
-  });
+  await expect(
+    recovered.getByTestId('accepted-reading').locator(':scope > :not(.reading-header)'),
+  ).toHaveText(acceptedText, { useInnerText: true });
+  await expect(
+    recovered.getByTestId('accepted-reading').locator('.reading-title > :not(.follow-up-link)'),
+  ).toHaveText(acceptedHeaderText, { useInnerText: true });
+  await expect(
+    recovered.getByTestId('accepted-reading').getByRole('heading', { name: question, exact: true }),
+  ).toBeVisible();
   await recovered.screenshot({ path: '/tmp/reflection-saved-reading-mobile.png', fullPage: true });
   expect(await recovered.locator('body').evaluate((el) => el.scrollWidth <= innerWidth)).toBe(true);
   await openAccount(recovered);
@@ -341,6 +373,7 @@ test('Save reading keeps an unsaved reflection draft and conflicting edits keep 
   await page.getByRole('button', { name: 'Save reflection', exact: true }).click();
   await expect(page.getByText('Reflection saved.', { exact: true })).toBeVisible();
   const saved = await savedSnapshot(page);
+  await page.getByRole('button', { name: 'Edit reflection', exact: true }).click();
   await page
     .getByLabel('Your reflection', { exact: true })
     .fill('Synthetic local conflicting draft');
@@ -432,6 +465,7 @@ test('focus refresh keeps a dirty reflection at its original revision until expl
   await page.getByRole('button', { name: 'Save reflection', exact: true }).click();
   await expect(page.getByText('Reflection saved.', { exact: true })).toBeVisible();
   const saved = await savedSnapshot(page);
+  await page.getByRole('button', { name: 'Edit reflection', exact: true }).click();
   await page.getByLabel('Your reflection', { exact: true }).fill('Local draft to reconcile');
   const updated = await page.evaluate(
     async ({ id, editionId, csrf }) => {
@@ -487,7 +521,7 @@ test('focus refresh keeps a dirty reflection at its original revision until expl
     text: 'Local draft to reconcile',
     stance: 'unspecified',
   });
-  // A clean editor can accept a fresh server version without rebasing any local changes.
+  // A clean saved view can accept a fresh server version without rebasing local changes.
   expect(
     await page.evaluate(
       async ({ id, editionId, csrf }) =>
@@ -511,10 +545,10 @@ test('focus refresh keeps a dirty reflection at its original revision until expl
     ),
   ).toBe(200);
   await page.evaluate(() => window.dispatchEvent(new Event('focus')));
-  await expect(page.getByLabel('Your reflection', { exact: true })).toHaveValue(
-    'A newer saved version',
-  );
-  await expect(page.getByLabel('How does this feel?', { exact: true })).toHaveValue('resonates');
+  await expect(page.locator('.saved-reflection-text')).toHaveText('A newer saved version');
+  await expect(page.locator('.saved-reflection-text')).toBeVisible();
+  await expect(page.locator('.saved-reflection')).toContainText('Resonates');
+  await expect(page.getByLabel('Your reflection', { exact: true })).not.toBeVisible();
   await expect(
     page.getByRole('button', { name: 'Keep my draft for the next save', exact: true }),
   ).toHaveCount(0);

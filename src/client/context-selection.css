@@ -1,0 +1,125 @@
+.context-selection .context-origin {
+  margin-block: 0.5rem 1rem;
+}
+
+.context-selection .context-origin h3 {
+  margin-block: 0 0.35rem;
+  font-family: var(--font-serif);
+  font-size: 1.5rem;
+  font-weight: 400;
+  line-height: 1.2;
+}
+
+.context-selection .context-browse {
+  margin-block-end: 1rem;
+}
+
+.context-selection .context-browse summary,
+.context-selection .context-source-text summary,
+.context-selection .context-character-controls summary {
+  min-block-size: 3rem;
+  align-content: center;
+  color: var(--reflection-link);
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+.context-selection .context-source-list {
+  min-inline-size: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.context-selection .context-source-list legend {
+  padding: 0 0 0.75rem;
+  font-weight: 600;
+}
+
+.context-selection .context-source-row {
+  border-block-start: 1px solid var(--border);
+  padding-block: 0.75rem;
+}
+
+.context-selection .context-controls label.context-source-choice {
+  display: flex;
+  align-items: start;
+  gap: 0.875rem;
+  min-block-size: 3rem;
+  cursor: pointer;
+}
+
+.context-selection .context-source-choice input {
+  flex: 0 0 auto;
+  inline-size: 1.25rem;
+  block-size: 1.25rem;
+  min-block-size: 1.25rem;
+  padding: 0;
+  margin-block-start: 0.4rem;
+  accent-color: var(--reflection-link);
+}
+
+.context-selection .context-source-choice strong {
+  display: block;
+  font-family: var(--font-serif);
+  font-size: 1.375rem;
+  font-weight: 500;
+  line-height: 1.2;
+}
+
+.context-selection .context-source-date {
+  display: block;
+  margin-block-start: 0.375rem;
+  font-size: 0.875rem;
+  font-weight: 400;
+  font-variant-numeric: tabular-nums;
+}
+
+.context-selection .context-source-text {
+  margin-inline-start: 2.125rem;
+}
+
+.context-selection .context-source-text blockquote,
+.context-selection .context-range-preview {
+  margin: 0.5rem 0 1rem;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font-weight: 400;
+}
+
+.context-selection .context-passage-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.context-selection .context-partial {
+  padding-block: 0.5rem;
+}
+
+.context-selection .context-review > section > h3 {
+  margin-block: 0 0.5rem;
+}
+
+.context-selection .context-review blockquote {
+  padding: 0;
+  border: 0;
+  font-size: 1.125rem;
+  line-height: 1.5;
+}
+
+.context-selection .context-review .check {
+  margin-block-start: 1rem;
+}
+
+@media (max-width: 520px) {
+  .context-selection .context-passage-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .context-selection .context-passage-actions > button {
+    inline-size: 100%;
+  }
+}

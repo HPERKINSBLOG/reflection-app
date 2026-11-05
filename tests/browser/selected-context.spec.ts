@@ -29,11 +29,9 @@ async function savedNote(page: Page, ip: string) {
 async function chooseNote(page: Page, family: string) {
   await page.getByRole('button', { name: 'Choose excerpts', exact: true }).click();
   await page.getByLabel('Saved reading', { exact: true }).selectOption(family);
-  const source = page.getByLabel('Source', { exact: true });
-  await expect(source.locator('option').filter({ hasText: 'Revisit note' })).toHaveCount(1);
-  await source.selectOption({
-    label: (await source.locator('option').filter({ hasText: 'Revisit note' }).textContent())!,
-  });
+  const source = page.getByRole('radio', { name: /Your revisit note/ });
+  await expect(source).toHaveCount(1);
+  await source.check();
 }
 test('only the explicitly reviewed range is confirmed and an edit invalidates the acknowledgement', async ({
   page,
@@ -51,6 +49,8 @@ test('only the explicitly reviewed range is confirmed and an edit invalidates th
   await page.getByRole('button', { name: 'Allow this source', exact: true }).click();
   await expect(page.getByText('No excerpts selected.', { exact: true })).toBeVisible();
   expect(previews).toEqual([]);
+  await page.getByRole('button', { name: 'Choose part of passage', exact: true }).click();
+  await page.getByText('Set first and last characters', { exact: true }).click();
   await page.getByLabel('First character', { exact: true }).fill('1301');
   await page.getByLabel('Last character', { exact: true }).fill('1303');
   await page.getByRole('button', { name: 'Add excerpt', exact: true }).click();
@@ -150,4 +150,85 @@ test('AI-off saved reading ownership permits grant inspection and revocation wit
   await page.keyboard.press('Enter');
   await expect(page.getByText(/revoked.*future/i)).toBeVisible();
   expect(starts).toEqual([]);
+});
+
+test('a follow-up starts its source browser at its parent while keeping every excerpt unselected', async ({
+  page,
+}) => {
+  const { saved, note } = await savedNote(page, '198.51.100.219');
+  await page.getByRole('link', { name: 'Follow up on this edition', exact: true }).click();
+  const chooser = page.getByRole('region', { name: 'Selected context', exact: true });
+  const sent: string[] = [];
+  page.on('request', (request) => {
+    if (request.method() === 'POST' && /\/(context-preview|requests)$/.test(request.url()))
+      sent.push(request.url());
+  });
+  await chooser.getByRole('button', { name: 'Choose excerpts', exact: true }).click();
+  await expect(
+    chooser.getByRole('heading', { name: saved.session.question!, exact: true }),
+  ).toBeVisible();
+  await expect(chooser.getByText('No excerpts selected.', { exact: true })).toBeVisible();
+  await expect(chooser.getByRole('radio', { checked: true })).toHaveCount(0);
+  await expect(chooser.getByLabel('Saved reading', { exact: true })).not.toBeVisible();
+  const source = chooser.getByRole('radio', { name: /Your revisit note/ });
+  await source.check();
+  const sourceRow = chooser
+    .locator('.context-source-row')
+    .filter({ has: page.getByRole('radio', { checked: true }) });
+  await sourceRow.getByText('Read passage', { exact: true }).click();
+  await expect(sourceRow.locator('blockquote')).toHaveText(note.note);
+  await expect(sourceRow.locator('blockquote')).toBeVisible();
+  await chooser.getByRole('button', { name: 'Allow this source', exact: true }).click();
+  await expect(chooser.getByText('No excerpts selected.', { exact: true })).toBeVisible();
+  expect(sent).toEqual([]);
+});
+
+test('whole-passage selection stays exact and a changed source cannot reuse its reviewed acknowledgement', async ({
+  page,
+}) => {
+  const { saved, note } = await savedNote(page, '198.51.100.220');
+  const headers = {
+    Origin: new URL(page.url()).origin,
+    'X-CSRF-Token': saved.me.csrfToken,
+    'Idempotency-Key': crypto.randomUUID(),
+  };
+  const shortened = await page.request.put(`/api/v1/revisits/${note.id}`, {
+    headers: { ...headers, 'If-Match': `"${note.revision}"` },
+    data: { note: 'A short passage.\nA second thought.', stance: 'unsure' },
+  });
+  expect(shortened.ok()).toBe(true);
+  const sourceNote = apiSchemas.Revisit.parse(await shortened.json());
+  await page.getByRole('button', { name: 'New reading', exact: true }).click();
+  await page.getByLabel('Your question', { exact: true }).fill('What can remain simple?');
+  await page.getByLabel('Use English for this reading').check();
+  await chooseNote(page, saved.session.id);
+  await page.getByRole('button', { name: 'Allow this source', exact: true }).click();
+  await expect(page.getByLabel('First character', { exact: true })).toHaveCount(0);
+  await page.getByRole('button', { name: 'Use whole passage', exact: true }).click();
+  await page.getByRole('button', { name: 'Review selected excerpts', exact: true }).click();
+  const review = page.getByRole('region', { name: 'Review selected excerpts', exact: true });
+  await expect(review.locator('blockquote')).toHaveText(sourceNote.note);
+  const acknowledge = page.getByLabel('I agree to use these exact excerpts for this reading.');
+  await acknowledge.check();
+  await expect(page.getByRole('button', { name: 'Choose excerpts', exact: true })).toHaveCount(0);
+  await expect(page.getByLabel('Saved passage', { exact: true })).toHaveCount(0);
+  const changed = await page.request.put(`/api/v1/revisits/${note.id}`, {
+    headers: {
+      ...headers,
+      'Idempotency-Key': crypto.randomUUID(),
+      'If-Match': `"${sourceNote.revision}"`,
+    },
+    data: { note: 'My later words stay private.', stance: 'unsure' },
+  });
+  expect(changed.ok()).toBe(true);
+  await review.getByRole('button', { name: 'Change selected excerpts', exact: true }).click();
+  await expect(acknowledge).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Start reading', exact: true })).toBeDisabled();
+  await page.getByRole('button', { name: 'Review selected excerpts', exact: true }).click();
+  await expect(
+    page.getByText(
+      'A selected source changed or is unavailable. Remove the old excerpt and review your selection again.',
+    ),
+  ).toBeVisible();
+  await expect(review).toHaveCount(0);
 });

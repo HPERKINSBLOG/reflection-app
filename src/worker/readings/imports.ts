@@ -645,6 +645,7 @@ export class ReadingImports extends RecordBase {
           item: {
             index: row.ordinal,
             label,
+            unit,
             identity: result.identity,
             originalId: result.originalId,
             status: result.readiness,

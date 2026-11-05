@@ -97,7 +97,11 @@ test('keyboard upload, processing, save, reflection, Account and exact return jo
   await page.evaluate(() => window.dispatchEvent(new Event('online')));
   const accepted = page.getByTestId('accepted-reading');
   await expect(accepted.getByRole('heading', { name: question, exact: true })).toBeFocused();
-  const original = await accepted.textContent();
+  // Header actions change when the reading is saved; its interpretation remains fixed.
+  const acceptedContent = accepted.locator(':scope > :not(.reading-header)');
+  const original = await acceptedContent.allTextContents();
+  const acceptedHeader = accepted.locator('.reading-title > :not(.follow-up-link)');
+  const originalHeader = await acceptedHeader.allTextContents();
   const url = page.url();
   const saveReading = page.getByRole('button', { name: 'Save reading', exact: true });
   // The accepted heading can mount before the request's final busy-state cleanup.
@@ -154,13 +158,19 @@ test('keyboard upload, processing, save, reflection, Account and exact return jo
   await page.getByRole('link', { name: 'Back to readings', exact: true }).focus();
   await page.keyboard.press('Enter');
   await expect(page).toHaveURL(url);
-  await expect(accepted).toHaveText(original!);
-  await expect(reflection).toHaveValue('Synthetic reflection to return to later.');
+  await expect(acceptedContent).toHaveText(original);
+  await expect(acceptedHeader).toHaveText(originalHeader);
+  await expect(page.locator('.saved-reflection-text')).toHaveText(
+    'Synthetic reflection to return to later.',
+  );
+  await expect(page.locator('.saved-reflection-text')).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Edit reflection', exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'Saved readings', exact: true }).click();
   await page.getByRole('button', { name: question, exact: true }).focus();
   await page.keyboard.press('Enter');
   await expect(accepted.getByRole('heading', { name: question, exact: true })).toBeFocused();
-  await expect(accepted).toHaveText(original!);
+  await expect(acceptedContent).toHaveText(original);
+  await expect(acceptedHeader).toHaveText(originalHeader);
   await writeFile(
     `artifacts/visual-pass/screens/${browserName}-journey-aria.txt`,
     await page.locator('main').ariaSnapshot(),

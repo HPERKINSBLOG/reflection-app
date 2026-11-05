@@ -1,0 +1,83 @@
+.import-tools .import-group {
+  padding: 24px;
+}
+.import-tools .import-group > h4 {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: 26px;
+  font-weight: 500;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+.import-group-counts,
+.import-record-date {
+  color: var(--muted-foreground);
+  margin-top: 8px;
+}
+.import-group-preview {
+  margin-block: 16px;
+}
+.import-record-preview {
+  border-block-start: 1px solid var(--border);
+  padding-block: 20px;
+  overflow-wrap: anywhere;
+}
+.import-record-preview h5,
+.import-record-preview h6 {
+  margin: 0 0 8px;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.5;
+}
+.import-record-preview section {
+  margin-block: 20px;
+}
+.import-kept-text {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.import-record-status {
+  font-weight: 600;
+}
+.import-remedy {
+  border-block: 1px solid var(--border);
+  padding-block: 16px;
+  margin-block: 20px 8px;
+}
+.import-identifiers {
+  margin-block: 12px;
+  font-size: 14px;
+}
+.import-identifiers dl {
+  margin: 12px 0;
+}
+.import-identifiers dt {
+  font-weight: 600;
+}
+.import-identifiers dd {
+  margin: 0 0 12px;
+  overflow-wrap: anywhere;
+}
+.import-tools .import-file-record {
+  border-block-end: 1px solid var(--border);
+  padding-block: 12px;
+}
+.import-tools .import-file-record .import-choice {
+  border: 0;
+  padding-bottom: 0;
+}
+.import-file-record > .import-identifiers {
+  margin-inline-start: 30px;
+}
+.import-saved-links {
+  padding-inline-start: 24px;
+  overflow-wrap: anywhere;
+}
+@media (max-width: 600px) {
+  .import-tools .import-group {
+    padding: 20px 16px;
+  }
+  .import-tools .import-group > h4 {
+    font-size: 24px;
+  }
+}

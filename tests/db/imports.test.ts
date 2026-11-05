@@ -1,7 +1,7 @@
 import { env } from 'cloudflare:workers';
 import { applyD1Migrations } from 'cloudflare:test';
 import { beforeAll, beforeEach, expect, test } from 'vitest';
-import { ImportChunkDocument, ImportedReading } from '../../src/contracts/index.ts';
+import { apiSchemas, ImportChunkDocument, ImportedReading } from '../../src/contracts/index.ts';
 import { buildImportGroups } from '../../src/domain/imports/chunks.ts';
 import { parseImportFile } from '../../src/domain/imports/parse.ts';
 import { localIdentity } from '../../src/worker/identity/routes.ts';
@@ -55,6 +55,17 @@ test('the import service stages 102 units across 11 uploads, returns bounded dur
     completedItems: 0,
     previewHash: expect.stringMatching(/^[a-f0-9]{64}$/),
   });
+  const reviewedUnits: typeof group.units = [];
+  let reviewCursor: string | null = null;
+  do {
+    const page = apiSchemas.ImportReviewPage.parse(
+      await f.imports.reviewPage(f.session, group.id, reviewCursor),
+    );
+    expect(page.items.length).toBeLessThanOrEqual(25);
+    reviewedUnits.push(...page.items.map((item) => item.unit));
+    reviewCursor = page.nextCursor;
+  } while (reviewCursor);
+  expect(reviewedUnits).toEqual(group.units);
   const body = {
     version: 'import-group.v1' as const,
     manifestHash: group.manifestHash,
@@ -89,6 +100,66 @@ test('the import service stages 102 units across 11 uploads, returns bounded dur
     status: 404,
   });
 });
+
+test('resuming an encrypted review returns the original question, date and authored text only to its owner', async () => {
+  const f = await account();
+  const question = `${'Private question '.repeat(40)}🌱`;
+  const interpretation = 'Original imported interpretation <script>not executable</script>.';
+  const authored = 'The reader’s original words, preserved on a later return.';
+  const occurredAt = '2026-10-26T09:30:00.000Z';
+  const group = await family(
+    JSON.stringify({
+      exportedAt: '2026-11-01T12:00:00.000Z',
+      entryCount: 1,
+      entries: [
+        {
+          id: 'private-review',
+          ts: Date.parse(occurredAt),
+          question,
+          personalReading: interpretation,
+          reflections: { feelings: authored },
+        },
+      ],
+    }),
+  );
+  for (const chunk of group.chunks) await f.imports.preview(f.session, crypto.randomUUID(), chunk);
+  const resumed = new ReadingImports(env.DB, localIdentity(readingBindings)!);
+  const page = apiSchemas.ImportReviewPage.parse(
+    await resumed.reviewPage(f.session, group.id, null),
+  );
+  expect(page.items.map((item) => item.unit)).toEqual(group.units);
+  expect(page.items.find((item) => item.unit.kind === 'legacy-reading')?.unit).toMatchObject({
+    kind: 'legacy-reading',
+    record: { question, generatedText: interpretation, occurredAt },
+  });
+  expect(page.items.find((item) => item.unit.kind === 'legacy-authored')?.unit).toMatchObject({
+    kind: 'legacy-authored',
+    record: { text: authored },
+  });
+  const foreign = await account();
+  await expect(resumed.reviewPage(foreign.session, group.id, null)).rejects.toMatchObject({
+    status: 404,
+  });
+});
+
+test.each(['expired', 'erased'] as const)(
+  'a resumed %s preview does not return its original private content',
+  async (state) => {
+    const f = await account();
+    const group = await family(small('Private content no longer available for review'));
+    await f.imports.preview(f.session, crypto.randomUUID(), group.chunks[0]!);
+    if (state === 'expired')
+      await env.DB.prepare('UPDATE import_groups SET expires_at=1 WHERE id=?').bind(group.id).run();
+    else
+      await env.DB.prepare('UPDATE import_items SET body_enc=NULL,result_enc=NULL WHERE group_id=?')
+        .bind(group.id)
+        .run();
+    await expect(f.imports.reviewPage(f.session, group.id, null)).rejects.toMatchObject({
+      status: 410,
+      code: state === 'expired' ? 'EXPIRED' : 'CONTENT_UNAVAILABLE',
+    });
+  },
+);
 
 test('private preview expiry and a duplicate ordinal forbid publication and preserve saved rows', async () => {
   const f = await account();

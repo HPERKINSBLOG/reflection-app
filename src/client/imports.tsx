@@ -1,14 +1,22 @@
 import { useEffect, useRef, useState } from 'react';
 import type { z } from 'zod';
-import { apiSchemas, Id, ImportSource } from '../contracts/index.ts';
+import { apiSchemas, Id, ImportSource, ImportChunkDocument } from '../contracts/index.ts';
 import { IMPORT_LIMITS } from '../contracts/import-policy.ts';
 import { parseImportFile } from '../domain/imports/parse.ts';
 import { decodeImportBytes, readJson } from '../domain/imports/json.ts';
 import { importLabel } from '../domain/imports/review.ts';
 import { buildImportGroups } from '../domain/imports/chunks.ts';
-import type { ImportGroup, NormalizedImport, Recovery, Source } from '../domain/imports/types.ts';
+import type {
+  ImportGroup,
+  NormalizedImport,
+  Recovery,
+  Source,
+  Unit,
+} from '../domain/imports/types.ts';
 import { api, ApiFailure } from './api.ts';
-import { Button } from './design/components.tsx';
+import { Button, TextLink } from './design/components.tsx';
+import { date } from './date.ts';
+import './import-review.css';
 
 const formats = [
   ['tarot-json', 'Tarot journal'],
@@ -20,14 +28,268 @@ const formats = [
 type Review = {
   group: Pick<ImportGroup, 'id' | 'unresolved'>;
   recovery: Recovery;
-  items: (z.infer<typeof apiSchemas.ImportPreview>['items'][number] & { label?: string })[];
+  items: (z.infer<typeof apiSchemas.ImportPreview>['items'][number] & {
+    label?: string;
+    unit?: Unit;
+  })[];
   status: z.infer<typeof apiSchemas.ImportGroupStatus>;
   key: string;
+  failure?: string;
 };
 type Progress = {
   status: z.infer<typeof apiSchemas.ImportGroupStatus>;
   items: z.infer<typeof apiSchemas.ImportGroupResultPage>['items'];
+  saved: { title: string; path: string }[];
 };
+
+function unitDescription(unit: Unit) {
+  if (unit.kind === 'legacy-reading') return 'Imported reading';
+  if (unit.kind === 'legacy-authored') return 'Imported personal writing';
+  return {
+    session: 'Saved reading',
+    reading: 'Reading edition',
+    reflection: 'Your reflection',
+    revisit: 'Your revisit note',
+    generation_receipt: 'Historical generation receipt',
+    permission: 'Historical AI permission',
+    grant: 'Historical excerpt permission',
+  }[unit.record.kind];
+}
+function originalDate(unit: Unit): string | null {
+  if (unit.kind === 'legacy-reading' || unit.kind === 'legacy-authored')
+    return (
+      unit.record.originalTimestamp ??
+      (unit.record.occurredAt ? date(unit.record.occurredAt) : null)
+    );
+  const record = unit.record;
+  if (record.kind === 'session' || record.kind === 'generation_receipt')
+    return date(record.value.createdAt);
+  if (record.kind === 'reflection' || record.kind === 'revisit')
+    return date('updatedAt' in record.value ? record.value.updatedAt : record.value.createdAt);
+  if (record.kind !== 'reading') return null;
+  const reading = record.value;
+  if (reading.kind === 'legacy.imported.v1')
+    return (
+      reading.record.originalTimestamp ??
+      (reading.record.occurredAt ? date(reading.record.occurredAt) : null)
+    );
+  return date(
+    reading.kind === 'reading.unavailable.v1' ? reading.unavailableAt : reading.acceptedAt,
+  );
+}
+function groupPrimary(review: Review) {
+  const units = review.items.flatMap((item) => (item.unit ? [item.unit] : []));
+  return (
+    units.find((unit) => unit.kind === 'portable' && unit.record.kind === 'session') ??
+    units.find(
+      (unit) =>
+        unit.kind === 'legacy-reading' ||
+        (unit.kind === 'portable' && unit.record.kind === 'reading'),
+    ) ??
+    units[0]
+  );
+}
+function groupTitle(review: Review) {
+  const primary = groupPrimary(review);
+  return primary
+    ? primary.kind === 'legacy-authored' ||
+      (primary.kind === 'portable' && ['reflection', 'revisit'].includes(primary.record.kind))
+      ? unitDescription(primary)
+      : importLabel(primary)
+    : (review.items[0]?.label ?? 'Selected records');
+}
+function recordStatus(status: Review['items'][number]['status']) {
+  return {
+    ready: 'Ready to import',
+    duplicate: 'Already saved — skipped',
+    conflict: 'Needs review — different content',
+    erased: 'Previously deleted — confirmation needed',
+    invalid: 'Cannot import yet',
+  }[status];
+}
+function externalDependencies(items: Review['items']) {
+  const units = items.flatMap((item) => (item.unit ? [item.unit] : []));
+  const entityKey = (identity: Unit['identity']) =>
+    JSON.stringify([
+      identity.source.namespaceId,
+      identity.source.revision,
+      identity.kind,
+      identity.recordId,
+    ]);
+  const entities = new Set(units.map((unit) => entityKey(unit.identity)));
+  const revisions = new Set(
+    units.map((unit) => `${entityKey(unit.identity)}/${unit.identity.recordRevision}`),
+  );
+  return units
+    .flatMap((unit) => unit.dependencies)
+    .filter((dependency) => {
+      const key = entityKey({ ...dependency, recordRevision: dependency.recordRevision ?? 1 });
+      return dependency.recordRevision === null
+        ? !entities.has(key)
+        : !revisions.has(`${key}/${dependency.recordRevision}`);
+    });
+}
+export function ImportRecordContent({ unit }: { unit: Unit }) {
+  if (unit.kind === 'legacy-authored')
+    return <p className="import-kept-text">{unit.record.text}</p>;
+  if (unit.kind === 'legacy-reading')
+    return (
+      <>
+        <p className="import-kept-text">
+          {unit.record.question ?? 'The file did not include a question.'}
+        </p>
+        <p>Source: {unit.record.source} · Imported, unverified</p>
+        <h6>Original interpretation</h6>
+        <p className="import-kept-text">
+          {unit.record.generatedText ?? 'The file did not include an interpretation.'}
+        </p>
+        {unit.record.userStatements.map((entry, i) => (
+          <section key={entry.originalId ?? i}>
+            <h6>Reader’s words</h6>
+            <p className="import-kept-text">{entry.text}</p>
+            <p className="muted">
+              {entry.originalTimestamp ?? 'Original date unavailable'}
+              {entry.revision !== null ? ` · Revision ${entry.revision}` : ''}
+            </p>
+          </section>
+        ))}
+        {unit.record.basis.cards.length > 0 && (
+          <ul>
+            {unit.record.basis.cards.map((card) => (
+              <li key={`${card.position}:${card.name}:${card.orientation}`}>
+                {card.name}
+                {card.position ? ` · ${card.position}` : ''} · {card.orientation}
+              </li>
+            ))}
+          </ul>
+        )}
+        {unit.record.provenanceGaps.length > 0 && (
+          <p className="muted">
+            Unavailable in the original file:{' '}
+            {unit.record.provenanceGaps.map((gap) => gap.replaceAll('_', ' ')).join(', ')}.
+          </p>
+        )}
+      </>
+    );
+  const record = unit.record;
+  switch (record.kind) {
+    case 'session':
+      return (
+        <p className="import-kept-text">
+          {record.value.question ?? 'The archive did not include a question.'}
+        </p>
+      );
+    case 'reflection':
+      return <p className="import-kept-text">{record.value.text}</p>;
+    case 'revisit':
+      return (
+        <p className="import-kept-text">
+          {'note' in record.value
+            ? record.value.note
+            : 'The archive did not retain this note’s text.'}
+        </p>
+      );
+    case 'reading': {
+      const reading = record.value;
+      if (reading.kind === 'legacy.imported.v1')
+        return (
+          <ImportRecordContent
+            unit={{
+              ...unit,
+              kind: 'legacy-reading',
+              rawScope: 'selected-fields.v1',
+              record: reading.record,
+            }}
+          />
+        );
+      if (reading.kind === 'reading.unavailable.v1')
+        return (
+          <p>
+            This edition was recorded as {reading.reason.replaceAll('_', ' ')}. Its unavailable
+            state and original date are preserved; importing does not restore erased text.
+          </p>
+        );
+      return (
+        <>
+          <p>Original generated interpretation · Edition {reading.editionNumber}</p>
+          <p className="import-kept-text">{reading.question}</p>
+          {reading.units.map((part) => (
+            <section key={part.position}>
+              <h6>{part.position}</h6>
+              <p className="import-kept-text">{part.basisText}</p>
+              <p className="import-kept-text">{part.interpretation}</p>
+              {'reflectionQuestion' in part && (
+                <p className="import-kept-text">{part.reflectionQuestion}</p>
+              )}
+            </section>
+          ))}
+          {reading.kind === 'tarot.accepted.v2' ? (
+            <>
+              <h6>Synthesis</h6>
+              <p className="import-kept-text">{reading.synthesis.text}</p>
+              <h6>Optional next step</h6>
+              <p className="import-kept-text">{reading.action.text}</p>
+              {reading.reflectionQuestion && (
+                <>
+                  <h6>Reflection question</h6>
+                  <p className="import-kept-text">{reading.reflectionQuestion.text}</p>
+                </>
+              )}
+            </>
+          ) : (
+            <p className="import-kept-text">{reading.closing}</p>
+          )}
+          <p className="muted">
+            The archive’s source and generation information stays with this edition. Imported
+            permissions remain historical.
+          </p>
+        </>
+      );
+    }
+    case 'permission':
+      return (
+        <p>
+          This historical AI permission is kept as an archive record. It does not change your
+          account’s current permission.
+        </p>
+      );
+    case 'grant':
+      return (
+        <p>
+          This historical excerpt permission does not make the imported writing eligible for new
+          readings.
+        </p>
+      );
+    case 'generation_receipt':
+      return (
+        <p>
+          The original generation record is preserved with state {record.value.state}. Importing it
+          does not run the writer.
+        </p>
+      );
+  }
+}
+function RecordIdentifiers({ unit }: { unit: Unit }) {
+  return (
+    <details className="import-identifiers">
+      <summary>Record identifiers</summary>
+      <dl>
+        <dt>Record type</dt>
+        <dd>{unit.identity.kind}</dd>
+        <dt>Original record</dt>
+        <dd>{unit.identity.recordId}</dd>
+        <dt>Record revision</dt>
+        <dd>{unit.identity.recordRevision}</dd>
+        <dt>Source namespace</dt>
+        <dd>{unit.identity.source.namespaceId}</dd>
+        <dt>Source revision</dt>
+        <dd>{unit.identity.source.revision}</dd>
+        <dt>File location</dt>
+        <dd>{unit.sourcePointer}</dd>
+      </dl>
+    </details>
+  );
+}
 async function defaultDataset(owner: string, format: string) {
   const hash = Array.from(
     new Uint8Array(
@@ -71,6 +333,8 @@ export function ImportRecords({
   const [visible, setVisible] = useState(25);
   const [reviews, setReviews] = useState<Review[]>([]),
     [progress, setProgress] = useState<Progress | null>(null);
+  const [previewGroup, setPreviewGroup] = useState<string | null>(null),
+    [previewLimit, setPreviewLimit] = useState(25);
   const [resumeId, setResumeId] = useState(''),
     [message, setMessage] = useState(''),
     [error, setError] = useState('');
@@ -91,6 +355,8 @@ export function ImportRecords({
     setVisible(25);
     setReviews([]);
     setProgress(null);
+    setPreviewGroup(null);
+    setPreviewLimit(25);
     setMessage('');
     setError('');
   };
@@ -180,6 +446,7 @@ export function ImportRecords({
         setResumeId(group.id);
         const items: Review['items'] = [];
         for (const chunk of group.chunks) {
+          const chunkItems = ImportChunkDocument.parse(JSON.parse(chunk.document)).items;
           const preview = await api(
             '/imports',
             apiSchemas.ImportPreview,
@@ -188,12 +455,27 @@ export function ImportRecords({
             { key: crypto.randomUUID() },
           );
           if (!current()) return;
-          items.push(...preview.items);
+          items.push(
+            ...preview.items.map((item) => {
+              const entry = chunkItems[item.index];
+              if (!entry)
+                throw new Error(
+                  'The review did not match the selected records. Read the file again.',
+                );
+              return {
+                ...item,
+                index: entry.ordinal,
+                label: importLabel(entry.unit),
+                unit: entry.unit,
+              };
+            }),
+          );
         }
         const status = await api('/imports/groups/' + group.id, apiSchemas.ImportGroupStatus);
         collected.push({ group, recovery, items, status, key: crypto.randomUUID() });
         if (!current()) return;
         setReviews([...collected]);
+        setPreviewGroup((previous) => previous ?? group.id);
         setResumeId(group.id);
       }
       setMessage('Review each group before confirming. The encrypted preview expires in 24 hours.');
@@ -221,13 +503,15 @@ export function ImportRecords({
       setReviews((previous) => [
         ...previous.filter((r) => r.group.id !== id),
         {
-          group: { id, unresolved: [] },
+          group: { id, unresolved: externalDependencies(previewItems) },
           recovery,
           items: previewItems,
           status,
           key: crypto.randomUUID(),
         },
       ]);
+      setPreviewGroup(id);
+      setPreviewLimit(25);
     }
     if (status.state === 'complete' || status.state === 'failed') {
       let cursor: string | null = null;
@@ -246,7 +530,31 @@ export function ImportRecords({
     }
     if (!current()) return;
     setReviews((rs) => rs.map((r) => (r.group.id === id ? { ...r, status } : r)));
-    setProgress({ status, items });
+    const sessions = [
+      ...new Set(items.flatMap((item) => (item.sessionId ? [item.sessionId] : []))),
+    ].slice(0, 10);
+    const saved = (
+      await Promise.all(
+        sessions.map(async (sessionId) => {
+          try {
+            const record = await api('/sessions/' + sessionId, apiSchemas.SessionRecord);
+            const editionId = record.editionIds.at(-1);
+            if (record.id !== sessionId || record.status !== 'saved' || !editionId) return null;
+            return {
+              title: record.question ?? 'Saved reading',
+              path: `/saved/${record.id}/${editionId}`,
+            };
+          } catch (error) {
+            if (error instanceof ApiFailure && error.status === 401) throw error;
+            return null;
+          }
+        }),
+      )
+    ).filter((value) => value !== null);
+    if (!current()) return;
+    if (status.state === 'expired')
+      setReviews((previous) => previous.filter((r) => r.group.id !== id));
+    setProgress({ status, items, saved });
     setResumeId(id);
     setMessage(status.state === 'complete' ? 'Group complete.' : 'Group ' + status.state + '.');
   }
@@ -269,7 +577,24 @@ export function ImportRecords({
           { key: r.key },
         );
       } catch (e) {
-        if (e instanceof ApiFailure && e.status < 500) throw e;
+        if (e instanceof ApiFailure && e.status < 500) {
+          if (current())
+            setReviews((previous) =>
+              previous.map((review) =>
+                review.group.id === id
+                  ? {
+                      ...review,
+                      failure: /DEPENDENCY_MISSING|MISSING_PARENT|PARENT_NOT_FOUND/.test(
+                        e.code ?? '',
+                      )
+                        ? 'The required parent could not be found. Include the original parent reading and required records, then review the selection again.'
+                        : 'This group could not be confirmed. Review the selected records and recovery options before creating a fresh review. Earlier completed groups stay saved.',
+                    }
+                  : review,
+              ),
+            );
+          throw e;
+        }
       }
       if (current()) await reconcile(id, current);
     });
@@ -372,7 +697,7 @@ export function ImportRecords({
             </Button>
           </fieldset>
           {parsed && (
-            <fieldset disabled={busy}>
+            <fieldset disabled={busy} id="import-file-records">
               <legend>Records in the file</legend>
               {parsed.errors.map((e) => (
                 <p key={e.pointer}>
@@ -380,44 +705,45 @@ export function ImportRecords({
                 </p>
               ))}
               {parsed.units.slice(0, visible).map((u) => (
-                <label className="import-choice" key={u.key}>
-                  <input
-                    type="checkbox"
-                    checked={selected.includes(u.key)}
-                    onChange={(e) => {
-                      setSelected((prev) =>
-                        e.target.checked ? [...prev, u.key] : prev.filter((k) => k !== u.key),
-                      );
-                      setReviews([]);
-                      setProgress(null);
-                    }}
-                  />
-                  <span>
-                    <strong>{importLabel(u)}</strong>
-                    <small>
-                      {u.identity.kind} · {u.sourcePointer} · Revision {u.identity.recordRevision}
-                    </small>
-                    {u.kind === 'legacy-reading' && (
+                <div className="import-file-record" key={u.key}>
+                  <label className="import-choice">
+                    <input
+                      type="checkbox"
+                      checked={selected.includes(u.key)}
+                      onChange={(e) => {
+                        setSelected((prev) =>
+                          e.target.checked ? [...prev, u.key] : prev.filter((k) => k !== u.key),
+                        );
+                        setReviews([]);
+                        setProgress(null);
+                      }}
+                    />
+                    <span>
+                      <strong>{importLabel(u)}</strong>
                       <small>
-                        {u.record.originalTimestamp ?? 'Original date unavailable'} ·{' '}
-                        {u.record.source} · {u.record.generatedText ?? 'Interpretation unavailable'}
+                        {unitDescription(u)} · {originalDate(u) ?? 'Original date unavailable'}
                       </small>
-                    )}
-                    {u.kind === 'legacy-authored' && <small>{u.record.text}</small>}
-                    {u.dependencies.length > 0 && (
-                      <small>
-                        Needs {u.dependencies.map((d) => d.kind + ' ' + d.recordId).join(', ')}
-                      </small>
-                    )}
-                  </span>
-                </label>
+                      {u.kind === 'legacy-reading' && (
+                        <small>{u.record.generatedText ?? 'Interpretation unavailable'}</small>
+                      )}
+                      {u.kind === 'legacy-authored' && <small>{u.record.text}</small>}
+                      {u.dependencies.length > 0 && (
+                        <small>
+                          Includes related records. Its original reading and required sources must
+                          be available.
+                        </small>
+                      )}
+                    </span>
+                  </label>
+                  <RecordIdentifiers unit={u} />
+                </div>
               ))}
               {visible < parsed.units.length && (
                 <Button type="button" variant="secondary" onClick={() => setVisible((n) => n + 25)}>
                   Show more records
                 </Button>
               )}
-              <details>
+              <details id="import-recovery-options">
                 <summary>Resolve a conflict or erased record</summary>
                 <label>
                   Recovery action
@@ -461,51 +787,214 @@ export function ImportRecords({
               </Button>
             </fieldset>
           )}
-          {reviews.map((r, i) => (
-            <section className="import-group" key={r.group.id}>
-              <h4>Group {i + 1}</h4>
-              <p>
-                {r.status.totalItems} selected · {r.status.state} · Import ID {r.group.id}
-              </p>
-              <ul>
-                {r.items.map((item, j) => (
-                  <li
-                    key={
-                      item.identity ? JSON.stringify(item.identity) : `${item.index}:${item.error}`
+          {reviews.map((r) => {
+            const ready = r.items.filter((item) => item.status === 'ready').length;
+            const duplicates = r.items.filter((item) => item.status === 'duplicate').length;
+            const blocked = r.items.length - ready - duplicates;
+            const duplicateOnly = duplicates === r.status.totalItems;
+            const expanded = previewGroup === r.group.id;
+            const title = groupTitle(r);
+            const primary = groupPrimary(r);
+            const at = primary ? originalDate(primary) : null;
+            const erased = r.items.some((item) => item.status === 'erased');
+            const conflict = r.items.some((item) => item.status === 'conflict');
+            const missingParent = r.items.some((item) =>
+              /DEPENDENCY_MISSING|MISSING_PARENT|PARENT_NOT_FOUND/.test(item.error ?? ''),
+            );
+            const remedy = erased
+              ? 'This record was previously deleted. To recreate it, choose “Recreate in a new namespace” in the recovery options, then review the group again. Other saved records are unchanged.'
+              : conflict
+                ? 'A saved record has different content. Keep it by leaving this group unconfirmed, or choose a new source revision in the recovery options and review again.'
+                : missingParent
+                  ? 'The parent reading or a required source is missing. Include its original reading and required records, then review the selection again. Other independent groups can still be imported.'
+                  : blocked
+                    ? 'One or more records could not be validated. Correct the original file or leave those records unselected, then review again.'
+                    : !r.status.previewHash && r.status.state === 'staged'
+                      ? 'This group is not ready to confirm. Include all of its related records and review the original file again.'
+                      : null;
+            return (
+              <section
+                className="import-group"
+                key={r.group.id}
+                aria-labelledby={`import-group-title-${r.group.id}`}
+              >
+                <h4 id={`import-group-title-${r.group.id}`}>{title}</h4>
+                <p className="muted">{at ?? 'Original date unavailable'}</p>
+                <p className="import-group-counts">
+                  {r.status.state === 'complete'
+                    ? `${r.status.totalItems} records reviewed · Finished`
+                    : `${ready} ready · ${duplicates} already saved · ${blocked} need review`}
+                </p>
+                {r.status.state === 'complete' && (
+                  <p>
+                    Review complete.{' '}
+                    {duplicateOnly
+                      ? 'No new records were added.'
+                      : 'The confirmed records are saved.'}
+                  </p>
+                )}
+                {duplicateOnly && <p>Already saved — skipped</p>}
+                {duplicateOnly && (
+                  <p className="muted">
+                    Finishing this review adds no new records. Your existing reading stays saved.
+                  </p>
+                )}
+                <Button
+                  variant="text-button"
+                  disabled={busy}
+                  aria-expanded={expanded}
+                  aria-controls={`import-group-preview-${r.group.id}`}
+                  onClick={() => {
+                    setPreviewGroup(expanded ? null : r.group.id);
+                    setPreviewLimit(25);
+                  }}
+                >
+                  {expanded ? 'Hide record preview' : 'Preview this group'}
+                </Button>
+                {expanded && (
+                  <div className="import-group-preview" id={`import-group-preview-${r.group.id}`}>
+                    <p className="muted">
+                      {r.status.totalItems} selected{' '}
+                      {r.status.totalItems === 1 ? 'record' : 'records'}. Readings and related
+                      personal writing are kept together in this group.
+                    </p>
+                    {r.items.slice(0, previewLimit).map((item, j) => (
+                      <section className="import-record-preview" key={item.index}>
+                        <h5>
+                          {item.unit
+                            ? unitDescription(item.unit)
+                            : (item.label ?? `Record ${j + 1}`)}
+                        </h5>
+                        {item.unit && (
+                          <p className="import-record-date">
+                            {originalDate(item.unit) ?? 'Original date unavailable'}
+                          </p>
+                        )}
+                        <p className={`import-record-status is-${item.status}`}>
+                          {duplicateOnly
+                            ? 'This record is already saved.'
+                            : recordStatus(item.status)}
+                        </p>
+                        {item.unit ? (
+                          <ImportRecordContent unit={item.unit} />
+                        ) : (
+                          <p>
+                            Original content is unavailable in this review. Read the original file
+                            again to inspect it.
+                          </p>
+                        )}
+                        {item.unit && <RecordIdentifiers unit={item.unit} />}
+                      </section>
+                    ))}
+                    {r.items.length > previewLimit && (
+                      <Button
+                        variant="secondary"
+                        disabled={busy}
+                        onClick={() => setPreviewLimit((n) => n + 25)}
+                      >
+                        Show more related records
+                      </Button>
+                    )}
+                  </div>
+                )}
+                {r.recovery.kind !== 'none' && (
+                  <p>
+                    {r.recovery.kind === 'new_revision'
+                      ? 'New source revision'
+                      : 'Recreation in a new namespace'}{' '}
+                    · Existing records remain unchanged.
+                  </p>
+                )}
+                {remedy && (
+                  <p className="import-remedy" id={`import-remedy-${r.group.id}`}>
+                    {remedy}
+                  </p>
+                )}
+                {r.group.unresolved.length > 0 && (
+                  <p className="import-remedy">
+                    This group references a parent reading or source outside this selection. It must
+                    already be saved with the same source and revision. Otherwise, include its
+                    original reading and required records, then review the selection again.
+                  </p>
+                )}
+                {r.failure && (
+                  <p className="import-remedy" role="alert">
+                    {r.failure}
+                  </p>
+                )}
+                {r.failure && parsed && (
+                  <Button
+                    variant="text-button"
+                    disabled={busy}
+                    onClick={() => {
+                      const records = document.getElementById('import-file-records');
+                      records?.scrollIntoView({ block: 'start' });
+                      records?.querySelector<HTMLInputElement>('input[type="checkbox"]')?.focus();
+                    }}
+                  >
+                    Review record selection
+                  </Button>
+                )}
+                {(erased || conflict) && parsed && (
+                  <Button
+                    variant="text-button"
+                    disabled={busy}
+                    onClick={() => {
+                      const details = document.getElementById('import-recovery-options');
+                      if (details instanceof HTMLDetailsElement) {
+                        details.open = true;
+                        details.scrollIntoView({ block: 'center' });
+                        details.querySelector('select')?.focus();
+                      }
+                    }}
+                  >
+                    Review recovery options
+                  </Button>
+                )}
+                {r.status.state === 'staged' && (
+                  <Button
+                    type="button"
+                    onClick={() => commit(r)}
+                    aria-describedby={remedy ? `import-remedy-${r.group.id}` : undefined}
+                    disabled={
+                      busy ||
+                      Boolean(r.failure) ||
+                      !r.status.previewHash ||
+                      r.items.some((x) => !['ready', 'duplicate'].includes(x.status))
                     }
                   >
-                    {item.label ?? item.originalId ?? 'Item ' + (j + 1)} · {item.status}
-                    {item.error && ' · ' + item.error}
-                  </li>
-                ))}
-              </ul>
-              {r.recovery.kind !== 'none' && (
-                <p>
-                  {r.recovery.kind === 'new_revision'
-                    ? 'New source revision'
-                    : 'Recreation in a new namespace'}{' '}
-                  · Previous source {r.recovery.previousSource.namespaceId}, revision{' '}
-                  {r.recovery.previousSource.revision}
-                </p>
-              )}
-              {r.group.unresolved.length > 0 && (
-                <p>External dependencies require an exact existing record.</p>
-              )}
-              {r.status.state === 'staged' && (
-                <Button
-                  type="button"
-                  onClick={() => commit(r)}
-                  disabled={
-                    busy ||
-                    !r.status.previewHash ||
-                    r.items.some((x) => !['ready', 'duplicate'].includes(x.status))
-                  }
-                >
-                  Confirm this group
-                </Button>
-              )}
-            </section>
-          ))}
+                    {duplicateOnly ? 'Finish review — no new records' : 'Confirm this group'}
+                  </Button>
+                )}
+                <details className="import-identifiers">
+                  <summary>Import details</summary>
+                  <dl>
+                    <dt>Import ID</dt>
+                    <dd>{r.group.id}</dd>
+                    <dt>Review state</dt>
+                    <dd>{r.status.state}</dd>
+                    {r.recovery.kind !== 'none' && (
+                      <>
+                        <dt>Previous source namespace</dt>
+                        <dd>{r.recovery.previousSource.namespaceId}</dd>
+                        <dt>Previous source revision</dt>
+                        <dd>{r.recovery.previousSource.revision}</dd>
+                      </>
+                    )}
+                    {r.items.map((item) => (
+                      <div key={item.index}>
+                        <dt>Record status</dt>
+                        <dd>
+                          {item.status}
+                          {item.error ? ` · ${item.error}` : ''}
+                        </dd>
+                      </div>
+                    ))}
+                  </dl>
+                </details>
+              </section>
+            );
+          })}
           {reviews.length > 0 && (
             <Button
               type="button"
@@ -541,10 +1030,28 @@ export function ImportRecords({
               Check import status
             </Button>
             {progress && (
-              <p>
-                {progress.status.completedItems} of {progress.status.totalItems} completed.{' '}
-                {progress.items.filter((i) => i.status === 'duplicate').length} duplicates skipped.
-              </p>
+              <>
+                <p>
+                  {progress.status.completedItems} of {progress.status.totalItems} completed.{' '}
+                  {progress.items.filter((i) => i.status === 'duplicate').length} duplicates
+                  skipped.
+                </p>
+                {progress.status.state === 'expired' && (
+                  <p>
+                    This private preview expired after 24 hours. Read the original file to create a
+                    fresh preview. Earlier completed groups stay saved.
+                  </p>
+                )}
+                {progress.saved.length > 0 && (
+                  <ul className="import-saved-links">
+                    {progress.saved.map((saved) => (
+                      <li key={saved.path}>
+                        <TextLink href={saved.path}>Open saved reading: {saved.title}</TextLink>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </>
             )}
           </fieldset>
           {busy && <p role="status">Checking the import…</p>}

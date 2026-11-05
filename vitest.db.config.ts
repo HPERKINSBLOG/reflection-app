@@ -41,6 +41,9 @@ export default defineConfig({
   test: {
     include: ['tests/db/**/*.test.ts'],
     setupFiles: ['tests/deny-network.ts'],
+    // Bound simultaneous workerd/storage environments; keep per-file isolation
+    // and the existing deadlines so restore-heavy suites do not starve each other.
+    maxWorkers: 2,
     testTimeout: 15000,
     hookTimeout: 15000,
   },

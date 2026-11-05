@@ -83,8 +83,19 @@ test('a lost Save response is reconciled by reloading the same accepted reading'
 }) => {
   await account(page, '198.51.100.82');
   await reading(page, 'Synthetic save interruption');
-  // biome-ignore lint/performance/useDomNodeTextContent: compare visible text, excluding collapsed sources.
-  const text = await page.getByTestId('accepted-reading').innerText();
+  // Saving changes header actions; every part of the fixed reading stays identical.
+  const accepted = page.getByTestId('accepted-reading');
+  const content = accepted.locator(':scope > :not(.reading-header)');
+  const text = await content.allInnerTexts();
+  const header = accepted.locator('.reading-title > :not(.follow-up-link)');
+  const headerText = await header.allInnerTexts();
+  const requestId = new URL(page.url()).pathname.split('/').at(-1)!;
+  const status = apiSchemas.RequestStatus.parse(
+    await (await page.request.get(`/api/v1/requests/${requestId}`)).json(),
+  );
+  const originalReading = apiSchemas.Reading.parse(
+    await (await page.request.get(`/api/v1/readings/${status.editionId}`)).json(),
+  );
   let saves = 0;
   await page.route('**/api/v1/sessions/*/save', async (route) => {
     saves++;
@@ -97,9 +108,12 @@ test('a lost Save response is reconciled by reloading the same accepted reading'
   ).toBeVisible();
   await page.reload();
   await expect(page.getByTestId('accepted-reading')).toBeVisible();
-  await expect(page.getByTestId('accepted-reading')).toHaveText(text, { useInnerText: true });
+  await expect(content).toHaveText(text, { useInnerText: true });
+  await expect(header).toHaveText(headerText, { useInnerText: true });
   await expect(page.getByText('Saved until you delete it.', { exact: true })).toBeVisible();
   const snapshot = await savedSnapshot(page);
+  expect(snapshot.reading).toEqual(originalReading);
+  expect(snapshot.session.id).toBe(status.sessionId);
   expect(snapshot.session.reflectionIds).toEqual([]);
   expect(snapshot.me.remainingDay).toBe(2);
   expect(saves).toBe(1);

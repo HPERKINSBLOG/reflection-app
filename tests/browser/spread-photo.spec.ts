@@ -78,7 +78,16 @@ test('starting while image preparation is pending keeps the chosen photo', async
     .getByLabel('Your reflection', { exact: true })
     .fill('Synthetic reflection on my spread');
   await page.getByRole('button', { name: 'Save reflection', exact: true }).click();
-  await expect(page.getByRole('heading', { name: 'Edit reflection', exact: true })).toBeVisible();
+  const personal = page.getByRole('region', { name: 'Personal reflection', exact: true });
+  await expect(
+    personal.getByRole('heading', { name: 'Your reflection', exact: true }),
+  ).toBeVisible();
+  await expect(personal.locator('.saved-reflection-text')).toHaveText(
+    'Synthetic reflection on my spread',
+  );
+  await expect(personal.locator('.saved-reflection-text')).toBeVisible();
+  await personal.getByRole('button', { name: 'Edit reflection', exact: true }).click();
+  await expect(reference).toBeVisible();
   await expect(reference).toHaveAttribute('src', input.spreadPhoto);
   expect(submissions).toBe(1);
 });

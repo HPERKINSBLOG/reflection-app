@@ -7,6 +7,7 @@ import { api, ApiFailure } from './api.ts';
 import { date } from './date.ts';
 import { Button, Input, TextArea } from './design/components.tsx';
 import { Notice, type NoticeMessage } from './notice.tsx';
+import './context-selection.css';
 
 type PreviewWrite = z.infer<typeof apiSchemas.ContextPreviewWrite>;
 type Preview = z.infer<typeof apiSchemas.ContextPreview>;
@@ -18,6 +19,13 @@ type Choice = { source: GrantValue['source']; title: string; at: string; passage
 type Picked = { range: Range; title: string; at: string; source: string };
 export interface ContextSubmission {
   count: number;
+  reviewedExcerpts?: Array<{
+    id: string;
+    title: string;
+    at: string;
+    text: string;
+    authorship: 'generated' | 'user' | 'unknown';
+  }>;
   confirmation?: {
     binding: string;
     selection: z.infer<typeof apiSchemas.StartRequest>['selection'];
@@ -68,7 +76,12 @@ function originalOffset(text: string, browserOffset: number) {
 }
 type Props = { csrfToken: string; onExpired: () => void } & (
   | { mode: 'manage'; family: Family; editionId: string }
-  | { mode: 'choose'; binding: Binding; onChange: (result: ContextSubmission) => void }
+  | {
+      mode: 'choose';
+      binding: Binding;
+      initialSource?: { family: Family; editionId: string };
+      onChange: (result: ContextSubmission) => void;
+    }
 );
 
 /** Mounted private draft. Only server-issued selection coordinates and proofs leave it on confirmation. */
@@ -77,9 +90,16 @@ export function ContextSelection(props: Props) {
     [busy, setBusy] = useState(false);
   const [history, setHistory] = useState<z.infer<typeof apiSchemas.HistoryPage> | null>(null);
   const [family, setFamily] = useState<Family | null>(
-    props.mode === 'manage' ? props.family : null,
+    props.mode === 'manage' ? props.family : (props.initialSource?.family ?? null),
   );
-  const [edition, setEdition] = useState(props.mode === 'manage' ? props.editionId : '');
+  const [edition, setEdition] = useState(
+    props.mode === 'manage' ? props.editionId : (props.initialSource?.editionId ?? ''),
+  );
+  const [partial, setPartial] = useState(false);
+  const [editionSummary, setEditionSummary] = useState<{
+    question: string | null;
+    at: string;
+  } | null>(null);
   const [choices, setChoices] = useState<Choice[]>([]),
     [grants, setGrants] = useState<GrantValue[]>([]);
   const [nextGrants, setNextGrants] = useState<string | null>(null);
@@ -218,6 +238,7 @@ export function ContextSelection(props: Props) {
     );
   }
   function resetSources() {
+    setEditionSummary(null);
     setChoices([]);
     setGrants([]);
     setNextGrants(null);
@@ -246,6 +267,13 @@ export function ContextSelection(props: Props) {
       notes.items.some((n) => n.sessionId !== record.id || n.editionId !== id)
     )
       throw new Error('The source did not match this edition. Refresh to try again.');
+    if (reading && reading.kind !== 'reading.unavailable.v1') {
+      setEditionSummary({
+        question:
+          reading.kind === 'legacy.imported.v1' ? reading.record.question : reading.question,
+        at: 'acceptedAt' in reading ? reading.acceptedAt : reading.importedAt,
+      });
+    }
     const rendered: Choice[] = reading
       ? editionContextPassages(reading).map((passage) => ({
           source: { kind: 'edition', editionId: id },
@@ -292,6 +320,8 @@ export function ContextSelection(props: Props) {
     setOpened(true);
     if (props.mode === 'manage')
       void run((current) => loadEdition(props.family, props.editionId, current));
+    else if (family && edition && !choices.length)
+      void run((current) => loadEdition(family, edition, current));
     else if (!history) void run((current) => listHistory(current));
   }
   async function allow(current: () => boolean) {
@@ -330,17 +360,17 @@ export function ContextSelection(props: Props) {
       });
     }
   }
-  function add() {
-    const grant = matching[0];
-    if (!choice || !grant) return;
-    const a = Number(first),
-      b = Number(last);
+  function addRange(selected: Choice, a: number, b: number) {
+    const grant = grants.find(
+      (g) => g.state === 'allowed' && sourceKey(g.source) === sourceKey(selected.source),
+    );
+    if (!grant) return;
     if (
       !Number.isSafeInteger(a) ||
       !Number.isSafeInteger(b) ||
       a < 1 ||
       b < a ||
-      b > choice.passage.end - choice.passage.start ||
+      b > selected.passage.end - selected.passage.start ||
       b - a + 1 > CONTEXT_LIMITS.perSource
     ) {
       setMessage({
@@ -349,13 +379,13 @@ export function ContextSelection(props: Props) {
       });
       return;
     }
-    const source = sourceKey(choice.source);
+    const source = sourceKey(selected.source);
     const next = picks.filter((p) => p.source !== source);
     const range = {
       grantId: grant.id,
       grantRevision: grant.revision,
-      start: choice.passage.start + a - 1,
-      end: choice.passage.start + b,
+      start: selected.passage.start + a - 1,
+      end: selected.passage.start + b,
     };
     if (
       next.length >= CONTEXT_LIMITS.sources ||
@@ -368,11 +398,14 @@ export function ContextSelection(props: Props) {
       });
       return;
     }
-    updatePicks([...next, { range, source, title: choice.title, at: choice.at }]);
+    updatePicks([...next, { range, source, title: selected.title, at: selected.at }]);
     setMessage({
       tone: 'success',
       text: 'Excerpt added. Review your selected excerpts before starting.',
     });
+  }
+  function add() {
+    if (choice) addRange(choice, Number(first), Number(last));
   }
   async function preview(current: () => boolean) {
     if (props.mode !== 'choose') return;
@@ -411,6 +444,7 @@ export function ContextSelection(props: Props) {
     setChoiceId(id);
     setFirst('');
     setLast('');
+    setPartial(false);
     setMessage(null);
   };
   return (
@@ -418,21 +452,23 @@ export function ContextSelection(props: Props) {
       className="context-selection"
       aria-label={props.mode === 'choose' ? 'Selected context' : 'Sharing eligibility'}
     >
-      <Button
-        ref={opener}
-        variant="secondary"
-        aria-expanded={opened}
-        disabled={busy}
-        onClick={toggle}
-      >
-        {props.mode === 'choose' ? 'Choose excerpts' : 'Sharing eligibility'}
-      </Button>
+      {!visibleReview && (
+        <Button
+          ref={opener}
+          variant="secondary"
+          aria-expanded={opened}
+          disabled={busy}
+          onClick={toggle}
+        >
+          {props.mode === 'choose' ? 'Choose excerpts' : 'Sharing eligibility'}
+        </Button>
+      )}
       {props.mode === 'choose' && (
         <p className="muted">
           {picks.length ? `${picks.length} of 3 sources selected.` : 'No excerpts selected.'}
         </p>
       )}
-      {opened && (
+      {opened && !visibleReview && (
         <div className="context-controls">
           <p>
             {props.mode === 'manage'
@@ -442,76 +478,144 @@ export function ContextSelection(props: Props) {
           </p>
           {props.mode === 'choose' && (
             <>
-              <div className="context-field">
-                <label htmlFor="context-family">Saved reading</label>
-                <select
-                  id="context-family"
-                  value={family?.id ?? ''}
-                  disabled={busy}
-                  onChange={(e) => {
-                    const id = e.target.value;
-                    void run((current) => loadFamily(id, current));
-                  }}
-                >
-                  <option value="">Choose a saved reading</option>
-                  {history?.items.map((row) => (
-                    <option key={row.id} value={row.id}>
-                      {date(row.createdAt, true)} · {row.questionPreview ?? 'Saved reading'}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              {history && history.items.length === 0 && <p>No saved readings available.</p>}
-              {history?.nextCursor && (
-                <Button
-                  variant="text-button"
-                  disabled={busy}
-                  onClick={() => void run((current) => listHistory(current, history.nextCursor))}
-                >
-                  More saved readings
-                </Button>
+              {family && (
+                <div className="context-origin">
+                  <h3>{editionSummary?.question ?? family.question ?? 'Saved reading'}</h3>
+                  <p>
+                    {date(editionSummary?.at ?? family.createdAt)}
+                    {edition &&
+                      ` · ${
+                        family.editionIds.indexOf(edition) === 0
+                          ? 'Original reading'
+                          : `Follow-up ${family.editionIds.indexOf(edition)}`
+                      }`}
+                  </p>
+                </div>
               )}
-              {family && family.editionIds.length > 1 && (
+              <details
+                className="context-browse"
+                open={!family}
+                onToggle={(event) => {
+                  if (event.currentTarget.open && !history)
+                    void run((current) => listHistory(current));
+                }}
+              >
+                <summary>Choose another saved reading or edition</summary>
                 <div className="context-field">
-                  <label htmlFor="context-edition">Edition</label>
+                  <label htmlFor="context-family">Saved reading</label>
                   <select
-                    id="context-edition"
-                    value={edition}
+                    id="context-family"
+                    value={family?.id ?? ''}
                     disabled={busy}
                     onChange={(e) => {
                       const id = e.target.value;
-                      void run((current) => loadEdition(family, id, current));
+                      void run((current) => loadFamily(id, current));
                     }}
                   >
-                    <option value="">Choose an edition</option>
-                    {family.editionIds.map((id, i) => (
-                      <option key={id} value={id}>
-                        Edition {i + 1}
+                    <option value="">Choose a saved reading</option>
+                    {family && !history?.items.some((row) => row.id === family.id) && (
+                      <option value={family.id}>
+                        {date(family.createdAt)} · {family.question ?? 'Saved reading'}
+                      </option>
+                    )}
+                    {history?.items.map((row) => (
+                      <option key={row.id} value={row.id}>
+                        {date(row.createdAt, true)} · {row.questionPreview ?? 'Saved reading'}
                       </option>
                     ))}
                   </select>
                 </div>
-              )}
+                {history && history.items.length === 0 && <p>No saved readings available.</p>}
+                {history?.nextCursor && (
+                  <Button
+                    variant="text-button"
+                    disabled={busy}
+                    onClick={() => void run((current) => listHistory(current, history.nextCursor))}
+                  >
+                    More saved readings
+                  </Button>
+                )}
+                {family && family.editionIds.length > 1 && (
+                  <div className="context-field">
+                    <label htmlFor="context-edition">Edition</label>
+                    <select
+                      id="context-edition"
+                      value={edition}
+                      disabled={busy}
+                      onChange={(e) => {
+                        const id = e.target.value;
+                        void run((current) => loadEdition(family, id, current));
+                      }}
+                    >
+                      <option value="">Choose an edition</option>
+                      {family.editionIds.map((id, i) => (
+                        <option key={id} value={id}>
+                          {i === 0 ? 'Original reading' : `Follow-up ${i}`}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+              </details>
             </>
           )}
           {edition && (
             <>
-              <div className="context-field">
-                <label htmlFor="context-source">Source</label>
-                <select
-                  id="context-source"
-                  disabled={busy}
-                  value={choiceId}
-                  onChange={(e) => selectChoice(e.target.value)}
-                >
-                  <option value="">Choose a source</option>
-                  {choices.map((c, i) => (
-                    <option key={choiceKey(c)} value={choiceKey(c)}>
-                      {c.title} · {date(c.at)} · source {i + 1}
-                    </option>
+              {props.mode === 'manage' ? (
+                <div className="context-field">
+                  <label htmlFor="context-source">Source</label>
+                  <select
+                    id="context-source"
+                    disabled={busy}
+                    value={choiceId}
+                    onChange={(e) => selectChoice(e.target.value)}
+                  >
+                    <option value="">Choose a source</option>
+                    {choices.map((c, i) => (
+                      <option key={choiceKey(c)} value={choiceKey(c)}>
+                        {c.title} · {date(c.at)} · source {i + 1}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              ) : (
+                <fieldset className="context-source-list">
+                  <legend>Choose a passage</legend>
+                  {choices.map((source) => (
+                    <div className="context-source-row" key={choiceKey(source)}>
+                      <label
+                        className="context-source-choice"
+                        htmlFor={`context-source-${choiceKey(source)}`}
+                      >
+                        <Input
+                          type="radio"
+                          id={`context-source-${choiceKey(source)}`}
+                          name="context-source-choice"
+                          checked={choiceId === choiceKey(source)}
+                          disabled={busy}
+                          onChange={() => selectChoice(choiceKey(source))}
+                        />
+                        <span>
+                          <strong>{source.title}</strong>
+                          <span className="context-source-date">
+                            {source.passage.authorship === 'user'
+                              ? 'Your words'
+                              : source.passage.authorship === 'generated'
+                                ? 'Generated text'
+                                : 'Unknown authorship'}{' '}
+                            · {date(source.at)}
+                          </span>
+                        </span>
+                      </label>
+                      <details className="context-source-text">
+                        <summary>Read passage</summary>
+                        <blockquote>{source.passage.text}</blockquote>
+                      </details>
+                    </div>
                   ))}
-                </select>
-              </div>
+                  {!choices.length && !busy && <p>No passages are available in this edition.</p>}
+                </fieldset>
+              )}
               {family && refOffset < family.reflectionIds.length && (
                 <Button
                   variant="text-button"
@@ -591,6 +695,7 @@ export function ContextSelection(props: Props) {
                     const a = originalOffset(choice.passage.text, el.selectionStart),
                       b = originalOffset(choice.passage.text, el.selectionEnd);
                     if (a !== null && b !== null) {
+                      setPartial(true);
                       setFirst(String(a + 1));
                       setLast(String(b));
                       invalidate();
@@ -621,61 +726,88 @@ export function ContextSelection(props: Props) {
                   ))}
                   {props.mode === 'choose' && (
                     <>
-                      <p>
-                        Select text above or enter its first and last character. This passage has{' '}
-                        {choice.passage.end - choice.passage.start} characters.
-                      </p>
-                      <div className="context-range">
-                        <label htmlFor="context-first">
-                          First character
-                          <Input
-                            id="context-first"
-                            onKeyDown={(e) => {
-                              if (e.key === 'Enter') e.preventDefault();
-                            }}
-                            type="number"
-                            inputMode="numeric"
-                            min="1"
-                            value={first}
-                            onChange={(e) => {
-                              setFirst(e.target.value);
-                              invalidate();
-                            }}
-                          />
-                        </label>
-                        <label htmlFor="context-last">
-                          Last character
-                          <Input
-                            id="context-last"
-                            onKeyDown={(e) => {
-                              if (e.key === 'Enter') e.preventDefault();
-                            }}
-                            type="number"
-                            inputMode="numeric"
-                            min="1"
-                            value={last}
-                            onChange={(e) => {
-                              setLast(e.target.value);
-                              invalidate();
-                            }}
-                          />
-                        </label>
-                      </div>
-                      {choice.passage.end - choice.passage.start <= CONTEXT_LIMITS.perSource && (
+                      <div className="context-passage-actions">
+                        {choice.passage.end - choice.passage.start <= CONTEXT_LIMITS.perSource && (
+                          <Button
+                            variant="secondary"
+                            disabled={busy}
+                            onClick={() =>
+                              addRange(choice, 1, choice.passage.end - choice.passage.start)
+                            }
+                          >
+                            Use whole passage
+                          </Button>
+                        )}
                         <Button
                           variant="text-button"
-                          onClick={() => {
-                            setFirst('1');
-                            setLast(String(choice.passage.end - choice.passage.start));
-                            invalidate();
-                          }}
+                          aria-expanded={partial}
+                          onClick={() => setPartial(!partial)}
                         >
-                          Use whole passage
+                          Choose part of passage
                         </Button>
+                      </div>
+                      {partial && (
+                        <div className="context-partial">
+                          <p>Select the exact words in the saved passage above.</p>
+                          <details className="context-character-controls">
+                            <summary>Set first and last characters</summary>
+                            <p>
+                              This passage has {choice.passage.end - choice.passage.start}{' '}
+                              characters.
+                            </p>
+                            <div className="context-range">
+                              <label htmlFor="context-first">
+                                First character
+                                <Input
+                                  id="context-first"
+                                  onKeyDown={(e) => {
+                                    if (e.key === 'Enter') e.preventDefault();
+                                  }}
+                                  type="number"
+                                  inputMode="numeric"
+                                  min="1"
+                                  value={first}
+                                  onChange={(e) => {
+                                    setFirst(e.target.value);
+                                    invalidate();
+                                  }}
+                                />
+                              </label>
+                              <label htmlFor="context-last">
+                                Last character
+                                <Input
+                                  id="context-last"
+                                  onKeyDown={(e) => {
+                                    if (e.key === 'Enter') e.preventDefault();
+                                  }}
+                                  type="number"
+                                  inputMode="numeric"
+                                  min="1"
+                                  value={last}
+                                  onChange={(e) => {
+                                    setLast(e.target.value);
+                                    invalidate();
+                                  }}
+                                />
+                              </label>
+                            </div>
+                          </details>
+                          {first && last && (
+                            <p className="context-range-preview">
+                              {Array.from(choice.passage.text)
+                                .slice(Number(first) - 1, Number(last))
+                                .join('')}
+                            </p>
+                          )}
+                          <Button
+                            variant="secondary"
+                            disabled={busy || !first || !last}
+                            onClick={add}
+                          >
+                            Add excerpt
+                          </Button>
+                        </div>
                       )}
-                      <Button variant="secondary" disabled={busy || !first || !last} onClick={add}>
-                        Add excerpt
-                      </Button>
                     </>
                   )}
                 </>
@@ -719,37 +851,50 @@ export function ContextSelection(props: Props) {
       )}
       {props.mode === 'choose' && picks.length > 0 && (
         <div className="context-review">
-          <ol>
-            {picks.map((p, i) => (
-              <li key={p.source}>
-                <span>
-                  {p.title} · {date(p.at)} · {p.range.end - p.range.start} characters
-                </span>{' '}
-                <Button
-                  variant="text-button"
-                  aria-label={`Remove excerpt ${i + 1}`}
-                  onClick={() => {
-                    updatePicks(picks.filter((item) => item !== p));
-                    setMessage({ tone: 'notice', text: 'Excerpt removed from this reading.' });
-                  }}
-                >
-                  Remove excerpt
-                </Button>
-              </li>
-            ))}
-          </ol>
-          <Button
-            variant="secondary"
-            disabled={busy || !props.binding.question.trim()}
-            onClick={() => void run(preview)}
-          >
-            Review selected excerpts
-          </Button>
+          {!visibleReview && (
+            <ol>
+              {picks.map((p, i) => (
+                <li key={p.source}>
+                  <span>
+                    {p.title} · {date(p.at)} · {p.range.end - p.range.start} characters
+                  </span>{' '}
+                  <Button
+                    variant="text-button"
+                    aria-label={`Remove excerpt ${i + 1}`}
+                    onClick={() => {
+                      updatePicks(picks.filter((item) => item !== p));
+                      setMessage({ tone: 'notice', text: 'Excerpt removed from this reading.' });
+                    }}
+                  >
+                    Remove excerpt
+                  </Button>
+                </li>
+              ))}
+            </ol>
+          )}
+          {!visibleReview && (
+            <Button
+              variant="secondary"
+              disabled={busy || !props.binding.question.trim()}
+              onClick={() => void run(preview)}
+            >
+              Review selected excerpts
+            </Button>
+          )}
           {visibleReview && (
             <section aria-labelledby="context-review-heading">
               <h3 ref={reviewHeading} tabIndex={-1} id="context-review-heading">
                 Review selected excerpts
               </h3>
+              <Button
+                variant="text-button"
+                onClick={() => {
+                  invalidate();
+                  setOpened(true);
+                }}
+              >
+                Change selected excerpts
+              </Button>
               {visibleReview.items.map((item, i) => (
                 <div key={item.selection.grantId}>
                   <p>
@@ -761,6 +906,13 @@ export function ContextSelection(props: Props) {
                     · {picks[i]?.title} · {picks[i] && date(picks[i]!.at)}
                   </p>
                   <blockquote>{item.text}</blockquote>
+                  <Button
+                    variant="text-button"
+                    aria-label={`Remove excerpt ${i + 1}`}
+                    onClick={() => updatePicks(picks.filter((_, index) => index !== i))}
+                  >
+                    Remove excerpt
+                  </Button>
                 </div>
               ))}
               <p>
@@ -780,6 +932,16 @@ export function ContextSelection(props: Props) {
                       checked
                         ? {
                             count: picks.length,
+                            reviewedExcerpts: visibleReview.items.map((item, index) => ({
+                              id: item.selection.grantId,
+                              title: picks[index]!.title,
+                              at: picks[index]!.at,
+                              text: item.text,
+                              authorship:
+                                item.authorship === 'generated' || item.authorship === 'user'
+                                  ? item.authorship
+                                  : 'unknown',
+                            })),
                             confirmation: {
                               binding,
                               selection: visibleReview.items.map((i) => i.selection),

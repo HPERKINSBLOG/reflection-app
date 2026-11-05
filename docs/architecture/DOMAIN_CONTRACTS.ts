@@ -1111,7 +1111,12 @@ export const ImportReviewPage = z.strictObject({
   source: ImportSource,
   recovery: ImportRecovery,
   items: z
-    .array(ImportPreview.shape.items.element.extend({ label: z.string().max(10000) }))
+    .array(
+      ImportPreview.shape.items.element.extend({
+        label: z.string().max(10000),
+        unit: ImportUnit,
+      }),
+    )
     .max(25),
   nextCursor: z.string().nullable(),
 });

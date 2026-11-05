@@ -3,6 +3,8 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { expect, test } from 'vitest';
 import { AcceptedReadingV2, ImportedReading } from '../../src/contracts/index.ts';
 import { ImportedReadingDetail } from '../../src/client/imported-reading.tsx';
+import { ImportRecordContent } from '../../src/client/imports.tsx';
+import { parseImportFile } from '../../src/domain/imports/parse.ts';
 import { sha256Json } from '../../src/domain/json.ts';
 import { buildPlanV2 } from '../../src/domain/tarot/context-v2.ts';
 import { v2Input } from '../fixtures/canon-v2.ts';
@@ -113,4 +115,30 @@ test('an imported native v2 snapshot exposes the exact separated historical inte
     'Imported, unverified',
   ])
     expect(html).toContain(text);
+  const parsed = await parseImportFile({
+    format: 'reflection-export.v1',
+    source: identity.source,
+    recovery: { kind: 'none' },
+    document: JSON.stringify({
+      format: 'reflection-export.v1',
+      exportId: crypto.randomUUID(),
+      snapshotRevision: 1,
+      records: [{ kind: 'reading', identity, originalId: editionId, value: native }],
+      nextCursor: null,
+      exportedAt: acceptedAt,
+      account: null,
+    }),
+  });
+  expect(parsed.units).toHaveLength(1);
+  const preview = renderToStaticMarkup(
+    createElement(ImportRecordContent, { unit: parsed.units[0]! }),
+  );
+  for (const text of [
+    native.question,
+    native.units[0]!.interpretation,
+    native.synthesis.text,
+    native.action.text,
+    native.reflectionQuestion!.text,
+  ])
+    expect(preview).toContain(text);
 });

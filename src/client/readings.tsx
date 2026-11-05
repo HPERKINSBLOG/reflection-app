@@ -48,7 +48,16 @@ import { Art } from './art.tsx';
 import { Icon } from './icon.tsx';
 import { CardFace, CardThumbnail } from './card-face.tsx';
 import { RevisitNotes, type RevisitNotesHandle } from './revisit-notes.tsx';
-import { FollowUp, EditionHistory, editionNavigation, editionPath } from './follow-up.tsx';
+import {
+  FollowUp,
+  EditionHistory,
+  ReadingOrigin,
+  useEditionDetails,
+  editionNavigation,
+  editionPath,
+} from './follow-up.tsx';
+import { FollowUpReview } from './submission-review.tsx';
+import './reading-return.css';
 import { ImportedReadingDetail } from './imported-reading.tsx';
 import { ContextSelection, contextBinding, type ContextSubmission } from './context-selection.tsx';
 
@@ -224,6 +233,8 @@ export function ReadingWorkspace({
     if (mode === 'followup' && reading && !document.hidden) composerHeading.current?.focus();
   }, [mode, reading]);
   const [reflection, setReflection] = useState<Thought | null>(null);
+  const [reflectionEditing, setReflectionEditing] = useState(true);
+  const editReflectionTrigger = useRef<HTMLButtonElement>(null);
   const [latestReflection, setLatestReflection] = useState<Thought | null>(null);
   const [revisionChoice, setRevisionChoice] = useState(1),
     [revisionNote, setRevisionNote] = useState<Thought | null>(null),
@@ -249,10 +260,20 @@ export function ReadingWorkspace({
     spreadInputRef = useRef<HTMLInputElement>(null),
     choosePhotoRef = useRef<HTMLButtonElement>(null);
   const [draftIntent, setDraftIntent] = useState(() => crypto.randomUUID());
+  const [reviewedBinding, setReviewedBinding] = useState<string | null>(null);
+  const submissionHeading = useRef<HTMLHeadingElement>(null);
+  useLayoutEffect(() => {
+    if (reviewedBinding) submissionHeading.current?.focus();
+  }, [reviewedBinding]);
   const [context, setContext] = useState<ContextSubmission>({ count: 0 });
+  const updateContext = useCallback((next: ContextSubmission) => {
+    setContext(next);
+    setReviewedBinding(null);
+  }, []);
   function resetContext() {
     setDraftIntent(crypto.randomUUID());
     setContext({ count: 0 });
+    setReviewedBinding(null);
   }
   const photoSelection = useRef(0),
     photoPreparing = useRef(false);
@@ -367,6 +388,7 @@ export function ReadingWorkspace({
     setImported(null);
     setUnavailable(null);
     setReflection(null);
+    setReflectionEditing(true);
     setLatestReflection(null);
     setDraft('');
     setStance('unspecified');
@@ -513,6 +535,7 @@ export function ReadingWorkspace({
     }
     focusResultOnCommit.current = focusResult;
     if (keepDraft && (dirtyReflection || conflict || requireReview)) {
+      setReflectionEditing(true);
       // Keep the draft's base revision until the user explicitly reconciles a newer version.
       if (note?.id !== reflection?.id || note?.revision !== reflection?.revision || requireReview) {
         setLatestReflection(note);
@@ -523,6 +546,7 @@ export function ReadingWorkspace({
         });
       }
     } else {
+      if (!keepDraft) setReflectionEditing(!note);
       setReflection(note);
       setLatestReflection(null);
       setDraft(note?.text ?? '');
@@ -723,6 +747,8 @@ export function ReadingWorkspace({
             setDraft(result.text);
             setStance(result.stance);
             setConflict(false);
+            setReflectionEditing(false);
+            requestAnimationFrame(() => editReflectionTrigger.current?.focus());
             intents.current.delete('reflection');
             setMessage({ tone: 'success', text: 'Reflection saved.' });
           }
@@ -852,6 +878,8 @@ export function ReadingWorkspace({
   const confirmed =
     context.confirmation?.binding === contextBinding(binding) ? context.confirmation : null;
   const contextReady = context.count === 0 || (Boolean(user.continuityReady) && Boolean(confirmed));
+  const reviewing =
+    mode === 'followup' && reviewedBinding === contextBinding(binding) && contextReady;
   const loadingFirstPage = mode === 'history' && !history && !historyRetry;
   const startHint = !question.trim()
     ? 'Enter your question to start.'
@@ -873,6 +901,26 @@ export function ReadingWorkspace({
   const localRuntime = ['synthetic-only', 'synthetic-local', 'live-local'].includes(
     runtimeMode ?? '',
   );
+  const editionDetails = useEditionDetails(
+    mode === 'reading' ? reading : null,
+    record?.editionIds ?? [],
+    onExpired,
+  );
+  const followUpEntry =
+    reading &&
+    record?.status === 'saved' &&
+    !record.imported &&
+    user.continuityReady &&
+    user.permission.modelAllowed &&
+    record.editionIds.length < 51 ? (
+      <TextLink
+        className="follow-up-link"
+        href={`${editionPath(record.id, reading.editionId)}/follow-up`}
+        onClick={editionNavigation}
+      >
+        Follow up on this edition
+      </TextLink>
+    ) : null;
   return (
     <section className="reading-workspace" aria-label="Your readings" aria-busy={busy}>
       {!deletionTarget && live === null && mode !== 'new' && (
@@ -1165,6 +1213,10 @@ export function ReadingWorkspace({
               live === null
             )
               return;
+            if (mode === 'followup' && !reviewing) {
+              setReviewedBinding(contextBinding(binding));
+              return;
+            }
             const values = {
               question,
               languageConfirmed: 'en' as const,
@@ -1190,13 +1242,13 @@ export function ReadingWorkspace({
             setMessage(null);
           }}
         >
-          <div className="new-reading-heading">
+          <div className="new-reading-heading" hidden={reviewing}>
             <h2 ref={composerHeading} tabIndex={-1} className="title-section">
               {mode === 'followup' ? 'Ask a follow-up' : 'A new reading'}
             </h2>
             <Art name="spread-ribbon" mobileName="mobile-corner" className="new-reading-art" />
           </div>
-          <div className="new-reading-layout">
+          <div className="new-reading-layout" hidden={reviewing}>
             <div className="new-reading-content">
               {mode === 'followup' && reading && <FollowUp parent={reading} />}
               <ReflectionField
@@ -1361,10 +1413,13 @@ export function ReadingWorkspace({
                 <ContextSelection
                   key={draftIntent}
                   mode="choose"
+                  {...(mode === 'followup' && record && reading
+                    ? { initialSource: { family: record, editionId: reading.editionId } }
+                    : {})}
                   binding={binding}
                   csrfToken={user.csrfToken}
                   onExpired={onExpired}
-                  onChange={setContext}
+                  onChange={updateContext}
                 />
               )}
             </div>
@@ -1398,7 +1453,7 @@ export function ReadingWorkspace({
                     live === null
                   }
                 >
-                  {mode === 'followup' ? 'Start follow-up' : 'Start reading'}
+                  {mode === 'followup' ? 'Review follow-up' : 'Start reading'}
                   <Icon name="chevron" />
                 </Button>
                 {startHint && (
@@ -1412,6 +1467,26 @@ export function ReadingWorkspace({
               </div>
             </aside>
           </div>
+          {reviewing && reading && (
+            <FollowUpReview
+              parent={reading}
+              question={question}
+              context={context}
+              notice={submitNotice}
+              heading={submissionHeading}
+              disabled={
+                busy ||
+                !contextReady ||
+                !user.permission.modelAllowed ||
+                !user.continuityReady ||
+                live === null
+              }
+              onBack={() => {
+                setReviewedBinding(null);
+                requestAnimationFrame(() => composerHeading.current?.focus());
+              }}
+            />
+          )}
         </form>
       )}
       {mode === 'reading' && !record && !busy && message?.tone === 'error' && (
@@ -1420,7 +1495,26 @@ export function ReadingWorkspace({
         </Button>
       )}
       {mode === 'reading' && record && selectedEditionId && (
-        <section className="reading-detail" aria-label="Reading detail" hidden={!!deletionTarget}>
+        <section
+          className={`reading-detail${reading ? ' reading-detail-native' : ''}`}
+          aria-label="Reading detail"
+          hidden={!!deletionTarget}
+        >
+          {reading && (
+            <EditionHistory
+              ids={record.editionIds}
+              reading={reading}
+              details={editionDetails.details}
+            />
+          )}
+          {editionDetails.failed && (
+            <p className="edition-details-retry">
+              Some edition details could not be loaded.{' '}
+              <Button variant="text-button" onClick={editionDetails.retry}>
+                Retry edition details
+              </Button>
+            </p>
+          )}
           {reading ? (
             <article
               data-testid="accepted-reading"
@@ -1447,8 +1541,10 @@ export function ReadingWorkspace({
                   <h2 ref={resultHeading} tabIndex={-1}>
                     {reading.question}
                   </h2>
+                  <ReadingOrigin reading={reading} details={editionDetails.details} />
                   {notesLink}
                   {deletionEntry}
+                  {followUpEntry}
                 </div>
                 {!reading.spreadPhoto && <Art name="study-inquiry" className="question-art" />}
               </div>
@@ -1489,7 +1585,11 @@ export function ReadingWorkspace({
                       <div className="position-copy">
                         <div>
                           <h4>
-                            {reading.spreadPhoto ? 'Recognized card' : 'Drawn card'}
+                            {reading.spreadPhoto
+                              ? 'Recognized card'
+                              : reading.parentEditionId
+                                ? 'Original card'
+                                : 'Drawn card'}
                             {name ? `: ${name}` : ''}
                           </h4>
                           <p className="basis-text">{unit.basisText}</p>
@@ -1624,258 +1724,297 @@ export function ReadingWorkspace({
               {notesLink}
             </ReflectionCard>
           )}
-          <div className={`save-reading ${record.status === 'saved' ? 'is-saved' : ''}`}>
-            {record.status === 'saved' ? (
-              <p className="saved-label">
-                <Icon name="check" />
-                Saved until you delete it.
-              </p>
-            ) : (
-              <>
-                <div className="save-summary">
-                  <Icon name="clock" />
-                  <div className="save-copy">
-                    <p>
-                      <strong>Not saved</strong> · Temporary storage lasts 24 hours from creation.
-                    </p>
-                    <p className="muted">{READING_PRODUCT_COPY.saveReading}</p>
-                  </div>
-                </div>
-                <Button id="save-reading" type="button" onClick={save} disabled={busy}>
-                  <Icon name="bookmark" />
-                  Save reading
-                </Button>
-              </>
-            )}
-          </div>
-          {!reading && deletionEntry}
-          {reading && <EditionHistory ids={record.editionIds} reading={reading} />}
-          {reading &&
-            record.status === 'saved' &&
-            !record.imported &&
-            user.continuityReady &&
-            user.permission.modelAllowed &&
-            record.editionIds.length < 51 && (
-              <TextLink
-                className="follow-up-link"
-                href={`${editionPath(record.id, reading.editionId)}/follow-up`}
-                onClick={editionNavigation}
-              >
-                Follow up on this edition
-              </TextLink>
-            )}
-          <ReflectionCard
-            id="personal-reflection"
-            tabIndex={-1}
-            className="reflection-editor"
-            aria-label="Personal reflection"
-          >
-            <h2>{reflection ? 'Edit reflection' : 'Add reflection'}</h2>
-            <p>
-              This is your own writing. It does not change the reading or request AI generation.
-            </p>
-            {reading?.spreadPhoto && (
-              <figure className="reflection-spread-reference">
-                <img
-                  src={reading.spreadPhoto}
-                  alt="Your uploaded spread, for reference while writing"
-                />
-                <figcaption>Your uploaded spread</figcaption>
-              </figure>
-            )}
-            {conflict && (
-              <div className="notice reflection-conflict">
-                <p>
-                  Current saved reflection
-                  {latestReflection ? ` (revision ${latestReflection.revision})` : ''}:
+          <aside className="reading-personal-writing" aria-label="Your writing">
+            <div className={`save-reading ${record.status === 'saved' ? 'is-saved' : ''}`}>
+              {record.status === 'saved' ? (
+                <p className="saved-label">
+                  <Icon name="check" />
+                  Saved until you delete it.
                 </p>
-                <blockquote>{latestReflection?.text ?? 'No saved reflection.'}</blockquote>
-                <p>Saved response: {stanceLabels[latestReflection?.stance ?? 'unspecified']}</p>
-                <div className="actions">
-                  <Button
-                    type="button"
-                    disabled={busy}
-                    onClick={() => {
-                      setReflection(latestReflection);
-                      setLatestReflection(null);
-                      setConflict(false);
-                      setMessage({
-                        tone: 'notice',
-                        text: 'Your draft is ready for the next save.',
-                      });
-                    }}
-                  >
-                    Keep my draft for the next save
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="secondary"
-                    disabled={busy}
-                    onClick={() => {
-                      setReflection(latestReflection);
-                      setDraft(latestReflection?.text ?? '');
-                      setStance(latestReflection?.stance ?? 'unspecified');
-                      setLatestReflection(null);
-                      setConflict(false);
-                      setMessage({
-                        tone: 'notice',
-                        text: 'The saved reflection is now in the editor.',
-                      });
-                    }}
-                  >
-                    Use the saved reflection
-                  </Button>
-                </div>
-              </div>
-            )}
-            <ReflectionField
-              id="reflection-text"
-              label="Your reflection"
-              rows={4}
-              maxLength={10000}
-              value={draft}
-              onChange={(event) => setDraft(event.target.value)}
-              disabled={busy}
-            />
-            <label htmlFor="reflection-stance">How does this feel?</label>
-            <div className="select-field">
-              <select
-                id="reflection-stance"
-                value={stance}
-                onChange={(event) => setStance(event.target.value as Thought['stance'])}
-                disabled={busy}
-              >
-                {Object.entries(stanceLabels).map(([value, label]) => (
-                  <option key={value} value={value}>
-                    {label}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <p className="muted">
-              Unsaved drafts stay only in memory and are lost when you leave this reading or reload.
-            </p>
-            {record.status !== 'saved' && (
-              <p>Saving a reflection also saves this reading until deletion.</p>
-            )}
-            <Button
-              type="button"
-              onClick={saveReflection}
-              disabled={busy || conflict || !reading || !draft.trim()}
-            >
-              Save reflection
-            </Button>
-          </ReflectionCard>
-          <RevisitNotes
-            key={`${user.subjectId}:${record.id}:${selectedEditionId}`}
-            ref={revisitNotes}
-            sessionId={record.id}
-            editionId={selectedEditionId}
-            saved={record.status === 'saved'}
-            parentExpiresAt={record.retentionExpiresAt ?? null}
-            csrfToken={user.csrfToken}
-            onExpired={onExpired}
-            onChanged={() => {
-              const id = record.id;
-              void run(async (current) => {
-                const fresh = await api(`/sessions/${id}`, apiSchemas.SessionRecord);
-                if (current() && selected.current?.id === id) setRecord(fresh);
-              });
-            }}
-          />
-          {reflection && (
-            <details className="deletion-actions reflection-revisions">
-              <summary>Reflection revisions</summary>
-              <div className="revision-controls">
-                <div className="revision-select">
-                  <label htmlFor="reflection-revision">Saved reflection revision</label>
-                  <div className="select-field">
-                    <select
-                      id="reflection-revision"
-                      value={revisionChoice}
-                      onChange={(event) => {
-                        setRevisionChoice(Number(event.target.value));
-                        setRevisionNote(null);
-                        setEraseRevisionChecked(false);
-                      }}
-                      disabled={busy}
-                    >
-                      {Array.from({ length: reflection.revision }, (_, i) => i + 1).map((value) => (
-                        <option key={value} value={value}>
-                          Revision {value}
-                          {value === reflection.revision ? ' (current)' : ''}
-                        </option>
-                      ))}
-                    </select>
+              ) : (
+                <>
+                  <div className="save-summary">
+                    <Icon name="clock" />
+                    <div className="save-copy">
+                      <p>
+                        <strong>Not saved</strong> · Temporary storage lasts 24 hours from creation.
+                      </p>
+                      <p className="muted">{READING_PRODUCT_COPY.saveReading}</p>
+                    </div>
                   </div>
-                </div>
-                <Button type="button" variant="secondary" onClick={viewRevision} disabled={busy}>
-                  <Icon name="eye" />
-                  View revision
-                </Button>
-              </div>
-              {revisionNote && (
-                <div className="notice revision-note">
-                  <p>
-                    Saved revision {revisionNote.revision} · {date(revisionNote.updatedAt)}
-                  </p>
-                  <blockquote>{revisionNote.text}</blockquote>
-                  <p>
-                    Erasing this revision keeps the reading and other authored revisions. Erasing
-                    the current revision removes it from the editor; older revisions remain
-                    available in export.
-                  </p>
-                  <label className="check" htmlFor="check-eraseRevisionChecked">
-                    <Input
-                      id="check-eraseRevisionChecked"
-                      type="checkbox"
-                      checked={eraseRevisionChecked}
-                      onChange={(event) => setEraseRevisionChecked(event.target.checked)}
-                      disabled={busy}
-                    />
-                    Permanently erase this reflection revision
-                  </label>
-                  <Button
-                    type="button"
-                    variant="danger"
-                    disabled={busy || !eraseRevisionChecked}
-                    onClick={eraseRevision}
-                  >
-                    Erase revision {revisionNote.revision}
+                  <Button id="save-reading" type="button" onClick={save} disabled={busy}>
+                    <Icon name="bookmark" />
+                    Save reading
                   </Button>
+                </>
+              )}
+            </div>
+            {!reading && deletionEntry}
+            <ReflectionCard
+              id="personal-reflection"
+              tabIndex={-1}
+              className="reflection-editor"
+              aria-label="Personal reflection"
+            >
+              {reflection && !reflectionEditing && (
+                <div className="saved-reflection">
+                  <div className="saved-reflection-heading">
+                    <h2>Your reflection</h2>
+                    <Button
+                      ref={editReflectionTrigger}
+                      variant="text-button"
+                      disabled={busy}
+                      onClick={() => {
+                        setReflectionEditing(true);
+                        requestAnimationFrame(() =>
+                          document.getElementById('reflection-text')?.focus(),
+                        );
+                      }}
+                    >
+                      Edit reflection
+                    </Button>
+                  </div>
+                  <p className="muted">
+                    Saved {date(reflection.updatedAt)} · {stanceLabels[reflection.stance]}
+                  </p>
+                  <p className="saved-reflection-text">{reflection.text}</p>
                 </div>
               )}
-            </details>
-          )}
-          {revisionReceipt && (
-            <DeletionReceiptPanel
-              key={revisionReceipt.proof.receiptId}
-              {...revisionReceipt}
-              onDismiss={() => setRevisionReceipt(null)}
-            />
-          )}
-          {record.status === 'saved' && (
-            <ContextSelection
-              key={selectedEditionId}
-              mode="manage"
-              family={record}
+              <div className="reflection-edit-controls" hidden={!!reflection && !reflectionEditing}>
+                <h2>{reflection ? 'Edit reflection' : 'Add reflection'}</h2>
+                <p>
+                  This is your own writing. It does not change the reading or request AI generation.
+                </p>
+                {reading?.spreadPhoto && (
+                  <figure className="reflection-spread-reference">
+                    <img
+                      src={reading.spreadPhoto}
+                      alt="Your uploaded spread, for reference while writing"
+                    />
+                    <figcaption>Your uploaded spread</figcaption>
+                  </figure>
+                )}
+                {conflict && (
+                  <div className="notice reflection-conflict">
+                    <p>
+                      Current saved reflection
+                      {latestReflection ? ` (revision ${latestReflection.revision})` : ''}:
+                    </p>
+                    <blockquote>{latestReflection?.text ?? 'No saved reflection.'}</blockquote>
+                    <p>Saved response: {stanceLabels[latestReflection?.stance ?? 'unspecified']}</p>
+                    <div className="actions">
+                      <Button
+                        type="button"
+                        disabled={busy}
+                        onClick={() => {
+                          setReflection(latestReflection);
+                          setLatestReflection(null);
+                          setConflict(false);
+                          setMessage({
+                            tone: 'notice',
+                            text: 'Your draft is ready for the next save.',
+                          });
+                        }}
+                      >
+                        Keep my draft for the next save
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="secondary"
+                        disabled={busy}
+                        onClick={() => {
+                          setReflection(latestReflection);
+                          setDraft(latestReflection?.text ?? '');
+                          setStance(latestReflection?.stance ?? 'unspecified');
+                          setLatestReflection(null);
+                          setConflict(false);
+                          setMessage({
+                            tone: 'notice',
+                            text: 'The saved reflection is now in the editor.',
+                          });
+                        }}
+                      >
+                        Use the saved reflection
+                      </Button>
+                    </div>
+                  </div>
+                )}
+                <ReflectionField
+                  id="reflection-text"
+                  label="Your reflection"
+                  rows={4}
+                  maxLength={10000}
+                  value={draft}
+                  onChange={(event) => setDraft(event.target.value)}
+                  disabled={busy}
+                />
+                <label htmlFor="reflection-stance">How does this feel?</label>
+                <div className="select-field">
+                  <select
+                    id="reflection-stance"
+                    value={stance}
+                    onChange={(event) => setStance(event.target.value as Thought['stance'])}
+                    disabled={busy}
+                  >
+                    {Object.entries(stanceLabels).map(([value, label]) => (
+                      <option key={value} value={value}>
+                        {label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <p className="muted">
+                  Unsaved drafts stay only in memory and are lost when you leave this reading or
+                  reload.
+                </p>
+                {record.status !== 'saved' && (
+                  <p>Saving a reflection also saves this reading until deletion.</p>
+                )}
+                <Button
+                  type="button"
+                  onClick={saveReflection}
+                  disabled={busy || conflict || !reading || !draft.trim()}
+                >
+                  Save reflection
+                </Button>
+                {reflection && (
+                  <Button
+                    variant="text-button"
+                    disabled={busy}
+                    onClick={() => {
+                      const saved = conflict ? latestReflection : reflection;
+                      setReflection(saved);
+                      setDraft(saved?.text ?? '');
+                      setStance(saved?.stance ?? 'unspecified');
+                      setLatestReflection(null);
+                      setConflict(false);
+                      setReflectionEditing(!saved);
+                      requestAnimationFrame(() =>
+                        (saved
+                          ? editReflectionTrigger.current
+                          : document.getElementById('reflection-text')
+                        )?.focus(),
+                      );
+                    }}
+                  >
+                    Cancel editing
+                  </Button>
+                )}
+              </div>
+            </ReflectionCard>
+            <RevisitNotes
+              key={`${user.subjectId}:${record.id}:${selectedEditionId}`}
+              ref={revisitNotes}
+              sessionId={record.id}
               editionId={selectedEditionId}
+              saved={record.status === 'saved'}
+              parentExpiresAt={record.retentionExpiresAt ?? null}
               csrfToken={user.csrfToken}
               onExpired={onExpired}
+              onChanged={() => {
+                const id = record.id;
+                void run(async (current) => {
+                  const fresh = await api(`/sessions/${id}`, apiSchemas.SessionRecord);
+                  if (current() && selected.current?.id === id) setRecord(fresh);
+                });
+              }}
             />
-          )}
-          {imported?.record.parentIdentity && (
-            <div className="deletion-actions reading-deletion">
-              <Button
-                ref={importedDeleteTrigger}
-                variant="text-button"
-                disabled={busy}
-                onClick={() => confirmReadingDeletion('imported-edition')}
-              >
-                Delete this imported edition
-              </Button>
-            </div>
-          )}
+            {reflection && (
+              <details className="deletion-actions reflection-revisions">
+                <summary>Reflection revisions</summary>
+                <div className="revision-controls">
+                  <div className="revision-select">
+                    <label htmlFor="reflection-revision">Saved reflection revision</label>
+                    <div className="select-field">
+                      <select
+                        id="reflection-revision"
+                        value={revisionChoice}
+                        onChange={(event) => {
+                          setRevisionChoice(Number(event.target.value));
+                          setRevisionNote(null);
+                          setEraseRevisionChecked(false);
+                        }}
+                        disabled={busy}
+                      >
+                        {Array.from({ length: reflection.revision }, (_, i) => i + 1).map(
+                          (value) => (
+                            <option key={value} value={value}>
+                              Revision {value}
+                              {value === reflection.revision ? ' (current)' : ''}
+                            </option>
+                          ),
+                        )}
+                      </select>
+                    </div>
+                  </div>
+                  <Button type="button" variant="secondary" onClick={viewRevision} disabled={busy}>
+                    <Icon name="eye" />
+                    View revision
+                  </Button>
+                </div>
+                {revisionNote && (
+                  <div className="notice revision-note">
+                    <p>
+                      Saved revision {revisionNote.revision} · {date(revisionNote.updatedAt)}
+                    </p>
+                    <blockquote>{revisionNote.text}</blockquote>
+                    <p>
+                      Erasing this revision keeps the reading and other authored revisions. Erasing
+                      the current revision removes it from the editor; older revisions remain
+                      available in export.
+                    </p>
+                    <label className="check" htmlFor="check-eraseRevisionChecked">
+                      <Input
+                        id="check-eraseRevisionChecked"
+                        type="checkbox"
+                        checked={eraseRevisionChecked}
+                        onChange={(event) => setEraseRevisionChecked(event.target.checked)}
+                        disabled={busy}
+                      />
+                      Permanently erase this reflection revision
+                    </label>
+                    <Button
+                      type="button"
+                      variant="danger"
+                      disabled={busy || !eraseRevisionChecked}
+                      onClick={eraseRevision}
+                    >
+                      Erase revision {revisionNote.revision}
+                    </Button>
+                  </div>
+                )}
+              </details>
+            )}
+            {revisionReceipt && (
+              <DeletionReceiptPanel
+                key={revisionReceipt.proof.receiptId}
+                {...revisionReceipt}
+                onDismiss={() => setRevisionReceipt(null)}
+              />
+            )}
+            {record.status === 'saved' && (
+              <ContextSelection
+                key={selectedEditionId}
+                mode="manage"
+                family={record}
+                editionId={selectedEditionId}
+                csrfToken={user.csrfToken}
+                onExpired={onExpired}
+              />
+            )}
+            {imported?.record.parentIdentity && (
+              <div className="deletion-actions reading-deletion">
+                <Button
+                  ref={importedDeleteTrigger}
+                  variant="text-button"
+                  disabled={busy}
+                  onClick={() => confirmReadingDeletion('imported-edition')}
+                >
+                  Delete this imported edition
+                </Button>
+              </div>
+            )}
+          </aside>
         </section>
       )}
     </section>

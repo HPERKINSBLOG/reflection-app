@@ -208,7 +208,6 @@ export async function continuityJourneyStates(
   const follow = page.getByRole('link', { name: 'Follow up on this edition', exact: true });
   const target = await follow.getAttribute('href');
   if (!target) throw new Error('Missing saved parent link');
-  const family = target.split('/')[2]!;
   await follow.focus();
   await expect(follow).toBeFocused();
   await page.keyboard.press('Enter');
@@ -220,14 +219,11 @@ export async function continuityJourneyStates(
   await expect(page.getByText('No excerpts selected.', { exact: true })).toBeVisible();
   await capture('follow-up-compose');
   await page.getByRole('button', { name: 'Choose excerpts', exact: true }).click();
-  await page.getByLabel('Saved reading', { exact: true }).selectOption(family);
-  const sources = page.getByLabel('Source', { exact: true });
-  const questionOption = sources.locator('option').filter({ hasText: 'Your saved question' });
-  await expect(questionOption).toHaveCount(1);
-  await sources.selectOption({ value: (await questionOption.getAttribute('value'))! });
+  const chooser = page.getByRole('region', { name: 'Selected context', exact: true });
+  await expect(chooser.getByRole('heading', { name: parentQuestion!, exact: true })).toBeVisible();
+  await chooser.getByRole('radio', { name: /Your saved question/ }).check();
   await page.getByRole('button', { name: 'Allow this source', exact: true }).click();
   await page.getByRole('button', { name: 'Use whole passage', exact: true }).click();
-  await page.getByRole('button', { name: 'Add excerpt', exact: true }).click();
   await page.getByRole('button', { name: 'Review selected excerpts', exact: true }).click();
   const review = page.getByRole('region', { name: 'Review selected excerpts' });
   await expect(review.getByRole('heading')).toBeFocused();
@@ -238,6 +234,10 @@ export async function continuityJourneyStates(
   await page.keyboard.press('Space');
   await expect(check).toBeChecked();
   await capture('selected-context-review');
+  await page.getByRole('button', { name: 'Review follow-up', exact: true }).click();
+  await expect(page.getByRole('region', { name: 'Review follow-up', exact: true })).toContainText(
+    question,
+  );
   const submit = page.getByRole('button', { name: 'Start follow-up', exact: true });
   await expect(submit).toBeEnabled();
   await submit.focus();

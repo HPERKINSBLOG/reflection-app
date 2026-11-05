@@ -161,7 +161,11 @@ for (const width of [320, 390, 768, 1280]) {
         accepted.getByRole('heading', { name: longQuestion, exact: true }),
       ).toBeVisible();
       await capture('reading-photo');
-      const original = await accepted.textContent();
+      // Saving adds a follow-up action; compare the complete fixed edition separately.
+      const acceptedContent = accepted.locator(':scope > :not(.reading-header)');
+      const original = await acceptedContent.allTextContents();
+      const acceptedHeader = accepted.locator('.reading-title > :not(.follow-up-link)');
+      const originalHeader = await acceptedHeader.allTextContents();
       const requestId = page.url().split('/').at(-1)!;
       const status = apiSchemas.RequestStatus.parse(
         await page.request.get(`/api/v1/requests/${requestId}`).then((response) => response.json()),
@@ -192,10 +196,20 @@ for (const width of [320, 390, 768, 1280]) {
       await page
         .getByLabel('Your reflection', { exact: true })
         .fill('Synthetic writing kept for a later return.');
+      await page.getByLabel('How does this feel?', { exact: true }).selectOption('unsure');
       await page.getByRole('button', { name: 'Save reflection', exact: true }).click();
+      const savedReflection = page.getByRole('region', {
+        name: 'Personal reflection',
+        exact: true,
+      });
       await expect(
-        page.getByRole('heading', { name: 'Edit reflection', exact: true }),
+        savedReflection.getByRole('heading', { name: 'Your reflection', exact: true }),
       ).toBeVisible();
+      await expect(savedReflection.locator('.saved-reflection-text')).toHaveText(
+        'Synthetic writing kept for a later return.',
+      );
+      await expect(savedReflection.locator('.saved-reflection-text')).toBeVisible();
+      await expect(savedReflection.locator('.saved-reflection')).toContainText('Unsure');
       await capture('reflection');
       await noteJourneyStates(page, capture);
       await page.getByRole('button', { name: 'Saved readings', exact: true }).click();
@@ -204,10 +218,23 @@ for (const width of [320, 390, 768, 1280]) {
       ).toBeVisible();
       await capture('saved-populated');
       await page.getByRole('button', { name: longQuestion, exact: true }).click();
-      await expect(accepted).toHaveText(original!);
-      await expect(page.getByLabel('Your reflection', { exact: true })).toHaveValue(
+      await expect(acceptedContent).toHaveText(original);
+      await expect(acceptedHeader).toHaveText(originalHeader);
+      await expect(
+        accepted.getByRole('heading', { name: longQuestion, exact: true }),
+      ).toBeVisible();
+      await expect(savedReflection.locator('.saved-reflection-text')).toHaveText(
         'Synthetic writing kept for a later return.',
       );
+      await expect(savedReflection.locator('.saved-reflection-text')).toBeVisible();
+      await expect(savedReflection.locator('.saved-reflection')).toContainText('Unsure');
+      expect(
+        apiSchemas.Reading.parse(
+          await page.request
+            .get(`/api/v1/readings/${status.editionId}`)
+            .then((response) => response.json()),
+        ),
+      ).toEqual(reading);
 
       await continuityJourneyStates(page, capture);
 

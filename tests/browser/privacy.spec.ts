@@ -18,6 +18,7 @@ test('erase an old reflection revision with consent off while keeping current te
     .fill('Synthetic old reflection to erase');
   await page.getByRole('button', { name: 'Save reflection', exact: true }).click();
   await expect(page.getByText('Reflection saved.', { exact: true })).toBeVisible();
+  await page.getByRole('button', { name: 'Edit reflection', exact: true }).click();
   await page
     .getByLabel('Your reflection', { exact: true })
     .fill('Synthetic current reflection to retain');
@@ -30,6 +31,11 @@ test('erase an old reflection revision with consent off while keeping current te
     page.getByRole('heading', { name: 'AI readings are off', exact: true }),
   ).toBeVisible();
   await backToReadings(page);
+  await expect(page.locator('.saved-reflection-text')).toHaveText(
+    'Synthetic current reflection to retain',
+  );
+  await expect(page.locator('.saved-reflection-text')).toBeVisible();
+  await page.getByRole('button', { name: 'Edit reflection', exact: true }).click();
   await expect(page.getByLabel('Your reflection', { exact: true })).toHaveValue(
     'Synthetic current reflection to retain',
   );

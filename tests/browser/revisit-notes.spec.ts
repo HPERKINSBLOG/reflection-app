@@ -736,7 +736,10 @@ for (const outcome of [
     const noteDraft = 'Synthetic unsaved revisit draft must survive reflection deletion.';
     await noteEditor.fill(noteDraft);
     const reflectionDraft = 'Synthetic unsaved reflection to reconcile after deletion.';
-    if (outcome === 'remaining reflection') await reflectionEditor.fill(reflectionDraft);
+    if (outcome === 'remaining reflection') {
+      await page.getByRole('button', { name: 'Edit reflection', exact: true }).click();
+      await reflectionEditor.fill(reflectionDraft);
+    }
     let deleted = false;
     const fetched: string[] = [];
     page.on('request', (request) => {
@@ -947,6 +950,8 @@ test('older request and latest history keep owned edition reflections across mat
           await expect(editor).toHaveValue(matching ? originalReflection.text : '');
           await expect(page).toHaveURL(originalUrl);
           const draft = `Synthetic ${destination} ${matching ? 'matching' : 'new'} edition-specific draft.`;
+          if (matching)
+            await page.getByRole('button', { name: 'Edit reflection', exact: true }).click();
           await editor.fill(draft);
           const refreshed = page.waitForResponse((response) =>
             response.url().endsWith(`/api/v1/reflections/${other.id}`),

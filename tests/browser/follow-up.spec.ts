@@ -26,6 +26,8 @@ test('follow-ups keep their exact parents, questions and saved family across rel
       starts.push(request.postDataJSON());
   });
   await compose(page, 'What changed after a week?');
+  await page.getByRole('button', { name: 'Review follow-up', exact: true }).click();
+  await expect(page.getByRole('region', { name: 'Review follow-up', exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'Start follow-up', exact: true }).click();
   await expect(
     page
@@ -38,6 +40,8 @@ test('follow-ups keep their exact parents, questions and saved family across rel
     parentEditionId: saved.reading.editionId,
   });
   await compose(page, 'What shall I make room for now?');
+  await page.getByRole('button', { name: 'Review follow-up', exact: true }).click();
+  await expect(page.getByRole('region', { name: 'Review follow-up', exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'Start follow-up', exact: true }).click();
   await expect(
     page
@@ -118,6 +122,8 @@ test('concurrent family deletion returns to the follow-up draft and reconnect ne
   page.on('request', (request) => {
     if (request.method() === 'POST' && request.url().endsWith('/requests')) posts++;
   });
+  await page.getByRole('button', { name: 'Review follow-up', exact: true }).click();
+  await expect(page.getByRole('region', { name: 'Review follow-up', exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'Start follow-up', exact: true }).click();
   await expect(page.getByLabel('Your follow-up question', { exact: true })).toHaveValue(
     'What changed when I tried a shorter practice?',
