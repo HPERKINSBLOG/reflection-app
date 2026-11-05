@@ -187,11 +187,23 @@ export class ReadingRecords {
     }
     return result;
   }
-  async history(session: Session, status = 'saved', limit = 20, cursor: string | null = null) {
-    if (!['open', 'saved'].includes(status) || !Number.isInteger(limit) || limit < 1 || limit > 50)
+  async history(
+    session: Session,
+    status = 'saved',
+    limit = 20,
+    cursor: string | null = null,
+    method = 'all',
+  ) {
+    if (
+      !['open', 'saved'].includes(status) ||
+      !['all', 'tarot', 'astrology', 'imported'].includes(method) ||
+      !Number.isInteger(limit) ||
+      limit < 1 ||
+      limit > 50
+    )
       throw new RecordError(400, 'BAD_INPUT');
     const account = await this.base.account(session),
-      scope = ['history', status, limit];
+      scope = ['history', status, limit, method];
     const point = cursor
       ? await this.base.parseCursor(
           session,
@@ -202,13 +214,19 @@ export class ReadingRecords {
       : null;
     const rows = await q(
       this.base.db,
-      `SELECT s.*, EXISTS(SELECT 1 FROM reading_editions e WHERE e.owner_id=s.owner_id AND e.session_id=s.id AND e.mode='legacy') AS imported, (SELECT id FROM reading_editions WHERE owner_id=s.owner_id AND session_id=s.id AND status!='deleted' ORDER BY edition_number DESC LIMIT 1) AS edition_id, (SELECT id FROM generation_requests WHERE owner_id=s.owner_id AND session_id=s.id ORDER BY created_at DESC,id DESC LIMIT 1) AS request_id FROM reading_sessions s WHERE s.owner_id=? AND s.status=? AND ${availableSession}${point ? ' AND (s.created_at<? OR (s.created_at=? AND s.id<?))' : ''} ORDER BY s.created_at DESC,s.id DESC LIMIT ?`,
+      `SELECT s.*, EXISTS(SELECT 1 FROM reading_editions e WHERE e.owner_id=s.owner_id AND e.session_id=s.id AND e.mode='legacy') AS imported, (SELECT id FROM reading_editions WHERE owner_id=s.owner_id AND session_id=s.id AND status!='deleted' ORDER BY edition_number DESC LIMIT 1) AS edition_id, (SELECT id FROM generation_requests WHERE owner_id=s.owner_id AND session_id=s.id ORDER BY created_at DESC,id DESC LIMIT 1) AS request_id FROM reading_sessions s WHERE s.owner_id=? AND s.status=? AND ${availableSession}${method === 'all' ? '' : ' AND s.method=?'}${point ? ' AND (s.created_at<? OR (s.created_at=? AND s.id<?))' : ''} ORDER BY s.created_at DESC,s.id DESC LIMIT ?`,
       session.subjectId,
       status,
+      ...(method === 'all' ? [] : [method]),
       ...(point ? [point.at, point.at, point.id] : []),
       limit + 1,
     ).all<
-      SessionRow & { edition_id: string | null; request_id: string | null; imported: number }
+      SessionRow & {
+        method: 'tarot' | 'astrology' | 'imported';
+        edition_id: string | null;
+        request_id: string | null;
+        imported: number;
+      }
     >();
     const items = [];
     for (const row of rows.results.slice(0, limit)) {
@@ -220,6 +238,7 @@ export class ReadingRecords {
       }
       items.push({
         id: row.id,
+        method: row.method,
         revision: row.revision,
         questionPreview: question === null ? null : preview,
         questionTruncated: question !== null && question.length > preview.length,

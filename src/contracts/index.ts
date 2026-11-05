@@ -895,6 +895,7 @@ export const SessionRecord = z.strictObject({
 });
 export const HistoryItem = z.strictObject({
   id: Id,
+  method: z.enum(['tarot', 'astrology', 'imported']),
   revision: Revision,
   questionPreview: z.string().max(500).nullable(),
   questionTruncated: z.boolean(),

@@ -267,6 +267,7 @@ export async function readingRoute(
           url.searchParams.get('status') ?? 'saved',
           Number(url.searchParams.get('limit') ?? 20),
           url.searchParams.get('cursor'),
+          url.searchParams.get('method') ?? 'all',
         ),
       );
     const sessionMatch = match(/^\/sessions\/([^/]+)$/);

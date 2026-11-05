@@ -275,7 +275,7 @@ for (const navigation of ['link', 'Back'] as const) {
     const question = page.getByLabel('Your question', { exact: true });
     await question.fill('Synthetic question hidden behind saved readings');
     await page.getByRole('button', { name: 'Saved readings', exact: true }).click();
-    await expect(page.getByRole('heading', { name: 'Saved readings', exact: true })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Your journal', exact: true })).toBeVisible();
     const messages: string[] = [];
     let discard = false;
     page.on('dialog', async (dialog) => {
@@ -291,11 +291,11 @@ for (const navigation of ['link', 'Back'] as const) {
       .poll(() => messages)
       .toEqual(['Discard your unsaved question? Choose Cancel to stay and keep editing.']);
     await expect(page).toHaveURL('http://localhost:8787/');
-    await expect(page.getByRole('heading', { name: 'Saved readings', exact: true })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Your journal', exact: true })).toBeVisible();
     await page.getByRole('button', { name: 'New reading', exact: true }).click();
     await expect(question).toHaveValue('Synthetic question hidden behind saved readings');
     await page.getByRole('button', { name: 'Saved readings', exact: true }).click();
-    await expect(page.getByRole('heading', { name: 'Saved readings', exact: true })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Your journal', exact: true })).toBeVisible();
     discard = true;
     await visitAccount();
     await expect(page.getByRole('heading', { name: 'Your account', exact: true })).toBeVisible();

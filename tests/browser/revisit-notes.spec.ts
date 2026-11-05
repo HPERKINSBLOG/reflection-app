@@ -678,7 +678,7 @@ test('parent deletion during reading fetch clears a workspace with no reflection
     'CONTENT_UNAVAILABLE',
   );
   await expect(page).toHaveURL('http://localhost:8787/');
-  await expect(page.getByRole('heading', { name: 'Saved readings', exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Your journal', exact: true })).toBeVisible();
   await expect(page.getByTestId('accepted-reading')).toHaveCount(0);
   await expect(editor).toHaveCount(0);
   expect((await page.request.get(sessionPath)).status()).toBe(410);
@@ -787,7 +787,7 @@ for (const outcome of [
     if (outcome === 'deleted parent') {
       await expect(page).toHaveURL('http://localhost:8787/');
       await expect(
-        page.getByRole('heading', { name: 'Saved readings', exact: true }),
+        page.getByRole('heading', { name: 'Your journal', exact: true }),
       ).toBeVisible();
       await expect(page.getByTestId('accepted-reading')).toHaveCount(0);
       await expect(noteEditor).toHaveCount(0);

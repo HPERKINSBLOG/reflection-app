@@ -93,7 +93,7 @@ test('follow-ups keep their exact parents, questions and saved family across rel
       .first(),
   ).toBeVisible();
   await page.getByRole('button', { name: 'Delete permanently', exact: true }).click();
-  await expect(page.getByRole('heading', { name: 'Saved readings', exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Your journal', exact: true })).toBeVisible();
   for (const edition of third.session.editionIds) {
     const response = await page.request.get(`/api/v1/readings/${edition}`);
     expect([404, 410]).toContain(response.status());

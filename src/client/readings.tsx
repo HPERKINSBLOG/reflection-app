@@ -27,6 +27,7 @@ import {
   type Reflection,
   type PatternReadingV1,
 } from '../contracts/index.ts';
+import { Journal, type JournalMethod } from './journal.tsx';
 import { PatternReading } from './astrology/pattern-reading.tsx';
 import { READING_PRODUCT_COPY, SPREAD_PHOTO_COPY } from '../contracts/product-copy.ts';
 import { api, ApiFailure } from './api.ts';
@@ -196,6 +197,8 @@ export function ReadingWorkspace({
   const historyHeading = useRef<HTMLHeadingElement>(null);
   const focusHistoryOnCommit = useRef<string | null>(null);
   const [history, setHistory] = useState<History | null>(null);
+  const [journalMethod, setJournalMethod] = useState<JournalMethod>('all');
+  const journalFilter = useRef<JournalMethod>('all');
   const [historyRetry, setHistoryRetry] = useState<{ cursor: string | null } | null>(null);
   useLayoutEffect(() => {
     if (mode === 'history' && focusHistoryOnCommit.current) {
@@ -420,11 +423,15 @@ export function ReadingWorkspace({
     }
     return view;
   };
-  const loadHistory = async (current: Current, cursor: string | null = null) => {
+  const loadHistory = async (
+    current: Current,
+    cursor: string | null = null,
+    method = journalFilter.current,
+  ) => {
     setHistoryRetry(null);
     try {
       const result = await api(
-        `/sessions?status=saved${cursor ? `&cursor=${encodeURIComponent(cursor)}` : ''}`,
+        `/sessions?status=saved&method=${method}${cursor ? `&cursor=${encodeURIComponent(cursor)}` : ''}`,
         apiSchemas.HistoryPage,
       );
       if (!current()) return;
@@ -728,9 +735,9 @@ export function ReadingWorkspace({
       });
   };
   const saveReflection = () => {
-    if (record && reading && !conflict)
+    if (record && selectedEditionId && !conflict)
       void run(async (current) => {
-        const body = { text: draft, stance, editionId: reading.editionId };
+        const body = { text: draft, stance, editionId: selectedEditionId };
         try {
           const result = await api(
             reflection ? `/reflections/${reflection.id}` : `/sessions/${record.id}/reflections`,
@@ -1036,16 +1043,23 @@ export function ReadingWorkspace({
         />
       )}
       {mode === 'history' && (
-        <section className="history-section" aria-label="Saved reading history">
-          <h2
-            id="saved-readings-heading"
-            ref={historyHeading}
-            tabIndex={-1}
-            className="title-section"
-          >
-            Saved readings
-          </h2>
-          <p className="muted">Opening one does not start a new reading.</p>
+        <Journal
+          history={history}
+          method={journalMethod}
+          busy={busy}
+          loading={loadingFirstPage}
+          failed={!!historyRetry}
+          headingRef={historyHeading}
+          onMethod={(method) => {
+            journalFilter.current = method;
+            setJournalMethod(method);
+            setHistory(null);
+            void run((current) => loadHistory(current, null, method));
+          }}
+          onOpen={(id) => void run((current) => open(id, current, false, false, true, 'latest'))}
+          onMore={() => void run((current) => loadHistory(current, history?.nextCursor ?? null))}
+          onRetry={() => void run((current) => loadHistory(current, historyRetry?.cursor ?? null))}
+        >
           {readingDeletionReceipt && (
             <DeletionReceiptPanel
               key={readingDeletionReceipt.proof.receiptId}
@@ -1060,65 +1074,9 @@ export function ReadingWorkspace({
               onDismiss={() => setReadingDeletionReceipt(null)}
             />
           )}
-          {loadingFirstPage && <p role="status">Loading saved readings…</p>}
-          {historyRetry && (
-            <>
-              <Notice
-                message={{ tone: 'error', text: 'Your saved readings could not be loaded.' }}
-              />
-              <Button
-                variant="secondary"
-                disabled={busy}
-                onClick={() => void run((current) => loadHistory(current, historyRetry.cursor))}
-              >
-                Retry loading saved readings
-              </Button>
-            </>
-          )}
-          {history?.items.length === 0 && !historyRetry && !busy && (
-            <div className="empty-history">
-              <Art name="study-possibility" className="empty-history-art" />
-              <p>No saved readings yet.</p>
-            </div>
-          )}
-          {history && history.items.length > 0 && (
-            <ol className="reading-history">
-              {history.items.map((item) => (
-                <li key={item.id}>
-                  <div className="history-copy">
-                    <time dateTime={item.createdAt}>{date(item.createdAt)}</time>
-                    <Button
-                      type="button"
-                      className="history-link"
-                      id={`saved-reading-${item.id}`}
-                      disabled={busy}
-                      onClick={() =>
-                        void run((current) => open(item.id, current, false, false, true, 'latest'))
-                      }
-                    >
-                      <span>
-                        {item.questionPreview ?? 'Saved reading'}
-                        {item.imported && <small> · Imported reading</small>}
-                      </span>
-                      <Icon name="chevron" />
-                    </Button>
-                  </div>
-                </li>
-              ))}
-            </ol>
-          )}
-          {history?.nextCursor && !historyRetry && (
-            <Button
-              type="button"
-              variant="secondary"
-              disabled={busy}
-              onClick={() => void run((current) => loadHistory(current, history.nextCursor))}
-            >
-              Load more readings
-            </Button>
-          )}
-        </section>
+        </Journal>
       )}
+
       {mode === 'history' && request && (
         <Button
           type="button"
@@ -1501,7 +1459,7 @@ export function ReadingWorkspace({
       )}
       {mode === 'reading' && record && selectedEditionId && (
         <section
-          className={`reading-detail${reading ? ' reading-detail-native' : ''}`}
+          className={`reading-detail${reading ? ' reading-detail-native' : pattern ? ' reading-detail-pattern' : ''}`}
           aria-label="Reading detail"
           hidden={!!deletionTarget}
         >
@@ -1880,7 +1838,7 @@ export function ReadingWorkspace({
                 <Button
                   type="button"
                   onClick={saveReflection}
-                  disabled={busy || conflict || !reading || !draft.trim()}
+                  disabled={busy || conflict || !selectedEditionId || !draft.trim()}
                 >
                   Save reflection
                 </Button>

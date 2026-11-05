@@ -214,7 +214,7 @@ for (const width of [320, 390, 768, 1280]) {
       await noteJourneyStates(page, capture);
       await page.getByRole('button', { name: 'Saved readings', exact: true }).click();
       await expect(
-        page.getByRole('heading', { name: 'Saved readings', exact: true }),
+        page.getByRole('heading', { name: 'Your journal', exact: true }),
       ).toBeVisible();
       await capture('saved-populated');
       await page.getByRole('button', { name: longQuestion, exact: true }).click();

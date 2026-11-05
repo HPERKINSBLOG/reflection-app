@@ -59,6 +59,6 @@ test('keyboard reading deletion keeps focus through confirmation, cancellation a
   await page.keyboard.press('Tab');
   await expect(page.getByRole('button', { name: 'Delete permanently', exact: true })).toBeFocused();
   await page.keyboard.press('Enter');
-  await expect(page.getByRole('heading', { name: 'Saved readings', exact: true })).toBeFocused();
+  await expect(page.getByRole('heading', { name: 'Your journal', exact: true })).toBeFocused();
   await expect(page.getByRole('heading', { name: 'Reading deleted', exact: true })).toBeVisible();
 });

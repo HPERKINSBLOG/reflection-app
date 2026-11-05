@@ -36,7 +36,7 @@ test('a password account returns to its saved reading by username, email and kit
   await signOut(page);
   await page.setViewportSize({ width: 390, height: 844 });
   await signIn(page, 'River@Example.ORG');
-  await expect(page.getByRole('heading', { name: 'Saved readings', exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Your journal', exact: true })).toBeVisible();
   await signOut(page);
   await page.getByRole('link', { name: 'Recover with your saved kit' }).click();
   await page.getByLabel('Recovery handle').fill(kit.recoveryHandle);

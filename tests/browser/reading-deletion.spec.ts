@@ -206,7 +206,7 @@ test('pending deletion, unavailable status and missing backup expiry keep the re
   await expect(page.getByRole('heading', { name: 'Deletion not confirmed' })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Retry deletion', exact: true })).toHaveCount(0);
   await check.click();
-  await expect(page.getByRole('heading', { name: 'Saved readings', exact: true })).toBeFocused();
+  await expect(page.getByRole('heading', { name: 'Your journal', exact: true })).toBeFocused();
   await expect(page.getByRole('heading', { name: 'Reading deleted', exact: true })).toBeVisible();
   await expect(page.getByText(/A backup expiry date has not been confirmed yet/)).toBeVisible();
   const statusResponse = page.waitForResponse('**/api/v1/deletions/*');

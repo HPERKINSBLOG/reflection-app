@@ -217,7 +217,7 @@ test('a delayed status cannot reopen a view after leaving progress; explicit res
   await ready;
   await page.getByRole('button', { name: 'Saved readings', exact: true }).click();
   release();
-  await expect(page.getByRole('heading', { name: 'Saved readings', exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Your journal', exact: true })).toBeVisible();
   await expect(page.getByTestId('accepted-reading')).toHaveCount(0);
   await page.getByRole('button', { name: 'Resume reading request' }).click();
   await expect(page.getByTestId('accepted-reading')).toBeVisible();
@@ -368,7 +368,7 @@ for (const navigation of ['link', 'Back'] as const) {
       if (navigation === 'link') await backToReadings(page);
       else await page.goBack();
       await expect(
-        page.getByRole('heading', { name: 'Saved readings', exact: true }),
+        page.getByRole('heading', { name: 'Your journal', exact: true }),
       ).toBeVisible();
     }
     await expect(
@@ -433,7 +433,7 @@ test('account navigation forgets its retained request after signing out', async 
   await openAccount(page);
   await page.getByRole('button', { name: 'Sign out', exact: true }).click();
   await page.getByRole('button', { name: 'Sign in with a passkey', exact: true }).click();
-  await expect(page.getByRole('heading', { name: 'Saved readings', exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Your journal', exact: true })).toBeVisible();
   await expect(
     page.getByRole('button', { name: 'Resume reading request', exact: true }),
   ).toHaveCount(0);
@@ -490,7 +490,7 @@ test('revoking AI during progress keeps the stopped request and history availabl
   ).toBeVisible();
   await expect(page.getByRole('button', { name: 'New reading', exact: true })).toBeDisabled();
   await page.getByRole('button', { name: 'Saved readings', exact: true }).click();
-  await expect(page.getByRole('heading', { name: 'Saved readings', exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Your journal', exact: true })).toBeVisible();
 });
 
 for (const [state, errorCode, copy] of [
@@ -597,7 +597,7 @@ for (const boundary of ['status', 'reading'] as const) {
       await page.goBack();
       await expect(page).toHaveURL('http://localhost:8787/');
       await expect(
-        page.getByRole('heading', { name: 'Saved readings', exact: true }),
+        page.getByRole('heading', { name: 'Your journal', exact: true }),
       ).toBeVisible();
       release();
       await finished;
@@ -635,6 +635,6 @@ test('browser Back keeps a dirty reflection until discard is explicitly confirme
   });
   await page.goBack();
   await expect.poll(() => dialogs).toBe(2);
-  await expect(page.getByRole('heading', { name: 'Saved readings', exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Your journal', exact: true })).toBeVisible();
   await expect(page.getByTestId('accepted-reading')).toHaveCount(0);
 });
