@@ -110,7 +110,10 @@ test('changing themes preserves the in-memory reading draft and field descriptio
 }) => {
   await account(page, '203.0.113.247');
   await enableAi(page);
-  await page.getByRole('button', { name: 'New reading', exact: true }).click();
+  await page
+    .getByRole('navigation', { name: 'Reading actions' })
+    .getByRole('button', { name: 'Tarot', exact: true })
+    .click();
   const question = page.getByLabel('Your question', { exact: true });
   await question.fill('What would make room for another perspective?');
   for (const theme of ['evening', 'paper']) {

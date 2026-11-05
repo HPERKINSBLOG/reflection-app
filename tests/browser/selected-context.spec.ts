@@ -37,7 +37,10 @@ test('only the explicitly reviewed range is confirmed and an edit invalidates th
   page,
 }) => {
   const { saved, note } = await savedNote(page, '198.51.100.201');
-  await page.getByRole('button', { name: 'New reading', exact: true }).click();
+  await page
+    .getByRole('navigation', { name: 'Reading actions' })
+    .getByRole('button', { name: 'Tarot', exact: true })
+    .click();
   await page.getByLabel('Your question', { exact: true }).fill('Which change feels workable?');
   await page.getByLabel('Use English for this reading').check();
   const previews: unknown[] = [];
@@ -198,7 +201,10 @@ test('whole-passage selection stays exact and a changed source cannot reuse its 
   });
   expect(shortened.ok()).toBe(true);
   const sourceNote = apiSchemas.Revisit.parse(await shortened.json());
-  await page.getByRole('button', { name: 'New reading', exact: true }).click();
+  await page
+    .getByRole('navigation', { name: 'Reading actions' })
+    .getByRole('button', { name: 'Tarot', exact: true })
+    .click();
   await page.getByLabel('Your question', { exact: true }).fill('What can remain simple?');
   await page.getByLabel('Use English for this reading').check();
   await chooseNote(page, saved.session.id);

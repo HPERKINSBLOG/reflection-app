@@ -1,6 +1,7 @@
 import type { Ref } from 'react';
 import type { PatternReadingV1 } from '../../contracts/astrology.ts';
 import { TopicChip } from '../design/components.tsx';
+import { timeLabel } from './chart-context.tsx';
 import { date } from '../date.ts';
 
 export function PatternReading({
@@ -12,13 +13,7 @@ export function PatternReading({
 }) {
   const { chapter, basis } = reading;
   const { input, resolved, identity } = basis.calculation;
-  const time = input.birth.time;
-  const certainty =
-    time.certainty === 'exact'
-      ? `Exact · ${time.localTime}`
-      : time.certainty === 'approximate'
-        ? `Approximate · ${time.earliestLocalTime}–${time.latestLocalTime}`
-        : 'Birth time unknown · full local day';
+  const certainty = timeLabel(input.birth);
   return (
     <article className="pattern-snapshot" data-testid="pattern-reading">
       <header>

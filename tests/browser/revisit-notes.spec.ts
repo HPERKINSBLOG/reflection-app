@@ -419,7 +419,7 @@ test('note drafts participate in Account, navigation, Back and reload guards; wi
   await expect(page.getByLabel('Your revisit note', { exact: true })).toHaveValue(
     'Synthetic unsaved note',
   );
-  await page.getByRole('button', { name: 'Saved readings', exact: true }).click();
+  await page.getByRole('button', { name: 'Journal', exact: true }).click();
   await expect(page.getByLabel('Your revisit note', { exact: true })).toBeVisible();
   await page.goBack();
   await expect(page.getByLabel('Your revisit note', { exact: true })).toBeVisible();
@@ -527,7 +527,7 @@ test('late note responses cannot repopulate Account or a different reading', asy
   await page.unroute('**/api/v1/revisits?*');
   await page.getByRole('button', { name: 'Enable AI readings', exact: true }).click();
   await backToReadings(page);
-  await page.getByRole('button', { name: 'Saved readings', exact: true }).click();
+  await page.getByRole('button', { name: 'Journal', exact: true }).click();
   await page.getByRole('button', { name: 'Synthetic dated return', exact: true }).click();
   await expect(page.getByText('Synthetic old private note', { exact: true })).toBeVisible();
   let releaseEdition!: () => void;
@@ -552,7 +552,10 @@ test('late note responses cannot repopulate Account or a different reading', asy
   });
   await page.getByRole('button', { name: 'Refresh notes', exact: true }).click();
   await editionStarted;
-  await page.getByRole('button', { name: 'New reading', exact: true }).click();
+  await page
+    .getByRole('navigation', { name: 'Reading actions' })
+    .getByRole('button', { name: 'Tarot', exact: true })
+    .click();
   await page.getByLabel('Your question', { exact: true }).fill('Synthetic different edition');
   await page.getByLabel('Use English for this reading').check();
   await page.getByRole('button', { name: 'Start reading', exact: true }).click();
@@ -786,9 +789,7 @@ for (const outcome of [
     await missing;
     if (outcome === 'deleted parent') {
       await expect(page).toHaveURL('http://localhost:8787/');
-      await expect(
-        page.getByRole('heading', { name: 'Your journal', exact: true }),
-      ).toBeVisible();
+      await expect(page.getByRole('heading', { name: 'Your journal', exact: true })).toBeVisible();
       await expect(page.getByTestId('accepted-reading')).toHaveCount(0);
       await expect(noteEditor).toHaveCount(0);
       expect((await page.request.get(sessionPath)).status()).toBe(410);
@@ -935,7 +936,7 @@ test('older request and latest history keep owned edition reflections across mat
           );
           if (destination === 'older request') await page.goto(originalUrl);
           else {
-            await page.getByRole('button', { name: 'Saved readings', exact: true }).click();
+            await page.getByRole('button', { name: 'Journal', exact: true }).click();
             await page
               .getByRole('region', { name: 'Saved reading history', exact: true })
               .getByRole('button', { name: 'Synthetic dated return', exact: true })
@@ -1056,7 +1057,7 @@ test('unavailable history never derives its URL from a truncated unrelated reque
               },
         ),
       );
-      await page.getByRole('button', { name: 'Saved readings', exact: true }).click();
+      await page.getByRole('button', { name: 'Journal', exact: true }).click();
       await expect(page).toHaveURL('http://localhost:8787/');
       await page
         .getByRole('region', { name: 'Saved reading history', exact: true })

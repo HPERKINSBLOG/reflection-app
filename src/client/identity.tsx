@@ -1,3 +1,4 @@
+import type { BirthDraft } from '../contracts/astrology.ts';
 import { Button, Input, TextLink } from './design/components.tsx';
 import { type MouseEvent, useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import type { z } from 'zod';
@@ -125,6 +126,7 @@ export function IdentityApp() {
     null,
   );
   const [route, setRoute] = useState(window.location.pathname);
+  const [patternRestore, setPatternRestore] = useState<BirthDraft | null>(null);
   const [readingResume, setReadingResume] = useState<WorkspaceResume | null>(null);
   const readingsPath = readingResume?.path ?? '/';
   const [busy, setBusy] = useState(false),
@@ -173,6 +175,7 @@ export function IdentityApp() {
     setConfirmingPassword(false);
     setCredentials(null);
     setReadingResume(null);
+    setPatternRestore(null);
     setHandle('');
     setCode('');
     setDownloaded(false);
@@ -504,6 +507,9 @@ export function IdentityApp() {
       <header className="site-header">
         <div className="shell-width">
           <Brand />
+          {session && !kit && !grant && !accountPage && (
+            <div id="workspace-navigation" inert={checking || busy} />
+          )}
           <div className="header-tools">
             <ThemeSelect />
             {session && !kit && !grant && (
@@ -560,7 +566,13 @@ export function IdentityApp() {
                 Back to readings
               </TextLink>
             )}
-            <div className="page-title">
+            <div
+              className={
+                session && !kit && !grant && !accountPage
+                  ? 'page-title sr-only workspace-title'
+                  : 'page-title'
+              }
+            >
               <div className="title-copy">
                 {deletionReceipt ? (
                   <h2>Account access</h2>
@@ -934,6 +946,11 @@ export function IdentityApp() {
                       owner={session.subjectId}
                       csrf={session.csrfToken}
                       onExpired={expire}
+                      onRestoreProfile={(birth) => {
+                        setPatternRestore(birth);
+                        setReadingResume(null);
+                        show('/astrology/pattern');
+                      }}
                     />
                     <div className="account-tools">
                       <Button
@@ -1094,6 +1111,8 @@ export function IdentityApp() {
                   <ReadingWorkspace
                     ref={workspace}
                     resume={readingResume}
+                    restoredBirth={patternRestore}
+                    onRestoreConsumed={() => setPatternRestore(null)}
                     live={live}
                     runtimeMode={runtimeMode}
                     connectionRetry={connectionRetry}

@@ -29,7 +29,10 @@ test('keyboard upload, processing, save, reflection, Account and exact return jo
   );
   await page.reload();
   await enableAi(page);
-  await page.getByRole('button', { name: 'New reading', exact: true }).click();
+  await page
+    .getByRole('navigation', { name: 'Reading actions' })
+    .getByRole('button', { name: 'Tarot', exact: true })
+    .click();
   const question = 'Synthetic return to the exact saved reading';
   await page.getByLabel('Your question', { exact: true }).fill(question);
   await page.getByLabel('Use English for this reading').check();
@@ -165,7 +168,7 @@ test('keyboard upload, processing, save, reflection, Account and exact return jo
   );
   await expect(page.locator('.saved-reflection-text')).toBeVisible();
   await expect(page.getByRole('button', { name: 'Edit reflection', exact: true })).toBeVisible();
-  await page.getByRole('button', { name: 'Saved readings', exact: true }).click();
+  await page.getByRole('button', { name: 'Journal', exact: true }).click();
   await page.getByRole('button', { name: question, exact: true }).focus();
   await page.keyboard.press('Enter');
   await expect(accepted.getByRole('heading', { name: question, exact: true })).toBeFocused();

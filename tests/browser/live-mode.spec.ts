@@ -50,8 +50,12 @@ test('failed runtime discovery never describes a possible live call as simulatio
   );
   await page.getByRole('button', { name: 'Create an account with a passkey', exact: true }).click();
   await keepKit(page);
-  await expect(page.getByRole('button', { name: 'Saved readings', exact: true })).toBeEnabled();
-  await expect(page.getByRole('button', { name: 'New reading', exact: true })).toBeDisabled();
+  await expect(page.getByRole('button', { name: 'Journal', exact: true })).toBeEnabled();
+  await expect(
+    page
+      .getByRole('navigation', { name: 'Reading actions' })
+      .getByRole('button', { name: 'Tarot', exact: true }),
+  ).toBeDisabled();
   await openAccount(page);
   await expect(
     page.getByRole('button', { name: 'Enable AI readings', exact: true }),
@@ -96,7 +100,10 @@ for (const mode of ['live-local', 'live-preview', 'production'] as const) {
       page.getByRole('heading', { name: 'AI readings are on', exact: true }),
     ).toBeVisible();
     await backToReadings(page);
-    await page.getByRole('button', { name: 'New reading', exact: true }).click();
+    await page
+      .getByRole('navigation', { name: 'Reading actions' })
+      .getByRole('button', { name: 'Tarot', exact: true })
+      .click();
     await expect(page.getByText(/Starting a reading sends this question to OpenAI/)).toBeVisible();
     const preflight = page.getByRole('complementary', { name: 'Before you start' });
     await expect(preflight).toContainText('sends your attached photo to Meta');
@@ -144,7 +151,10 @@ test('explicit hosted synthetic readiness retains simulation disclosure', async 
     .click();
   await keepKit(page);
   await enableAi(page);
-  await page.getByRole('button', { name: 'New reading', exact: true }).click();
+  await page
+    .getByRole('navigation', { name: 'Reading actions' })
+    .getByRole('button', { name: 'Tarot', exact: true })
+    .click();
   const preflight = page.getByRole('complementary', { name: 'Before you start' });
   await expect(preflight).toContainText('Use synthetic text only.');
   await expect(preflight).toContainText('does not contact an AI provider');
@@ -168,8 +178,12 @@ test('unavailable hosted synthetic generation retains its environment without en
   await page.getByRole('button', { name: 'Create an account with a passkey', exact: true }).click();
   await expect(environment).toBeVisible();
   await keepKit(page);
-  await expect(page.getByRole('button', { name: 'Saved readings', exact: true })).toBeEnabled();
-  await expect(page.getByRole('button', { name: 'New reading', exact: true })).toBeDisabled();
+  await expect(page.getByRole('button', { name: 'Journal', exact: true })).toBeEnabled();
+  await expect(
+    page
+      .getByRole('navigation', { name: 'Reading actions' })
+      .getByRole('button', { name: 'Tarot', exact: true }),
+  ).toBeDisabled();
   await openAccount(page);
   await expect(
     page.getByRole('button', { name: 'Enable AI readings', exact: true }),

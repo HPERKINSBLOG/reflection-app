@@ -110,8 +110,11 @@ test('an offline request checks its receipt before resending and preserves an un
 }) => {
   await account(page, '192.0.2.214');
   const other = await savedReading(page, 'Keep this unrelated reading.');
-  await page.getByRole('button', { name: 'Saved readings', exact: true }).click();
-  await page.getByRole('button', { name: 'New reading', exact: true }).click();
+  await page.getByRole('button', { name: 'Journal', exact: true }).click();
+  await page
+    .getByRole('navigation', { name: 'Reading actions' })
+    .getByRole('button', { name: 'Tarot', exact: true })
+    .click();
   await page.getByLabel('Your question', { exact: true }).fill('Delete only this reading.');
   await page.getByLabel('Use English for this reading').check();
   await page.getByRole('button', { name: 'Start reading', exact: true }).click();

@@ -54,7 +54,10 @@ test('the new-reading form keeps transmission limits without build jargon', asyn
   await account(page, '192.0.2.242');
   await expect(page.getByText(localSimulation, { exact: true })).toHaveCount(0);
   await enableAi(page);
-  await page.getByRole('button', { name: 'New reading', exact: true }).click();
+  await page
+    .getByRole('navigation', { name: 'Reading actions' })
+    .getByRole('button', { name: 'Tarot', exact: true })
+    .click();
   const english = page.getByLabel('Use English for this reading');
   await expect(english).toHaveAttribute('required', '');
   const spread = page.locator('summary', { hasText: 'Use my own spread' });
@@ -94,7 +97,7 @@ test('saved readings are listed by date and question without a decorative thumbn
   });
   await page.getByRole('button', { name: 'Save reading', exact: true }).click();
   await expect(page.getByText('Saved until you delete it.', { exact: true })).toBeVisible();
-  await page.getByRole('button', { name: 'Saved readings', exact: true }).click();
+  await page.getByRole('button', { name: 'Journal', exact: true }).click();
   await expect(
     page.getByText('Opening one does not start a new reading.', { exact: true }),
   ).toBeVisible();

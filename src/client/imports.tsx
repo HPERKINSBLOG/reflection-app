@@ -1,3 +1,4 @@
+import type { BirthDraft } from '../contracts/astrology.ts';
 import { useEffect, useRef, useState } from 'react';
 import type { z } from 'zod';
 import { apiSchemas, Id, ImportSource, ImportChunkDocument } from '../contracts/index.ts';
@@ -325,10 +326,12 @@ export function ImportRecords({
   owner,
   csrf,
   onExpired,
+  onRestoreProfile,
 }: {
   owner: string;
   csrf: string;
   onExpired: () => void;
+  onRestoreProfile: (birth: BirthDraft) => void;
 }) {
   const [open, setOpen] = useState(false),
     heading = useRef<HTMLHeadingElement>(null),
@@ -711,6 +714,21 @@ export function ImportRecords({
           {parsed && (
             <fieldset disabled={busy} id="import-file-records">
               <legend>Records in the file</legend>
+              {parsed.profileCandidates?.map((candidate) => (
+                <section key={candidate.id} className="notice">
+                  <h3>Birth profile in this file</h3>
+                  <p>
+                    {candidate.birth.date} · {candidate.birth.place.label}
+                  </p>
+                  <p>
+                    This profile is not included in reading imports. Review it separately before
+                    explicitly replacing your current birth details.
+                  </p>
+                  <Button variant="secondary" onClick={() => onRestoreProfile(candidate.birth)}>
+                    Review birth profile for restoration
+                  </Button>
+                </section>
+              ))}
               {parsed.errors.map((e) => (
                 <p key={e.pointer}>
                   {e.pointer} · Invalid record ({e.code})

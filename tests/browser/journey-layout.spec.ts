@@ -126,7 +126,10 @@ for (const width of [320, 390, 768, 1280]) {
       await capture('account');
       await page.getByRole('button', { name: 'Enable AI readings', exact: true }).click();
       await page.getByRole('link', { name: 'Back to readings', exact: true }).click();
-      await page.getByRole('button', { name: 'New reading', exact: true }).click();
+      await page
+        .getByRole('navigation', { name: 'Reading actions' })
+        .getByRole('button', { name: 'Tarot', exact: true })
+        .click();
       await page.getByLabel('Your question', { exact: true }).fill(longQuestion);
       await page.getByLabel('Use English for this reading').check();
       await capture('new-empty');
@@ -212,10 +215,8 @@ for (const width of [320, 390, 768, 1280]) {
       await expect(savedReflection.locator('.saved-reflection')).toContainText('Unsure');
       await capture('reflection');
       await noteJourneyStates(page, capture);
-      await page.getByRole('button', { name: 'Saved readings', exact: true }).click();
-      await expect(
-        page.getByRole('heading', { name: 'Your journal', exact: true }),
-      ).toBeVisible();
+      await page.getByRole('button', { name: 'Journal', exact: true }).click();
+      await expect(page.getByRole('heading', { name: 'Your journal', exact: true })).toBeVisible();
       await capture('saved-populated');
       await page.getByRole('button', { name: longQuestion, exact: true }).click();
       await expect(acceptedContent).toHaveText(original);
@@ -255,7 +256,10 @@ for (const width of [320, 390, 768, 1280]) {
       await page.setViewportSize({ width, height: 1000 });
       await importReviewState(page, capture);
       await page.getByRole('link', { name: 'Back to readings', exact: true }).click();
-      await page.getByRole('button', { name: 'New reading', exact: true }).click();
+      await page
+        .getByRole('navigation', { name: 'Reading actions' })
+        .getByRole('button', { name: 'Tarot', exact: true })
+        .click();
       await page.getByLabel('Your question', { exact: true }).fill('Synthetic drawn-card layout');
       await page.getByLabel('Use English for this reading').check();
       await page.getByRole('button', { name: 'Start reading', exact: true }).click();
@@ -318,7 +322,10 @@ test('2x mobile illustration delivery uses transparent variants, not full-size o
     }
     await page.getByRole('button', { name: 'Enable AI readings', exact: true }).click();
     await page.getByRole('link', { name: 'Back to readings', exact: true }).click();
-    await page.getByRole('button', { name: 'New reading', exact: true }).click();
+    await page
+      .getByRole('navigation', { name: 'Reading actions' })
+      .getByRole('button', { name: 'Tarot', exact: true })
+      .click();
     const cards = page.locator('.spread-intro-art');
     await page.getByText('Use my own spread', { exact: true }).click();
     await expect

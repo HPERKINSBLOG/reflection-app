@@ -1,3 +1,6 @@
+import { createPortal } from 'react-dom';
+import { PatternWorkspace, type PatternHandle } from './astrology/pattern.tsx';
+import type { BirthDraft } from '../contracts/astrology.ts';
 import {
   Button,
   Input,
@@ -147,6 +150,8 @@ export interface WorkspaceHandle {
 export function ReadingWorkspace({
   ref,
   resume,
+  restoredBirth,
+  onRestoreConsumed,
   user,
   live = false,
   runtimeMode = null,
@@ -157,6 +162,8 @@ export function ReadingWorkspace({
 }: {
   ref?: Ref<WorkspaceHandle>;
   resume: WorkspaceResume | null;
+  restoredBirth?: BirthDraft | null;
+  onRestoreConsumed?: () => void;
   user: View;
   live?: boolean | null;
   runtimeMode?: string | null;
@@ -174,7 +181,9 @@ export function ReadingWorkspace({
     () => Boolean(requestFromPath()) || Boolean(resume?.request?.pending),
   );
   const [navigationVersion, setNavigationVersion] = useState(0);
-  const [mode, setMode] = useState<'history' | 'new' | 'followup' | 'reading' | 'request'>(() =>
+  const [mode, setMode] = useState<
+    'history' | 'new' | 'followup' | 'reading' | 'request' | 'pattern'
+  >(() =>
     requestFromPath()
       ? 'request'
       : followUpFromPath()
@@ -183,8 +192,11 @@ export function ReadingWorkspace({
           ? 'reading'
           : window.location.pathname === '/new'
             ? 'new'
-            : 'history',
+            : window.location.pathname === '/astrology/pattern'
+              ? 'pattern'
+              : 'history',
   );
+  const patternWorkspace = useRef<PatternHandle>(null);
   const shownPath = useRef(window.location.pathname);
   const resumeTarget = useRef(request?.target ?? null);
   const replacePath = (path: string) => {
@@ -329,6 +341,7 @@ export function ReadingWorkspace({
   const dirtyReflection =
     draft !== (reflection?.text ?? '') || stance !== (reflection?.stance ?? 'unspecified');
   const canLeave = () => {
+    if (mode === 'pattern') return patternWorkspace.current?.confirmLeave() ?? true;
     if (mode === 'followup' && !questionSubmitted && (question.trim() || context.count))
       return window.confirm(
         'Discard your unsaved follow-up? Choose Cancel to stay and keep editing.',
@@ -346,6 +359,7 @@ export function ReadingWorkspace({
   };
   const hasUnsavedWriting = useRef<() => boolean>(() => false);
   hasUnsavedWriting.current = () =>
+    (mode === 'pattern' && Boolean(patternWorkspace.current?.hasUnsavedChanges())) ||
     (mode === 'reading' &&
       (dirtyReflection || Boolean(revisitNotes.current?.hasUnsavedChanges()))) ||
     (!questionSubmitted &&
@@ -571,8 +585,9 @@ export function ReadingWorkspace({
       setEraseRevisionChecked(false);
     }
     setDeletionTarget(null);
+    return note;
   };
-  const run = async (action: (current: Current) => Promise<void>) => {
+  const run = async (action: (current: Current) => Promise<unknown>) => {
     if (inFlight.current) return;
     inFlight.current = true;
     const version = ++epoch.current;
@@ -661,7 +676,9 @@ export function ReadingWorkspace({
           ? 'reading'
           : path === '/new'
             ? 'new'
-            : 'history';
+            : path === '/astrology/pattern'
+              ? 'pattern'
+              : 'history';
     setRequest(restored);
     resumeTarget.current = restored?.target ?? null;
     setRequestPending(Boolean(restored));
@@ -691,7 +708,12 @@ export function ReadingWorkspace({
     alive.current = true;
     loadLocation();
     const focus = () => {
-      if (currentMode.current === 'request' || activeDeletion.current) return;
+      if (
+        currentMode.current === 'request' ||
+        currentMode.current === 'pattern' ||
+        activeDeletion.current
+      )
+        return;
       void runRef.current((current) =>
         currentMode.current === 'reading' && selected.current
           ? openRef.current(selected.current.id, current, true)
@@ -933,6 +955,67 @@ export function ReadingWorkspace({
         Follow up on this edition
       </TextLink>
     ) : null;
+  const workspaceNavigation = (
+    <nav className="reading-navigation" aria-label="Reading actions" hidden={!!deletionTarget}>
+      <Button
+        variant="text-button"
+        aria-current={mode === 'pattern' ? 'page' : undefined}
+        disabled={busy || requestPending}
+        onClick={() => {
+          if (!canLeave()) return;
+          clearReading();
+          setMode('pattern');
+          replacePath('/astrology/pattern');
+          setMessage(null);
+        }}
+      >
+        Astrology
+      </Button>
+      <Button
+        type="button"
+        aria-current={mode === 'new' ? 'page' : undefined}
+        disabled={busy || !user.permission.modelAllowed || requestPending || live === null}
+        onClick={() => {
+          if (!canLeave()) return;
+          // A deliberate new reading is a new intent, even if the question is unchanged.
+          intents.current.delete('start');
+          resetContext();
+          clearReading();
+          setMode('new');
+          setRequest(null);
+          resumeTarget.current = null;
+          setQuestionSubmitted(false);
+          if (mode === 'followup') {
+            setQuestion('');
+            setEnglish(false);
+          }
+          replacePath('/new');
+          setMessage(null);
+        }}
+      >
+        Tarot
+      </Button>
+      <Button
+        type="button"
+        variant="secondary"
+        aria-current={mode === 'history' ? 'page' : undefined}
+        disabled={busy}
+        onClick={() => {
+          if (!canLeave()) return;
+          void run(async (current) => {
+            await loadHistory(current);
+            if (current()) {
+              setMode('history');
+              replacePath('/');
+              clearReading();
+            }
+          });
+        }}
+      >
+        Journal
+      </Button>
+    </nav>
+  );
   return (
     <section className="reading-workspace" aria-label="Your readings" aria-busy={busy}>
       {!deletionTarget && live === null && mode !== 'new' && (
@@ -944,7 +1027,7 @@ export function ReadingWorkspace({
           {connectionRetry}
         </div>
       )}
-      {!deletionTarget && !user.permission.modelAllowed && (
+      {!deletionTarget && mode !== 'pattern' && !pattern && !user.permission.modelAllowed && (
         <p className="notice">
           <Icon name="info" />
           <span>
@@ -957,51 +1040,9 @@ export function ReadingWorkspace({
           </span>
         </p>
       )}
-      <nav className="reading-navigation" aria-label="Reading actions" hidden={!!deletionTarget}>
-        <Button
-          type="button"
-          variant="secondary"
-          aria-current={mode === 'history' ? 'page' : undefined}
-          disabled={busy}
-          onClick={() => {
-            if (!canLeave()) return;
-            void run(async (current) => {
-              await loadHistory(current);
-              if (current()) {
-                setMode('history');
-                replacePath('/');
-                clearReading();
-              }
-            });
-          }}
-        >
-          Saved readings
-        </Button>
-        <Button
-          type="button"
-          aria-current={mode === 'new' ? 'page' : undefined}
-          disabled={busy || !user.permission.modelAllowed || requestPending || live === null}
-          onClick={() => {
-            if (!canLeave()) return;
-            // A deliberate new reading is a new intent, even if the question is unchanged.
-            intents.current.delete('start');
-            resetContext();
-            clearReading();
-            setMode('new');
-            setRequest(null);
-            resumeTarget.current = null;
-            setQuestionSubmitted(false);
-            if (mode === 'followup') {
-              setQuestion('');
-              setEnglish(false);
-            }
-            replacePath('/new');
-            setMessage(null);
-          }}
-        >
-          New reading
-        </Button>
-      </nav>
+      {document.getElementById('workspace-navigation')
+        ? createPortal(workspaceNavigation, document.getElementById('workspace-navigation')!)
+        : workspaceNavigation}
       <Notice message={deletionTarget ? null : message} />
       {busy && !loadingFirstPage && !deletionTarget && (
         <p role="status" className="busy-line">
@@ -1040,6 +1081,54 @@ export function ReadingWorkspace({
             replacePath('/');
             void run((current) => loadHistory(current));
           }}
+        />
+      )}
+      {mode === 'pattern' && (
+        <PatternWorkspace
+          ref={patternWorkspace}
+          csrf={user.csrfToken}
+          enabled={['synthetic-only', 'synthetic-local'].includes(runtimeMode ?? '')}
+          initialBirth={restoredBirth ?? null}
+          {...(onRestoreConsumed ? { onRestoreConsumed } : {})}
+          onExpired={onExpired}
+          onJournal={() => {
+            setMode('history');
+            replacePath('/');
+            void run((current) => loadHistory(current));
+          }}
+          onTarot={(prompt) => {
+            resetContext();
+            clearReading();
+            setQuestion(prompt);
+            setEnglish(false);
+            clearPhoto();
+            setQuestionSubmitted(false);
+            setMode('new');
+            replacePath('/new');
+            setMessage({
+              tone: 'notice',
+              text: 'Only your selected reflection question was carried over. Review it before starting a tarot reading.',
+            });
+          }}
+          onOpen={(saved, keptDraft) =>
+            void run(async (current) => {
+              const note = await open(saved.sessionId, current, false, false, true, {
+                editionId: saved.editionId,
+              });
+              if (!current()) return;
+              replacePath(editionPath(saved.sessionId, saved.editionId));
+              if (keptDraft !== undefined) {
+                setDraft(keptDraft);
+                setLatestReflection(note ?? null);
+                setReflectionEditing(true);
+                setConflict(true);
+                setMessage({
+                  tone: 'notice',
+                  text: 'Your draft is kept. Compare it with the saved reflection, then choose which version to save.',
+                });
+              }
+            })
+          }
         />
       )}
       {mode === 'history' && (

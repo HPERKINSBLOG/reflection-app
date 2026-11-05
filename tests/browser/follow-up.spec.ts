@@ -74,7 +74,11 @@ test('follow-ups keep their exact parents, questions and saved family across rel
       page.getByTestId('accepted-reading').getByRole('heading', { name: title!, exact: true }),
     ).toBeVisible();
     await expect(page.getByText('Saved until you delete it.', { exact: true })).toBeVisible();
-    await expect(page.getByRole('button', { name: 'New reading', exact: true })).toBeDisabled();
+    await expect(
+      page
+        .getByRole('navigation', { name: 'Reading actions' })
+        .getByRole('button', { name: 'Tarot', exact: true }),
+    ).toBeDisabled();
   }
 
   await expect(

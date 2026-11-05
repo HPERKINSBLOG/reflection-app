@@ -84,7 +84,7 @@ test('a signed-in person adds a passkey, removes the old one, and signs out ever
     .poll(() => page.evaluate(async () => Boolean(await caches.match('/api/v1/me'))))
     .toBe(false);
   await page.getByRole('button', { name: 'Sign in with a passkey' }).click();
-  await expect(page.getByRole('heading', { name: 'Your readings' })).toBeVisible();
+  await expect(page.getByRole('region', { name: 'Your readings', exact: true })).toBeVisible();
   await openAccount(page);
   await expect(page.getByRole('list', { name: 'Passkeys' }).getByRole('listitem')).toHaveCount(1);
   expect(faults).toEqual([]);
@@ -102,7 +102,7 @@ test('an ended session clears the workspace and announces signing in again as a 
       body: '{}',
     }),
   );
-  await page.getByRole('button', { name: 'Saved readings', exact: true }).click();
+  await page.getByRole('button', { name: 'Journal', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'A little space to reflect.' })).toBeVisible();
   await expect(page.getByRole('region', { name: 'Your readings' })).toHaveCount(0);
   await expect(
@@ -124,9 +124,13 @@ test('account settings appear only on the account page, never beside the reading
     page.getByRole('button', { name: 'Sign out of all devices', exact: true }),
     page.getByText('Delete account', { exact: true }),
   ];
-  await expect(page.getByRole('button', { name: 'Saved readings', exact: true })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Journal', exact: true })).toBeVisible();
   for (const control of settings) await expect(control).toHaveCount(0);
-  await expect(page.getByRole('button', { name: 'New reading', exact: true })).toBeDisabled();
+  await expect(
+    page
+      .getByRole('navigation', { name: 'Reading actions' })
+      .getByRole('button', { name: 'Tarot', exact: true }),
+  ).toBeDisabled();
   await page.getByRole('link', { name: 'turn on AI readings in your account' }).click();
   await expect(page).toHaveURL('http://localhost:8787/account');
   await expect(page.getByRole('heading', { name: 'Your account' })).toBeFocused();
@@ -146,7 +150,11 @@ test('account settings appear only on the account page, never beside the reading
     'aria-current',
   );
   await expect(page.getByText(/^AI readings are off\./)).toHaveCount(0);
-  await expect(page.getByRole('button', { name: 'New reading', exact: true })).toBeEnabled();
+  await expect(
+    page
+      .getByRole('navigation', { name: 'Reading actions' })
+      .getByRole('button', { name: 'Tarot', exact: true }),
+  ).toBeEnabled();
   for (const control of settings) await expect(control).toHaveCount(0);
 });
 
@@ -170,12 +178,12 @@ test('an unsaved reflection asks before the account page closes it, from the lin
   });
   await page.getByRole('link', { name: 'Account', exact: true }).click();
   await expect.poll(() => messages.length).toBe(1);
-  await expect(page.getByRole('heading', { name: 'Your readings' })).toBeVisible();
+  await expect(page.getByRole('region', { name: 'Your readings', exact: true })).toBeVisible();
   await expect(reflection).toHaveValue('Synthetic unsaved reflection');
   await page.goBack();
   await expect.poll(() => messages.length).toBe(2);
   await expect(page).toHaveURL(url);
-  await expect(page.getByRole('heading', { name: 'Your readings' })).toBeVisible();
+  await expect(page.getByRole('region', { name: 'Your readings', exact: true })).toBeVisible();
   await expect(reflection).toHaveValue('Synthetic unsaved reflection');
   expect(messages.every((text) => text.startsWith('Discard your unsaved reflection?'))).toBe(true);
   discard = true;
@@ -192,7 +200,10 @@ test('an unsaved question asks before the account page and Back to readings retu
 }) => {
   await account(page, '192.0.2.181');
   await enableAi(page);
-  await page.getByRole('button', { name: 'New reading', exact: true }).click();
+  await page
+    .getByRole('navigation', { name: 'Reading actions' })
+    .getByRole('button', { name: 'Tarot', exact: true })
+    .click();
   const question = page.getByLabel('Your question');
   await question.fill('Synthetic question kept from the account page');
   const messages: string[] = [];
@@ -228,7 +239,10 @@ for (const preparation of ['ready', 'preparing'] as const) {
     }
     await account(page, preparation === 'ready' ? '192.0.2.224' : '192.0.2.225');
     await enableAi(page);
-    await page.getByRole('button', { name: 'New reading', exact: true }).click();
+    await page
+      .getByRole('navigation', { name: 'Reading actions' })
+      .getByRole('button', { name: 'Tarot', exact: true })
+      .click();
     await page.getByText('Use my own spread', { exact: true }).click();
     await page.getByLabel('Photo of your spread (optional)').setInputFiles({
       name: 'spread.png',
@@ -271,10 +285,13 @@ for (const navigation of ['link', 'Back'] as const) {
     await enableAi(page);
     await openAccount(page);
     await backToReadings(page);
-    await page.getByRole('button', { name: 'New reading', exact: true }).click();
+    await page
+      .getByRole('navigation', { name: 'Reading actions' })
+      .getByRole('button', { name: 'Tarot', exact: true })
+      .click();
     const question = page.getByLabel('Your question', { exact: true });
     await question.fill('Synthetic question hidden behind saved readings');
-    await page.getByRole('button', { name: 'Saved readings', exact: true }).click();
+    await page.getByRole('button', { name: 'Journal', exact: true }).click();
     await expect(page.getByRole('heading', { name: 'Your journal', exact: true })).toBeVisible();
     const messages: string[] = [];
     let discard = false;
@@ -292,16 +309,22 @@ for (const navigation of ['link', 'Back'] as const) {
       .toEqual(['Discard your unsaved question? Choose Cancel to stay and keep editing.']);
     await expect(page).toHaveURL('http://localhost:8787/');
     await expect(page.getByRole('heading', { name: 'Your journal', exact: true })).toBeVisible();
-    await page.getByRole('button', { name: 'New reading', exact: true }).click();
+    await page
+      .getByRole('navigation', { name: 'Reading actions' })
+      .getByRole('button', { name: 'Tarot', exact: true })
+      .click();
     await expect(question).toHaveValue('Synthetic question hidden behind saved readings');
-    await page.getByRole('button', { name: 'Saved readings', exact: true }).click();
+    await page.getByRole('button', { name: 'Journal', exact: true }).click();
     await expect(page.getByRole('heading', { name: 'Your journal', exact: true })).toBeVisible();
     discard = true;
     await visitAccount();
     await expect(page.getByRole('heading', { name: 'Your account', exact: true })).toBeVisible();
     expect(messages).toHaveLength(2);
     await backToReadings(page);
-    await page.getByRole('button', { name: 'New reading', exact: true }).click();
+    await page
+      .getByRole('navigation', { name: 'Reading actions' })
+      .getByRole('button', { name: 'Tarot', exact: true })
+      .click();
     await expect(question).toHaveValue('');
   });
 }
@@ -322,7 +345,10 @@ for (const navigation of ['Back', 'Forward'] as const) {
       ).toBeVisible();
       if (navigation === 'Back') await backToReadings(page);
       else await page.goBack();
-      await page.getByRole('button', { name: 'New reading', exact: true }).click();
+      await page
+        .getByRole('navigation', { name: 'Reading actions' })
+        .getByRole('button', { name: 'Tarot', exact: true })
+        .click();
       let starts = 0;
       page.on('request', (request) => {
         if (request.method() === 'POST' && new URL(request.url()).pathname === '/api/v1/requests')
@@ -358,7 +384,10 @@ test('a session check keeps the reading workspace visible and its draft intact w
 }) => {
   await account(page, '192.0.2.177');
   await enableAi(page);
-  await page.getByRole('button', { name: 'New reading', exact: true }).click();
+  await page
+    .getByRole('navigation', { name: 'Reading actions' })
+    .getByRole('button', { name: 'Tarot', exact: true })
+    .click();
   const workspace = page.locator('.reading-workspace');
   const question = page.locator('#reading-question');
   await question.fill('Synthetic question kept during a session check');

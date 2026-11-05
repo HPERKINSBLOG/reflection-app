@@ -32,7 +32,10 @@ async function form(page: Page, ip: string) {
     page.getByRole('button', { name: 'Turn off AI readings', exact: true }),
   ).toBeEnabled();
   await page.goto('/');
-  await page.getByRole('button', { name: 'New reading', exact: true }).click();
+  await page
+    .getByRole('navigation', { name: 'Reading actions' })
+    .getByRole('button', { name: 'Tarot', exact: true })
+    .click();
   await page.getByLabel('Your question').fill('How can I compare my options?');
   await page.getByLabel('Use English for this reading').check();
   await page.getByText('Use my own spread', { exact: true }).click();
