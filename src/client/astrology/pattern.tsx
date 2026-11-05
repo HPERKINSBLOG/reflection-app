@@ -33,6 +33,7 @@ export function PatternWorkspace({
   ref,
   csrf,
   enabled,
+  navigationPending,
   initialBirth,
   onRestoreConsumed,
   onOpen,
@@ -43,6 +44,7 @@ export function PatternWorkspace({
   ref?: Ref<PatternHandle>;
   csrf: string;
   enabled: boolean;
+  navigationPending: boolean;
   initialBirth?: BirthDraft | null;
   onRestoreConsumed?: () => void;
   onOpen: (saved: Saved, draft?: string) => void;
@@ -77,6 +79,7 @@ export function PatternWorkspace({
     Boolean(birth.current?.hasUnsavedChanges()) ||
     Object.values(drafts).some((text) => Boolean(text));
   const confirmLeave = () =>
+    !navigationPending &&
     !busy &&
     !birth.current?.isBusy() &&
     (!hasUnsavedChanges() ||
@@ -203,7 +206,11 @@ export function PatternWorkspace({
   };
   if (!enabled)
     return (
-      <section className="pattern-workspace">
+      <section
+        className="pattern-workspace"
+        aria-busy={navigationPending}
+        inert={navigationPending}
+      >
         <header className="pattern-page-heading">
           <h2>Your pattern</h2>
           <p>
@@ -221,7 +228,12 @@ export function PatternWorkspace({
       </section>
     );
   return (
-    <section className="pattern-workspace" aria-label="Your Pattern workspace" aria-busy={busy}>
+    <section
+      className="pattern-workspace"
+      aria-label="Your Pattern workspace"
+      aria-busy={busy || navigationPending}
+      inert={navigationPending}
+    >
       <Notice message={notice} />
       {deletion ? (
         <>

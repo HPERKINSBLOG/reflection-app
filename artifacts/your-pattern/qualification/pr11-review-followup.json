@@ -1,0 +1,69 @@
+{
+  "recordedAt": "2026-11-05T18:00:46.075256+00:00",
+  "reviewedBaseCommit": "1e0f73517a638901309ec94fc37b2676ea8ce47d",
+  "sourceDigest": "e29ca9b72a683bd4f1d2f29f007519dd92ceca2dbcb58c9d63b0afd86ee86b9b",
+  "files": {
+    "src/client/readings.tsx": "c1e9932878ebf4c4ec1af85c968f0f703ea73810fadf1b06a1a93a7316ad1bdd",
+    "src/client/astrology/pattern.tsx": "2b39e7471ac69bbeb20e159c14b9c96344e67d7d5216f02f1ca645ffcb02f99e",
+    "tests/browser/pattern-navigation.spec.ts": "1ab5f590bc65d86715b30ed28187c040e5a63bfea1814c30dafdfca2279f9190",
+    "tests/domain/pattern-chapters.test.ts": "f2a2357a04eccbf419994af6a7b765c7cd004e5ee0ecfcd603fe2a0e771f8148"
+  },
+  "changes": [
+    "Forward parent navigation pending state to Pattern; inert covers reflection, birth details and actions while asynchronous navigation is pending.",
+    "Guard imperative leave checks during parent navigation.",
+    "Recompute source hashes for unsupported claims in title, text and prompt, and assert the specific rejection. Test wrong body binding, stale hashes and accepted supported wording separately."
+  ],
+  "navigationRegression": {
+    "beforeFix": "Reflection and birth-place inputs accepted real keyboard text during held Journal requests. Both success and failure variants failed at the unchanged-value assertion.",
+    "fixtureAdjustment": "The first run reused an IP and its fourth account hit registration throttling. Each case now uses a separate synthetic IP; the isolated fourth case then reproduced the same editing defect.",
+    "afterFix": {
+      "passed": 4,
+      "failed": 0,
+      "skipped": 0,
+      "flaky": 0
+    },
+    "coverage": "Both editors reject focus and text while the response is held, then return to working input after successful Journal navigation or its failure/retry screen."
+  },
+  "claimFilterMutation": {
+    "mutation": "Temporarily remove only the unsupported-claim check from validatePatternCatalogue.",
+    "exitCode": 1,
+    "failedTests": [
+      "catalogue rejects unsupported claims in title even with a valid source hash",
+      "catalogue rejects unsupported claims in text even with a valid source hash",
+      "catalogue rejects unsupported claims in prompt even with a valid source hash"
+    ],
+    "passedTests": 6,
+    "productionValidatorRestored": true
+  },
+  "validation": {
+    "domainTooling": {
+      "command": "npx vitest run --config vitest.domain.config.ts --maxWorkers=4",
+      "passed": 477,
+      "failed": 0,
+      "skipped": 0
+    },
+    "patternBrowser": {
+      "command": "npx playwright test tests/browser/pattern-navigation.spec.ts tests/browser/your-pattern.spec.ts tests/browser/pattern-journal.spec.ts --grep-invert 'Paper and Evening birth'",
+      "passed": 15,
+      "failed": 0,
+      "skipped": 0,
+      "flaky": 0
+    },
+    "finalNavigationRun": {
+      "command": "npx playwright test tests/browser/pattern-navigation.spec.ts",
+      "passed": 4
+    },
+    "typecheck": "npm run typecheck: passed",
+    "lint": "Biome check passed for all four changed source/test files without diagnostics; repository-wide check passed with existing warnings and informational diagnostics.",
+    "diffCheck": "git diff --check: passed",
+    "initialDomainRun": "476 passed; the provider-evaluation dry-run test hit its unchanged 10-second timeout while default 64-worker tests ran alongside the browser build and typechecking. The complete 477-test suite then passed with four workers and no concurrent build, without changing the test or timeout."
+  },
+  "withdrawalAliasConcern": "No policy change: the supplied review downgraded this concern, and the written native-withdrawal and portable-import requirements do not explicitly decide the same-account duplicate-alias case.",
+  "limits": [
+    "Focused review-fix validation, not a new full 14-stage release gate.",
+    "The earlier D1, numerical, hosted and cross-browser receipts remain historical evidence bound to their original source.",
+    "The approved catalogue text and exact approval hash are unchanged.",
+    "No deployment, merge, hosted activation or GitHub review comment."
+  ],
+  "retainedRawEvidenceDirectory": "/home/htper/.local/state/reflection-app/pr11-review-followup-20261105"
+}

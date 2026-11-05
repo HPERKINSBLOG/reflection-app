@@ -11,6 +11,7 @@ import {
   ZODIAC_SIGNS,
 } from '../../src/contracts/astrology-policy.ts';
 import { CALCULATION_IDENTITY } from '../../src/domain/astrology/calculate.ts';
+import { sha256Json } from '../../src/domain/json.ts';
 import draft from '../../content/pattern-draft.json';
 import parity from '../fixtures/astrology-node-parity.json';
 
@@ -94,14 +95,36 @@ test('withdrawn, unreviewed, changed or synthetic production content is unavaila
       ),
     ).toBe(true);
 });
-test('catalogue rejects unsupported technical claims, wrong bodies and stale source hashes', async () => {
-  for (const change of [
-    { body: 'moon' },
-    { text: 'Your ascendant is changing.' },
-    { text: 'Edited after review' },
-  ]) {
+test.each(['title', 'text', 'prompt'] as const)(
+  'catalogue rejects unsupported claims in %s even with a valid source hash',
+  async (field) => {
     const altered = structuredClone(draft);
-    Object.assign(altered.entries[0]!, change);
-    await expect(validatePatternCatalogue(altered)).rejects.toThrow();
-  }
+    const entry = altered.entries[0]!;
+    entry[field] = 'Your ascendant is changing.';
+    const { sourceHash: _sourceHash, ...source } = entry;
+    entry.sourceHash = await sha256Json(source);
+    await expect(validatePatternCatalogue(altered)).rejects.toThrow(
+      'Unsupported technical or deterministic claim',
+    );
+  },
+);
+test('catalogue rejects a body that does not belong to its chapter', async () => {
+  const altered = structuredClone(draft);
+  altered.entries[0]!.body = 'venus';
+  await expect(validatePatternCatalogue(altered)).rejects.toThrow(
+    'Catalogue source binding mismatch',
+  );
+});
+test('catalogue rejects stale source hashes', async () => {
+  const altered = structuredClone(draft);
+  altered.entries[0]!.text = 'Edited after review';
+  await expect(validatePatternCatalogue(altered)).rejects.toThrow('Pattern source hash mismatch');
+});
+test('catalogue accepts supported wording with a matching source hash', async () => {
+  const altered = structuredClone(draft);
+  const entry = altered.entries[0]!;
+  entry.text = 'A different reflection to consider.';
+  const { sourceHash: _sourceHash, ...source } = entry;
+  entry.sourceHash = await sha256Json(source);
+  await expect(validatePatternCatalogue(altered)).resolves.toEqual(altered);
 });

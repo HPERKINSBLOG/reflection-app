@@ -1088,6 +1088,7 @@ export function ReadingWorkspace({
           ref={patternWorkspace}
           csrf={user.csrfToken}
           enabled={['synthetic-only', 'synthetic-local'].includes(runtimeMode ?? '')}
+          navigationPending={busy}
           initialBirth={restoredBirth ?? null}
           {...(onRestoreConsumed ? { onRestoreConsumed } : {})}
           onExpired={onExpired}
