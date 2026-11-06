@@ -162,12 +162,19 @@ select:disabled,
   opacity: 0.5;
   pointer-events: none;
 }
+/* Disabled is outlined with a dimmed label, so it never reads as a pressed fill. */
 button:disabled {
   color: var(--action-disabled-label);
-  background: var(--action-disabled);
-  border-color: transparent;
+  background: transparent;
+  border-color: var(--reflection-disabled-border);
   opacity: 1;
   cursor: not-allowed;
+}
+button.text-button:disabled {
+  border-color: transparent;
+}
+.confirmation-hint {
+  margin-top: 8px;
 }
 :focus-visible {
   outline: 2px solid var(--foreground);
@@ -200,7 +207,8 @@ select {
 }
 input::placeholder,
 textarea::placeholder {
-  color: var(--muted-foreground);
+  color: var(--reflection-placeholder);
+  opacity: 1;
 }
 textarea {
   min-height: 96px;
@@ -1025,10 +1033,15 @@ main {
   color: var(--foreground);
   background: transparent;
   border-color: transparent;
+  text-decoration: none;
 }
 .reading-navigation button:hover:enabled {
   color: var(--muted-text);
   background: var(--muted);
+}
+.reading-navigation button:active:enabled {
+  color: var(--reflection-ink);
+  background: var(--reflection-sage);
 }
 .reading-navigation button[aria-current="page"] {
   color: var(--primary-foreground);
@@ -1460,7 +1473,6 @@ button.history-link:hover:enabled {
 }
 .spread-upload-field label {
   display: block;
-  font-weight: 500;
 }
 .spread-upload-field p {
   margin: 4px 0 12px;
@@ -1600,6 +1612,11 @@ button.history-link:hover:enabled {
   font-size: 12px;
   line-height: 18px;
   font-variant-numeric: tabular-nums;
+}
+/* Why Start is unavailable is supporting copy, not a caption. */
+.new-reading-footer #reading-start-help {
+  font-size: 14px;
+  line-height: 20px;
 }
 .spread-photo-card {
   margin: 0;
@@ -1808,28 +1825,29 @@ button.history-link:hover:enabled {
   position: relative;
   flex: 1;
   overflow: hidden;
+  transform: scaleX(var(--art-flip, 1));
 }
+/* The crop is set per card (card-face.tsx), so two cards from one suit don't match. */
 .card-face-art .art {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
-  transform: scale(1.5);
+  object-position: var(--art-x, 50%) var(--art-y, 50%);
+  transform: scale(var(--art-zoom, 1.5));
+  transform-origin: var(--art-x, 50%) var(--art-y, 50%);
 }
 .card-face-art.reversed {
-  transform: rotate(180deg);
+  transform: rotate(180deg) scaleX(var(--art-flip, 1));
 }
-.suit-major .art,
 .source-art.suit-major {
   object-position: 64% 38%;
   transform-origin: 64% 38%;
 }
-.suit-cups .art,
 .source-art.suit-cups {
   object-position: 60% 45%;
   transform-origin: 60% 45%;
 }
-.suit-pentacles .art,
 .source-art.suit-pentacles {
   object-position: 74% 36%;
   transform-origin: 74% 36%;
@@ -1970,8 +1988,8 @@ div.reading-closing {
 .save-copy .muted {
   margin-top: 6px;
   color: var(--secondary-foreground);
-  font-size: 12px;
-  line-height: 16px;
+  font-size: 14px;
+  line-height: 20px;
 }
 .save-reading.is-saved {
   padding: 14px 16px;
@@ -2186,7 +2204,7 @@ div.reading-closing {
     display: grid;
     grid-template-columns: minmax(0, 1fr) 64px;
     gap: 12px;
-    min-height: 72px;
+    min-height: 64px;
     margin-bottom: 16px;
   }
   .new-reading-heading h2 {
@@ -2196,7 +2214,7 @@ div.reading-closing {
   .new-reading-art {
     position: static;
     width: 64px;
-    height: 72px;
+    height: 64px;
     object-fit: contain;
     object-position: right;
   }
@@ -2269,7 +2287,7 @@ div.reading-closing {
     object-position: 50% 62%;
   }
   .readings-page .page-title {
-    grid-template-columns: minmax(0, 1fr) 72px;
+    grid-template-columns: minmax(0, 1fr) 64px;
     gap: 12px;
     padding-bottom: 20px;
     margin-bottom: 20px;
@@ -2278,13 +2296,13 @@ div.reading-closing {
     font-size: clamp(2rem, 8vw, 2.5rem);
   }
   .readings-page .readings-title-art {
-    width: 72px;
-    height: 72px;
+    width: 64px;
+    height: 64px;
   }
   .account-settings .title-copy {
     padding-right: 0;
     display: grid;
-    grid-template-columns: minmax(0, 1fr) 72px;
+    grid-template-columns: minmax(0, 1fr) 64px;
     column-gap: 12px;
   }
   .account-settings .title-copy h1 {
@@ -2297,7 +2315,7 @@ div.reading-closing {
   .account-settings .account-title-art {
     max-width: none;
     width: 64px;
-    height: 72px;
+    height: 64px;
     right: 0;
     top: 0;
   }

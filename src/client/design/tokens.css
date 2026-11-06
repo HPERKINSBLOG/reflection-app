@@ -39,8 +39,11 @@
   --destructive-foreground: var(--reflection-ink);
   --success: var(--reflection-mint);
   --success-foreground: var(--reflection-ink);
+  /* Sage is no longer a disabled fill; kept so the Figma action/disabled token has a match. */
   --action-disabled: var(--reflection-sage);
-  --action-disabled-label: var(--reflection-ink);
+  --action-disabled-label: color-mix(in srgb, var(--reflection-ink) 60%, transparent);
+  --reflection-disabled-border: color-mix(in srgb, var(--reflection-ink) 40%, transparent);
+  --reflection-placeholder: color-mix(in srgb, var(--reflection-ink) 75%, transparent);
   --border-subtle: color-mix(in srgb, var(--border) 25%, transparent);
   --chart-1: var(--primary);
   --chart-2: var(--reflection-coral);
@@ -87,6 +90,9 @@
   --ring: var(--reflection-mint);
   --reflection-link: var(--reflection-mint);
   --destructive-text: var(--reflection-coral);
+  --action-disabled-label: color-mix(in srgb, var(--reflection-paper) 60%, transparent);
+  --reflection-disabled-border: color-mix(in srgb, var(--reflection-mint) 45%, transparent);
+  --reflection-placeholder: var(--reflection-mint);
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme]) {
@@ -107,6 +113,9 @@
     --ring: var(--reflection-mint);
     --reflection-link: var(--reflection-mint);
     --destructive-text: var(--reflection-coral);
+    --action-disabled-label: color-mix(in srgb, var(--reflection-paper) 60%, transparent);
+    --reflection-disabled-border: color-mix(in srgb, var(--reflection-mint) 45%, transparent);
+    --reflection-placeholder: var(--reflection-mint);
   }
 }
 :root {

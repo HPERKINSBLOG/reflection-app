@@ -196,7 +196,8 @@ The eight printed names above are the palette. The component tokens use Paper as
 | Writing fields | Ink on Paper with an Ink border. | Paper on Evening with a Mint border, even inside an Ink panel. |
 | Primary action | Paper on Teal. Hover uses Ink and press uses Evening. | Ink on Mint. Hover uses Butter and press uses Sage. |
 | Links, field focus, and supporting text | Teal links and field rings. Supporting text uses Ink. | Mint links, field rings, and supporting text. |
-| Secondary surfaces | Butter for storage notices, Mint for reflection prompts and success, Sage for provenance chips and disabled actions. All use Ink text. | The same fills and Ink text. |
+| Secondary surfaces | Butter for storage notices, Mint for reflection prompts, success and the selected filter chip, Sage for provenance chips and pressed secondary actions. All use Ink text. | The same fills and Ink text. |
+| Placeholders and disabled actions | Placeholders use Ink at 75% so they never read as an entry. Disabled buttons have no fill: an Ink outline at 40% and a label at 60%. | Mint placeholders. Disabled buttons use a Mint outline at 45% and a Paper label at 60%. |
 | Tertiary accent | Coral for destructive actions, error notices, and accents in artwork. | The same fill with Ink text. Standalone destructive text can use Coral. |
 
 **The Pastel Rule.** Keep Ink lettering on Mint, Coral, Butter, and Sage in both themes.
@@ -206,12 +207,14 @@ The eight printed names above are the palette. The component tokens use Paper as
 Newsreader gives a question the presence of a journal entry. Figtree carries the interpretation, form labels, and instructions. Outfit sets the Reflection wordmark and the small position numbers. JetBrains Mono distinguishes recovery material and technical identifiers. The fonts ship with the app. [Type styles and font assets](src/client/design/tokens.css)
 
 - **Titles.** The poster display style is 88/88 px. General page titles scale from 40 to 64 px. The welcome title has its own scale and renders at 36 px on a 390 px phone. Section and card titles use the 40/44 and 28/34 px styles.
-- **Reading text.** Body copy is 16/24 px, with 20/30 px for a lead and 14/20 px for supporting copy. Field hints and chips use the 12/18 px caption. Button and field labels use 600 weight.
+- **Reading text.** Body copy is 16/24 px, with 20/30 px for a lead and 14/20 px for supporting copy, including retention notes and the reason an action is unavailable. Field hints and chips use the 12/18 px caption. Button and field labels use 600 weight. On phones, section titles drop to 28/34 px while page titles stay at 40 px.
 - **Return visits.** A history question uses 22/24 px Newsreader, beneath a small Figtree date with tabular numerals. A long question wraps. The chevron stays beside the question.
 
 ## Layout
 
 The header aligns its mark and theme control within a centered shell (1120 px maximum on entry). The reading column has a 760 px maximum, Account uses 940 px, and the new-reading form expands to 1080 px. Within that form the question and photo take roughly two thirds of the width. A narrower column holds the disclosures and Start action.
+
+Pages with a side panel (the journal, Your pattern, birth details and a saved chapter) share one grid. The main column takes two thirds of the width and settles at 848 px beside a 432 px panel on wide screens, with no rule between them. The panel is a card in the page's own theme: Paper with an Ink rule, or Ink on Evening with a Mint rule.
 
 At 900 px and below, the welcome page stacks its controls above the bloom. At 760 px and below, the new-reading disclosures move beneath the fields and a compact botanical corner replaces the wide ribbon. At 390 px and below, the header tightens its spacing and the wordmark drops to 23 px. Keep history and dated notes in a single reading order. [Responsive layouts](src/client/style.css)
 
@@ -227,11 +230,11 @@ Buttons, chips, and the reading navigation have pill ends. Writing fields have a
 
 The controls are easy to touch and quiet on the page. Use the shared React components for their native labels, focus behavior, and theme changes. [Component definitions](src/client/design/components.tsx)
 
-- **Buttons and links.** Primary buttons have a solid fill. Secondary actions have a one-pixel outline. Text buttons and ordinary text links are underlined. Secondary and text buttons fill with Mint on hover and Sage on press. The destructive button starts on Coral and moves through Butter and Sage, always with Ink lettering. Buttons have a 48 px minimum height. Keyboard focus draws a 2 px foreground outline with a 4 px offset.
+- **Buttons and links.** Primary buttons have a solid fill. Secondary actions have a one-pixel outline. Text buttons and ordinary text links are underlined. Secondary and text buttons fill with Mint on hover and Sage on press. The destructive button starts on Coral and moves through Butter and Sage, always with Ink lettering, and every destructive confirmation uses it. A disabled button drops its fill for a dimmed outline, so it never looks pressed. When a checkbox gates a destructive button, “Check the box above to continue.” sits under the button until the box is checked. Buttons have a 48 px minimum height. Keyboard focus draws a 2 px foreground outline with a 4 px offset.
 - **Writing fields.** Keep a visible label above the field and its hint directly below. Textareas resize vertically. Focus picks up the theme ring on both the border and a 2 px outline with a 2 px offset.
-- **Navigation and chips.** Saved readings and New reading share one outlined pill, up to 440 px wide. The current destination has a filled segment and `aria-current="page"`. A topic chip is a static label with Mint, Butter, Sage, or Coral fill. The Sage chip identifies the provenance of a reading.
+- **Navigation and chips.** Astrology, Tarot and Journal share one outlined pill, up to 440 px wide, in that order. Each destination uses the same tab treatment; the current one has a filled segment and `aria-current="page"`. A topic chip is a static label with Mint, Butter, Sage, or Coral fill. The Sage chip identifies the provenance of a reading, including the label on an interpretation. Journal filters are outlined toggle chips after a visible “Show” label. The selected chip is Mint with a check and Ink lettering and carries `aria-pressed`.
 - **History and dated notes.** Group date, question, and chevron in one ruled history row. A revisit note has its own date and preserves the reader’s line breaks. Keep the author’s note, generated interpretation, and traditional source identifiable by their headings. [Reading workspace](src/client/readings.tsx) and [revisit notes](src/client/revisit-notes.tsx)
-- **Artwork and motion.** Keep the bloom’s proportions, use the theme-specific return mark, and use the compact artwork supplied for phones. The disclosure chevron turns over 150 ms. A busy spinner takes one second per turn and accompanies written status. Reduced motion removes both effects. [Artwork inventory](src/client/design/art/README.md)
+- **Artwork and motion.** Keep the bloom’s proportions, use the theme-specific return mark, and use the compact artwork supplied for phones at 64 px. Each card face shows its own crop of its suit’s study, so two cards in a draw never share a picture. The disclosure chevron turns over 150 ms. A busy spinner takes one second per turn and accompanies written status. Reduced motion removes both effects. [Artwork inventory](src/client/design/art/README.md)
 
 ## Do's and Don'ts
 

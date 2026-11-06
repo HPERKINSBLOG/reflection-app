@@ -22,27 +22,58 @@
   gap: 24px;
 }
 .journal-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  min-inline-size: 0;
   margin: 0;
   padding: 0;
   border: 0;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
 }
-.journal-filters .ui-button {
-  min-width: 80px;
+/* A floated legend is laid out with the chips instead of on the fieldset's border. */
+.journal-filters > legend {
+  float: left;
+  margin-right: 4px;
+  padding: 0;
 }
-.journal-columns {
+/* Outlined toggle chips; the selected one is Mint with a check and Ink lettering. */
+.journal-filters .filter-chip {
+  min-height: 44px;
+  padding: 9px 16px;
+  gap: 6px;
+}
+.journal-filters .filter-chip[aria-pressed="true"] {
+  color: var(--reflection-ink);
+  background: var(--reflection-mint);
+  border-color: var(--input);
+}
+/* One grid for every page with a side panel. The main column keeps about two thirds of the
+   width and settles at 848 px beside a 432 px panel once the page is wide enough. */
+.journal-columns,
+.pattern-columns,
+.birth-columns,
+.pattern-snapshot {
   display: grid;
-  grid-template-columns: minmax(0, 2fr) minmax(240px, 1fr);
+  grid-template-columns: minmax(0, 2fr) minmax(280px, 1fr);
   align-items: start;
   gap: 48px;
 }
+@media (min-width: 1368px) {
+  .journal-columns,
+  .pattern-columns,
+  .birth-columns,
+  .pattern-snapshot {
+    grid-template-columns: minmax(0, 848px) minmax(280px, 432px);
+    justify-content: space-between;
+  }
+}
+/* The side panel is a card in the page's own theme: Paper with an Ink rule, or Ink on Evening. */
 .pattern-context,
 .pattern-snapshot-context {
-  color: var(--foreground);
-  background: var(--background);
-  border: 1px solid var(--border-subtle);
+  color: var(--card-foreground);
+  background: var(--card);
+  border: 1px solid var(--border);
   padding: 24px;
   border-radius: 16px;
   display: grid;
@@ -92,6 +123,12 @@
 .journal-entry .history-link small {
   font: 14px / 1.4 var(--font-sans);
 }
+/* Keep "Started … · Saved …" on one line; the older history rows stack their date. */
+.journal-entry .field-hint time {
+  display: inline;
+  color: inherit;
+  font-size: inherit;
+}
 .journal .empty-history {
   text-align: left;
   padding: 32px 0;
@@ -102,9 +139,7 @@
   object-fit: contain;
 }
 .pattern-snapshot {
-  display: grid;
-  grid-template-columns: minmax(0, 2fr) minmax(240px, 1fr);
-  gap: 32px 48px;
+  row-gap: 32px;
 }
 .pattern-snapshot > header {
   grid-column: 1 / -1;
@@ -158,11 +193,14 @@
     margin-top: 16px;
   }
   .journal-filters {
-    gap: 4px;
+    gap: 8px 4px;
   }
-  .journal-filters .ui-button {
+  /* On phones the label sits above the chips, as in the Figma mobile journal. */
+  .journal-filters > legend {
+    flex-basis: 100%;
+  }
+  .journal-filters .filter-chip {
     padding-inline: 12px;
-    min-width: 0;
   }
   .pattern-page-heading > p:last-child {
     font-size: 16px;
@@ -212,12 +250,6 @@
   max-width: 100%;
   object-fit: contain;
   flex-shrink: 0;
-}
-.pattern-columns {
-  display: grid;
-  grid-template-columns: minmax(0, 1.4fr) minmax(280px, 1fr);
-  gap: 48px;
-  align-items: start;
 }
 .pattern-main,
 .pattern-chapter,
@@ -306,15 +338,11 @@
   font-size: 48px;
   line-height: 1.1;
 }
-.birth-columns {
-  display: grid;
-  grid-template-columns: minmax(0, 640px) minmax(280px, 480px);
-  gap: 64px;
-  align-items: start;
-}
 .birth-fields {
   display: grid;
   gap: 12px;
+  /* Fields keep a readable length inside the wider main column. */
+  max-width: 640px;
   border: 0;
   margin: 0;
   padding: 0;
@@ -430,9 +458,6 @@
     flex-basis: 100%;
     max-width: none;
   }
-  .birth-columns {
-    gap: 32px;
-  }
 }
 @media (max-width: 760px) {
   .pattern-columns,
@@ -451,6 +476,12 @@
   .pattern-chart h3,
   .birth-guidance h3 {
     font-size: 28px;
+  }
+  /* Page titles stay at 40 px on phones; section titles step down to 28/34. */
+  .pattern-chapter h3,
+  .pattern-snapshot-copy h3 {
+    font-size: 28px;
+    line-height: 34px;
   }
   .pattern-writing h3 {
     font-size: 28px;

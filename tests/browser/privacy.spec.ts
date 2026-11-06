@@ -89,8 +89,15 @@ for (const lost of [false, true])
     await openAccount(page);
     await expect(page.getByText('Delete account', { exact: true })).toBeVisible();
     await page.getByText('Delete account', { exact: true }).click();
+    const deleteAccount = page.getByRole('button', {
+      name: 'Delete account permanently',
+      exact: true,
+    });
+    await expect(deleteAccount).toBeDisabled();
+    await expect(deleteAccount).toHaveAccessibleDescription('Check the box above to continue.');
     await page.getByLabel('Permanently delete my account, readings and reflections').check();
-    await page.getByRole('button', { name: 'Delete account permanently', exact: true }).click();
+    await expect(deleteAccount).toHaveAccessibleDescription('');
+    await deleteAccount.click();
     await expect(
       page.getByRole('heading', { name: 'Deletion receipt', exact: true }),
     ).toBeFocused();

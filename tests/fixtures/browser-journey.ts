@@ -182,7 +182,15 @@ export async function themeContrast(page: Page, selector?: string) {
       const rendered = getComputedStyle(element);
       return { selectedText: ratio(rgba(rendered.color), rgba(rendered.backgroundColor)) };
     }
+    // The placeholder token is a color-mix, so let the page resolve it before measuring.
+    const probe = document.createElement('span');
+    probe.style.color = 'var(--reflection-placeholder)';
+    document.body.appendChild(probe);
+    const placeholder = rgba(getComputedStyle(probe).color);
+    probe.remove();
     return {
+      placeholderOnCard: ratio(placeholder, color('--card')),
+      placeholderOnBackground: ratio(placeholder, color('--background')),
       inputOnCard: ratio(color('--input'), color('--card')),
       inputOnBackground: ratio(color('--input'), color('--background')),
       mutedOnCard: ratio(color('--muted-foreground'), color('--card')),

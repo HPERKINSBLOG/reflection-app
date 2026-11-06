@@ -3,6 +3,7 @@ import type { z } from 'zod';
 import type { apiSchemas } from '../contracts/index.ts';
 import { Button } from './design/components.tsx';
 import { Art } from './art.tsx';
+import { Icon } from './icon.tsx';
 import { Notice } from './notice.tsx';
 import { date } from './date.ts';
 import './astrology/astrology.css';
@@ -48,16 +49,21 @@ export function Journal({
         <p>Astrology, tarot, and your own words—kept together over time.</p>
       </header>
       {children}
+      {/* Filters are toggle chips with a visible label, so they don't read as the header nav. */}
       <fieldset className="journal-filters">
-        <legend className="sr-only">Filter journal by source</legend>
+        <legend>
+          Show<span className="sr-only"> journal entries by source</span>
+        </legend>
         {(['all', 'tarot', 'astrology', 'imported'] as const).map((value) => (
           <Button
             key={value}
-            variant={method === value ? 'primary' : 'text-button'}
+            variant="secondary"
+            className="filter-chip"
             aria-pressed={method === value}
             disabled={busy}
             onClick={() => onMethod(value)}
           >
+            {method === value && <Icon name="checkmark" />}
             {value === 'all'
               ? 'All'
               : value === 'imported'
@@ -138,7 +144,7 @@ export function Journal({
             </Button>
           )}
         </div>
-        <aside className="pattern-context journal-context" data-theme="evening">
+        <aside className="pattern-context journal-context">
           <h3>Return with fresh eyes.</h3>
           <p>
             An earlier question can mean something different today. Keep the original close while

@@ -1,5 +1,5 @@
 import type { BirthDraft } from '../contracts/astrology.ts';
-import { Button, Input, TextLink } from './design/components.tsx';
+import { Button, ConfirmationHint, Input, TextLink } from './design/components.tsx';
 import { type MouseEvent, useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import type { z } from 'zod';
 import { apiSchemas, type AuthResult } from '../contracts/index.ts';
@@ -1069,6 +1069,7 @@ export function IdentityApp() {
                       type="button"
                       variant="danger"
                       disabled={busy || !accountDeleteChecked}
+                      aria-describedby={accountDeleteChecked ? undefined : 'account-delete-hint'}
                       onClick={() =>
                         void run(async (isCurrent) => {
                           let csrf = session.csrfToken;
@@ -1109,6 +1110,7 @@ export function IdentityApp() {
                     >
                       Delete account permanently
                     </Button>
+                    <ConfirmationHint id="account-delete-hint" show={!accountDeleteChecked} />
                   </details>
                   <p className="account-storage">
                     <Icon name="lock" />

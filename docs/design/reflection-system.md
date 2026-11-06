@@ -15,9 +15,9 @@ The source of truth in code is [`tokens.css`](../../src/client/design/tokens.css
 | Mint | `#A8D5BA` | Evening actions, links and supporting text |
 | Coral | `#F28B7B` | Expressive accents and error fills |
 | Butter | `#F1D27B` | Warm supporting fills |
-| Sage | `#A9B88F` | Botanical fills and disabled controls |
+| Sage | `#A9B88F` | Botanical fills, provenance chips and pressed secondary controls |
 
-Paper uses Ink on Paper (10.40:1), with Paper on Teal actions (5.34:1). Evening uses Paper on Evening (12.93:1), with Ink on Mint actions (7.08:1). Pastel surfaces always use Ink text. Text links are underlined. Primary hover/pressed states use Ink/Evening in Paper and Butter/Sage in Evening. Secondary buttons remain outlined and fill Mint/Sage on hover/press. Focus indicators remain visible with keyboard navigation and system forced colors.
+Paper uses Ink on Paper (10.40:1), with Paper on Teal actions (5.34:1). Evening uses Paper on Evening (12.93:1), with Ink on Mint actions (7.08:1). Pastel surfaces always use Ink text. Text links are underlined. Primary hover/pressed states use Ink/Evening in Paper and Butter/Sage in Evening. Secondary buttons remain outlined and fill Mint/Sage on hover/press. Disabled buttons have no fill: a 1 px outline (`--reflection-disabled-border`, Ink at 40% or Mint at 45%) and a dimmed label (`--action-disabled-label`, Ink or Paper at 60%). Placeholders use `--reflection-placeholder` (Ink at 75%, or Mint in Evening). Focus indicators remain visible with keyboard navigation and system forced colors.
 
 ## Typography and spacing
 
@@ -27,7 +27,7 @@ Spacing uses the shared 4/8/12/16/24/32/48/64 px scale. Buttons have a 48 px min
 
 ## Components and themes
 
-[`components.tsx`](../../src/client/design/components.tsx) exports `Button`, `TextLink`, `Input`, `TextArea`, `ReflectionField`, `TopicChip`, `ReflectionCard` and `Brand`. Native element props and refs pass through; buttons default to `type="button"`, and submit controls declare their type. Button variants are `primary`, `secondary`, `text-button` and `danger`. Fields associate labels and optional hint text; chips offer Mint, Butter, Sage and Coral fills.
+[`components.tsx`](../../src/client/design/components.tsx) exports `Button`, `ConfirmationHint`, `TextLink`, `Input`, `TextArea`, `ReflectionField`, `TopicChip`, `ReflectionCard` and `Brand`. Native element props and refs pass through; buttons default to `type="button"`, and submit controls declare their type. Button variants are `primary`, `secondary`, `text-button` and `danger`. Fields associate labels and optional hint text; chips offer Mint, Butter, Sage and Coral fills.
 
 The shared components are used in identity/recovery, account controls, new readings, reflection editing, revisit notes, deletion and request progress. Existing keyboard focus, consent, data handling and recovery behavior remain attached to the same controls.
 
