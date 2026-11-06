@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "command": "TMPDIR=/tmp/opencode npm run verify",
+  "status": "failed",
+  "sourceDigest": "4cae745181d44e6f480b6e94b988a2b5044cff86be5e1b3679e46461ad212f03",
+  "finishedAt": "2026-11-06T05:12:57.612Z",
+  "durationMs": 400035,
+  "passedStages": 12,
+  "failedStage": "identity and saved-reading browser journeys",
+  "database": { "passed": 682, "files": 73, "skipped": 0 },
+  "browser": { "passed": 185, "failed": 2, "skipped": 0, "flaky": 0 },
+  "failures": [
+    "FR-1: new STORAGE_LIMIT_EXCEEDED keeps actionable guidance and the unchanged draft intent",
+    "FR-1: initial-page NOTE_LIMIT_EXCEEDED keeps actionable guidance and the unchanged draft intent"
+  ],
+  "cause": "The revisit admission cases reused 192.0.2.211 and 192.0.2.212 from the deletion/password suites on the shared synthetic Worker. Signup returned RATE_LIMITED before either test reached its note assertion.",
+  "correction": "Give the six FR-1 browser cases their own documentation-address range, 203.0.113.180 through 203.0.113.185. Runtime registration limits and retry settings are unchanged.",
+  "scope": "synthetic-local-only"
+}

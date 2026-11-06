@@ -1,0 +1,95 @@
+{
+  "version": 1,
+  "checkedAt": "2026-11-06T05:26:43.712Z",
+  "status": "local-verified-hosted-pending",
+  "scope": "synthetic-local-only",
+  "branch": "codex/your-pattern",
+  "sourceCommitAtRunStart": "afe58d6b60fbfe00f0d3611796d46d6c9cc69ef5",
+  "workingTreeChangesAtRunStart": true,
+  "sourceDigest": "7c4b23b9d57993df5c50fb62014a502560809af3fdd77fbcf92644b940c4d2ad",
+  "sourceChangedDuringChecks": false,
+  "node": "v26.13.0",
+  "platform": "linux",
+  "reconciliation": {
+    "referenceBranch": "origin/codex/m3-implementation",
+    "referenceCommit": "7a0f5fff921f7fe154a50e6afdac293a10612315",
+    "disposition": "selectively-adapted",
+    "referenceBranchRetained": true,
+    "portedSafeguards": [
+      "Content withdrawal advances affected account data revisions to invalidate captured reads/exports",
+      "Same-account native copies are withheld after withdrawal/restore, with bounded nested provenance and final availability guards",
+      "Native compatibility aliases yield one current native-v1 family with complete new-child dependencies and bounded page traversal",
+      "Incremental imports and multiple session revisions reuse an established session after checking immutable metadata",
+      "Requested v3 transport parses ModelCandidateV3 and rejects v1/v2 output"
+    ],
+    "recoveredCoverage": {
+      "importReviewRegressions": 15,
+      "continuityProjection": 2,
+      "localPhotoPublication": 1,
+      "versionedSafetyBoundaries": 64,
+      "strictV3Transport": 3
+    },
+    "currentImplementationsRetained": [
+      "Encrypted import groups, context lifecycle, rekey and recovery implementations",
+      "Current migrations, registry and v3 reading contracts",
+      "Current conservative v3 prose validation and disabled generic/production runtime admission"
+    ],
+    "alreadyCovered": [
+      "Supported surviving-record export after imported revisit erasure",
+      "Durable photo publication through the current recognition guards",
+      "Staged copied-context erasure and abandoned-preview retention cleanup"
+    ],
+    "verificationFixtureCorrection": "Six FR-1 browser cases now use 203.0.113.180 through 203.0.113.185 to isolate their signup rate buckets from deletion/password tests; ten affected browser cases passed together before the full rerun"
+  },
+  "fullGate": {
+    "stages": 14,
+    "finishedAt": "2026-11-06T05:20:57.901Z",
+    "durationMs": 388840,
+    "deadlineMs": 540000,
+    "domain": { "passed": 548, "files": 67 },
+    "database": { "passed": 682, "files": 73 },
+    "chromium": { "passed": 187, "files": 26 },
+    "skipped": 0,
+    "flaky": 0
+  },
+  "crossBrowser": {
+    "passed": 39,
+    "files": 4,
+    "projects": ["chromium", "firefox", "webkit"],
+    "startTime": "2026-11-06T05:21:13.629Z",
+    "durationMs": 294279.83099999995,
+    "workers": 2,
+    "skipped": 0,
+    "flaky": 0
+  },
+  "releaseInspection": {
+    "localVerification": "passed",
+    "applicationDigest": "a930284eac3b4220ee813a89c02dccabcdb103c595eea4af1f3da8fc9df021bd",
+    "deploymentAllowed": false,
+    "pendingQualificationRows": 10,
+    "receipt": "artifacts/your-pattern/release-check.json"
+  },
+  "priorEvidence": {
+    "integrated": "https://github.com/HPERKINSBLOG/reflection-app/blob/f096d349ce502eeb10aec790778021673b985f58/artifacts/your-pattern/release-verification.json",
+    "developmentDeployment": "https://github.com/HPERKINSBLOG/reflection-app/blob/afe58d6b60fbfe00f0d3611796d46d6c9cc69ef5/artifacts/preview-deploy/deployment.json"
+  },
+  "receipts": [
+    { "path": "artifacts/verify.json", "sha256": "6f7fb5bdfed605323daf5c6a6bdd31d53e0000f8658423657a6930763d8644c5" },
+    { "path": "artifacts/domain-tests.json", "sha256": "68cc938b3d7f391633db7f61c4296d32912d9d0d83e7f4c541e669db148c5307" },
+    { "path": "artifacts/db-tests.json", "sha256": "24342ae144f7693ea75f817a5d7376d6fba998be83ce097e7450d7152e89f528" },
+    { "path": "artifacts/browser-tests.json", "sha256": "511643d598aa0a5ff3c31f9db1be1c5a03cf9375b172f70b71a741efdb6739ef" },
+    { "path": "artifacts/visual-pass/browser-matrix.json", "sha256": "49287ef0b05d11e99bc635c36b127e7705d8677c9581cfa576887b35906a6131" },
+    { "path": "artifacts/your-pattern/m3-reconciliation-initial-failure.json", "sha256": "675ce68113847890f9cf9238c02f20604dc62b3fd3aed090d6127ceac6107289" }
+  ],
+  "commands": [
+    "TMPDIR=/tmp/opencode npm run verify",
+    "TMPDIR=/tmp/opencode npm run test:journey -- --workers=2",
+    "node --import tsx scripts/release.ts --check"
+  ],
+  "limits": {
+    "hostedApplicationAndRecoveryQualification": "not-run",
+    "liveProviderQualification": "not-run",
+    "deployment": "not-performed",
+    "merge": "not-performed"
+  }
+}

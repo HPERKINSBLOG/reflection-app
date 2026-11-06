@@ -1759,7 +1759,8 @@ for (const [index, [mode, code, retryAfterRemediation]] of (
   test(`FR-1: ${mode} ${code} keeps actionable guidance and the unchanged draft intent`, async ({
     page,
   }) => {
-    const { original } = await savedReading(page, `192.0.2.${211 + index}`);
+    // Keep this range distinct from the deletion/password suites sharing the Worker.
+    const { original } = await savedReading(page, `203.0.113.${180 + index}`);
     if (mode === 'edit') await add(page, 'Synthetic saved note before admission rejection');
     let blocked = true;
     const writes: Array<{ key: string; body: string; revision: string | undefined }> = [];
@@ -1846,7 +1847,7 @@ for (const [index, [mode, code, retryAfterRemediation]] of (
 test('FR-1: a typed deletion idempotency rejection does not invent a changed note or discard confirmation', async ({
   page,
 }) => {
-  await savedReading(page, '192.0.2.216');
+  await savedReading(page, '203.0.113.185');
   await add(page, 'Synthetic retained note for typed deletion rejection');
   const keys: string[] = [];
   let listReads = 0;

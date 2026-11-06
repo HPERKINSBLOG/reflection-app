@@ -5,6 +5,12 @@ import { assertion } from '../identity/checkpoint.ts';
 import { statement as q, DB_NOW } from '../db/core.ts';
 import { availableSession, iso, type RecordBase, RecordError, type SessionRow } from './base.ts';
 import { pendingImportedQuestion } from './import-copies.ts';
+import {
+  importedNativeRecord,
+  nativeImportGuard,
+  nativeImportSource,
+  unavailableNativeImport,
+} from './import-availability.ts';
 export const Question = z.strictObject({ v: z.literal(1), text: z.string().max(10000).nullable() });
 // Include the newest bounded request summaries in chronological display order.
 // Each request has its own independently paginated export receipt.
@@ -166,8 +172,20 @@ export class ReadingRecords {
       ('provenance' in result && result.parentEditionId !== row.parent_edition_id)
     )
       throw new RecordError(503, 'KEY_UNAVAILABLE');
+    const original =
+      result.kind === 'legacy.imported.v1'
+        ? importedNativeRecord(result.record.originalJsonText)
+        : null;
+    if (original && (await unavailableNativeImport(this.base, session.subjectId, original)))
+      throw new RecordError(410, 'CONTENT_UNAVAILABLE');
+    const importedSource = original
+      ? nativeImportSource(session.subjectId, original)?.editionId
+      : undefined;
     try {
       await this.base.checkedSession(session, row.session_id, account.data_revision, [
+        ...(importedSource
+          ? [nativeImportGuard(this.base, session.subjectId, [importedSource])]
+          : []),
         assertion(
           this.base.db,
           "EXISTS(SELECT 1 FROM reading_editions e LEFT JOIN content_editions c ON c.hash=e.content_hash LEFT JOIN pattern_content_releases p ON p.hash=e.pattern_content_hash WHERE e.owner_id=? AND e.id=? AND e.status IN ('accepted','imported') AND (c.state IS NULL OR c.state!='withdrawn') AND (p.state IS NULL OR p.state!='withdrawn'))",
@@ -176,6 +194,8 @@ export class ReadingRecords {
         ),
       ]);
     } catch (error) {
+      if (original && (await unavailableNativeImport(this.base, session.subjectId, original)))
+        throw new RecordError(410, 'CONTENT_UNAVAILABLE');
       const current = await q(
         this.base.db,
         "SELECT 1 FROM reading_editions e LEFT JOIN content_editions c ON c.hash=e.content_hash LEFT JOIN pattern_content_releases p ON p.hash=e.pattern_content_hash WHERE e.owner_id=? AND e.id=? AND (e.status NOT IN ('accepted','imported') OR c.state='withdrawn' OR p.state='withdrawn')",

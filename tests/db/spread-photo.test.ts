@@ -129,6 +129,28 @@ async function setup(
   };
 }
 
+test('local simulation publishes a photo reading through the durable recognition guard', async () => {
+  const { client } = await readingAccount();
+  const me = await client.me();
+  const response = await client.request('/requests', {
+    clientIntentId: crypto.randomUUID(),
+    question: 'Synthetic photo reading with the default local recognizer',
+    languageConfirmed: 'en',
+    reversals: false,
+    permissionRevision: me.permission.revision,
+    parentEditionId: null,
+    selection: [],
+    spreadPhoto: photo,
+  });
+  expect(response.status, await response.clone().text()).toBe(202);
+  const start = apiSchemas.StartResponse.parse(await response.json());
+  expect(start.status.state).toBe('published');
+  const reading = AcceptedReadingV2.parse(
+    await (await client.request(`/readings/${start.status.editionId}`)).json(),
+  );
+  expect(reading.spreadPhoto).toBe(photo);
+});
+
 test.each(['live-local', 'live-preview'] as const)(
   '%s rejects a photo when the Meta key is absent',
   async (mode) => {

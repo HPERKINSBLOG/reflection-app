@@ -1,3 +1,4 @@
+import { z } from 'zod';
 import {
   ImportedReading,
   LegacyRecord,
@@ -155,6 +156,7 @@ export async function projectImportGroup(
   const keyVersion = version;
   const result = new Map<number, ProjectedImport>(),
     editions = new Map<string, number>();
+  const sessions = new Map<string, { createdAt: number; question: string | null }>();
   const revisits = new Map<string, Array<{ item: Item; note: RevisitNote }>>();
   for (const item of items) {
     const key = canonicalJson(item.unit.identity),
@@ -286,13 +288,61 @@ export async function projectImportGroup(
       } else if (value?.kind === 'session') {
         const sessionId = await localId(unit.identity, 'session');
         target = { kind: 'session', sessionId };
-        fields.push({
-          kind: 'session',
-          targetId: sessionId,
-          aadRevision: 1,
-          meta: { createdAt: Date.parse(value.value.createdAt), savedAt: now },
-          value: { v: 1, text: value.value.question },
-        });
+        const metadata = {
+          createdAt: Date.parse(value.value.createdAt),
+          question: value.value.question,
+        };
+        const pendingSession = sessions.get(sessionId);
+        if (pendingSession) {
+          if (
+            pendingSession.createdAt !== metadata.createdAt ||
+            pendingSession.question !== metadata.question
+          )
+            conflict();
+        } else {
+          const existing = await q(
+            base.db,
+            'SELECT question_enc,created_at,status FROM reading_sessions WHERE owner_id=? AND id=?',
+            owner,
+            sessionId,
+          ).first<{ question_enc: string | null; created_at: number; status: string }>();
+          if (existing) {
+            const established = await q(
+              base.db,
+              "SELECT 1 FROM import_identities WHERE owner_id=? AND session_id=? AND entity_kind='session' AND erased_at IS NULL",
+              owner,
+              sessionId,
+            ).first();
+            const question = existing.question_enc
+              ? await base.opened<{ v: 1; text: string | null }>(
+                  {
+                    ownerId: owner,
+                    table: 'reading_sessions',
+                    column: 'question_enc',
+                    recordId: sessionId,
+                    aadRevision: 1,
+                  },
+                  existing.question_enc,
+                  z.strictObject({ v: z.literal(1), text: z.string().max(10000).nullable() }),
+                )
+              : null;
+            if (
+              !established ||
+              existing.status !== 'saved' ||
+              existing.created_at !== Date.parse(value.value.createdAt) ||
+              question?.text !== value.value.question
+            )
+              conflict();
+          } else
+            fields.push({
+              kind: 'session',
+              targetId: sessionId,
+              aadRevision: 1,
+              meta: { createdAt: Date.parse(value.value.createdAt), savedAt: now },
+              value: { v: 1, text: value.value.question },
+            });
+          sessions.set(sessionId, metadata);
+        }
       } else if (
         unit.kind === 'legacy-authored' ||
         value?.kind === 'reflection' ||

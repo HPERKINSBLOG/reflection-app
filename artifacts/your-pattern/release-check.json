@@ -2,7 +2,7 @@
   "localVerification": "passed",
   "deploymentAllowed": false,
   "milestone2Complete": false,
-  "applicationDigest": "071980c4ca5eccbca98ae15e6d40cf076f8f1c55ed976c74ed8431496bb630c3",
+  "applicationDigest": "a930284eac3b4220ee813a89c02dccabcdb103c595eea4af1f3da8fc9df021bd",
   "outstanding": [
     "hosted identity and automated recovery",
     "production key rotation and retained-key receipts",
