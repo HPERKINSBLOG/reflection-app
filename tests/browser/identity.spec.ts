@@ -50,7 +50,7 @@ test('complete downloaded kit recovers the same account in a new browser without
   expect(kit.instructions).not.toContain('encryption keys');
   await page.getByLabel('I have saved the complete kit with the handle and codes.').check();
   await page.getByRole('button', { name: 'Continue', exact: true }).click();
-  await expect(page.getByRole('heading', { name: 'Your readings' })).toBeVisible();
+  await expect(page.getByRole('region', { name: 'Your readings', exact: true })).toBeVisible();
   const before = apiSchemas.SessionView.parse(
     await page.evaluate(async () => (await fetch('/api/v1/me')).json()),
   );
@@ -64,7 +64,7 @@ test('complete downloaded kit recovers the same account in a new browser without
   await openAccount(page);
   await page.getByRole('button', { name: 'Sign out', exact: true }).click();
   await page.getByRole('button', { name: 'Sign in with a passkey' }).click();
-  await expect(page.getByRole('heading', { name: 'Your readings' })).toBeVisible();
+  await expect(page.getByRole('region', { name: 'Your readings', exact: true })).toBeVisible();
   await original.cdp.send('WebAuthn.removeVirtualAuthenticator', {
     authenticatorId: original.authenticatorId,
   });
@@ -120,7 +120,9 @@ test('complete downloaded kit recovers the same account in a new browser without
     .getByLabel('I have saved the complete kit with the handle and codes.')
     .check();
   await recoveredPage.getByRole('button', { name: 'Continue', exact: true }).click();
-  await expect(recoveredPage.getByRole('heading', { name: 'Your readings' })).toBeVisible();
+  await expect(
+    recoveredPage.getByRole('region', { name: 'Your readings', exact: true }),
+  ).toBeVisible();
   await recoveredPage.screenshot({ path: '/tmp/reflection-identity-mobile.png', fullPage: true });
   expect(faults).toEqual([]);
   expect(outbound).toEqual([]);
@@ -195,7 +197,7 @@ test('an explicitly invalidated session clears a replacement kit after rotation'
   await downloaded;
   await page.getByLabel('I have saved the complete kit with the handle and codes.').check();
   await page.getByRole('button', { name: 'Continue', exact: true }).click();
-  await expect(page.getByRole('heading', { name: 'Your readings' })).toBeVisible();
+  await expect(page.getByRole('region', { name: 'Your readings', exact: true })).toBeVisible();
   await openAccount(page);
   let invalidated = false;
   await page.route('**/api/v1/auth/recovery-codes', async (route) => {

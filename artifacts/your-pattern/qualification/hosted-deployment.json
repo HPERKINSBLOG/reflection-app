@@ -1,0 +1,73 @@
+{
+  "metadata": {
+    "main_module": "worker.js",
+    "compatibility_date": "2026-10-23",
+    "compatibility_flags": [
+      "nodejs_compat"
+    ],
+    "bindings": [
+      {
+        "type": "plain_text",
+        "name": "TOKEN_SHA256",
+        "text": "ef872666df32df9224de90043f917c4ca9a50edd36ddc23f5b1c6ef3fb45913c"
+      }
+    ],
+    "limits": {
+      "cpu_ms": 30000
+    },
+    "observability": {
+      "enabled": true,
+      "head_sampling_rate": 1,
+      "logs": {
+        "enabled": true,
+        "invocation_logs": true
+      }
+    },
+    "tags": [
+      "reflection-qualification",
+      "synthetic-only",
+      "temporary-20261105"
+    ]
+  },
+  "result": {
+    "created_on": "2026-11-05T16:36:15.274367Z",
+    "modified_on": "2026-11-05T16:46:37.119729Z",
+    "id": "reflection-pattern-qualification-20261105",
+    "tag": "44ca552a3f024be5b7e736e37eb124d3",
+    "entry_point": "worker.js",
+    "tags": [
+      "reflection-qualification",
+      "synthetic-only",
+      "temporary-20261105"
+    ],
+    "deployment_id": "a5e7f5e8657c4c768eb8f954082a4bda",
+    "tail_consumers": null,
+    "logpush": false,
+    "observability": {
+      "enabled": true,
+      "head_sampling_rate": 1,
+      "logs": {
+        "enabled": true,
+        "head_sampling_rate": null,
+        "persist": null,
+        "invocation_logs": true
+      }
+    },
+    "has_assets": false,
+    "has_modules": true,
+    "etag": "17bd46510050fb67bf72f7b6eb23c9d2deeaeb30aaa7588bbe56aa5b5a118ec8",
+    "handlers": [
+      "fetch"
+    ],
+    "last_deployed_from": "api",
+    "compatibility_date": "2026-10-23",
+    "compatibility_flags": [
+      "nodejs_compat"
+    ],
+    "usage_model": "standard",
+    "limits": {
+      "cpu_ms": 30000
+    },
+    "startup_time_ms": 75
+  }
+}

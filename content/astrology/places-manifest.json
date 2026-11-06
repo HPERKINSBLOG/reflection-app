@@ -1,0 +1,26 @@
+{
+  "version": "geonames-cities15000.v1",
+  "retrievedAt": "2026-11-05T12:39:14.897Z",
+  "sources": [
+    {
+      "url": "https://download.geonames.org/export/dump/cities15000.zip",
+      "extractedFile": "cities15000.txt",
+      "sha256": "d5279a10a5c02beab103602f8900babadb2fbfea8b9e4c905c5573b3b291732b"
+    },
+    {
+      "url": "https://download.geonames.org/export/dump/admin1CodesASCII.txt",
+      "extractedFile": "admin1CodesASCII.txt",
+      "sha256": "2e4867f5397acb056ea26377601b57af37cb4c81399770225018e9e439e91ad3"
+    },
+    {
+      "url": "https://download.geonames.org/export/dump/countryInfo.txt",
+      "extractedFile": "countryInfo.txt",
+      "sha256": "79f8f59ea01cbb40438bf1856dd6c2ff201f03f8fc72d0530b2646aaf603ef04"
+    }
+  ],
+  "archiveSha256": "6e5bb17e2c265df549ca7d8cae1762d8cf4ce04a9edca9426c2cdbf378b42c0e",
+  "artifactSha256": "bd97a7bc246eb7d22390a11e9d01aad1cae4b14dcb8539d02bd9ceebbda889f0",
+  "tzdbVersion": "2026f",
+  "attribution": "GeoNames, CC BY 4.0. https://www.geonames.org/ https://creativecommons.org/licenses/by/4.0/",
+  "scope": "Cities over 15,000 population or capitals. Missing localities require manual confirmation; coordinates and historical time zones may need correction."
+}

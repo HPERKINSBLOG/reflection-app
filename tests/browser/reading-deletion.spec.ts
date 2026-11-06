@@ -110,8 +110,11 @@ test('an offline request checks its receipt before resending and preserves an un
 }) => {
   await account(page, '192.0.2.214');
   const other = await savedReading(page, 'Keep this unrelated reading.');
-  await page.getByRole('button', { name: 'Saved readings', exact: true }).click();
-  await page.getByRole('button', { name: 'New reading', exact: true }).click();
+  await page.getByRole('button', { name: 'Journal', exact: true }).click();
+  await page
+    .getByRole('navigation', { name: 'Reading actions' })
+    .getByRole('button', { name: 'Tarot', exact: true })
+    .click();
   await page.getByLabel('Your question', { exact: true }).fill('Delete only this reading.');
   await page.getByLabel('Use English for this reading').check();
   await page.getByRole('button', { name: 'Start reading', exact: true }).click();
@@ -206,7 +209,7 @@ test('pending deletion, unavailable status and missing backup expiry keep the re
   await expect(page.getByRole('heading', { name: 'Deletion not confirmed' })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Retry deletion', exact: true })).toHaveCount(0);
   await check.click();
-  await expect(page.getByRole('heading', { name: 'Saved readings', exact: true })).toBeFocused();
+  await expect(page.getByRole('heading', { name: 'Your journal', exact: true })).toBeFocused();
   await expect(page.getByRole('heading', { name: 'Reading deleted', exact: true })).toBeVisible();
   await expect(page.getByText(/A backup expiry date has not been confirmed yet/)).toBeVisible();
   const statusResponse = page.waitForResponse('**/api/v1/deletions/*');

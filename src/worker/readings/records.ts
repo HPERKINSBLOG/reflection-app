@@ -5,6 +5,12 @@ import { assertion } from '../identity/checkpoint.ts';
 import { statement as q, DB_NOW } from '../db/core.ts';
 import { availableSession, iso, type RecordBase, RecordError, type SessionRow } from './base.ts';
 import { pendingImportedQuestion } from './import-copies.ts';
+import {
+  importedNativeRecord,
+  nativeImportGuard,
+  nativeImportSource,
+  unavailableNativeImport,
+} from './import-availability.ts';
 export const Question = z.strictObject({ v: z.literal(1), text: z.string().max(10000).nullable() });
 // Include the newest bounded request summaries in chronological display order.
 // Each request has its own independently paginated export receipt.
@@ -116,7 +122,7 @@ export class ReadingRecords {
     const account = await this.base.account(session);
     const row = await q(
       this.base.db,
-      'SELECT e.*,c.state AS content_state FROM reading_editions e LEFT JOIN content_editions c ON c.hash=e.content_hash WHERE e.owner_id=? AND e.id=?',
+      'SELECT e.*,coalesce(c.state,p.state) AS content_state FROM reading_editions e LEFT JOIN content_editions c ON c.hash=e.content_hash LEFT JOIN pattern_content_releases p ON p.hash=e.pattern_content_hash WHERE e.owner_id=? AND e.id=?',
       session.subjectId,
       id,
     ).first<{
@@ -129,6 +135,7 @@ export class ReadingRecords {
       content_state: string | null;
       body_enc: string | null;
       key_version: number;
+      pattern_content_hash: string | null;
     }>();
     if (!row) throw new RecordError(404, 'NOT_FOUND');
     await this.base.ownedSession(session, row.session_id);
@@ -157,22 +164,41 @@ export class ReadingRecords {
       result.editionId !== id ||
       result.sessionId !== row.session_id ||
       result.editionNumber !== row.edition_number ||
+      (result.kind === 'astrology.pattern.accepted.v1' &&
+        (row.mode !== 'pattern' ||
+          result.chapter.releaseHash !== row.pattern_content_hash ||
+          row.parent_edition_id !== null)) ||
+      (row.mode === 'pattern' && result.kind !== 'astrology.pattern.accepted.v1') ||
       ('provenance' in result && result.parentEditionId !== row.parent_edition_id)
     )
       throw new RecordError(503, 'KEY_UNAVAILABLE');
+    const original =
+      result.kind === 'legacy.imported.v1'
+        ? importedNativeRecord(result.record.originalJsonText)
+        : null;
+    if (original && (await unavailableNativeImport(this.base, session.subjectId, original)))
+      throw new RecordError(410, 'CONTENT_UNAVAILABLE');
+    const importedSource = original
+      ? nativeImportSource(session.subjectId, original)?.editionId
+      : undefined;
     try {
       await this.base.checkedSession(session, row.session_id, account.data_revision, [
+        ...(importedSource
+          ? [nativeImportGuard(this.base, session.subjectId, [importedSource])]
+          : []),
         assertion(
           this.base.db,
-          "EXISTS(SELECT 1 FROM reading_editions e LEFT JOIN content_editions c ON c.hash=e.content_hash WHERE e.owner_id=? AND e.id=? AND e.status IN ('accepted','imported') AND (c.state IS NULL OR c.state!='withdrawn'))",
+          "EXISTS(SELECT 1 FROM reading_editions e LEFT JOIN content_editions c ON c.hash=e.content_hash LEFT JOIN pattern_content_releases p ON p.hash=e.pattern_content_hash WHERE e.owner_id=? AND e.id=? AND e.status IN ('accepted','imported') AND (c.state IS NULL OR c.state!='withdrawn') AND (p.state IS NULL OR p.state!='withdrawn'))",
           session.subjectId,
           id,
         ),
       ]);
     } catch (error) {
+      if (original && (await unavailableNativeImport(this.base, session.subjectId, original)))
+        throw new RecordError(410, 'CONTENT_UNAVAILABLE');
       const current = await q(
         this.base.db,
-        "SELECT 1 FROM reading_editions e LEFT JOIN content_editions c ON c.hash=e.content_hash WHERE e.owner_id=? AND e.id=? AND (e.status NOT IN ('accepted','imported') OR c.state='withdrawn')",
+        "SELECT 1 FROM reading_editions e LEFT JOIN content_editions c ON c.hash=e.content_hash LEFT JOIN pattern_content_releases p ON p.hash=e.pattern_content_hash WHERE e.owner_id=? AND e.id=? AND (e.status NOT IN ('accepted','imported') OR c.state='withdrawn' OR p.state='withdrawn')",
         session.subjectId,
         id,
       ).first();
@@ -181,11 +207,23 @@ export class ReadingRecords {
     }
     return result;
   }
-  async history(session: Session, status = 'saved', limit = 20, cursor: string | null = null) {
-    if (!['open', 'saved'].includes(status) || !Number.isInteger(limit) || limit < 1 || limit > 50)
+  async history(
+    session: Session,
+    status = 'saved',
+    limit = 20,
+    cursor: string | null = null,
+    method = 'all',
+  ) {
+    if (
+      !['open', 'saved'].includes(status) ||
+      !['all', 'tarot', 'astrology', 'imported'].includes(method) ||
+      !Number.isInteger(limit) ||
+      limit < 1 ||
+      limit > 50
+    )
       throw new RecordError(400, 'BAD_INPUT');
     const account = await this.base.account(session),
-      scope = ['history', status, limit];
+      scope = ['history', status, limit, method];
     const point = cursor
       ? await this.base.parseCursor(
           session,
@@ -196,13 +234,19 @@ export class ReadingRecords {
       : null;
     const rows = await q(
       this.base.db,
-      `SELECT s.*, EXISTS(SELECT 1 FROM reading_editions e WHERE e.owner_id=s.owner_id AND e.session_id=s.id AND e.mode='legacy') AS imported, (SELECT id FROM reading_editions WHERE owner_id=s.owner_id AND session_id=s.id AND status!='deleted' ORDER BY edition_number DESC LIMIT 1) AS edition_id, (SELECT id FROM generation_requests WHERE owner_id=s.owner_id AND session_id=s.id ORDER BY created_at DESC,id DESC LIMIT 1) AS request_id FROM reading_sessions s WHERE s.owner_id=? AND s.status=? AND ${availableSession}${point ? ' AND (s.created_at<? OR (s.created_at=? AND s.id<?))' : ''} ORDER BY s.created_at DESC,s.id DESC LIMIT ?`,
+      `SELECT s.*, EXISTS(SELECT 1 FROM reading_editions e WHERE e.owner_id=s.owner_id AND e.session_id=s.id AND e.mode='legacy') AS imported, (SELECT id FROM reading_editions WHERE owner_id=s.owner_id AND session_id=s.id AND status!='deleted' ORDER BY edition_number DESC LIMIT 1) AS edition_id, (SELECT id FROM generation_requests WHERE owner_id=s.owner_id AND session_id=s.id ORDER BY created_at DESC,id DESC LIMIT 1) AS request_id FROM reading_sessions s WHERE s.owner_id=? AND s.status=? AND ${availableSession}${method === 'all' ? '' : ' AND s.method=?'}${point ? ' AND (s.created_at<? OR (s.created_at=? AND s.id<?))' : ''} ORDER BY s.created_at DESC,s.id DESC LIMIT ?`,
       session.subjectId,
       status,
+      ...(method === 'all' ? [] : [method]),
       ...(point ? [point.at, point.at, point.id] : []),
       limit + 1,
     ).all<
-      SessionRow & { edition_id: string | null; request_id: string | null; imported: number }
+      SessionRow & {
+        method: 'tarot' | 'astrology' | 'imported';
+        edition_id: string | null;
+        request_id: string | null;
+        imported: number;
+      }
     >();
     const items = [];
     for (const row of rows.results.slice(0, limit)) {
@@ -214,6 +258,7 @@ export class ReadingRecords {
       }
       items.push({
         id: row.id,
+        method: row.method,
         revision: row.revision,
         questionPreview: question === null ? null : preview,
         questionTruncated: question !== null && question.length > preview.length,

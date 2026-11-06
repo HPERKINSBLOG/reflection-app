@@ -1,11 +1,7 @@
-import {
-  Button,
-  Input,
-  ReflectionCard,
-  ReflectionField,
-  TextLink,
-  TopicChip,
-} from './design/components.tsx';
+import { createPortal } from 'react-dom';
+import { PatternWorkspace, type PatternHandle } from './astrology/pattern.tsx';
+import type { BirthDraft } from '../contracts/astrology.ts';
+import { Button, Input, ReflectionCard, ReflectionField, TextLink } from './design/components.tsx';
 import {
   type MouseEvent,
   type ReactNode,
@@ -25,7 +21,10 @@ import {
   type AnyAcceptedReading,
   type ImportedReading,
   type Reflection,
+  type PatternReadingV1,
 } from '../contracts/index.ts';
+import { Journal, type JournalMethod } from './journal.tsx';
+import { PatternReading } from './astrology/pattern-reading.tsx';
 import { READING_PRODUCT_COPY, SPREAD_PHOTO_COPY } from '../contracts/product-copy.ts';
 import { api, ApiFailure } from './api.ts';
 import {
@@ -43,10 +42,10 @@ import {
 import { ReadingDeletion, type ReadingDeletionTarget } from './reading-deletion.tsx';
 import { date } from './date.ts';
 import { Notice, type NoticeMessage } from './notice.tsx';
-import { cardName } from './card-names.ts';
 import { Art } from './art.tsx';
 import { Icon } from './icon.tsx';
-import { CardFace, CardThumbnail } from './card-face.tsx';
+import { ReturnInterpretation } from './return-interpretation.tsx';
+import returnBotanical from './design/art/return/header-botanical.png';
 import { RevisitNotes, type RevisitNotesHandle } from './revisit-notes.tsx';
 import {
   FollowUp,
@@ -144,9 +143,12 @@ export interface WorkspaceHandle {
 export function ReadingWorkspace({
   ref,
   resume,
+  restoredBirth,
+  onRestoreConsumed,
   user,
   live = false,
   runtimeMode = null,
+  patternReady = false,
   connectionRetry,
   onSession,
   onExpired,
@@ -154,9 +156,12 @@ export function ReadingWorkspace({
 }: {
   ref?: Ref<WorkspaceHandle>;
   resume: WorkspaceResume | null;
+  restoredBirth?: BirthDraft | null;
+  onRestoreConsumed?: () => void;
   user: View;
   live?: boolean | null;
   runtimeMode?: string | null;
+  patternReady?: boolean;
   connectionRetry: ReactNode;
   onSession: (value: View) => void;
   onExpired: () => void;
@@ -171,7 +176,9 @@ export function ReadingWorkspace({
     () => Boolean(requestFromPath()) || Boolean(resume?.request?.pending),
   );
   const [navigationVersion, setNavigationVersion] = useState(0);
-  const [mode, setMode] = useState<'history' | 'new' | 'followup' | 'reading' | 'request'>(() =>
+  const [mode, setMode] = useState<
+    'history' | 'new' | 'followup' | 'reading' | 'request' | 'pattern'
+  >(() =>
     requestFromPath()
       ? 'request'
       : followUpFromPath()
@@ -180,8 +187,11 @@ export function ReadingWorkspace({
           ? 'reading'
           : window.location.pathname === '/new'
             ? 'new'
-            : 'history',
+            : window.location.pathname === '/astrology/pattern'
+              ? 'pattern'
+              : 'history',
   );
+  const patternWorkspace = useRef<PatternHandle>(null);
   const shownPath = useRef(window.location.pathname);
   const resumeTarget = useRef(request?.target ?? null);
   const replacePath = (path: string) => {
@@ -194,6 +204,8 @@ export function ReadingWorkspace({
   const historyHeading = useRef<HTMLHeadingElement>(null);
   const focusHistoryOnCommit = useRef<string | null>(null);
   const [history, setHistory] = useState<History | null>(null);
+  const [journalMethod, setJournalMethod] = useState<JournalMethod>('all');
+  const journalFilter = useRef<JournalMethod>('all');
   const [historyRetry, setHistoryRetry] = useState<{ cursor: string | null } | null>(null);
   useLayoutEffect(() => {
     if (mode === 'history' && focusHistoryOnCommit.current) {
@@ -217,6 +229,7 @@ export function ReadingWorkspace({
   > | null>(null);
   const [imported, setImported] = useState<z.infer<typeof ImportedReading> | null>(null);
   const [reading, setReading] = useState<z.infer<typeof AnyAcceptedReading> | null>(null);
+  const [pattern, setPattern] = useState<PatternReadingV1 | null>(null);
   useLayoutEffect(() => {
     const jumpToNotes = window.location.hash === '#revisit-notes';
     if (mode === 'reading' && selectedEditionId && (focusResultOnCommit.current || jumpToNotes)) {
@@ -289,6 +302,7 @@ export function ReadingWorkspace({
   const [busy, setBusy] = useState(false),
     [message, setMessage] = useState<NoticeMessage | null>(null),
     [conflict, setConflict] = useState(false);
+  const [journalNavigationPending, setJournalNavigationPending] = useState(false);
   const [deletionTarget, setDeletionTarget] = useState<ReadingDeletionTarget | null>(null);
   const activeDeletion = useRef(deletionTarget);
   activeDeletion.current = deletionTarget;
@@ -323,6 +337,7 @@ export function ReadingWorkspace({
   const dirtyReflection =
     draft !== (reflection?.text ?? '') || stance !== (reflection?.stance ?? 'unspecified');
   const canLeave = () => {
+    if (mode === 'pattern') return patternWorkspace.current?.confirmLeave() ?? true;
     if (mode === 'followup' && !questionSubmitted && (question.trim() || context.count))
       return window.confirm(
         'Discard your unsaved follow-up? Choose Cancel to stay and keep editing.',
@@ -340,6 +355,7 @@ export function ReadingWorkspace({
   };
   const hasUnsavedWriting = useRef<() => boolean>(() => false);
   hasUnsavedWriting.current = () =>
+    (mode === 'pattern' && Boolean(patternWorkspace.current?.hasUnsavedChanges())) ||
     (mode === 'reading' &&
       (dirtyReflection || Boolean(revisitNotes.current?.hasUnsavedChanges()))) ||
     (!questionSubmitted &&
@@ -385,6 +401,7 @@ export function ReadingWorkspace({
     setSelectedEditionId(null);
     selectedTarget.current = null;
     setReading(null);
+    setPattern(null);
     setImported(null);
     setUnavailable(null);
     setReflection(null);
@@ -416,11 +433,15 @@ export function ReadingWorkspace({
     }
     return view;
   };
-  const loadHistory = async (current: Current, cursor: string | null = null) => {
+  const loadHistory = async (
+    current: Current,
+    cursor: string | null = null,
+    method = journalFilter.current,
+  ) => {
     setHistoryRetry(null);
     try {
       const result = await api(
-        `/sessions?status=saved${cursor ? `&cursor=${encodeURIComponent(cursor)}` : ''}`,
+        `/sessions?status=saved&method=${method}${cursor ? `&cursor=${encodeURIComponent(cursor)}` : ''}`,
         apiSchemas.HistoryPage,
       );
       if (!current()) return;
@@ -521,6 +542,7 @@ export function ReadingWorkspace({
     setRecord(session);
     setSelectedEditionId(editionId);
     setReading(accepted ? content : null);
+    setPattern(content?.kind === 'astrology.pattern.accepted.v1' ? content : null);
     setMode(forFollowUp ? 'followup' : 'reading');
     // Session requests are capped and do not identify their edition. Only use a
     // request already associated with this selection or its accepted content.
@@ -559,8 +581,9 @@ export function ReadingWorkspace({
       setEraseRevisionChecked(false);
     }
     setDeletionTarget(null);
+    return note;
   };
-  const run = async (action: (current: Current) => Promise<void>) => {
+  const run = async (action: (current: Current) => Promise<unknown>) => {
     if (inFlight.current) return;
     inFlight.current = true;
     const version = ++epoch.current;
@@ -636,6 +659,7 @@ export function ReadingWorkspace({
     epoch.current++;
     inFlight.current = false;
     setBusy(false);
+    setJournalNavigationPending(false);
     setMessage(null);
     const previousEdition = selectedTarget.current;
     clearReading();
@@ -649,7 +673,9 @@ export function ReadingWorkspace({
           ? 'reading'
           : path === '/new'
             ? 'new'
-            : 'history';
+            : path === '/astrology/pattern'
+              ? 'pattern'
+              : 'history';
     setRequest(restored);
     resumeTarget.current = restored?.target ?? null;
     setRequestPending(Boolean(restored));
@@ -679,7 +705,12 @@ export function ReadingWorkspace({
     alive.current = true;
     loadLocation();
     const focus = () => {
-      if (currentMode.current === 'request' || activeDeletion.current) return;
+      if (
+        currentMode.current === 'request' ||
+        currentMode.current === 'pattern' ||
+        activeDeletion.current
+      )
+        return;
       void runRef.current((current) =>
         currentMode.current === 'reading' && selected.current
           ? openRef.current(selected.current.id, current, true)
@@ -723,9 +754,9 @@ export function ReadingWorkspace({
       });
   };
   const saveReflection = () => {
-    if (record && reading && !conflict)
+    if (record && selectedEditionId && !conflict)
       void run(async (current) => {
-        const body = { text: draft, stance, editionId: reading.editionId };
+        const body = { text: draft, stance, editionId: selectedEditionId };
         try {
           const result = await api(
             reflection ? `/reflections/${reflection.id}` : `/sessions/${record.id}/reflections`,
@@ -918,9 +949,75 @@ export function ReadingWorkspace({
         href={`${editionPath(record.id, reading.editionId)}/follow-up`}
         onClick={editionNavigation}
       >
-        Follow up on this edition
+        Ask a follow-up
       </TextLink>
     ) : null;
+  const workspaceNavigation = (
+    <nav className="reading-navigation" aria-label="Reading actions" hidden={!!deletionTarget}>
+      <Button
+        variant="text-button"
+        aria-current={mode === 'pattern' ? 'page' : undefined}
+        disabled={busy || requestPending}
+        onClick={() => {
+          if (!canLeave()) return;
+          clearReading();
+          setMode('pattern');
+          replacePath('/astrology/pattern');
+          setMessage(null);
+        }}
+      >
+        Astrology
+      </Button>
+      <Button
+        type="button"
+        aria-current={mode === 'new' ? 'page' : undefined}
+        disabled={busy || !user.permission.modelAllowed || requestPending || live === null}
+        onClick={() => {
+          if (!canLeave()) return;
+          // A deliberate new reading is a new intent, even if the question is unchanged.
+          intents.current.delete('start');
+          resetContext();
+          clearReading();
+          setMode('new');
+          setRequest(null);
+          resumeTarget.current = null;
+          setQuestionSubmitted(false);
+          if (mode === 'followup') {
+            setQuestion('');
+            setEnglish(false);
+          }
+          replacePath('/new');
+          setMessage(null);
+        }}
+      >
+        Tarot
+      </Button>
+      <Button
+        type="button"
+        variant="secondary"
+        aria-current={mode === 'history' ? 'page' : undefined}
+        disabled={busy}
+        onClick={() => {
+          if (!canLeave()) return;
+          void run(async (current) => {
+            setJournalNavigationPending(true);
+            try {
+              await loadHistory(current);
+              if (current()) {
+                setMode('history');
+                replacePath('/');
+                clearReading();
+              }
+            } finally {
+              if (current()) setJournalNavigationPending(false);
+            }
+          });
+        }}
+      >
+        Journal
+      </Button>
+    </nav>
+  );
   return (
     <section className="reading-workspace" aria-label="Your readings" aria-busy={busy}>
       {!deletionTarget && live === null && mode !== 'new' && (
@@ -932,7 +1029,7 @@ export function ReadingWorkspace({
           {connectionRetry}
         </div>
       )}
-      {!deletionTarget && !user.permission.modelAllowed && (
+      {!deletionTarget && mode !== 'pattern' && !pattern && !user.permission.modelAllowed && (
         <p className="notice">
           <Icon name="info" />
           <span>
@@ -945,51 +1042,9 @@ export function ReadingWorkspace({
           </span>
         </p>
       )}
-      <nav className="reading-navigation" aria-label="Reading actions" hidden={!!deletionTarget}>
-        <Button
-          type="button"
-          variant="secondary"
-          aria-current={mode === 'history' ? 'page' : undefined}
-          disabled={busy}
-          onClick={() => {
-            if (!canLeave()) return;
-            void run(async (current) => {
-              await loadHistory(current);
-              if (current()) {
-                setMode('history');
-                replacePath('/');
-                clearReading();
-              }
-            });
-          }}
-        >
-          Saved readings
-        </Button>
-        <Button
-          type="button"
-          aria-current={mode === 'new' ? 'page' : undefined}
-          disabled={busy || !user.permission.modelAllowed || requestPending || live === null}
-          onClick={() => {
-            if (!canLeave()) return;
-            // A deliberate new reading is a new intent, even if the question is unchanged.
-            intents.current.delete('start');
-            resetContext();
-            clearReading();
-            setMode('new');
-            setRequest(null);
-            resumeTarget.current = null;
-            setQuestionSubmitted(false);
-            if (mode === 'followup') {
-              setQuestion('');
-              setEnglish(false);
-            }
-            replacePath('/new');
-            setMessage(null);
-          }}
-        >
-          New reading
-        </Button>
-      </nav>
+      {document.getElementById('workspace-navigation')
+        ? createPortal(workspaceNavigation, document.getElementById('workspace-navigation')!)
+        : workspaceNavigation}
       <Notice message={deletionTarget ? null : message} />
       {busy && !loadingFirstPage && !deletionTarget && (
         <p role="status" className="busy-line">
@@ -1030,17 +1085,76 @@ export function ReadingWorkspace({
           }}
         />
       )}
+      {mode === 'pattern' && (
+        <PatternWorkspace
+          ref={patternWorkspace}
+          csrf={user.csrfToken}
+          enabled={
+            ['synthetic-only', 'synthetic-local'].includes(runtimeMode ?? '') ||
+            (runtimeMode === 'live-preview' && patternReady)
+          }
+          navigationPending={busy}
+          initialBirth={restoredBirth ?? null}
+          {...(onRestoreConsumed ? { onRestoreConsumed } : {})}
+          onExpired={onExpired}
+          onJournal={() => {
+            setMode('history');
+            replacePath('/');
+            void run((current) => loadHistory(current));
+          }}
+          onTarot={(prompt) => {
+            resetContext();
+            clearReading();
+            setQuestion(prompt);
+            setEnglish(false);
+            clearPhoto();
+            setQuestionSubmitted(false);
+            setMode('new');
+            replacePath('/new');
+            setMessage({
+              tone: 'notice',
+              text: 'Only your selected reflection question was carried over. Review it before starting a tarot reading.',
+            });
+          }}
+          onOpen={(saved, keptDraft) =>
+            void run(async (current) => {
+              const note = await open(saved.sessionId, current, false, false, true, {
+                editionId: saved.editionId,
+              });
+              if (!current()) return;
+              replacePath(editionPath(saved.sessionId, saved.editionId));
+              if (keptDraft !== undefined) {
+                setDraft(keptDraft);
+                setLatestReflection(note ?? null);
+                setReflectionEditing(true);
+                setConflict(true);
+                setMessage({
+                  tone: 'notice',
+                  text: 'Your draft is kept. Compare it with the saved reflection, then choose which version to save.',
+                });
+              }
+            })
+          }
+        />
+      )}
       {mode === 'history' && (
-        <section className="history-section" aria-label="Saved reading history">
-          <h2
-            id="saved-readings-heading"
-            ref={historyHeading}
-            tabIndex={-1}
-            className="title-section"
-          >
-            Saved readings
-          </h2>
-          <p className="muted">Opening one does not start a new reading.</p>
+        <Journal
+          history={history}
+          method={journalMethod}
+          busy={busy}
+          loading={loadingFirstPage}
+          failed={!!historyRetry}
+          headingRef={historyHeading}
+          onMethod={(method) => {
+            journalFilter.current = method;
+            setJournalMethod(method);
+            setHistory(null);
+            void run((current) => loadHistory(current, null, method));
+          }}
+          onOpen={(id) => void run((current) => open(id, current, false, false, true, 'latest'))}
+          onMore={() => void run((current) => loadHistory(current, history?.nextCursor ?? null))}
+          onRetry={() => void run((current) => loadHistory(current, historyRetry?.cursor ?? null))}
+        >
           {readingDeletionReceipt && (
             <DeletionReceiptPanel
               key={readingDeletionReceipt.proof.receiptId}
@@ -1055,65 +1169,9 @@ export function ReadingWorkspace({
               onDismiss={() => setReadingDeletionReceipt(null)}
             />
           )}
-          {loadingFirstPage && <p role="status">Loading saved readings…</p>}
-          {historyRetry && (
-            <>
-              <Notice
-                message={{ tone: 'error', text: 'Your saved readings could not be loaded.' }}
-              />
-              <Button
-                variant="secondary"
-                disabled={busy}
-                onClick={() => void run((current) => loadHistory(current, historyRetry.cursor))}
-              >
-                Retry loading saved readings
-              </Button>
-            </>
-          )}
-          {history?.items.length === 0 && !historyRetry && !busy && (
-            <div className="empty-history">
-              <Art name="study-possibility" className="empty-history-art" />
-              <p>No saved readings yet.</p>
-            </div>
-          )}
-          {history && history.items.length > 0 && (
-            <ol className="reading-history">
-              {history.items.map((item) => (
-                <li key={item.id}>
-                  <div className="history-copy">
-                    <time dateTime={item.createdAt}>{date(item.createdAt)}</time>
-                    <Button
-                      type="button"
-                      className="history-link"
-                      id={`saved-reading-${item.id}`}
-                      disabled={busy}
-                      onClick={() =>
-                        void run((current) => open(item.id, current, false, false, true, 'latest'))
-                      }
-                    >
-                      <span>
-                        {item.questionPreview ?? 'Saved reading'}
-                        {item.imported && <small> · Imported reading</small>}
-                      </span>
-                      <Icon name="chevron" />
-                    </Button>
-                  </div>
-                </li>
-              ))}
-            </ol>
-          )}
-          {history?.nextCursor && !historyRetry && (
-            <Button
-              type="button"
-              variant="secondary"
-              disabled={busy}
-              onClick={() => void run((current) => loadHistory(current, history.nextCursor))}
-            >
-              Load more readings
-            </Button>
-          )}
-        </section>
+        </Journal>
       )}
+
       {mode === 'history' && request && (
         <Button
           type="button"
@@ -1496,16 +1554,33 @@ export function ReadingWorkspace({
       )}
       {mode === 'reading' && record && selectedEditionId && (
         <section
-          className={`reading-detail${reading ? ' reading-detail-native' : ''}`}
+          className={`reading-detail${reading ? ' reading-detail-native reading-return' : pattern ? ' reading-detail-pattern' : ''}`}
           aria-label="Reading detail"
           hidden={!!deletionTarget}
         >
           {reading && (
-            <EditionHistory
-              ids={record.editionIds}
-              reading={reading}
-              details={editionDetails.details}
-            />
+            <div className="reading-return-navigation">
+              <img
+                className="reading-return-art"
+                src={returnBotanical}
+                alt=""
+                width="582"
+                height="280"
+              />
+              <p className="return-reading-meta">
+                {record.status === 'saved' ? 'Saved reading' : 'Reading'} · Started{' '}
+                <time dateTime={record.createdAt}>{date(record.createdAt)}</time>
+                {record.status === 'saved' && (
+                  <span className="return-retention-status">Saved until you delete it.</span>
+                )}
+              </p>
+              <EditionHistory
+                ids={record.editionIds}
+                reading={reading}
+                details={editionDetails.details}
+                compact
+              />
+            </div>
           )}
           {editionDetails.failed && (
             <p className="edition-details-retry">
@@ -1520,182 +1595,26 @@ export function ReadingWorkspace({
               data-testid="accepted-reading"
               className={`accepted-reading${reading.spreadPhoto ? ' has-spread-photo' : ''}`}
             >
-              <div className="reading-header">
+              <header className="reading-header reading-return-title">
                 <div className="reading-title">
-                  <p className="test-notice">
-                    <TopicChip tone="sage">
-                      {reading.provenance.provider === 'openai'
-                        ? 'AI reading'
-                        : localRuntime
-                          ? 'Local simulated reading'
-                          : 'Simulated reading'}
-                      {reading.mode === 'template' ? ' · Prepared reflection template' : ''}
-                    </TopicChip>
-                  </p>
-                  <time
-                    dateTime={reading.editionNumber === 1 ? record.createdAt : reading.acceptedAt}
-                  >
-                    {date(reading.editionNumber === 1 ? record.createdAt : reading.acceptedAt)}
-                  </time>
-                  {reading.parentEditionId && <p>Follow-up · Edition {reading.editionNumber}</p>}
                   <h2 ref={resultHeading} tabIndex={-1}>
                     {reading.question}
                   </h2>
-                  <ReadingOrigin reading={reading} details={editionDetails.details} />
-                  {notesLink}
-                  {deletionEntry}
-                  {followUpEntry}
-                </div>
-                {!reading.spreadPhoto && <Art name="study-inquiry" className="question-art" />}
-              </div>
-              {reading.spreadPhoto && (
-                <figure
-                  className="card spread-photo-card"
-                  data-testid="spread-photo-card"
-                  aria-labelledby="reading-spread-caption"
-                >
-                  <img
-                    src={reading.spreadPhoto}
-                    alt="Uploaded tarot spread for this reading"
-                    className="spread-photo-image"
-                  />
-                  <figcaption id="reading-spread-caption" className="muted">
-                    Uploaded spread photo · Recognized 3-card spread
-                  </figcaption>
-                </figure>
-              )}
-              {reading.units.map((unit, index) => {
-                const card = reading.basis.cards.find((item) => item.position === unit.position);
-                const name =
-                  reading.kind === 'tarot.accepted.v2'
-                    ? reading.draw.find((item) => item.position === unit.position)?.name
-                    : card && cardName(reading.basis.deckEdition, card.cardId);
-                return (
-                  <section key={unit.position} className="card position-card">
-                    <div className="position-title">
-                      <span className="position-number" aria-hidden="true">
-                        {index + 1}
-                      </span>
-                      <h3>{unit.position}</h3>
-                    </div>
-                    <div className="position-body">
-                      {card && !reading.spreadPhoto && (
-                        <CardFace cardId={card.cardId} orientation={card.orientation} name={name} />
-                      )}
-                      <div className="position-copy">
-                        <div>
-                          <h4>
-                            {reading.spreadPhoto
-                              ? 'Recognized card'
-                              : reading.parentEditionId
-                                ? 'Original card'
-                                : 'Drawn card'}
-                            {name ? `: ${name}` : ''}
-                          </h4>
-                          <p className="basis-text">{unit.basisText}</p>
-                        </div>
-                        <div>
-                          <h4>Interpretation</h4>
-                          <p>{unit.interpretation}</p>
-                        </div>
-                        {'reflectionQuestion' in unit && (
-                          <div className="reflection-prompt">
-                            <h4>Reflection prompt</h4>
-                            <p>{unit.reflectionQuestion}</p>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </section>
-                );
-              })}
-              {reading.kind === 'tarot.accepted.v2' ? (
-                <div className="card reading-closing">
-                  <section>
-                    <h3>Putting it together</h3>
-                    <p>{reading.synthesis.text}</p>
-                  </section>
-                  <section>
-                    <h3>An optional next step</h3>
-                    <p>{reading.action.text}</p>
-                  </section>
-                  {reading.reflectionQuestion && (
-                    <section className="reflection-prompt">
-                      <h3>A question to consider</h3>
-                      <p>{reading.reflectionQuestion.text}</p>
-                    </section>
+                  <ReadingOrigin reading={reading} details={editionDetails.details} compact />
+                  {!reading.parentEditionId && (
+                    <p className="return-draw-note">Original three-card draw</p>
                   )}
                 </div>
-              ) : (
-                <p className="reading-closing">{reading.closing}</p>
-              )}
-              <details className="reading-sources">
-                <summary>Cards and sources</summary>
-                <h3>Traditional source material</h3>
-                <p className="muted">
-                  These sources are saved with the reading. They are separate from the
-                  interpretation and your own reflection. These meanings are unapproved development
-                  material.
-                </p>
-                {reading.basis.cards.map((card, index) => {
-                  const name =
-                    reading.kind === 'tarot.accepted.v2'
-                      ? reading.draw[index]!.name
-                      : cardName(reading.basis.deckEdition, card.cardId);
-                  const position = card.position[0]!.toUpperCase() + card.position.slice(1);
-                  return (
-                    <div key={card.id} className="source">
-                      <CardThumbnail cardId={card.cardId} orientation={card.orientation} />
-                      <div className="source-copy">
-                        <h3>
-                          {position}: {name ? `${name} (${card.cardId})` : card.cardId} ·{' '}
-                          {card.orientation}
-                        </h3>
-                        {reading.kind === 'tarot.accepted.v2' ? (
-                          <>
-                            <p>{reading.sources[index]!.meaning.core}</p>
-                            <ul>
-                              {reading.sources[index]!.meaning.distinctions.map((text) => (
-                                <li key={text}>{text}</li>
-                              ))}
-                            </ul>
-                            <p>{reading.sources[index]!.meaning.positive}</p>
-                            <p>{reading.sources[index]!.meaning.limits.join(' ')}</p>
-                            {reading.sources[index]!.meaning.imagery && (
-                              <p>
-                                {reading.sources[index]!.meaning.imagery!.text} —{' '}
-                                {reading.sources[index]!.meaning.imagery!.reference}
-                              </p>
-                            )}
-                          </>
-                        ) : (
-                          <p>{reading.sources[index]!.text}</p>
-                        )}
-                        <p className="source-attribution">
-                          {reading.sources[index]!.rights.attribution}
-                        </p>
-                        <p className="muted source-id">
-                          Source {reading.sources[index]!.id} · version{' '}
-                          {reading.sources[index]!.version}
-                        </p>
-                      </div>
-                    </div>
-                  );
-                })}
-                <p className="muted">
-                  {reading.mode === 'template'
-                    ? 'Prepared reflection template.'
-                    : reading.provenance.provider === 'openai'
-                      ? 'Generated by OpenAI.'
-                      : runtimeMode === 'hosted-synthetic'
-                        ? 'Generated by the hosted simulation.'
-                        : localRuntime
-                          ? 'Generated by the local simulation.'
-                          : 'Generated by a simulation.'}{' '}
-                  This saved text is not rewritten when you return.
-                </p>
-              </details>
+                {followUpEntry}
+              </header>
+              <ReturnInterpretation
+                reading={reading}
+                runtimeMode={runtimeMode}
+                localRuntime={localRuntime}
+              />
             </article>
+          ) : pattern ? (
+            <PatternReading reading={pattern} headingRef={resultHeading} />
           ) : imported ? (
             <ImportedReadingDetail reading={imported} headingRef={resultHeading} />
           ) : (
@@ -1725,30 +1644,33 @@ export function ReadingWorkspace({
             </ReflectionCard>
           )}
           <aside className="reading-personal-writing" aria-label="Your writing">
-            <div className={`save-reading ${record.status === 'saved' ? 'is-saved' : ''}`}>
-              {record.status === 'saved' ? (
-                <p className="saved-label">
-                  <Icon name="check" />
-                  Saved until you delete it.
-                </p>
-              ) : (
-                <>
-                  <div className="save-summary">
-                    <Icon name="clock" />
-                    <div className="save-copy">
-                      <p>
-                        <strong>Not saved</strong> · Temporary storage lasts 24 hours from creation.
-                      </p>
-                      <p className="muted">{READING_PRODUCT_COPY.saveReading}</p>
+            {(!reading || record.status !== 'saved') && (
+              <div className={`save-reading ${record.status === 'saved' ? 'is-saved' : ''}`}>
+                {record.status === 'saved' ? (
+                  <p className="saved-label">
+                    <Icon name="check" />
+                    Saved until you delete it.
+                  </p>
+                ) : (
+                  <>
+                    <div className="save-summary">
+                      <Icon name="clock" />
+                      <div className="save-copy">
+                        <p>
+                          <strong>Not saved</strong> · Temporary storage lasts 24 hours from
+                          creation.
+                        </p>
+                        <p className="muted">{READING_PRODUCT_COPY.saveReading}</p>
+                      </div>
                     </div>
-                  </div>
-                  <Button id="save-reading" type="button" onClick={save} disabled={busy}>
-                    <Icon name="bookmark" />
-                    Save reading
-                  </Button>
-                </>
-              )}
-            </div>
+                    <Button id="save-reading" type="button" onClick={save} disabled={busy}>
+                      <Icon name="bookmark" />
+                      Save reading
+                    </Button>
+                  </>
+                )}
+              </div>
+            )}
             {!reading && deletionEntry}
             <ReflectionCard
               id="personal-reflection"
@@ -1775,7 +1697,12 @@ export function ReadingWorkspace({
                     </Button>
                   </div>
                   <p className="muted">
-                    Saved {date(reflection.updatedAt)} · {stanceLabels[reflection.stance]}
+                    {reading
+                      ? reading.parentEditionId
+                        ? 'On this follow-up ·'
+                        : 'On this reading ·'
+                      : 'Saved'}{' '}
+                    {date(reflection.updatedAt)} · {stanceLabels[reflection.stance]}
                   </p>
                   <p className="saved-reflection-text">{reflection.text}</p>
                 </div>
@@ -1873,7 +1800,7 @@ export function ReadingWorkspace({
                 <Button
                   type="button"
                   onClick={saveReflection}
-                  disabled={busy || conflict || !reading || !draft.trim()}
+                  disabled={busy || conflict || !selectedEditionId || !draft.trim()}
                 >
                   Save reflection
                 </Button>
@@ -1909,6 +1836,8 @@ export function ReadingWorkspace({
               editionId={selectedEditionId}
               saved={record.status === 'saved'}
               parentExpiresAt={record.retentionExpiresAt ?? null}
+              presentation={reading ? 'return' : 'default'}
+              disabled={journalNavigationPending}
               csrfToken={user.csrfToken}
               onExpired={onExpired}
               onChanged={() => {
@@ -1919,6 +1848,12 @@ export function ReadingWorkspace({
                 });
               }}
             />
+            {reading && (
+              <div className="return-reading-actions">
+                {notesLink}
+                {deletionEntry}
+              </div>
+            )}
             {reflection && (
               <details className="deletion-actions reflection-revisions">
                 <summary>Reflection revisions</summary>

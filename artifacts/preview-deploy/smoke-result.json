@@ -1,0 +1,20 @@
+{
+  "kind": "reflection.preview-api-smoke.v1",
+  "target": "https://reflection-preview.lfd.workers.dev",
+  "startedAt": "2026-11-05T23:15:25.916Z",
+  "status": "failed",
+  "cleanup": "not-created",
+  "expectedRelease": "3a730caeb64a87cacc981f55df0558164bbe5ff77b00257d778d0045dae73e11",
+  "checks": {
+    "health": true
+  },
+  "requests": 2,
+  "paidAIRequestsMade": 0,
+  "limitations": [
+    "API-only; no browser layout or screen-reader acceptance.",
+    "Legacy import reopening does not prove native Tarot Return rendering.",
+    "No live provider generation, paid AI call, production qualification or existing-account mutation."
+  ],
+  "failureCode": "REGISTRATION_HTTP_429",
+  "finishedAt": "2026-11-05T23:15:26.957Z"
+}

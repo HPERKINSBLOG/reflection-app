@@ -12,7 +12,10 @@ test('keyboard photo attachment and removal announce their outcomes without subm
   await page.setViewportSize({ width: 320, height: 900 });
   await account(page, '192.0.2.231');
   await enableAi(page);
-  await page.getByRole('button', { name: 'New reading', exact: true }).click();
+  await page
+    .getByRole('navigation', { name: 'Reading actions' })
+    .getByRole('button', { name: 'Tarot', exact: true })
+    .click();
   await page.locator('summary', { hasText: 'Use my own spread' }).press('Enter');
   const choose = page.getByRole('button', { name: 'Choose photo', exact: true });
   await expect(choose).toHaveAccessibleDescription(/does not recognize real cards/);
@@ -59,6 +62,6 @@ test('keyboard reading deletion keeps focus through confirmation, cancellation a
   await page.keyboard.press('Tab');
   await expect(page.getByRole('button', { name: 'Delete permanently', exact: true })).toBeFocused();
   await page.keyboard.press('Enter');
-  await expect(page.getByRole('heading', { name: 'Saved readings', exact: true })).toBeFocused();
+  await expect(page.getByRole('heading', { name: 'Your journal', exact: true })).toBeFocused();
   await expect(page.getByRole('heading', { name: 'Reading deleted', exact: true })).toBeVisible();
 });

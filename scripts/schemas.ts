@@ -7,6 +7,8 @@ export const projectRoot = fileURLToPath(new URL('../', import.meta.url));
 const mirrors = {
   'docs/architecture/DOMAIN_CONTRACTS.ts': 'src/contracts/index.ts',
   'docs/architecture/revisit-policy.ts': 'src/contracts/revisit-policy.ts',
+  'docs/architecture/astrology.ts': 'src/contracts/astrology.ts',
+  'docs/architecture/astrology-policy.ts': 'src/contracts/astrology-policy.ts',
   'docs/architecture/schema.sql': 'src/worker/db/migrations/0001.sql',
   'docs/architecture/publication_guard.sql': 'src/worker/db/publication_guard.sql',
   'docs/architecture/COLUMN_REGISTRY.json': 'src/worker/db/column-registry.json',

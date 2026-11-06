@@ -1,3 +1,4 @@
+import type { BirthDraft } from '../contracts/astrology.ts';
 import { Button, Input, TextLink } from './design/components.tsx';
 import { type MouseEvent, useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import type { z } from 'zod';
@@ -74,6 +75,7 @@ function environmentNotice(mode: string | null, live: boolean | null) {
 export function IdentityApp() {
   const [live, setLive] = useState<boolean | null>(null);
   const [runtimeMode, setRuntimeMode] = useState<string | null>(null);
+  const [patternReady, setPatternReady] = useState(false);
   const connectionRequest = useRef<AbortController | null>(null);
   const [checkingConnection, setCheckingConnection] = useState(true);
   const checkConnection = useCallback(() => {
@@ -81,6 +83,7 @@ export function IdentityApp() {
     const controller = new AbortController();
     connectionRequest.current = controller;
     setCheckingConnection(true);
+    setPatternReady(false);
     void fetch('/health', { cache: 'no-store', signal: controller.signal })
       .then((response) => (response.ok ? response.json() : null))
       .then((runtime) => {
@@ -89,6 +92,9 @@ export function IdentityApp() {
           const mode = String(runtime.mode);
           const ready = 'generationReady' in runtime && runtime.generationReady === true;
           setRuntimeMode(mode);
+          setPatternReady(
+            mode === 'live-preview' && 'patternReady' in runtime && runtime.patternReady === true,
+          );
           if (mode === 'live-local' || mode === 'live-preview') setLive(true);
           if (mode === 'synthetic-only') setLive(false);
           if (ready && ['synthetic-local', 'hosted-synthetic'].includes(mode)) setLive(false);
@@ -125,6 +131,7 @@ export function IdentityApp() {
     null,
   );
   const [route, setRoute] = useState(window.location.pathname);
+  const [patternRestore, setPatternRestore] = useState<BirthDraft | null>(null);
   const [readingResume, setReadingResume] = useState<WorkspaceResume | null>(null);
   const readingsPath = readingResume?.path ?? '/';
   const [busy, setBusy] = useState(false),
@@ -151,6 +158,12 @@ export function IdentityApp() {
     heading = useRef<HTMLHeadingElement>(null);
   const receiptHeading = useRef<HTMLHeadingElement>(null);
   const hadReceipt = useRef(false);
+  const previousPasswordScreen = useRef(passwordScreen);
+  useLayoutEffect(() => {
+    if (previousPasswordScreen.current === passwordScreen) return;
+    previousPasswordScreen.current = passwordScreen;
+    heading.current?.focus();
+  }, [passwordScreen]);
   useLayoutEffect(() => {
     // The receipt and the welcome screen replace each other's primary heading.
     if (deletionReceipt) receiptHeading.current?.focus();
@@ -173,6 +186,7 @@ export function IdentityApp() {
     setConfirmingPassword(false);
     setCredentials(null);
     setReadingResume(null);
+    setPatternRestore(null);
     setHandle('');
     setCode('');
     setDownloaded(false);
@@ -487,7 +501,6 @@ export function IdentityApp() {
   const choosePasswordScreen = (screen: typeof passwordScreen) => {
     setPasswordScreen(screen);
     setMessage(null);
-    requestAnimationFrame(() => heading.current?.focus());
   };
   return (
     <div className={`app-shell${accountPage ? ' account-shell' : ''}`}>
@@ -504,6 +517,9 @@ export function IdentityApp() {
       <header className="site-header">
         <div className="shell-width">
           <Brand />
+          {session && !kit && !grant && !accountPage && (
+            <div id="workspace-navigation" inert={checking || busy} />
+          )}
           <div className="header-tools">
             <ThemeSelect />
             {session && !kit && !grant && (
@@ -560,7 +576,13 @@ export function IdentityApp() {
                 Back to readings
               </TextLink>
             )}
-            <div className="page-title">
+            <div
+              className={
+                session && !kit && !grant && !accountPage
+                  ? 'page-title sr-only workspace-title'
+                  : 'page-title'
+              }
+            >
               <div className="title-copy">
                 {deletionReceipt ? (
                   <h2>Account access</h2>
@@ -586,12 +608,11 @@ export function IdentityApp() {
                 )}
               </div>
               {kit && <Art name="study-perspective" className="title-art" />}
-              {!kit && !grant && session && (
+              {!kit && !grant && session && accountPage && (
                 <Art
-                  name={accountPage ? 'account-sprig' : 'study-stillness'}
-                  {...(accountPage ? { mobileName: 'mobile-corner' as const } : {})}
-                  className={`title-art ${accountPage ? 'account-title-art' : 'readings-title-art'}`}
-                  loading={accountPage ? 'eager' : 'lazy'}
+                  name="account-sprig"
+                  mobileName="mobile-corner"
+                  className="title-art account-title-art"
                 />
               )}
             </div>
@@ -934,6 +955,11 @@ export function IdentityApp() {
                       owner={session.subjectId}
                       csrf={session.csrfToken}
                       onExpired={expire}
+                      onRestoreProfile={(birth) => {
+                        setPatternRestore(birth);
+                        setReadingResume(null);
+                        show('/astrology/pattern');
+                      }}
                     />
                     <div className="account-tools">
                       <Button
@@ -1094,8 +1120,11 @@ export function IdentityApp() {
                   <ReadingWorkspace
                     ref={workspace}
                     resume={readingResume}
+                    restoredBirth={patternRestore}
+                    onRestoreConsumed={() => setPatternRestore(null)}
                     live={live}
                     runtimeMode={runtimeMode}
+                    patternReady={patternReady}
                     connectionRetry={connectionRetry}
                     key={session.subjectId}
                     user={session}

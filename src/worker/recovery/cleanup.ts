@@ -394,6 +394,9 @@ export class OfflineCleanup {
         'auth_challenges',
         'auth_sessions',
         'basis_snapshots',
+        'birth_profiles',
+        'astrology_admissions',
+        'pattern_saved_sources',
         'context_grants',
         'cost_reservations',
         'credentials',
@@ -429,6 +432,19 @@ export class OfflineCleanup {
       ])
         if (await q(db, `SELECT 1 FROM ${table} WHERE owner_id=? LIMIT 1`, owner).first())
           throw new Error('Account family is not erased');
+      return;
+    }
+    if (target.scope === 'birth_profile') {
+      if (
+        await q(
+          db,
+          'SELECT 1 FROM birth_profiles WHERE owner_id=? AND id=? AND revision<=? AND body_enc IS NOT NULL',
+          owner,
+          target.profileId,
+          target.revision,
+        ).first()
+      )
+        throw new Error('Birth profile is not erased');
       return;
     }
     try {

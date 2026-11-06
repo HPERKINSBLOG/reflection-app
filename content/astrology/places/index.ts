@@ -1,0 +1,25 @@
+// Generated gzip/base64 chunks. Decompressed JSON bytes retain places-manifest artifactSha256.
+import part0 from './part-0.json';
+import part1 from './part-1.json';
+import part2 from './part-2.json';
+import part3 from './part-3.json';
+import part4 from './part-4.json';
+import part5 from './part-5.json';
+import part6 from './part-6.json';
+import part7 from './part-7.json';
+import part8 from './part-8.json';
+import part9 from './part-9.json';
+import part10 from './part-10.json';
+import part11 from './part-11.json';
+import part12 from './part-12.json';
+import part13 from './part-13.json';
+import part14 from './part-14.json';
+import part15 from './part-15.json';
+import part16 from './part-16.json';
+import part17 from './part-17.json';
+import part18 from './part-18.json';
+import part19 from './part-19.json';
+import part20 from './part-20.json';
+import part21 from './part-21.json';
+import part22 from './part-22.json';
+export default [part0,part1,part2,part3,part4,part5,part6,part7,part8,part9,part10,part11,part12,part13,part14,part15,part16,part17,part18,part19,part20,part21,part22].join('');

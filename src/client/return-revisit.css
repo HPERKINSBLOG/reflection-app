@@ -1,0 +1,224 @@
+/* Native tarot's return view; other reading types retain the default note layout. */
+.revisit-notes.revisit-notes--return {
+  container-type: inline-size;
+  margin: 0;
+  padding-block-start: var(--space-6);
+  border-block-start: 1px solid var(--border-subtle);
+}
+
+.revisit-notes--return > h2 {
+  margin: 0 0 var(--space-1\.5);
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  font-weight: 600;
+  line-height: 1.4;
+  letter-spacing: normal;
+}
+
+.revisit-notes--return .revisit-intro,
+.revisit-notes--return .revisit-add-hint {
+  margin: 0;
+  color: var(--muted-foreground);
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+}
+
+.revisit-notes--return .revisit-list {
+  gap: 0;
+  margin-block: var(--space-6);
+}
+
+.revisit-notes--return .revisit-list:empty {
+  margin: 0;
+}
+
+.revisit-notes--return .revisit-note {
+  display: grid;
+  grid-template-columns: 8rem minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-6);
+  margin: 0;
+  padding: var(--space-5) 0;
+  border: 0;
+  border-block-end: 1px solid var(--border-subtle);
+  border-radius: 0;
+  color: var(--foreground);
+  background: transparent;
+  box-shadow: none;
+}
+
+.revisit-notes--return .revisit-note-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.revisit-notes--return .revisit-note h3 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  font-weight: 600;
+  line-height: 1.4;
+  letter-spacing: normal;
+}
+
+.revisit-notes--return .revisit-stance {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  max-width: 100%;
+  padding: var(--space-1) var(--space-3);
+  font-size: 0.875rem;
+  font-weight: 400;
+  line-height: 1.25rem;
+}
+
+.revisit-notes--return .revisit-stance--unsure,
+.revisit-notes--return .revisit-stance--unspecified {
+  background: color-mix(in srgb, var(--reflection-sage) 26%, var(--reflection-paper));
+}
+
+.revisit-notes--return .revisit-stance--resonates {
+  background: color-mix(in srgb, var(--reflection-mint) 52%, var(--reflection-paper));
+}
+
+.revisit-notes--return .revisit-stance img {
+  flex: 0 0 auto;
+}
+
+.revisit-notes--return .revisit-note-edited {
+  margin: 0;
+  font-size: 0.75rem;
+  line-height: 1.125rem;
+}
+
+.revisit-notes--return .authored-note {
+  min-width: 0;
+  margin: 0;
+  padding-inline-start: var(--space-6);
+  border-inline-start: 1px solid var(--border-subtle);
+  line-height: 1.5;
+}
+
+.revisit-notes--return .revisit-note-actions {
+  flex-wrap: wrap;
+  gap: var(--space-3\.5);
+  margin: 0;
+}
+
+.revisit-notes--return .revisit-note-actions button {
+  min-height: 44px;
+  padding: 0;
+  border-radius: 0;
+  font-weight: 400;
+  white-space: normal;
+}
+
+.revisit-notes--return .revisit-note-actions button + button {
+  position: relative;
+  margin-inline-start: var(--space-3\.5);
+}
+
+.revisit-notes--return .revisit-note-actions button + button::before {
+  position: absolute;
+  inset-inline-start: calc(-1 * var(--space-3\.5));
+  top: 50%;
+  height: 1.25rem;
+  border-inline-start: 1px solid var(--border-subtle);
+  content: "";
+  transform: translateY(-50%);
+}
+
+.revisit-notes--return .revisit-add {
+  gap: var(--space-2);
+  min-height: 48px;
+  margin: 0 0 var(--space-3\.5);
+}
+
+.revisit-notes--return .revisit-note-policy {
+  margin-block: var(--space-3\.5) var(--space-1);
+  color: var(--muted-foreground);
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.revisit-notes--return .revisit-note-policy summary {
+  padding-block: var(--space-3);
+  cursor: pointer;
+}
+
+.revisit-notes--return .revisit-note-policy h3 {
+  font-family: var(--font-sans);
+  font-size: 0.875rem;
+}
+
+.revisit-notes--return .revisit-note-policy li {
+  margin-block: var(--space-2);
+  overflow-wrap: anywhere;
+}
+
+.revisit-notes--return .revisit-editor {
+  margin-block: var(--space-6);
+}
+
+@container (max-width: 34rem) {
+  .revisit-notes--return .revisit-note {
+    grid-template-columns: 8rem minmax(0, 1fr);
+    column-gap: var(--space-4);
+    row-gap: var(--space-2);
+  }
+
+  .revisit-notes--return .revisit-note-meta {
+    grid-row: span 2;
+  }
+
+  .revisit-notes--return .authored-note {
+    padding-inline-start: var(--space-4);
+  }
+
+  .revisit-notes--return .revisit-note-actions {
+    grid-column: 2;
+    padding-inline-start: var(--space-4);
+  }
+}
+
+@container (max-width: 24rem) {
+  .revisit-notes--return .revisit-note {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-3);
+  }
+
+  .revisit-notes--return .revisit-note-meta {
+    grid-row: auto;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2) var(--space-3);
+  }
+
+  .revisit-notes--return .revisit-note-edited {
+    flex-basis: 100%;
+  }
+
+  .revisit-notes--return .authored-note {
+    padding: 0;
+    border: 0;
+  }
+
+  .revisit-notes--return .revisit-note-actions {
+    grid-column: 1;
+    padding: 0;
+  }
+}
+
+@media (forced-colors: active) {
+  .revisit-notes--return .revisit-note {
+    border-block-end-color: CanvasText;
+  }
+
+  .revisit-notes--return .revisit-stance {
+    border: 1px solid CanvasText;
+  }
+}

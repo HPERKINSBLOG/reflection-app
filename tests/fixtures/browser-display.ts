@@ -9,6 +9,7 @@ import {
   continuityJourneyStates,
   importReviewState,
   spreadPhotoPath,
+  patternJourneyStates,
 } from './browser-journey.ts';
 import { enableAi } from './browser-reading.ts';
 
@@ -149,7 +150,10 @@ export function displayCapture(
 export async function displayJourney(page: Page, capture: (state: string) => Promise<void>) {
   await capture('saved-empty');
   await enableAi(page);
-  await page.getByRole('button', { name: 'New reading', exact: true }).click();
+  await page
+    .getByRole('navigation', { name: 'Reading actions' })
+    .getByRole('button', { name: 'Tarot', exact: true })
+    .click();
   await page.getByLabel('Your question', { exact: true }).fill(longQuestion);
   const english = page.getByLabel('Use English for this reading');
   await english.focus();
@@ -219,8 +223,8 @@ export async function displayJourney(page: Page, capture: (state: string) => Pro
   await page.getByRole('link', { name: 'Back to readings', exact: true }).focus();
   await page.keyboard.press('Enter');
   await expect(accepted).toHaveText(original!);
-  await page.getByRole('button', { name: 'Saved readings', exact: true }).click();
-  await expect(page.getByRole('heading', { name: 'Saved readings', exact: true })).toBeVisible();
+  await page.getByRole('button', { name: 'Journal', exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'Your journal', exact: true })).toBeVisible();
   await capture('saved-populated');
   await page.getByRole('button', { name: longQuestion, exact: true }).focus();
   await page.keyboard.press('Enter');
@@ -242,4 +246,5 @@ export async function displayJourney(page: Page, capture: (state: string) => Pro
   await importReviewState(page, capture);
   await page.getByRole('link', { name: 'Back to readings', exact: true }).click();
   await expect(accepted.getByRole('heading', { name: longQuestion, exact: true })).toBeVisible();
+  await patternJourneyStates(page, capture);
 }

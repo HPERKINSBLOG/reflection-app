@@ -9,7 +9,7 @@ async function original(page: Page, ip: string) {
   return savedSnapshot(page);
 }
 async function compose(page: Page, question: string) {
-  await page.getByRole('link', { name: 'Follow up on this edition', exact: true }).click();
+  await page.getByRole('link', { name: 'Ask a follow-up', exact: true }).click();
   await expect(page.getByText('No new draw', { exact: true })).toBeVisible();
   await expect(page.getByLabel('Include reversed cards')).toHaveCount(0);
   await expect(page.getByLabel('Photo of your spread')).toHaveCount(0);
@@ -74,9 +74,13 @@ test('follow-ups keep their exact parents, questions and saved family across rel
       page.getByTestId('accepted-reading').getByRole('heading', { name: title!, exact: true }),
     ).toBeVisible();
     await expect(page.getByText('Saved until you delete it.', { exact: true })).toBeVisible();
-    await expect(page.getByRole('button', { name: 'New reading', exact: true })).toBeDisabled();
+    await expect(
+      page
+        .getByRole('navigation', { name: 'Reading actions' })
+        .getByRole('button', { name: 'Tarot', exact: true }),
+    ).toBeDisabled();
   }
-
+  await page.getByText('Parent and original reading', { exact: true }).click();
   await expect(
     page.getByRole('link', { name: 'Open parent edition', exact: true }),
   ).toHaveAttribute('href', `/saved/${saved.session.id}/${second.reading.editionId}`);
@@ -93,7 +97,7 @@ test('follow-ups keep their exact parents, questions and saved family across rel
       .first(),
   ).toBeVisible();
   await page.getByRole('button', { name: 'Delete permanently', exact: true }).click();
-  await expect(page.getByRole('heading', { name: 'Saved readings', exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Your journal', exact: true })).toBeVisible();
   for (const edition of third.session.editionIds) {
     const response = await page.request.get(`/api/v1/readings/${edition}`);
     expect([404, 410]).toContain(response.status());

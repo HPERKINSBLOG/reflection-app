@@ -1,0 +1,364 @@
+[
+  {
+    "input": {
+      "kind": "astrology.natal.v2",
+      "calendar": "gregorian",
+      "zodiac": "tropical",
+      "houses": "not_calculated",
+      "birth": {
+        "date": "1992-10-12",
+        "place": {
+          "source": "manual",
+          "label": "Kathmandu",
+          "latitudeDeg": 27.7,
+          "longitudeEastDeg": 85.3,
+          "zone": "Asia/Kathmandu"
+        },
+        "time": {
+          "certainty": "exact",
+          "localTime": "08:30"
+        },
+        "historicalZoneConfirmed": false
+      }
+    },
+    "resolved": {
+      "kind": "instant",
+      "certainty": "exact",
+      "at": "1992-10-12T02:45:00.000Z",
+      "offsetSeconds": 20700,
+      "fold": "unambiguous",
+      "historicalZone": false
+    },
+    "semanticHash": "329b83236586215d6fae2bccf60406a398897cc59d7d3e5b70240f3e0c126768",
+    "placements": [
+      {
+        "status": "supported",
+        "id": "sign:sun",
+        "body": "sun",
+        "sign": "libra",
+        "representativeLongitudeDeg": 199.030534199,
+        "maximumDeviationDeg": 1e-9,
+        "guardDeg": 0.05
+      },
+      {
+        "status": "supported",
+        "id": "sign:moon",
+        "body": "moon",
+        "sign": "aries",
+        "representativeLongitudeDeg": 23.18555467,
+        "maximumDeviationDeg": 1e-9,
+        "guardDeg": 0.05
+      },
+      {
+        "status": "supported",
+        "id": "sign:mercury",
+        "body": "mercury",
+        "sign": "scorpio",
+        "representativeLongitudeDeg": 216.982505233,
+        "maximumDeviationDeg": 1e-9,
+        "guardDeg": 0.05
+      },
+      {
+        "status": "supported",
+        "id": "sign:venus",
+        "body": "venus",
+        "sign": "scorpio",
+        "representativeLongitudeDeg": 230.719648491,
+        "maximumDeviationDeg": 1e-9,
+        "guardDeg": 0.05
+      },
+      {
+        "status": "supported",
+        "id": "sign:mars",
+        "body": "mars",
+        "sign": "cancer",
+        "representativeLongitudeDeg": 105.34075792,
+        "maximumDeviationDeg": 1e-9,
+        "guardDeg": 0.05
+      },
+      {
+        "status": "supported",
+        "id": "sign:jupiter",
+        "body": "jupiter",
+        "sign": "libra",
+        "representativeLongitudeDeg": 180.327441178,
+        "maximumDeviationDeg": 1e-9,
+        "guardDeg": 0.05
+      },
+      {
+        "status": "supported",
+        "id": "sign:saturn",
+        "body": "saturn",
+        "sign": "aquarius",
+        "representativeLongitudeDeg": 311.833254481,
+        "maximumDeviationDeg": 1e-9,
+        "guardDeg": 0.05
+      },
+      {
+        "status": "supported",
+        "id": "sign:uranus",
+        "body": "uranus",
+        "sign": "capricorn",
+        "representativeLongitudeDeg": 284.198302375,
+        "maximumDeviationDeg": 1e-9,
+        "guardDeg": 0.05
+      },
+      {
+        "status": "supported",
+        "id": "sign:neptune",
+        "body": "neptune",
+        "sign": "capricorn",
+        "representativeLongitudeDeg": 286.238489397,
+        "maximumDeviationDeg": 1e-9,
+        "guardDeg": 0.05
+      },
+      {
+        "status": "supported",
+        "id": "sign:pluto",
+        "body": "pluto",
+        "sign": "scorpio",
+        "representativeLongitudeDeg": 231.562928347,
+        "maximumDeviationDeg": 1e-9,
+        "guardDeg": 0.05
+      }
+    ]
+  },
+  {
+    "input": {
+      "kind": "astrology.natal.v2",
+      "calendar": "gregorian",
+      "zodiac": "tropical",
+      "houses": "not_calculated",
+      "birth": {
+        "date": "1992-10-12",
+        "place": {
+          "source": "manual",
+          "label": "Kathmandu",
+          "latitudeDeg": 27.7,
+          "longitudeEastDeg": 85.3,
+          "zone": "Asia/Kathmandu"
+        },
+        "time": {
+          "certainty": "unknown"
+        },
+        "historicalZoneConfirmed": false
+      }
+    },
+    "resolved": {
+      "kind": "intervals",
+      "certainty": "unknown",
+      "historicalZone": false,
+      "intervals": [
+        {
+          "startsAt": "1992-10-11T18:15:00.000Z",
+          "endsAt": "1992-10-12T18:15:00.000Z"
+        }
+      ]
+    },
+    "semanticHash": "bba9f0845a8c6807af604a8764de245b1fb2caddbc8ee706de039bf004b32d8f",
+    "placements": [
+      {
+        "status": "supported",
+        "body": "sun",
+        "id": "sign:sun",
+        "sign": "libra",
+        "representativeLongitudeDeg": 199.174810084,
+        "maximumDeviationDeg": 7.877401623,
+        "guardDeg": 0.05
+      },
+      {
+        "status": "suppressed",
+        "body": "moon",
+        "reason": "interval_unqualified"
+      },
+      {
+        "status": "supported",
+        "body": "mercury",
+        "id": "sign:mercury",
+        "sign": "scorpio",
+        "representativeLongitudeDeg": 217.195071171,
+        "maximumDeviationDeg": 5.089112718,
+        "guardDeg": 0.05
+      },
+      {
+        "status": "supported",
+        "body": "venus",
+        "id": "sign:venus",
+        "sign": "scorpio",
+        "representativeLongitudeDeg": 230.897308047,
+        "maximumDeviationDeg": 5.335865068,
+        "guardDeg": 0.05
+      },
+      {
+        "status": "supported",
+        "body": "mars",
+        "id": "sign:mars",
+        "sign": "cancer",
+        "representativeLongitudeDeg": 105.405607555,
+        "maximumDeviationDeg": 9.595095502,
+        "guardDeg": 0.05
+      },
+      {
+        "status": "supported",
+        "body": "jupiter",
+        "id": "sign:jupiter",
+        "sign": "libra",
+        "representativeLongitudeDeg": 180.358136564,
+        "maximumDeviationDeg": 0.374547802,
+        "guardDeg": 0.05
+      },
+      {
+        "status": "supported",
+        "body": "saturn",
+        "id": "sign:saturn",
+        "sign": "aquarius",
+        "representativeLongitudeDeg": 311.832292654,
+        "maximumDeviationDeg": 8.58653157,
+        "guardDeg": 0.05
+      },
+      {
+        "status": "supported",
+        "body": "uranus",
+        "id": "sign:uranus",
+        "sign": "capricorn",
+        "representativeLongitudeDeg": 284.200680154,
+        "maximumDeviationDeg": 7.835543476,
+        "guardDeg": 0.05
+      },
+      {
+        "status": "supported",
+        "body": "neptune",
+        "id": "sign:neptune",
+        "sign": "capricorn",
+        "representativeLongitudeDeg": 286.239657434,
+        "maximumDeviationDeg": 7.522221553,
+        "guardDeg": 0.05
+      },
+      {
+        "status": "suppressed",
+        "body": "pluto",
+        "reason": "interval_unqualified"
+      }
+    ]
+  },
+  {
+    "input": {
+      "kind": "astrology.natal.v2",
+      "calendar": "gregorian",
+      "zodiac": "tropical",
+      "houses": "not_calculated",
+      "birth": {
+        "date": "1992-10-12",
+        "place": {
+          "source": "manual",
+          "label": "Kathmandu",
+          "latitudeDeg": 27.7,
+          "longitudeEastDeg": 85.3,
+          "zone": "Asia/Kathmandu"
+        },
+        "time": {
+          "certainty": "approximate",
+          "earliestLocalTime": "08:00",
+          "latestLocalTime": "10:00"
+        },
+        "historicalZoneConfirmed": false
+      }
+    },
+    "resolved": {
+      "kind": "intervals",
+      "certainty": "approximate",
+      "historicalZone": false,
+      "intervals": [
+        {
+          "startsAt": "1992-10-12T02:15:00.000Z",
+          "endsAt": "1992-10-12T04:15:00.000Z"
+        }
+      ]
+    },
+    "semanticHash": "51766e10f3559157cf2421b070c750cd37876b057be68f6f7b81ec87f5793bb8",
+    "placements": [
+      {
+        "status": "supported",
+        "body": "sun",
+        "id": "sign:sun",
+        "sign": "libra",
+        "representativeLongitudeDeg": 199.051144275,
+        "maximumDeviationDeg": 2.522989028,
+        "guardDeg": 0.05
+      },
+      {
+        "status": "suppressed",
+        "body": "moon",
+        "reason": "interval_unqualified"
+      },
+      {
+        "status": "supported",
+        "body": "mercury",
+        "id": "sign:mercury",
+        "sign": "scorpio",
+        "representativeLongitudeDeg": 217.012889084,
+        "maximumDeviationDeg": 2.970419065,
+        "guardDeg": 0.05
+      },
+      {
+        "status": "supported",
+        "body": "venus",
+        "id": "sign:venus",
+        "sign": "scorpio",
+        "representativeLongitudeDeg": 230.745028867,
+        "maximumDeviationDeg": 3.209914887,
+        "guardDeg": 0.05
+      },
+      {
+        "status": "supported",
+        "body": "mars",
+        "id": "sign:mars",
+        "sign": "cancer",
+        "representativeLongitudeDeg": 105.350029243,
+        "maximumDeviationDeg": 6.263232798,
+        "guardDeg": 0.05
+      },
+      {
+        "status": "supported",
+        "body": "jupiter",
+        "id": "sign:jupiter",
+        "sign": "libra",
+        "representativeLongitudeDeg": 180.331826867,
+        "maximumDeviationDeg": 0.201861293,
+        "guardDeg": 0.05
+      },
+      {
+        "status": "supported",
+        "body": "saturn",
+        "id": "sign:saturn",
+        "sign": "aquarius",
+        "representativeLongitudeDeg": 311.833114886,
+        "maximumDeviationDeg": 2.882186882,
+        "guardDeg": 0.05
+      },
+      {
+        "status": "supported",
+        "body": "uranus",
+        "id": "sign:uranus",
+        "sign": "capricorn",
+        "representativeLongitudeDeg": 284.19864096,
+        "maximumDeviationDeg": 2.630805556,
+        "guardDeg": 0.05
+      },
+      {
+        "status": "supported",
+        "body": "neptune",
+        "id": "sign:neptune",
+        "sign": "capricorn",
+        "representativeLongitudeDeg": 286.238655528,
+        "maximumDeviationDeg": 2.527303924,
+        "guardDeg": 0.05
+      },
+      {
+        "status": "suppressed",
+        "body": "pluto",
+        "reason": "interval_unqualified"
+      }
+    ]
+  }
+]

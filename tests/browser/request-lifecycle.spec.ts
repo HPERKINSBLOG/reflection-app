@@ -11,7 +11,10 @@ import {
 
 async function form(page: Page, question = 'Synthetic request interruption') {
   await enableAi(page);
-  await page.getByRole('button', { name: 'New reading', exact: true }).click();
+  await page
+    .getByRole('navigation', { name: 'Reading actions' })
+    .getByRole('button', { name: 'Tarot', exact: true })
+    .click();
   await page.getByLabel('Your question').fill(question);
   await page.getByLabel('Use English for this reading').check();
 }
@@ -72,8 +75,15 @@ test('an unreceived Start after reload explains the uncertainty and allows a del
   await expect(page.getByRole('status').filter({ hasText: /Connection lost/ })).toBeVisible();
   await page.reload();
   await expect(page.getByRole('status').filter({ hasText: /not been found yet/ })).toBeVisible();
-  await expect(page.getByRole('button', { name: 'New reading', exact: true })).toBeEnabled();
-  await page.getByRole('button', { name: 'New reading', exact: true }).click();
+  await expect(
+    page
+      .getByRole('navigation', { name: 'Reading actions' })
+      .getByRole('button', { name: 'Tarot', exact: true }),
+  ).toBeEnabled();
+  await page
+    .getByRole('navigation', { name: 'Reading actions' })
+    .getByRole('button', { name: 'Tarot', exact: true })
+    .click();
   await expect(page.getByLabel('Your question')).toHaveValue('');
   expect(posts).toBe(1);
 });
@@ -140,7 +150,10 @@ test('accepted completion refreshes displayed allowance even when progress unmou
     await page.getByRole('button', { name: 'Start reading', exact: true }).click();
     await expect(page.getByTestId('accepted-reading')).toBeVisible();
     release();
-    await page.getByRole('button', { name: 'New reading', exact: true }).click();
+    await page
+      .getByRole('navigation', { name: 'Reading actions' })
+      .getByRole('button', { name: 'Tarot', exact: true })
+      .click();
     await expect(page.getByText('Readings left: 2 today · 29 this month.')).toBeVisible();
   } finally {
     release();
@@ -215,9 +228,9 @@ test('a delayed status cannot reopen a view after leaving progress; explicit res
   });
   await page.getByRole('button', { name: 'Start reading', exact: true }).click();
   await ready;
-  await page.getByRole('button', { name: 'Saved readings', exact: true }).click();
+  await page.getByRole('button', { name: 'Journal', exact: true }).click();
   release();
-  await expect(page.getByRole('heading', { name: 'Saved readings', exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Your journal', exact: true })).toBeVisible();
   await expect(page.getByTestId('accepted-reading')).toHaveCount(0);
   await page.getByRole('button', { name: 'Resume reading request' }).click();
   await expect(page.getByTestId('accepted-reading')).toBeVisible();
@@ -236,13 +249,16 @@ test('reading inspection has semantic labels, keyboard source expansion and comp
   await expect(
     accepted.getByRole('heading', { name: 'Synthetic source inspection' }),
   ).toBeFocused();
-  await expect(accepted.getByRole('heading', { name: /^Drawn card: / })).toHaveCount(3);
-  await expect(accepted.getByRole('heading', { name: 'Interpretation', exact: true })).toHaveCount(
-    3,
-  );
+  await expect(accepted.locator('.return-position')).toHaveCount(3);
+  await expect(accepted.locator('.return-position h3')).toHaveText([
+    'situation',
+    'tension',
+    'possibility',
+  ]);
   const summary = accepted.locator('summary');
   await summary.focus();
   await page.keyboard.press('Enter');
+  await expect(accepted.getByRole('heading', { name: 'Drawn card', exact: true })).toHaveCount(3);
   await expect(
     accepted.getByRole('heading', { name: 'Traditional source material' }),
   ).toBeVisible();
@@ -358,23 +374,29 @@ for (const navigation of ['link', 'Back'] as const) {
     await page.getByRole('button', { name: 'Start reading', exact: true }).click();
     await expect(page.getByRole('button', { name: 'Cancel reading', exact: true })).toBeEnabled();
     const url = page.url();
-    await page.getByRole('button', { name: 'Saved readings', exact: true }).click();
+    await page.getByRole('button', { name: 'Journal', exact: true }).click();
     for (let visit = 0; visit < 2; visit++) {
       await expect(
         page.getByRole('button', { name: 'Resume reading request', exact: true }),
       ).toBeVisible();
-      await expect(page.getByRole('button', { name: 'New reading', exact: true })).toBeDisabled();
+      await expect(
+        page
+          .getByRole('navigation', { name: 'Reading actions' })
+          .getByRole('button', { name: 'Tarot', exact: true }),
+      ).toBeDisabled();
       await openAccount(page);
       if (navigation === 'link') await backToReadings(page);
       else await page.goBack();
-      await expect(
-        page.getByRole('heading', { name: 'Saved readings', exact: true }),
-      ).toBeVisible();
+      await expect(page.getByRole('heading', { name: 'Your journal', exact: true })).toBeVisible();
     }
     await expect(
       page.getByRole('button', { name: 'Resume reading request', exact: true }),
     ).toBeVisible();
-    await expect(page.getByRole('button', { name: 'New reading', exact: true })).toBeDisabled();
+    await expect(
+      page
+        .getByRole('navigation', { name: 'Reading actions' })
+        .getByRole('button', { name: 'Tarot', exact: true }),
+    ).toBeDisabled();
     await page.getByRole('button', { name: 'Resume reading request', exact: true }).click();
     await expect(page).toHaveURL(url);
     await expect(page.getByRole('button', { name: 'Cancel reading', exact: true })).toBeEnabled();
@@ -387,7 +409,11 @@ for (const navigation of ['link', 'Back'] as const) {
     });
     await page.getByRole('button', { name: 'Cancel reading', exact: true }).click();
     await expect(page.getByRole('status').filter({ hasText: 'Reading cancelled' })).toBeVisible();
-    await expect(page.getByRole('button', { name: 'New reading', exact: true })).toBeEnabled();
+    await expect(
+      page
+        .getByRole('navigation', { name: 'Reading actions' })
+        .getByRole('button', { name: 'Tarot', exact: true }),
+    ).toBeEnabled();
     expect(starts).toBe(1);
     await emptyStorage(page);
   });
@@ -426,18 +452,22 @@ test('account navigation forgets its retained request after signing out', async 
   await pendingFixture(page);
   await page.getByRole('button', { name: 'Start reading', exact: true }).click();
   await expect(page.getByRole('button', { name: 'Cancel reading', exact: true })).toBeEnabled();
-  await page.getByRole('button', { name: 'Saved readings', exact: true }).click();
+  await page.getByRole('button', { name: 'Journal', exact: true }).click();
   await expect(
     page.getByRole('button', { name: 'Resume reading request', exact: true }),
   ).toBeVisible();
   await openAccount(page);
   await page.getByRole('button', { name: 'Sign out', exact: true }).click();
   await page.getByRole('button', { name: 'Sign in with a passkey', exact: true }).click();
-  await expect(page.getByRole('heading', { name: 'Saved readings', exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Your journal', exact: true })).toBeVisible();
   await expect(
     page.getByRole('button', { name: 'Resume reading request', exact: true }),
   ).toHaveCount(0);
-  await expect(page.getByRole('button', { name: 'New reading', exact: true })).toBeEnabled();
+  await expect(
+    page
+      .getByRole('navigation', { name: 'Reading actions' })
+      .getByRole('button', { name: 'Tarot', exact: true }),
+  ).toBeEnabled();
   await openAccount(page);
   await expect(page.getByRole('link', { name: 'Back to readings', exact: true })).toHaveAttribute(
     'href',
@@ -488,9 +518,13 @@ test('revoking AI during progress keeps the stopped request and history availabl
   await expect(
     page.getByRole('status').filter({ hasText: /AI permission was turned off/ }),
   ).toBeVisible();
-  await expect(page.getByRole('button', { name: 'New reading', exact: true })).toBeDisabled();
-  await page.getByRole('button', { name: 'Saved readings', exact: true }).click();
-  await expect(page.getByRole('heading', { name: 'Saved readings', exact: true })).toBeVisible();
+  await expect(
+    page
+      .getByRole('navigation', { name: 'Reading actions' })
+      .getByRole('button', { name: 'Tarot', exact: true }),
+  ).toBeDisabled();
+  await page.getByRole('button', { name: 'Journal', exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'Your journal', exact: true })).toBeVisible();
 });
 
 for (const [state, errorCode, copy] of [
@@ -552,7 +586,10 @@ test('explicit New reading after a stopped request uses a fresh identity for the
   await expect(
     page.getByRole('status').filter({ hasText: 'The reading service is unavailable' }),
   ).toBeVisible();
-  await page.getByRole('button', { name: 'New reading', exact: true }).click();
+  await page
+    .getByRole('navigation', { name: 'Reading actions' })
+    .getByRole('button', { name: 'Tarot', exact: true })
+    .click();
   await page.getByRole('button', { name: 'Start reading', exact: true }).click();
   await expect.poll(() => submitted.length).toBe(2);
   expect(submitted[1]!.intent).not.toBe(submitted[0]!.intent);
@@ -596,9 +633,7 @@ for (const boundary of ['status', 'reading'] as const) {
     try {
       await page.goBack();
       await expect(page).toHaveURL('http://localhost:8787/');
-      await expect(
-        page.getByRole('heading', { name: 'Saved readings', exact: true }),
-      ).toBeVisible();
+      await expect(page.getByRole('heading', { name: 'Your journal', exact: true })).toBeVisible();
       release();
       await finished;
       await expect(page).toHaveURL('http://localhost:8787/');
@@ -635,6 +670,6 @@ test('browser Back keeps a dirty reflection until discard is explicitly confirme
   });
   await page.goBack();
   await expect.poll(() => dialogs).toBe(2);
-  await expect(page.getByRole('heading', { name: 'Saved readings', exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Your journal', exact: true })).toBeVisible();
   await expect(page.getByTestId('accepted-reading')).toHaveCount(0);
 });

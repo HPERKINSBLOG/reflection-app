@@ -2,8 +2,48 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { expect, test } from '@playwright/test';
 import { apiSchemas } from '../../src/contracts/index.ts';
 import { READING_PRODUCT_COPY, SPREAD_PHOTO_COPY } from '../../src/contracts/product-copy.ts';
-import { journeyAccount, spreadPhotoPath } from '../fixtures/browser-journey.ts';
-import { enableAi } from '../fixtures/browser-reading.ts';
+import {
+  journeyAccount,
+  spreadPhotoPath,
+  patternJourneyStates,
+} from '../fixtures/browser-journey.ts';
+import { enableAi, keepKit, openAccount } from '../fixtures/browser-reading.ts';
+
+test('calculated Pattern with AI off survives sign out, profile changes and dated return', async ({
+  page,
+  browserName,
+}) => {
+  const faults: string[] = [];
+  page.on('pageerror', (error) => faults.push(error.message));
+  await page.setViewportSize({ width: 390, height: 900 });
+  await page.context().setExtraHTTPHeaders({ 'CF-Connecting-IP': '192.0.2.235' });
+  const username = `pattern_${browserName}_${crypto.randomUUID().slice(0, 8)}`;
+  const password = 'Synthetic garden passphrase 2026';
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Create a password account', exact: true }).click();
+  await page.getByLabel('Username', { exact: true }).fill(username);
+  await page.getByLabel('Email', { exact: true }).fill(`${username}@example.org`);
+  await page.getByLabel('New password', { exact: true }).fill(password);
+  await page.getByRole('button', { name: 'Create account', exact: true }).click();
+  await keepKit(page);
+  const capture = async (state: string) => {
+    await mkdir('artifacts/your-pattern', { recursive: true });
+    await page.screenshot({
+      path: `artifacts/your-pattern/${browserName}-${state}.png`,
+      fullPage: true,
+    });
+  };
+  await patternJourneyStates(page, capture, async () => {
+    await openAccount(page);
+    await page.getByRole('button', { name: 'Sign out', exact: true }).click();
+    await page.getByRole('button', { name: 'Sign in with a password', exact: true }).click();
+    await page.getByLabel('Username or email').fill(username);
+    await page.getByLabel('Password', { exact: true }).fill(password);
+    await page.getByRole('button', { name: 'Sign in', exact: true }).click();
+    await expect(page.getByRole('region', { name: 'Your readings', exact: true })).toBeVisible();
+  });
+  expect(faults).toEqual([]);
+});
 
 test('keyboard upload, processing, save, reflection, Account and exact return journey', async ({
   page,
@@ -29,7 +69,10 @@ test('keyboard upload, processing, save, reflection, Account and exact return jo
   );
   await page.reload();
   await enableAi(page);
-  await page.getByRole('button', { name: 'New reading', exact: true }).click();
+  await page
+    .getByRole('navigation', { name: 'Reading actions' })
+    .getByRole('button', { name: 'Tarot', exact: true })
+    .click();
   const question = 'Synthetic return to the exact saved reading';
   await page.getByLabel('Your question', { exact: true }).fill(question);
   await page.getByLabel('Use English for this reading').check();
@@ -165,7 +208,7 @@ test('keyboard upload, processing, save, reflection, Account and exact return jo
   );
   await expect(page.locator('.saved-reflection-text')).toBeVisible();
   await expect(page.getByRole('button', { name: 'Edit reflection', exact: true })).toBeVisible();
-  await page.getByRole('button', { name: 'Saved readings', exact: true }).click();
+  await page.getByRole('button', { name: 'Journal', exact: true }).click();
   await page.getByRole('button', { name: question, exact: true }).focus();
   await page.keyboard.press('Enter');
   await expect(accepted.getByRole('heading', { name: question, exact: true })).toBeFocused();
@@ -181,7 +224,7 @@ test('keyboard upload, processing, save, reflection, Account and exact return jo
   await page.keyboard.press('Tab');
   await expect(page.getByRole('button', { name: 'Delete permanently', exact: true })).toBeFocused();
   await page.keyboard.press('Enter');
-  await expect(page.getByRole('heading', { name: 'Saved readings', exact: true })).toBeFocused();
+  await expect(page.getByRole('heading', { name: 'Your journal', exact: true })).toBeFocused();
   await page.getByRole('link', { name: 'Account', exact: true }).focus();
   await page.keyboard.press('Enter');
   await expect(page.getByRole('heading', { name: 'Your account', exact: true })).toBeFocused();

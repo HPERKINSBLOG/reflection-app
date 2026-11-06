@@ -52,11 +52,16 @@ for (const theme of ['light', 'dark'] as const) {
     await displayJourney(page, capture);
     // Disabled does not mean illegible: preserve the platform's chosen disabled
     // text color rather than compositing it with a second opacity reduction.
-    await expect(page.getByRole('button', { name: 'New reading', exact: true })).toBeDisabled();
-    await expect(page.getByRole('button', { name: 'New reading', exact: true })).toHaveCSS(
-      'opacity',
-      '1',
-    );
+    await expect(
+      page
+        .getByRole('navigation', { name: 'Reading actions' })
+        .getByRole('button', { name: 'Tarot', exact: true }),
+    ).toBeDisabled();
+    await expect(
+      page
+        .getByRole('navigation', { name: 'Reading actions' })
+        .getByRole('button', { name: 'Tarot', exact: true }),
+    ).toHaveCSS('opacity', '1');
     const disabledColor = await page.evaluate(() => {
       const probe = document.createElement('span');
       probe.style.color = 'GrayText';
@@ -65,10 +70,11 @@ for (const theme of ['light', 'dark'] as const) {
       probe.remove();
       return color;
     });
-    await expect(page.getByRole('button', { name: 'New reading', exact: true })).toHaveCSS(
-      'color',
-      disabledColor,
-    );
+    await expect(
+      page
+        .getByRole('navigation', { name: 'Reading actions' })
+        .getByRole('button', { name: 'Tarot', exact: true }),
+    ).toHaveCSS('color', disabledColor);
     await finish(faults);
   });
 }

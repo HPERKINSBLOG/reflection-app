@@ -13,14 +13,32 @@ import { onlineGuard } from './identity/checkpoint.ts';
 import { DB_NOW } from './db/core.ts';
 import type { RecordBase } from './readings/base.ts';
 import type { GenerationDependencies } from './readings/generation.ts';
+import { verifyPatternRelease } from '../domain/astrology/content-approval.ts';
+import approvedPatternRelease from '../../content/pattern-approved.json';
 
 export interface LocalLiveEnv extends Env {
   OPENAI_API_KEY?: string;
   OPENAI_PROJECT_ID?: string;
   MODEL_API_KEY?: string;
+  PATTERN_PREVIEW_ENABLED?: string;
+  PATTERN_PREVIEW_RELEASE_HASH?: string;
+  PATTERN_PREVIEW_REVIEW_KEY?: string;
 }
 
 type DevelopmentMode = 'live-local' | 'live-preview';
+async function previewPatternRelease(env: LocalLiveEnv) {
+  if (env.PATTERN_PREVIEW_ENABLED !== 'true') return null;
+  try {
+    return await verifyPatternRelease(
+      approvedPatternRelease,
+      JSON.parse(env.PATTERN_PREVIEW_REVIEW_KEY ?? ''),
+      env.PATTERN_PREVIEW_RELEASE_HASH ?? '',
+    );
+  } catch {
+    // Invalid Pattern configuration must not disable saved readings, identity or Tarot.
+    return null;
+  }
+}
 function localConfiguration(env: LocalLiveEnv, mode: DevelopmentMode) {
   const origin = new URL(env.IDENTITY_ORIGIN ?? 'https://unconfigured.invalid');
   if (
@@ -148,11 +166,13 @@ function createDevelopmentWorker(mode: DevelopmentMode, fetcher: typeof fetch) {
       }
       // Hosted fast/xhigh can exceed the post-response waitUntil lifetime. Keep
       // Start's HTTP request open until completion; durable recovery still applies.
-      return createWorker((base) => dependencies(base, env, fetcher, mode)).fetch(
-        request,
-        env,
-        mode === 'live-preview' ? undefined : ctx,
-      );
+      const preview =
+        mode === 'live-preview' ? { patternRelease: await previewPatternRelease(env) } : undefined;
+      return createWorker(
+        (base) => dependencies(base, env, fetcher, mode),
+        undefined,
+        preview,
+      ).fetch(request, env, mode === 'live-preview' ? undefined : ctx);
     },
     async scheduled(controller: ScheduledController, env: LocalLiveEnv, ctx: ExecutionContext) {
       localConfiguration(env, mode);

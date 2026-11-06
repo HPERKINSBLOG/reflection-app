@@ -68,6 +68,7 @@ export class RetentionMaintenance {
       `expires_at<=${DB_NOW} OR idle_expires_at<=${DB_NOW}`,
       'min(expires_at,idle_expires_at)',
     );
+    await remove('astrology_admissions', `expires_at<=${DB_NOW}`, 'expires_at');
     await remove('rate_buckets', `expires_at<=${DB_NOW}`, 'expires_at');
     await remove('export_tickets', `expires_at<=${DB_NOW}`, 'expires_at');
     await remove('idempotency_keys', `expires_at<=${DB_NOW}`, 'expires_at');

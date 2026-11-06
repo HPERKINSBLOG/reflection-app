@@ -1,0 +1,77 @@
+{
+  "identity": {
+    "engine": "astronomy-engine",
+    "engineVersion": "2.1.19",
+    "engineArtifactHash": "068f1445ed0c636c94818fe6d20d7d125120e605e0bab9fc4675c3d531be5ad7",
+    "tzdbVersion": "2026f",
+    "tzdbHash": "3103c5c0eaa879615da630b74e2373ad9b571e0eae992e0b2a3db6e4475de2ce",
+    "adapterVersion": "natal.v2.1",
+    "reliabilityPolicy": "vsop-vector-enclosure.v1",
+    "reliabilityHash": "7a8be427e640a50501790253ff9d50785e2d33716f49f090f464f801975a4251"
+  },
+  "engineArtifact": "node_modules/astronomy-engine/esm/astronomy.js",
+  "reliability": {
+    "version": "vsop-vector-enclosure.v1",
+    "range": [
+      "1900-01-01",
+      "2100-12-31"
+    ],
+    "coefficientTimeAbsMillennia": 0.2,
+    "frameRateRadiansPerDay": 1,
+    "vsopRotationNormFactor": 1.001,
+    "retardedAndTerrestrialTimeFactor": 1.01,
+    "discontinuityAllowanceSeconds": 60,
+    "minimumGuardDeg": 0.05,
+    "resultPrecisionDeg": 1e-9,
+    "evaluatedInstants": 2048,
+    "intervalBodies": [
+      "sun",
+      "mercury",
+      "venus",
+      "mars",
+      "jupiter",
+      "saturn",
+      "uranus",
+      "neptune"
+    ],
+    "unqualifiedIntervalBodies": [
+      "moon",
+      "pluto"
+    ],
+    "bounds": {
+      "mercury": {
+        "radiusAu": 0.483577847382,
+        "speedAuPerDay": 0.0671631326023402
+      },
+      "venus": {
+        "radiusAu": 0.728371813122,
+        "speedAuPerDay": 0.02206240871805236
+      },
+      "earth": {
+        "radiusAu": 1.017286105354,
+        "speedAuPerDay": 0.018426230720381142
+      },
+      "mars": {
+        "radiusAu": 1.6821455400504002,
+        "speedAuPerDay": 0.020780827869915742
+      },
+      "jupiter": {
+        "radiusAu": 5.478735546458,
+        "speedAuPerDay": 0.009409562832089083
+      },
+      "saturn": {
+        "radiusAu": 10.1624335987848,
+        "speedAuPerDay": 0.007369403001269762
+      },
+      "uranus": {
+        "radiusAu": 20.192040100407997,
+        "speedAuPerDay": 0.00485126767970769
+      },
+      "neptune": {
+        "radiusAu": 30.38260533675,
+        "speedAuPerDay": 0.003386181289931123
+      }
+    }
+  },
+  "qualification": "local-preview; full production numerical and editorial qualification remains required"
+}

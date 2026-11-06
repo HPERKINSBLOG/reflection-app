@@ -32,7 +32,10 @@ async function form(page: Page, ip: string) {
     page.getByRole('button', { name: 'Turn off AI readings', exact: true }),
   ).toBeEnabled();
   await page.goto('/');
-  await page.getByRole('button', { name: 'New reading', exact: true }).click();
+  await page
+    .getByRole('navigation', { name: 'Reading actions' })
+    .getByRole('button', { name: 'Tarot', exact: true })
+    .click();
   await page.getByLabel('Your question').fill('How can I compare my options?');
   await page.getByLabel('Use English for this reading').check();
   await page.getByText('Use my own spread', { exact: true }).click();
@@ -66,6 +69,7 @@ test('starting while image preparation is pending keeps the chosen photo', async
   const input = (await posted).postDataJSON();
   await expect(page.getByTestId('accepted-reading')).toBeVisible();
   expect(input.spreadPhoto).toBe(`data:image/png;base64,${image.toString('base64')}`);
+  await page.getByText('Cards, sources and shared context', { exact: true }).click();
   await expect(page.getByTestId('spread-photo-card')).toBeVisible();
   await expect(
     page.getByText('Uploaded spread photo · Recognized 3-card spread', { exact: true }),

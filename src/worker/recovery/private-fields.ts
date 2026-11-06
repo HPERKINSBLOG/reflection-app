@@ -54,6 +54,7 @@ function account(
 }
 /** Explicit reviewed closure, including fields whose product routes remain deferred. */
 export const PRIVATE_FIELD_HANDLERS: readonly (AccountPrivateField | RecoveryPrivateField)[] = [
+  account('birth_profiles', 'body_enc', ['id'], ['id'], 'id'),
   account('basis_snapshots', 'body_enc', ['id'], ['id'], 'id'),
   account(
     'generation_context',
@@ -143,3 +144,6 @@ export const PRIVATE_FIELD_HANDLERS: readonly (AccountPrivateField | RecoveryPri
 export const ACCOUNT_FIELD_HANDLERS = PRIVATE_FIELD_HANDLERS.filter(
   (field): field is AccountPrivateField => field.family === 'account-data',
 );
+
+/** Owner-keyed operational identities retain no plaintext but still pin a key version. */
+export const OPERATIONAL_KEY_TABLES = ['astrology_admissions', 'pattern_saved_sources'] as const;

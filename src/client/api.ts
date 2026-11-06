@@ -1,4 +1,5 @@
 import type { z } from 'zod';
+import type { PatternSavedIdentity } from '../contracts/astrology.ts';
 import { apiSchemas } from '../contracts/index.ts';
 export class ApiFailure extends Error {
   constructor(
@@ -9,6 +10,7 @@ export class ApiFailure extends Error {
     readonly correlationId: string | null = null,
     readonly retry: string | null = null,
     readonly retryAfterSeconds: number | null = null,
+    readonly existingPattern: PatternSavedIdentity | null = null,
   ) {
     super(message);
   }
@@ -45,6 +47,7 @@ export async function api<T>(
       parsed.success ? parsed.data.error.correlationId : null,
       parsed.success ? parsed.data.error.retry : null,
       parsed.success ? parsed.data.error.retryAfterSeconds : null,
+      parsed.success ? (parsed.data.error.existingPattern ?? null) : null,
     );
   }
   return schema.parse(response.status === 204 ? {} : await response.json());

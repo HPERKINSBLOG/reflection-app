@@ -11,7 +11,9 @@ export function importLabel(unit: Unit): string {
         ? (record.value.record.question ?? 'Question unavailable')
         : record.value.kind === 'reading.unavailable.v1'
           ? 'Unavailable reading'
-          : record.value.question;
+          : record.value.kind === 'astrology.pattern.accepted.v1'
+            ? record.value.chapter.prompt
+            : record.value.question;
     case 'session':
       return record.value.question ?? 'Saved reading';
     case 'reflection':

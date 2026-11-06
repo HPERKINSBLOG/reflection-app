@@ -43,7 +43,7 @@ export async function pendingImportedQuestion(base: RecordBase, owner: string, i
     mask,
   ).first());
 }
-type RecordTarget = Exclude<Target, { scope: 'account' }>;
+type RecordTarget = Exclude<Target, { scope: 'account' | 'birth_profile' }>;
 type Native = Pick<z.infer<typeof ImportRecordIdentity>, 'kind' | 'recordId' | 'recordRevision'>;
 
 /** A keyed copy graph covers pending previews as well as committed records.

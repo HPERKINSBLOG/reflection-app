@@ -1,0 +1,80 @@
+{
+  "localVerification": "passed",
+  "deploymentAllowed": false,
+  "milestone2Complete": false,
+  "applicationDigest": "a930284eac3b4220ee813a89c02dccabcdb103c595eea4af1f3da8fc9df021bd",
+  "outstanding": [
+    "hosted identity and automated recovery",
+    "production key rotation and retained-key receipts",
+    "verified launch content and attribution",
+    "provider qualification and billing reconciliation",
+    "hosted release isolation and failing-test proof",
+    "hosted D1 concurrency and scheduled recovery",
+    "hosted erasure/security restore and independent backups",
+    "automated browser and accessibility acceptance",
+    "operational monitoring and runbooks",
+    "owner decisions"
+  ],
+  "qualification": [
+    {
+      "id": "identity",
+      "label": "hosted identity and automated recovery",
+      "status": "pending",
+      "reason": "Exact hosted origin/RP ID and automated same-account recovery journeys on the frozen candidate remain open. Physical/synced authenticators are untested limitations, not human-review gates."
+    },
+    {
+      "id": "keys",
+      "label": "production key rotation and retained-key receipts",
+      "status": "pending",
+      "reason": "Retained DEKs, journaled replacement, complete authenticated inventory, checkpoint rollover and guarded retirement pass local tests. Actual hosted secret custody, recovery and backup-retention evidence remain open."
+    },
+    {
+      "id": "content",
+      "label": "verified launch content and attribution",
+      "status": "pending",
+      "reason": "Automated validation of the final catalog, attribution, source provenance, product copy and signed content artifact is not recorded. No human sign-off is required by owner instruction."
+    },
+    {
+      "id": "provider",
+      "label": "provider qualification and billing reconciliation",
+      "status": "pending",
+      "reason": "Production qualification for reading-provider-policy.v2 remains open: content integrity, frozen-corpus automated evaluation, project privacy/access evidence and billing reconciliation. The four-case development check and hosted smoke establish development behavior only."
+    },
+    {
+      "id": "release",
+      "label": "hosted release isolation and failing-test proof",
+      "status": "pending",
+      "reason": "Hosted main failing-test proof, non-main rejection and separate preview resource/token evidence have not been run."
+    },
+    {
+      "id": "database",
+      "label": "hosted D1 concurrency and scheduled recovery",
+      "status": "pending",
+      "reason": "Hosted D1 transaction/race behavior, Cron overlap/missed wake and backlog recovery remain unverified."
+    },
+    {
+      "id": "restore",
+      "label": "hosted erasure/security restore and independent backups",
+      "status": "pending",
+      "reason": "Hosted snapshot/restore and independent backup inventory/loss tests including erased records, used codes, removed passkeys and pre-dispatch requests remain unrun."
+    },
+    {
+      "id": "accessibility",
+      "label": "automated browser and accessibility acceptance",
+      "status": "pending",
+      "reason": "Automated keyboard, focus, zoom, viewport, accessibility-tree and browser checks against the final hosted candidate remain open. Physical devices and screen-reader experience are unverified limitations, not human approval gates."
+    },
+    {
+      "id": "operations",
+      "label": "operational monitoring and runbooks",
+      "status": "pending",
+      "reason": "Content-free completed heartbeats, configured spend alerts, independent missing-wake checks and runbooks are implemented locally. Independent monitor, alert delivery and hosted recovery drills remain unverified."
+    },
+    {
+      "id": "owner",
+      "label": "owner decisions",
+      "status": "pending",
+      "reason": "Production domain, spend caps and operational ownership await owner decisions. Launch geography, minimum-age policy and human-review sign-offs are excluded by owner instruction."
+    }
+  ]
+}

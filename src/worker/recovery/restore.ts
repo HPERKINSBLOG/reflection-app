@@ -1,3 +1,6 @@
+import { PatternContentRelease } from '../../contracts/astrology.ts';
+import { syntheticPatternRelease } from '../../domain/astrology/chapters.ts';
+import patternCatalogue from '../../../content/pattern-draft.json';
 import { ACCOUNT_FIELD_HANDLERS } from './private-fields.ts';
 import { abandonImportRekeyEntries } from './account-rekey.ts';
 import type { ApplicationRuntime } from '../runtime/application.ts';
@@ -32,6 +35,7 @@ export interface OfflineRestoreOptions {
   runtime?: ApplicationRuntime;
   offline?: { coordinator: HostedCoordinator; context: OfflineContext };
   validateContent?: (hash: string) => Promise<boolean>;
+  validatePatternContent?: (hash: string) => Promise<boolean>;
   backupInventory?: ProtectedBackupInventory;
 }
 const uuid = '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}';
@@ -448,6 +452,35 @@ export class OfflineRestore {
     ]);
   }
   private async checkContent() {
+    const patternRows = await q(
+      this.env.DB,
+      "SELECT hash,release_json FROM pattern_content_releases WHERE state='active'",
+    ).all<{ hash: string; release_json: string }>();
+    const syntheticHash = this.options.runtime
+      ? null
+      : (await syntheticPatternRelease(patternCatalogue)).releaseHash;
+    for (const row of patternRows.results) {
+      let valid = false;
+      try {
+        const release = PatternContentRelease.parse(JSON.parse(row.release_json));
+        valid =
+          release.releaseHash === row.hash &&
+          (await syntheticPatternRelease(release.catalogue)).releaseHash === row.hash &&
+          release.state === 'active' &&
+          (this.options.validatePatternContent
+            ? await this.options.validatePatternContent(row.hash)
+            : row.hash === syntheticHash && release.review.kind === 'synthetic_local');
+      } catch {
+        /* Unrecognized restored content remains closed. */
+      }
+      if (!valid)
+        await q(
+          this.env.DB,
+          `UPDATE pattern_content_releases SET state='withdrawn',withdrawn_at=coalesce(withdrawn_at,${DB_NOW}) WHERE hash=?`,
+          row.hash,
+        ).run();
+    }
+    await q(this.env.DB, 'UPDATE pattern_state SET enabled=0,revision=revision+1').run();
     // Exact localhost fixture editions only; this is not a production approval list.
     let fixtures: string[];
     if (this.options.validateContent) {

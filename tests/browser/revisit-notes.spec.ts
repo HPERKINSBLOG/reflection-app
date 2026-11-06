@@ -419,7 +419,7 @@ test('note drafts participate in Account, navigation, Back and reload guards; wi
   await expect(page.getByLabel('Your revisit note', { exact: true })).toHaveValue(
     'Synthetic unsaved note',
   );
-  await page.getByRole('button', { name: 'Saved readings', exact: true }).click();
+  await page.getByRole('button', { name: 'Journal', exact: true }).click();
   await expect(page.getByLabel('Your revisit note', { exact: true })).toBeVisible();
   await page.goBack();
   await expect(page.getByLabel('Your revisit note', { exact: true })).toBeVisible();
@@ -494,7 +494,7 @@ test('session expiry removes private drafts and sign-in restores only saved note
     .getByRole('button', { name: 'Create a test account with a passkey', exact: true })
     .click();
   await keepKit(page);
-  await expect(page.getByText('No saved readings yet.', { exact: true })).toBeVisible();
+  await expect(page.getByText(/^No saved readings yet\./)).toBeVisible();
   await expect(page.getByText('Synthetic saved before expiry', { exact: true })).toHaveCount(0);
   await expect(
     page.getByText('Synthetic draft must die with account state', { exact: true }),
@@ -527,7 +527,7 @@ test('late note responses cannot repopulate Account or a different reading', asy
   await page.unroute('**/api/v1/revisits?*');
   await page.getByRole('button', { name: 'Enable AI readings', exact: true }).click();
   await backToReadings(page);
-  await page.getByRole('button', { name: 'Saved readings', exact: true }).click();
+  await page.getByRole('button', { name: 'Journal', exact: true }).click();
   await page.getByRole('button', { name: 'Synthetic dated return', exact: true }).click();
   await expect(page.getByText('Synthetic old private note', { exact: true })).toBeVisible();
   let releaseEdition!: () => void;
@@ -552,7 +552,10 @@ test('late note responses cannot repopulate Account or a different reading', asy
   });
   await page.getByRole('button', { name: 'Refresh notes', exact: true }).click();
   await editionStarted;
-  await page.getByRole('button', { name: 'New reading', exact: true }).click();
+  await page
+    .getByRole('navigation', { name: 'Reading actions' })
+    .getByRole('button', { name: 'Tarot', exact: true })
+    .click();
   await page.getByLabel('Your question', { exact: true }).fill('Synthetic different edition');
   await page.getByLabel('Use English for this reading').check();
   await page.getByRole('button', { name: 'Start reading', exact: true }).click();
@@ -643,6 +646,9 @@ test('parent deletion during reading fetch clears a workspace with no reflection
   await page.getByRole('button', { name: 'Edit note', exact: true }).click();
   const editor = page.getByLabel('Your revisit note', { exact: true });
   await editor.fill('Synthetic private draft on the deleted parent');
+  // Note saving also refreshes its parent. Let that request settle before
+  // installing the separate deletion-during-reading-fetch race below.
+  await expect(page.getByRole('button', { name: 'Delete reading', exact: true })).toBeEnabled();
   const sessionPath = `/api/v1/sessions/${original.session.id}`;
   let deleted = false;
   await page.route(`**${sessionPath}`, async (route) => {
@@ -678,7 +684,7 @@ test('parent deletion during reading fetch clears a workspace with no reflection
     'CONTENT_UNAVAILABLE',
   );
   await expect(page).toHaveURL('http://localhost:8787/');
-  await expect(page.getByRole('heading', { name: 'Saved readings', exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Your journal', exact: true })).toBeVisible();
   await expect(page.getByTestId('accepted-reading')).toHaveCount(0);
   await expect(editor).toHaveCount(0);
   expect((await page.request.get(sessionPath)).status()).toBe(410);
@@ -740,6 +746,9 @@ for (const outcome of [
       await page.getByRole('button', { name: 'Edit reflection', exact: true }).click();
       await reflectionEditor.fill(reflectionDraft);
     }
+    // The child note editor is usable during its parent's refresh. This race
+    // must begin after that refresh, when a new focus refresh can be admitted.
+    await expect(page.getByRole('button', { name: 'Delete reading', exact: true })).toBeEnabled();
     let deleted = false;
     const fetched: string[] = [];
     page.on('request', (request) => {
@@ -786,9 +795,7 @@ for (const outcome of [
     await missing;
     if (outcome === 'deleted parent') {
       await expect(page).toHaveURL('http://localhost:8787/');
-      await expect(
-        page.getByRole('heading', { name: 'Saved readings', exact: true }),
-      ).toBeVisible();
+      await expect(page.getByRole('heading', { name: 'Your journal', exact: true })).toBeVisible();
       await expect(page.getByTestId('accepted-reading')).toHaveCount(0);
       await expect(noteEditor).toHaveCount(0);
       expect((await page.request.get(sessionPath)).status()).toBe(410);
@@ -935,7 +942,7 @@ test('older request and latest history keep owned edition reflections across mat
           );
           if (destination === 'older request') await page.goto(originalUrl);
           else {
-            await page.getByRole('button', { name: 'Saved readings', exact: true }).click();
+            await page.getByRole('button', { name: 'Journal', exact: true }).click();
             await page
               .getByRole('region', { name: 'Saved reading history', exact: true })
               .getByRole('button', { name: 'Synthetic dated return', exact: true })
@@ -1056,7 +1063,7 @@ test('unavailable history never derives its URL from a truncated unrelated reque
               },
         ),
       );
-      await page.getByRole('button', { name: 'Saved readings', exact: true }).click();
+      await page.getByRole('button', { name: 'Journal', exact: true }).click();
       await expect(page).toHaveURL('http://localhost:8787/');
       await page
         .getByRole('region', { name: 'Saved reading history', exact: true })
@@ -1752,7 +1759,8 @@ for (const [index, [mode, code, retryAfterRemediation]] of (
   test(`FR-1: ${mode} ${code} keeps actionable guidance and the unchanged draft intent`, async ({
     page,
   }) => {
-    const { original } = await savedReading(page, `192.0.2.${211 + index}`);
+    // Keep this range distinct from the deletion/password suites sharing the Worker.
+    const { original } = await savedReading(page, `203.0.113.${180 + index}`);
     if (mode === 'edit') await add(page, 'Synthetic saved note before admission rejection');
     let blocked = true;
     const writes: Array<{ key: string; body: string; revision: string | undefined }> = [];
@@ -1839,7 +1847,7 @@ for (const [index, [mode, code, retryAfterRemediation]] of (
 test('FR-1: a typed deletion idempotency rejection does not invent a changed note or discard confirmation', async ({
   page,
 }) => {
-  await savedReading(page, '192.0.2.216');
+  await savedReading(page, '203.0.113.185');
   await add(page, 'Synthetic retained note for typed deletion rejection');
   const keys: string[] = [];
   let listReads = 0;

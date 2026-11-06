@@ -10,7 +10,7 @@ test('saved history distinguishes loading, failure and a successful retry', asyn
   await reading(page, question);
   await page.getByRole('button', { name: 'Save reading', exact: true }).click();
   await expect(page.getByText('Saved until you delete it.', { exact: true })).toBeVisible();
-  const listUrl = '**/api/v1/sessions?status=saved';
+  const listUrl = /\/api\/v1\/sessions\?status=saved(?:&[^#]*)?$/;
   let release!: () => void;
   const held = new Promise<void>((resolve) => {
     release = resolve;
@@ -22,7 +22,7 @@ test('saved history distinguishes loading, failure and a successful retry', asyn
   const request = page.waitForRequest(listUrl);
   await page.goto('/');
   await request;
-  const empty = page.getByText('No saved readings yet.', { exact: true });
+  const empty = page.getByText(/^No saved readings yet\./);
   try {
     await expect(empty).toHaveCount(0);
     await expect(page.getByText('Loading saved readings…', { exact: true })).toBeVisible();
@@ -54,7 +54,10 @@ test('the new-reading form keeps transmission limits without build jargon', asyn
   await account(page, '192.0.2.242');
   await expect(page.getByText(localSimulation, { exact: true })).toHaveCount(0);
   await enableAi(page);
-  await page.getByRole('button', { name: 'New reading', exact: true }).click();
+  await page
+    .getByRole('navigation', { name: 'Reading actions' })
+    .getByRole('button', { name: 'Tarot', exact: true })
+    .click();
   const english = page.getByLabel('Use English for this reading');
   await expect(english).toHaveAttribute('required', '');
   const spread = page.locator('summary', { hasText: 'Use my own spread' });
@@ -94,12 +97,12 @@ test('saved readings are listed by date and question without a decorative thumbn
   });
   await page.getByRole('button', { name: 'Save reading', exact: true }).click();
   await expect(page.getByText('Saved until you delete it.', { exact: true })).toBeVisible();
-  await page.getByRole('button', { name: 'Saved readings', exact: true }).click();
+  await page.getByRole('button', { name: 'Journal', exact: true }).click();
   await expect(
-    page.getByText('Opening one does not start a new reading.', { exact: true }),
+    page.getByText(/^Opening a saved reading does not start a new reading\./),
   ).toBeVisible();
   await expect(page.getByText(/Return to the original reading/)).toHaveCount(0);
-  const item = page.locator('.reading-history li');
+  const item = page.locator('.journal-entry');
   await expect(item).toHaveCount(1);
   await expect(item.locator('img')).toHaveCount(0);
   await expect(item.getByRole('button', { name: question, exact: true })).toBeVisible();

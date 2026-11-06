@@ -54,7 +54,7 @@ d.execute('UPDATE generation_requests SET lease_expires_at=2000000, expires_at=2
 rejects(d,guard,params);checks.append('deadline equality rejects publication')
 d=seed();d.execute('UPDATE generation_requests SET lease_expires_at=2000000, expires_at=2000000')
 d.execute('begin')
-d.execute("insert into reading_editions values('late',?,'session',1,'request','basis',NULL,'accepted','model','cipher',1,?,0,NULL)",(A,H))
+d.execute("insert into reading_editions(id,owner_id,session_id,edition_number,request_id,basis_id,parent_edition_id,status,mode,body_enc,key_version,content_hash,accepted_at,invalidated_at) values('late',?,'session',1,'request','basis',NULL,'accepted','model','cipher',1,?,0,NULL)",(A,H))
 d.create_function('unixepoch',1,lambda modifier:2001.0)
 try:
  d.execute(guard,params)
@@ -67,7 +67,7 @@ d=seed();rejects(d,"insert into basis_snapshots values('bad',?,'session','tarot.
 d=seed();rejects(d,"insert into generation_requests select 'other',owner_id,session_id,client_intent_id,parent_edition_id,basis_id,operation,payload_hmac,state,revision,run_epoch,lease_token,lease_expires_at,next_run_at,permission_revision,key_version,content_hash,content_policy_revision,policy_hash,input_enc,plan_enc,plan_hmac,context_count,next_event,error_code,fallback_reason,created_at,expires_at,finished_at,spread_dispatch_id from generation_requests");checks.append('duplicate intent rejected')
 d=seed();d.execute('begin')
 try:
- d.execute("insert into reading_editions values('edition',?,'session',1,'request','basis',NULL,'accepted','model','cipher',1,?,0,NULL)",(A,H))
+ d.execute("insert into reading_editions(id,owner_id,session_id,edition_number,request_id,basis_id,parent_edition_id,status,mode,body_enc,key_version,content_hash,accepted_at,invalidated_at) values('edition',?,'session',1,'request','basis',NULL,'accepted','model','cipher',1,?,0,NULL)",(A,H))
  d.execute('insert into assertion_probe values(0)')
 except sqlite3.IntegrityError:d.execute('rollback')
 assert d.execute('select count(*) from reading_editions').fetchone()[0]==0;checks.append('failed statement rolls back preceding edition in SQLite transaction')
@@ -75,7 +75,7 @@ assert d.execute('select count(*) from reading_editions').fetchone()[0]==0;check
 for relation in ('parent','selected'):
  d=seed()
  d.execute("update reading_sessions set status='saved', saved_at=1, retention_expires_at=NULL")
- d.execute("insert into reading_editions values('old',?,'session',1,'request','basis',NULL,'accepted','model','cipher',1,?,0,NULL)",(A,H))
+ d.execute("insert into reading_editions(id,owner_id,session_id,edition_number,request_id,basis_id,parent_edition_id,status,mode,body_enc,key_version,content_hash,accepted_at,invalidated_at) values('old',?,'session',1,'request','basis',NULL,'accepted','model','cipher',1,?,0,NULL)",(A,H))
  d.execute("insert into content_editions(hash,state,bundle_json,reviewed_hash,reviewer_kind,reviewer_id,rights_status,created_at,approved_at) values(?,'approved','{}',?,'human_approved','synthetic','cleared',0,0)",(H2,H2))
  d.execute('update generation_requests set content_hash=?',(H2,))
  if relation=='parent':d.execute("update generation_requests set operation='followup',parent_edition_id='old'")

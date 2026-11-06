@@ -34,6 +34,119 @@ export async function journeyAccount(
   }
 }
 
+/** Real calculated Pattern flow; works with AI off and never calls the reading writer. */
+export async function patternJourneyStates(
+  page: Page,
+  capture: (state: string) => Promise<void>,
+  signOutAndIn?: () => Promise<void>,
+) {
+  const navigation = page.getByRole('navigation', { name: 'Reading actions' });
+  await expect(navigation.getByRole('button', { name: 'Tarot', exact: true })).toBeDisabled();
+  const generated: string[] = [];
+  const calculations: string[] = [];
+  page.on('request', (request) => {
+    const path = new URL(request.url()).pathname;
+    if (path === '/api/v1/requests' && request.method() === 'POST') generated.push(path);
+    if (path === '/api/v1/astrology/pattern') calculations.push(path);
+  });
+  const astrology = navigation.getByRole('button', { name: 'Astrology', exact: true });
+  await expect(astrology).toBeEnabled();
+  await astrology.focus();
+  await expect(astrology).toBeFocused();
+  await page.keyboard.press('Enter');
+  await expect(
+    page.getByRole('heading', { name: 'Your birth details', exact: true }),
+  ).toBeFocused();
+  await page.getByLabel('Birth date', { exact: true }).fill('1992-10-12');
+  await page.getByRole('button', { name: 'Enter a place manually', exact: true }).click();
+  await page.getByLabel('Place name', { exact: true }).fill('Synthetic Kathmandu');
+  await page.getByLabel('Latitude (north positive)', { exact: true }).fill('27.7');
+  await page.getByLabel('Longitude (east positive)', { exact: true }).fill('85.3');
+  await page.getByLabel('IANA time zone', { exact: true }).fill('Asia/Kathmandu');
+  await page.getByLabel('Local birth time', { exact: true }).fill('08:30');
+  await capture('pattern-birth');
+  await page.getByRole('button', { name: 'Review details', exact: true }).focus();
+  await page.keyboard.press('Enter');
+  await expect(
+    page.getByRole('heading', { name: 'Does this look right?', exact: true }),
+  ).toBeFocused();
+  await capture('pattern-review');
+  const retention = page.getByLabel('Keep these birth details in my account.', { exact: true });
+  await retention.focus();
+  await page.keyboard.press('Space');
+  await expect(retention).toBeChecked();
+  await page.getByRole('button', { name: 'Create my chart', exact: true }).focus();
+  await page.keyboard.press('Enter');
+  await expect(page.getByRole('group', { name: 'Choose a chapter', exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Your pattern', exact: true })).toBeFocused();
+  await page.getByRole('button', { name: 'Connection', exact: true }).focus();
+  await page.keyboard.press('Enter');
+  const words = 'A small change in how I listen can leave room for both of us.';
+  await page.getByLabel('Your reflection', { exact: true }).fill(words);
+  await capture('pattern-writing');
+  const save = page.getByRole('button', { name: 'Save to journal', exact: true });
+  await save.focus();
+  await page.keyboard.press('Enter');
+  await expect(
+    page.getByRole('heading', { name: 'Saved to your journal', exact: true }),
+  ).toBeFocused();
+  await capture('pattern-confirmation');
+  await page.getByRole('button', { name: 'View saved chapter', exact: true }).click();
+  await expect(page).toHaveURL(/\/saved\/[0-9a-f-]+\/[0-9a-f-]+$/);
+  const savedUrl = page.url();
+  const record = page.getByTestId('pattern-reading');
+  const original = await record.textContent();
+  const question = await record.getByRole('heading', { level: 2 }).textContent();
+  await expect(page.locator('.saved-reflection-text')).toHaveText(words);
+  await capture('pattern-saved');
+  const reopen = async () => {
+    await navigation.getByRole('button', { name: 'Journal', exact: true }).click();
+    const history = page.getByRole('region', { name: 'Saved reading history', exact: true });
+    await history.getByRole('button', { name: 'Astrology', exact: true }).click();
+    const entry = history.getByRole('button', { name: question!, exact: true });
+    await entry.focus();
+    await page.keyboard.press('Enter');
+    await expect(page).toHaveURL(savedUrl);
+    await expect(record).toHaveText(original!);
+    await expect(page.locator('.saved-reflection-text')).toHaveText(words);
+  };
+  if (signOutAndIn) {
+    await signOutAndIn();
+    const count = calculations.length;
+    await reopen();
+    expect(calculations).toHaveLength(count);
+  }
+  await navigation.getByRole('button', { name: 'Astrology', exact: true }).click();
+  await page.getByRole('button', { name: 'Review birth details', exact: true }).click();
+  await page.getByLabel('Birth date', { exact: true }).fill('2002-01-01');
+  await page.getByRole('button', { name: 'Review details', exact: true }).click();
+  await retention.check();
+  await page.getByRole('button', { name: 'Update my chart', exact: true }).click();
+  await expect(page.getByRole('group', { name: 'Choose a chapter', exact: true })).toBeVisible();
+  const count = calculations.length;
+  await reopen();
+  await page.getByRole('button', { name: 'Add revisit note', exact: true }).click();
+  const note = page.getByLabel('Your revisit note', { exact: true });
+  await expect(note).toBeFocused();
+  await note.fill('Returning today, I notice that listening is easier when I slow down.');
+  await page.getByRole('button', { name: 'Save note', exact: true }).focus();
+  await page.keyboard.press('Enter');
+  await expect(
+    page.getByText('Returning today, I notice that listening is easier when I slow down.', {
+      exact: true,
+    }),
+  ).toBeVisible();
+  await expect(record).toHaveText(original!);
+  await capture('pattern-revisited');
+  expect(calculations).toHaveLength(count);
+  expect(generated).toEqual([]);
+  const stored = await page.evaluate(() => [
+    ...Object.values(localStorage),
+    ...Object.values(sessionStorage),
+  ]);
+  expect(JSON.stringify(stored)).not.toMatch(/Kathmandu|1992-10-12|small change in how I listen/);
+}
+
 export async function themeContrast(page: Page, selector?: string) {
   return page.evaluate((selector): Record<string, number> => {
     const style = getComputedStyle(document.documentElement);
@@ -205,7 +318,7 @@ export async function continuityJourneyStates(
 ) {
   const original = page.getByTestId('accepted-reading').getByRole('heading', { level: 2 });
   const parentQuestion = await original.textContent();
-  const follow = page.getByRole('link', { name: 'Follow up on this edition', exact: true });
+  const follow = page.getByRole('link', { name: 'Ask a follow-up', exact: true });
   const target = await follow.getAttribute('href');
   if (!target) throw new Error('Missing saved parent link');
   await follow.focus();
@@ -248,6 +361,7 @@ export async function continuityJourneyStates(
   ).toBeFocused();
   await expect(page.getByRole('navigation', { name: 'Edition history' })).toBeVisible();
   await capture('follow-up-accepted');
+  await page.getByText('Parent and original reading', { exact: true }).click();
   await page.getByRole('link', { name: 'Open parent edition', exact: true }).click();
   await expect(original).toHaveText(parentQuestion!);
 }
@@ -256,7 +370,9 @@ export async function continuityJourneyStates(
 export async function importReviewState(page: Page, capture: (state: string) => Promise<void>) {
   const opener = page.getByRole('button', { name: 'Import records', exact: true });
   await opener.click();
-  await expect(page.getByRole('heading', { name: 'Review an import', exact: true })).toBeVisible();
+  await expect(
+    page.getByRole('heading', { name: 'Review your import', exact: true }),
+  ).toBeVisible();
   await page.getByLabel('File format').selectOption('tarot-json');
   await page
     .getByLabel('Import file', { exact: true })

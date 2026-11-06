@@ -73,9 +73,11 @@ const stages = [
       'node_modules/@playwright/test/cli.js',
       'test',
       // The complete Chromium suite shares one local Worker. Separate files use
-      // isolated browser contexts and accounts. Two file workers keep the expanded
-      // suite within the measured Linux gate on hosts with at least four CPUs.
-      ...(process.platform === 'linux' && availableParallelism() >= 4 ? ['--workers=2'] : []),
+      // isolated browser contexts and accounts. Use four file workers on eight-CPU
+      // Linux hosts, or two on four-CPU hosts, within the unchanged gate deadline.
+      ...(process.platform === 'linux' && availableParallelism() >= 4
+        ? [`--workers=${availableParallelism() >= 8 ? 4 : 2}`]
+        : []),
     ],
   ],
   ['specification package links', 'python3', ['checks/check-package.py']],

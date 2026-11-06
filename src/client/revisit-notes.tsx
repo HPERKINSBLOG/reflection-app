@@ -1,4 +1,4 @@
-import { Button, Input, TextArea, TextLink } from './design/components.tsx';
+import { Button, Input, TextArea, TextLink, TopicChip } from './design/components.tsx';
 import {
   type Ref,
   useCallback,
@@ -16,6 +16,10 @@ import { api, ApiFailure } from './api.ts';
 import { date } from './date.ts';
 import { deletionIntent, DeletionReceiptPanel, type DeletionProof } from './deletion.tsx';
 import { Notice, type NoticeMessage } from './notice.tsx';
+import { Icon } from './icon.tsx';
+import unsureDot from './design/art/return/stance-unsure.svg';
+import resonatesDot from './design/art/return/stance-resonates.svg';
+import './return-revisit.css';
 
 type Page = z.infer<typeof apiSchemas.RevisitPage>;
 function fullDate(value: string) {
@@ -51,6 +55,8 @@ export function RevisitNotes({
   csrfToken,
   onExpired,
   onChanged,
+  presentation = 'default',
+  disabled = false,
 }: {
   ref?: Ref<RevisitNotesHandle>;
   sessionId: string;
@@ -60,6 +66,8 @@ export function RevisitNotes({
   csrfToken: string;
   onExpired: () => void;
   onChanged: () => void;
+  presentation?: 'default' | 'return';
+  disabled?: boolean;
 }) {
   const [page, setPage] = useState<Page>({ items: [], nextCursor: null });
   const [loaded, setLoaded] = useState(false);
@@ -472,13 +480,22 @@ export function RevisitNotes({
     });
   };
   const length = revisitTextLength(text);
+  const compact = presentation === 'return';
   return (
-    <section className="revisit-notes" aria-label="Revisit notes">
+    <section
+      className={`revisit-notes${compact ? ' revisit-notes--return' : ''}`}
+      aria-label="Revisit notes"
+      inert={disabled}
+    >
       <h2 id="revisit-notes" tabIndex={-1}>
         Revisit notes
       </h2>
-      <p>Your own dated thoughts, separate from the original reading and reflection.</p>
-      <p id="revisit-disclosure">{REVISIT_PRODUCT_COPY.disclosure}</p>
+      <p className={compact ? 'revisit-intro' : undefined}>
+        {compact
+          ? 'Later observations on this reading.'
+          : 'Your own dated thoughts, separate from the original reading and reflection.'}
+      </p>
+      {!compact && <p id="revisit-disclosure">{REVISIT_PRODUCT_COPY.disclosure}</p>}
       <Notice message={message} />
       {!saved && (
         <p className="notice">
@@ -502,6 +519,7 @@ export function RevisitNotes({
           <Button
             type="button"
             variant="secondary"
+            disabled={disabled}
             onClick={() => void run('list', (current) => list(current))}
           >
             Retry loading notes
@@ -512,36 +530,61 @@ export function RevisitNotes({
         {page.items.map((note) => (
           <li key={note.id}>
             <article className="card revisit-note" aria-labelledby={`note-${note.id}`}>
-              <h3
-                id={`note-${note.id}`}
-                tabIndex={-1}
-                ref={(node) => {
-                  if (node) headings.current.set(note.id, node);
-                  else headings.current.delete(note.id);
-                }}
-              >
-                Note ·{' '}
-                <time dateTime={note.createdAt}>
-                  <span aria-hidden="true">{date(note.createdAt)}</span>
-                  <span className="sr-only">{fullDate(note.createdAt)}</span>
-                </time>
-              </h3>
-              {note.updatedAt !== note.createdAt && (
-                <p className="muted">
-                  Edited{' '}
-                  <time dateTime={note.updatedAt}>
-                    <span aria-hidden="true">{date(note.updatedAt)}</span>
-                    <span className="sr-only">{fullDate(note.updatedAt)}</span>
+              <div className="revisit-note-meta">
+                <h3
+                  id={`note-${note.id}`}
+                  tabIndex={-1}
+                  ref={(node) => {
+                    if (node) headings.current.set(note.id, node);
+                    else headings.current.delete(note.id);
+                  }}
+                >
+                  <span className={compact ? 'sr-only' : undefined}>Note · </span>
+                  <time dateTime={note.createdAt} title={fullDate(note.createdAt)}>
+                    <span aria-hidden="true">{date(note.createdAt, compact)}</span>
+                    <span className="sr-only">{fullDate(note.createdAt)}</span>
                   </time>
-                </p>
-              )}
+                </h3>
+                {compact && (
+                  <TopicChip
+                    className={`revisit-stance revisit-stance--${note.stance}`}
+                    tone={
+                      note.stance === 'resonates'
+                        ? 'mint'
+                        : note.stance === 'disagree'
+                          ? 'coral'
+                          : 'sage'
+                    }
+                  >
+                    {(note.stance === 'unsure' || note.stance === 'resonates') && (
+                      <img
+                        src={note.stance === 'unsure' ? unsureDot : resonatesDot}
+                        width="12"
+                        height="12"
+                        alt=""
+                      />
+                    )}
+                    <span className="sr-only">Response: </span>
+                    {labels[note.stance]}
+                  </TopicChip>
+                )}
+                {note.updatedAt !== note.createdAt && (
+                  <p className="muted revisit-note-edited">
+                    Edited{' '}
+                    <time dateTime={note.updatedAt} title={fullDate(note.updatedAt)}>
+                      <span aria-hidden="true">{date(note.updatedAt, compact)}</span>
+                      <span className="sr-only">{fullDate(note.updatedAt)}</span>
+                    </time>
+                  </p>
+                )}
+              </div>
               <p className="authored-note">{note.note || 'This saved legacy note is blank.'}</p>
-              <p className="muted">Response: {labels[note.stance]}</p>
-              <div className="actions">
+              {!compact && <p className="muted">Response: {labels[note.stance]}</p>}
+              <div className="actions revisit-note-actions">
                 <Button
                   type="button"
-                  variant="secondary"
-                  disabled={!saved || busy === 'save'}
+                  variant={compact ? 'text-button' : 'secondary'}
+                  disabled={disabled || !saved || busy === 'save'}
                   onClick={(event) => begin(note, event.currentTarget)}
                 >
                   Edit note
@@ -549,6 +592,7 @@ export function RevisitNotes({
                 <Button
                   type="button"
                   variant="text-button"
+                  disabled={disabled}
                   onClick={(event) => {
                     deleteInitiator.current = event.currentTarget;
                     setDeleting(note);
@@ -566,7 +610,7 @@ export function RevisitNotes({
         <Button
           type="button"
           variant="secondary"
-          disabled={busy === 'list'}
+          disabled={disabled || busy === 'list'}
           onClick={() => void run('list', (current) => list(current, page.nextCursor))}
         >
           Load more notes
@@ -575,7 +619,10 @@ export function RevisitNotes({
       <Button
         ref={addRef}
         type="button"
+        variant={compact ? 'secondary' : 'primary'}
+        className={compact ? 'revisit-add' : undefined}
         disabled={
+          disabled ||
           busy === 'save' ||
           !saved ||
           !loaded ||
@@ -583,8 +630,12 @@ export function RevisitNotes({
         }
         onClick={(event) => begin(null, event.currentTarget)}
       >
+        {compact && <Icon name="add" />}
         Add revisit note
       </Button>
+      {compact && (
+        <p className="revisit-add-hint">Adding a note does not request a new AI reading.</p>
+      )}
       {page.items.length >= REVISIT_LIMITS.activePerEdition && (
         <p>This reading has reached its 100-note limit. You can still read or delete notes.</p>
       )}
@@ -604,6 +655,7 @@ export function RevisitNotes({
             name="note"
             rows={6}
             required
+            disabled={disabled}
             aria-describedby="revisit-count revisit-disclosure revisit-draft"
             aria-invalid={length > REVISIT_LIMITS.textCodePoints || undefined}
             value={text}
@@ -620,6 +672,7 @@ export function RevisitNotes({
             <select
               id="revisit-stance"
               name="stance"
+              disabled={disabled}
               value={stance}
               onChange={(event) => {
                 edits.current++;
@@ -640,6 +693,7 @@ export function RevisitNotes({
             <Button
               type="submit"
               disabled={
+                disabled ||
                 busy === 'save' ||
                 conflict ||
                 expired ||
@@ -649,7 +703,12 @@ export function RevisitNotes({
             >
               Save note
             </Button>
-            <Button type="button" variant="secondary" disabled={busy === 'save'} onClick={cancel}>
+            <Button
+              type="button"
+              variant="secondary"
+              disabled={disabled || busy === 'save'}
+              onClick={cancel}
+            >
               Cancel
             </Button>
           </div>
@@ -664,7 +723,7 @@ export function RevisitNotes({
               <Button
                 type="button"
                 variant="secondary"
-                disabled={busy === 'refresh'}
+                disabled={disabled || busy === 'refresh'}
                 onClick={refresh}
               >
                 Refresh saved note
@@ -676,6 +735,7 @@ export function RevisitNotes({
                   <p>Saved response: {labels[latest.stance]}</p>
                   <Button
                     type="button"
+                    disabled={disabled}
                     onClick={() => {
                       setEditor({ base: latest });
                       setConflict(false);
@@ -703,12 +763,13 @@ export function RevisitNotes({
             Seven days have passed since this attempt. It will not be submitted again. Reconcile
             saved notes before choosing a new intent.
           </p>
-          <Button type="button" disabled={busy === 'reconcile'} onClick={reconcile}>
+          <Button type="button" disabled={disabled || busy === 'reconcile'} onClick={reconcile}>
             Reconcile saved notes
           </Button>
           {reconciled && !editor?.base && (
             <Button
               type="button"
+              disabled={disabled}
               onClick={() => {
                 intent.current = null;
                 erase.current = null;
@@ -736,6 +797,7 @@ export function RevisitNotes({
               id="check-checked"
               ref={checkRef}
               type="checkbox"
+              disabled={disabled}
               checked={checked}
               onChange={(event) => setChecked(event.target.checked)}
             />
@@ -745,7 +807,7 @@ export function RevisitNotes({
             <Button
               type="button"
               variant="danger"
-              disabled={!checked || deletionBusy || expired}
+              disabled={disabled || !checked || deletionBusy || expired}
               onClick={remove}
             >
               Confirm note deletion
@@ -753,6 +815,7 @@ export function RevisitNotes({
             <Button
               type="button"
               variant="secondary"
+              disabled={disabled}
               onClick={() => {
                 setDeleting(null);
                 setChecked(false);
@@ -777,11 +840,36 @@ export function RevisitNotes({
           />
         </section>
       ))}
+      {compact && (
+        <details className="revisit-note-policy">
+          <summary>About revisit notes</summary>
+          <p id="revisit-disclosure">{REVISIT_PRODUCT_COPY.disclosure}</p>
+          {page.items.length > 0 && (
+            <>
+              <h3>Full note dates</h3>
+              <ul>
+                {page.items.map((note, index) => (
+                  <li key={note.id}>
+                    <TextLink href={`#note-${note.id}`}>Note {index + 1}</TextLink>
+                    {' · '}Created <time dateTime={note.createdAt}>{fullDate(note.createdAt)}</time>
+                    {note.updatedAt !== note.createdAt && (
+                      <>
+                        {' · '}Edited{' '}
+                        <time dateTime={note.updatedAt}>{fullDate(note.updatedAt)}</time>
+                      </>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </>
+          )}
+        </details>
+      )}
       {loaded && (
         <Button
           type="button"
           variant="text-button"
-          disabled={busy === 'list'}
+          disabled={disabled || busy === 'list'}
           onClick={() => void run('list', (current) => list(current, null, true))}
         >
           Refresh notes

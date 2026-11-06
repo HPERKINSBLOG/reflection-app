@@ -1,3 +1,6 @@
+import { astrologyRoute } from '../astrology/routes.ts';
+import { PatternConflict, previewPatternReady } from '../astrology/patterns.ts';
+import { ASTROLOGY_LIMITS } from '../../contracts/astrology-policy.ts';
 import { READING_PRODUCT_COPY } from '../../contracts/product-copy.ts';
 import { z } from 'zod';
 import { apiSchemas, Id } from '../../contracts/index.ts';
@@ -15,6 +18,7 @@ import { Reflections } from './reflections.ts';
 import { ReadingExports } from './export.ts';
 import { SessionErasure } from './erasure.ts';
 import type { ApplicationRuntime } from '../runtime/application.ts';
+import type { DevelopmentPreviewCapability } from '../index.ts';
 
 export interface ReadingBindings extends IdentityBindings {
   READING_MODE?: string;
@@ -94,6 +98,7 @@ export async function readingRoute(
   defer?: (work: Promise<void>) => void,
   factory?: GenerationFactory,
   runtime?: ApplicationRuntime,
+  preview?: DevelopmentPreviewCapability,
 ): Promise<Response | null> {
   if (
     !runtime &&
@@ -147,7 +152,14 @@ export async function readingRoute(
       60_000,
     );
     const body = mutate
-      ? await readBody(request, path === '/imports' ? IMPORT_LIMITS.bodyBytes : 256 * 1024)
+      ? await readBody(
+          request,
+          path.startsWith('/astrology/')
+            ? ASTROLOGY_LIMITS.bodyBytes
+            : path === '/imports'
+              ? IMPORT_LIMITS.bodyBytes
+              : 256 * 1024,
+        )
       : undefined;
     const key = () => Id.parse(request.headers.get('Idempotency-Key'));
     const revision = () => {
@@ -161,6 +173,29 @@ export async function readingRoute(
         .max(Number.MAX_SAFE_INTEGER)
         .parse(Number(value.slice(1, -1)));
     };
+    const approvedPreviewRelease =
+      !runtime &&
+      factory &&
+      env.READING_MODE === 'live-preview' &&
+      preview?.patternRelease &&
+      // Let Patterns.save reconcile an already committed key before consulting
+      // changed publication state. Fresh saves still enforce content guards.
+      (path === '/astrology/pattern/saves' ||
+        (await previewPatternReady(env.DB, preview.patternRelease)))
+        ? preview.patternRelease
+        : undefined;
+    const astrology = await astrologyRoute(
+      request,
+      base,
+      session,
+      body,
+      key,
+      revision,
+      erasure,
+      runtime ? runtime.health.mode === 'synthetic-local' : env.READING_MODE === 'synthetic-local',
+      approvedPreviewRelease,
+    );
+    if (astrology) return astrology;
     const match = (pattern: RegExp) => path.match(pattern);
     if (path === '/imports' || path.startsWith('/imports/')) {
       const reply = await importRoute(
@@ -246,6 +281,7 @@ export async function readingRoute(
           url.searchParams.get('status') ?? 'saved',
           Number(url.searchParams.get('limit') ?? 20),
           url.searchParams.get('cursor'),
+          url.searchParams.get('method') ?? 'all',
         ),
       );
     const sessionMatch = match(/^\/sessions\/([^/]+)$/);
@@ -436,6 +472,7 @@ export async function readingRoute(
                 : 'never',
           retryAfterSeconds: failure.status === 429 ? 60 : null,
           currentRevision: failure.revision,
+          ...(failure instanceof PatternConflict ? { existingPattern: failure.existing } : {}),
         },
       }),
       failure.status,

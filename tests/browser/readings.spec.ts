@@ -91,7 +91,7 @@ test('source headings preserve launch-deck names, card codes and orientations wh
   });
   await reading(page, 'Synthetic source casing inspection');
   const accepted = page.getByTestId('accepted-reading');
-  await accepted.getByText('Cards and sources', { exact: true }).click();
+  await accepted.getByText('Cards, sources and shared context', { exact: true }).click();
   const headings = accepted.locator('.source h3');
   const expected = [
     'Situation: Wheel of Fortune (major-10) · upright',
@@ -134,18 +134,24 @@ test('card names match the deck edition beside unchanged facts and unknown decks
   if (saved.reading.kind !== 'tarot.accepted.v1') throw new Error('Expected accepted tarot');
   expect(saved.reading.basis.deckEdition).toBe(launch.deckEdition);
   const accepted = page.getByTestId('accepted-reading');
-  for (const card of saved.reading.basis.cards) {
+  for (const [index, card] of saved.reading.basis.cards.entries()) {
     const name = launch.deck.find((item) => item.id === card.cardId)!.name;
-    await expect(
-      accepted.getByRole('heading', { name: `Drawn card: ${name}`, exact: true }),
-    ).toBeVisible();
+    await expect(accepted.locator('.return-card-line').nth(index)).toHaveText(
+      `${name} · ${card.orientation}`,
+    );
   }
+  await accepted.getByText('Cards, sources and shared context', { exact: true }).click();
   for (const unit of saved.reading.units) {
     await expect(accepted.getByText(unit.basisText, { exact: true })).toBeVisible();
   }
   unknownDeck = true;
-  await page.getByRole('button', { name: 'Saved readings', exact: true }).click();
+  await page.getByRole('button', { name: 'Journal', exact: true }).click();
   await page.getByRole('button', { name: question, exact: true }).click();
+  for (const [index, card] of saved.reading.basis.cards.entries())
+    await expect(accepted.locator('.return-card-line').nth(index)).toHaveText(
+      `${card.cardId} · ${card.orientation}`,
+    );
+  await accepted.getByText('Cards, sources and shared context', { exact: true }).click();
   await expect(accepted.getByRole('heading', { name: 'Drawn card', exact: true })).toHaveCount(3);
   await expect(accepted.getByRole('heading', { name: /^Drawn card: / })).toHaveCount(0);
   for (const unit of saved.reading.units) {
@@ -289,8 +295,12 @@ test('save, sign in, recover from the downloaded kit, and manage the same readin
   await expect(
     recovered.getByTestId('accepted-reading').getByRole('heading', { name: question, exact: true }),
   ).toBeVisible();
-  await expect(recovered.getByRole('button', { name: 'New reading', exact: true })).toBeDisabled();
-  await recovered.getByRole('button', { name: 'Saved readings', exact: true }).click();
+  await expect(
+    recovered
+      .getByRole('navigation', { name: 'Reading actions' })
+      .getByRole('button', { name: 'Tarot', exact: true }),
+  ).toBeDisabled();
+  await recovered.getByRole('button', { name: 'Journal', exact: true }).click();
   await recovered.getByRole('button', { name: question, exact: true }).click();
   await recovered
     .getByLabel('Your reflection', { exact: true })
@@ -339,7 +349,7 @@ test('save, sign in, recover from the downloaded kit, and manage the same readin
   await backToReadings(recovered);
   await recovered.getByRole('button', { name: 'Delete reading', exact: true }).click();
   await recovered.getByRole('button', { name: 'Delete permanently', exact: true }).click();
-  await expect(recovered.getByText('No saved readings yet.', { exact: true })).toBeVisible();
+  await expect(recovered.getByText(/^No saved readings yet\./)).toBeVisible();
   expect((await fresh.request.get(`/api/v1/readings/${original.reading.editionId}`)).status()).toBe(
     410,
   );
@@ -428,7 +438,7 @@ test('a delayed reading response cannot repopulate private content after cross-t
   await reading(page, question);
   await page.getByRole('button', { name: 'Save reading', exact: true }).click();
   await expect(page.getByText('Saved until you delete it.', { exact: true })).toBeVisible();
-  await page.getByRole('button', { name: 'Saved readings', exact: true }).click();
+  await page.getByRole('button', { name: 'Journal', exact: true }).click();
   let arrived!: () => void, release!: () => void;
   const ready = new Promise<void>((r) => {
       arrived = r;
@@ -591,11 +601,11 @@ test('a lost deletion response checks the original receipt without resending an 
   await expect(page.getByRole('heading', { name: 'Reading deleted', exact: true })).toBeVisible();
 });
 
-for (const destination of ['Saved readings', 'New reading']) {
+for (const destination of ['Journal', 'Tarot']) {
   test(`leaving a dirty reflection for ${destination} requires a local stay or discard choice`, async ({
     page,
   }) => {
-    await account(page, destination === 'Saved readings' ? '192.0.2.92' : '192.0.2.94');
+    await account(page, destination === 'Journal' ? '192.0.2.92' : '192.0.2.94');
     const question = `Synthetic navigation to ${destination}`;
     await reading(page, question);
     await page.getByRole('button', { name: 'Save reading', exact: true }).click();
@@ -608,19 +618,25 @@ for (const destination of ['Saved readings', 'New reading']) {
       expect(dialog.message()).toContain('Discard');
       await (discard ? dialog.accept() : dialog.dismiss());
     });
-    await page.getByRole('button', { name: destination, exact: true }).click();
+    await page
+      .getByRole('navigation', { name: 'Reading actions' })
+      .getByRole('button', { name: destination, exact: true })
+      .click();
     await expect(page.getByTestId('accepted-reading')).toBeVisible();
     await expect(page.getByLabel('Your reflection', { exact: true })).toHaveValue(
       'Unsubmitted local thought',
     );
     expect(dialogs).toBe(1);
     discard = true;
-    await page.getByRole('button', { name: destination, exact: true }).click();
-    if (destination === 'New reading') {
+    await page
+      .getByRole('navigation', { name: 'Reading actions' })
+      .getByRole('button', { name: destination, exact: true })
+      .click();
+    if (destination === 'Tarot') {
       await expect(page.getByRole('heading', { name: 'A new reading', exact: true })).toBeVisible();
       await page.evaluate(() => window.dispatchEvent(new Event('focus')));
       await expect(page.getByRole('heading', { name: 'A new reading', exact: true })).toBeVisible();
-      await page.getByRole('button', { name: 'Saved readings', exact: true }).click();
+      await page.getByRole('button', { name: 'Journal', exact: true }).click();
     }
     await page.getByRole('button', { name: question, exact: true }).click();
     await expect(page.getByLabel('Your reflection', { exact: true })).toHaveValue('');
@@ -662,7 +678,7 @@ test('a rejected deletion can be freshly confirmed against the updated reading r
   };
   const first = await remove();
   expect(first.status()).toBe(409);
-  await page.getByRole('button', { name: 'Saved readings', exact: true }).click();
+  await page.getByRole('button', { name: 'Journal', exact: true }).click();
   await page.getByRole('button', { name: question, exact: true }).click();
   await expect(page.getByTestId('accepted-reading')).toBeVisible();
   const second = await remove();
@@ -689,7 +705,7 @@ for (const mode of ['model', 'template'] as const) {
       await route.fulfill({ response, json: body });
     });
     await reading(page, 'Compare ways to develop a creative project.');
-    await page.getByText('Cards and sources', { exact: true }).click();
+    await page.getByText('Cards, sources and shared context', { exact: true }).click();
     await expect(page.getByText(/unapproved development material/)).toBeVisible();
     await expect(
       page.getByText(mode === 'model' ? 'Generated by OpenAI.' : 'Prepared reflection template.', {
@@ -707,7 +723,10 @@ test('uploading an offline spread photo recognizes the 3 cards in one step and s
 }) => {
   await account(page, '192.0.2.188');
   await enableAi(page);
-  await page.getByRole('button', { name: 'New reading', exact: true }).click();
+  await page
+    .getByRole('navigation', { name: 'Reading actions' })
+    .getByRole('button', { name: 'Tarot', exact: true })
+    .click();
   await page.getByLabel('Your question').fill('What does my offline dealt spread suggest?');
   await page.getByLabel('Use English for this reading').check();
   const pngBytes = Buffer.from(
@@ -726,6 +745,7 @@ test('uploading an offline spread photo recognizes the 3 cards in one step and s
   const accepted = page.getByTestId('accepted-reading');
   await expect(accepted).toBeVisible();
   const photoCard = accepted.getByTestId('spread-photo-card');
+  await accepted.getByText('Cards, sources and shared context', { exact: true }).click();
   await expect(photoCard).toBeVisible();
   await expect(photoCard.locator('img')).toHaveAttribute(
     'src',

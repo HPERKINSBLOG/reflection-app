@@ -1,0 +1,302 @@
+{
+  "batches": [
+    {
+      "sql": "INSERT INTO content_editions(hash,state,bundle_json,reviewed_hash,reviewer_kind,reviewer_id,rights_status,created_at,approved_at) VALUES (?,'approved','{}',?,'human_approved','synthetic-reviewer','cleared',1,1)",
+      "params": [
+        "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      ]
+    },
+    {
+      "sql": "INSERT INTO system_state(id,active_content_hash,generation_enabled,dispatch_mode,provider_policy_hash,updated_at) VALUES (1,?,1,'model',?,1)",
+      "params": [
+        "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+      ]
+    },
+    {
+      "sql": "INSERT INTO accounts(id,recovery_handle_hash,recovery_ack_at,created_at,updated_at) VALUES (?,?,1,1,1)",
+      "params": [
+        "11111111-1111-4111-8111-111111111111",
+        "11111111-1111-4111-8111-111111111111"
+      ]
+    },
+    {
+      "sql": "INSERT INTO account_keys(owner_id,version,wrap_key_id,wrapped_key_enc,wrapped_index_key_enc,created_at) VALUES (?,1,'synthetic',?,?,1)",
+      "params": [
+        "11111111-1111-4111-8111-111111111111",
+        "SYNTHETIC_ONLY_NOT_ENCRYPTED",
+        "SYNTHETIC_ONLY_NOT_ENCRYPTED"
+      ]
+    },
+    {
+      "sql": "INSERT INTO permission_revisions(owner_id,revision,model_allowed,policy_version,created_at) VALUES (?,1,1,'egress.v1',1)",
+      "params": [
+        "11111111-1111-4111-8111-111111111111"
+      ]
+    },
+    {
+      "sql": "INSERT INTO accounts(id,recovery_handle_hash,recovery_ack_at,created_at,updated_at) VALUES (?,?,1,1,1)",
+      "params": [
+        "22222222-2222-4222-8222-222222222222",
+        "22222222-2222-4222-8222-222222222222"
+      ]
+    },
+    {
+      "sql": "INSERT INTO account_keys(owner_id,version,wrap_key_id,wrapped_key_enc,wrapped_index_key_enc,created_at) VALUES (?,1,'synthetic',?,?,1)",
+      "params": [
+        "22222222-2222-4222-8222-222222222222",
+        "SYNTHETIC_ONLY_NOT_ENCRYPTED",
+        "SYNTHETIC_ONLY_NOT_ENCRYPTED"
+      ]
+    },
+    {
+      "sql": "INSERT INTO permission_revisions(owner_id,revision,model_allowed,policy_version,created_at) VALUES (?,1,1,'egress.v1',1)",
+      "params": [
+        "22222222-2222-4222-8222-222222222222"
+      ]
+    },
+    {
+      "sql": "INSERT INTO reading_sessions(id,owner_id,question_enc,created_at,retention_expires_at) VALUES (?,?,?,1,9999999999999)",
+      "params": [
+        "54844a68-9ed0-497e-82fa-7acd21926e2e",
+        "11111111-1111-4111-8111-111111111111",
+        "SYNTHETIC_ONLY_NOT_ENCRYPTED"
+      ]
+    },
+    {
+      "sql": "INSERT INTO basis_snapshots(id,owner_id,session_id,kind,schema_version,body_enc,key_version,created_at) VALUES (?,?,?,'tarot.v1',1,?,1,1)",
+      "params": [
+        "22ce7098-344f-429d-b3a6-3dc78127e70a",
+        "11111111-1111-4111-8111-111111111111",
+        "54844a68-9ed0-497e-82fa-7acd21926e2e",
+        "SYNTHETIC_ONLY_NOT_ENCRYPTED"
+      ]
+    },
+    {
+      "sql": "UPDATE reading_sessions SET status='saved',saved_at=1,retention_expires_at=NULL WHERE id=?",
+      "params": [
+        "54844a68-9ed0-497e-82fa-7acd21926e2e"
+      ]
+    },
+    {
+      "sql": "INSERT INTO generation_requests(id,owner_id,session_id,client_intent_id,basis_id,operation,payload_hmac,state,next_run_at,permission_revision,key_version,content_hash,content_policy_revision,policy_hash,plan_enc,plan_hmac,context_count,run_epoch,lease_token,lease_expires_at,created_at,expires_at) VALUES(?,?,?,?,?,'initial',?,'prepared',1,1,1,?,1,?,'historical plan',?,?,1,'old-lease',30001,1,180001)",
+      "params": [
+        "a1e9e103-e187-444b-97d6-b2e8a4129529",
+        "11111111-1111-4111-8111-111111111111",
+        "54844a68-9ed0-497e-82fa-7acd21926e2e",
+        "31af6668-1fd5-46c2-b4ba-5a746b3822b2",
+        "22ce7098-344f-429d-b3a6-3dc78127e70a",
+        "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        0
+      ]
+    },
+    {
+      "sql": "INSERT INTO generation_attempts(id,owner_id,request_id,run_epoch,lease_token,started_at) VALUES(?,?,?,1,'old-lease',1)",
+      "params": [
+        "3b95ffb3-64e3-40d8-83ae-4f42cc045997",
+        "11111111-1111-4111-8111-111111111111",
+        "a1e9e103-e187-444b-97d6-b2e8a4129529"
+      ]
+    },
+    {
+      "sql": "INSERT INTO reading_editions(id,owner_id,session_id,edition_number,request_id,basis_id,parent_edition_id,status,mode,body_enc,key_version,content_hash,accepted_at) VALUES(?,?,?,?,?,?,?,'accepted','template',?,1,?,1)",
+      "params": [
+        "be6d63c4-97aa-4d9e-b1c2-8984213a2fe7",
+        "11111111-1111-4111-8111-111111111111",
+        "54844a68-9ed0-497e-82fa-7acd21926e2e",
+        1,
+        "a1e9e103-e187-444b-97d6-b2e8a4129529",
+        "22ce7098-344f-429d-b3a6-3dc78127e70a",
+        null,
+        "tarot-v1-unchanged-bytes",
+        "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      ]
+    },
+    {
+      "sql": "INSERT INTO generation_requests(id,owner_id,session_id,client_intent_id,basis_id,operation,payload_hmac,state,next_run_at,permission_revision,key_version,content_hash,content_policy_revision,policy_hash,plan_enc,plan_hmac,context_count,run_epoch,lease_token,lease_expires_at,created_at,expires_at) VALUES(?,?,?,?,?,'initial',?,'prepared',1,1,1,?,1,?,'historical plan',?,?,1,'old-lease',30001,1,180001)",
+      "params": [
+        "299c257c-6d7f-40dc-a057-ecfa4c16d5b9",
+        "11111111-1111-4111-8111-111111111111",
+        "54844a68-9ed0-497e-82fa-7acd21926e2e",
+        "b44dc526-10a0-4591-9e99-321bee4bf465",
+        "22ce7098-344f-429d-b3a6-3dc78127e70a",
+        "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        0
+      ]
+    },
+    {
+      "sql": "INSERT INTO generation_attempts(id,owner_id,request_id,run_epoch,lease_token,started_at) VALUES(?,?,?,1,'old-lease',1)",
+      "params": [
+        "0c5ab79f-e215-40d3-bc91-da724525ff9c",
+        "11111111-1111-4111-8111-111111111111",
+        "299c257c-6d7f-40dc-a057-ecfa4c16d5b9"
+      ]
+    },
+    {
+      "sql": "INSERT INTO reading_editions(id,owner_id,session_id,edition_number,request_id,basis_id,parent_edition_id,status,mode,body_enc,key_version,content_hash,accepted_at) VALUES(?,?,?,?,?,?,?,'accepted','template',?,1,?,1)",
+      "params": [
+        "18a2c7d7-dda9-4cb8-8c82-0ab2df59b9a3",
+        "11111111-1111-4111-8111-111111111111",
+        "54844a68-9ed0-497e-82fa-7acd21926e2e",
+        2,
+        "299c257c-6d7f-40dc-a057-ecfa4c16d5b9",
+        "22ce7098-344f-429d-b3a6-3dc78127e70a",
+        "be6d63c4-97aa-4d9e-b1c2-8984213a2fe7",
+        "tarot-v2-unchanged-bytes",
+        "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      ]
+    },
+    {
+      "sql": "INSERT INTO generation_requests(id,owner_id,session_id,client_intent_id,basis_id,operation,payload_hmac,state,next_run_at,permission_revision,key_version,content_hash,content_policy_revision,policy_hash,plan_enc,plan_hmac,context_count,run_epoch,lease_token,lease_expires_at,created_at,expires_at) VALUES(?,?,?,?,?,'initial',?,'prepared',1,1,1,?,1,?,'historical plan',?,?,1,'old-lease',30001,1,180001)",
+      "params": [
+        "ace89446-252b-4a23-93a5-c3a30a9c883c",
+        "11111111-1111-4111-8111-111111111111",
+        "54844a68-9ed0-497e-82fa-7acd21926e2e",
+        "87c9fcc3-0ca3-4000-9ef4-c683223cd185",
+        "22ce7098-344f-429d-b3a6-3dc78127e70a",
+        "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        0
+      ]
+    },
+    {
+      "sql": "INSERT INTO generation_attempts(id,owner_id,request_id,run_epoch,lease_token,started_at) VALUES(?,?,?,1,'old-lease',1)",
+      "params": [
+        "b1ae9ada-629c-4410-9904-0d75f87bdecb",
+        "11111111-1111-4111-8111-111111111111",
+        "ace89446-252b-4a23-93a5-c3a30a9c883c"
+      ]
+    },
+    {
+      "sql": "INSERT INTO reading_editions(id,owner_id,session_id,edition_number,request_id,basis_id,parent_edition_id,status,mode,body_enc,key_version,content_hash,accepted_at) VALUES(?,?,?,?,?,?,?,'accepted','template',?,1,?,1)",
+      "params": [
+        "77b22615-1847-447f-b9e5-1b6aa2e117b5",
+        "11111111-1111-4111-8111-111111111111",
+        "54844a68-9ed0-497e-82fa-7acd21926e2e",
+        3,
+        "ace89446-252b-4a23-93a5-c3a30a9c883c",
+        "22ce7098-344f-429d-b3a6-3dc78127e70a",
+        "18a2c7d7-dda9-4cb8-8c82-0ab2df59b9a3",
+        "tarot-v3-unchanged-bytes",
+        "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      ]
+    },
+    {
+      "sql": "INSERT INTO reflections(id,owner_id,session_id,edition_id) VALUES(?,?,?,?)",
+      "params": [
+        "d27f77b6-5c0c-4dfd-a257-6fce38039a09",
+        "11111111-1111-4111-8111-111111111111",
+        "54844a68-9ed0-497e-82fa-7acd21926e2e",
+        "77b22615-1847-447f-b9e5-1b6aa2e117b5"
+      ]
+    },
+    {
+      "sql": "INSERT INTO reflection_revisions(reflection_id,owner_id,revision,body_enc,key_version,created_at) VALUES(?,?,1,'original-writing',1,1)",
+      "params": [
+        "d27f77b6-5c0c-4dfd-a257-6fce38039a09",
+        "11111111-1111-4111-8111-111111111111"
+      ]
+    },
+    {
+      "sql": "INSERT INTO revisits(id,owner_id,edition_id,session_id,note_enc,key_version,created_at,current_revision,updated_at) VALUES(?,?,?,?,'current-revisit-bytes',1,1,2,2)",
+      "params": [
+        "eb6dc69f-bdd2-4e7d-a66f-950f92e01490",
+        "11111111-1111-4111-8111-111111111111",
+        "77b22615-1847-447f-b9e5-1b6aa2e117b5",
+        "54844a68-9ed0-497e-82fa-7acd21926e2e"
+      ]
+    },
+    {
+      "sql": "INSERT INTO revisit_revisions(revisit_id,owner_id,revision,body_enc,key_version,created_at) VALUES(?,?,1,'earlier-revisit-bytes',1,1)",
+      "params": [
+        "eb6dc69f-bdd2-4e7d-a66f-950f92e01490",
+        "11111111-1111-4111-8111-111111111111"
+      ]
+    },
+    {
+      "sql": "INSERT INTO context_grants(id,owner_id,revisit_id,revisit_revision,state,created_at,updated_at) VALUES(?,?,?,2,'allowed',1,1)",
+      "params": [
+        "03b0a4ee-9f98-45f9-8f18-1eeb0594fa3c",
+        "11111111-1111-4111-8111-111111111111",
+        "eb6dc69f-bdd2-4e7d-a66f-950f92e01490"
+      ]
+    },
+    {
+      "sql": "INSERT INTO import_identities(owner_id,source_key_hmac,source_entity_hmac,original_hmac,session_id,entity_kind,revisit_id,source_record_enc,key_version) VALUES(?,'source','entity','original',?,'revisit',?,'import-provenance-bytes',1)",
+      "params": [
+        "11111111-1111-4111-8111-111111111111",
+        "54844a68-9ed0-497e-82fa-7acd21926e2e",
+        "eb6dc69f-bdd2-4e7d-a66f-950f92e01490"
+      ]
+    },
+    {
+      "sql": "INSERT INTO reading_sessions(id,owner_id,status,question_enc,created_at,saved_at) VALUES(?,?,'saved','imported-question',1,1)",
+      "params": [
+        "3dfe662f-b5bb-4526-9532-51e37718059c",
+        "11111111-1111-4111-8111-111111111111"
+      ]
+    },
+    {
+      "sql": "INSERT INTO reading_editions(id,owner_id,session_id,edition_number,status,mode,body_enc,key_version,accepted_at,invalidated_at) VALUES(?,?,?,1,?,'legacy',?,1,1,?)",
+      "params": [
+        "3e0499dc-d4b4-4d32-b379-34edaf3e320e",
+        "11111111-1111-4111-8111-111111111111",
+        "3dfe662f-b5bb-4526-9532-51e37718059c",
+        "imported",
+        "imported-bytes",
+        null
+      ]
+    },
+    {
+      "sql": "INSERT INTO reading_sessions(id,owner_id,status,question_enc,created_at,saved_at) VALUES(?,?,'saved','imported-question',1,1)",
+      "params": [
+        "842dc2bd-a4b8-42f8-94f0-a1f8d970f4a9",
+        "11111111-1111-4111-8111-111111111111"
+      ]
+    },
+    {
+      "sql": "INSERT INTO reading_editions(id,owner_id,session_id,edition_number,status,mode,body_enc,key_version,accepted_at,invalidated_at) VALUES(?,?,?,1,?,'legacy',?,1,1,?)",
+      "params": [
+        "eb9e6549-60de-4d6f-beb2-feea9b1eb251",
+        "11111111-1111-4111-8111-111111111111",
+        "842dc2bd-a4b8-42f8-94f0-a1f8d970f4a9",
+        "withdrawn",
+        null,
+        2
+      ]
+    }
+  ],
+  "owner": "11111111-1111-4111-8111-111111111111",
+  "other": "22222222-2222-4222-8222-222222222222",
+  "plan": {
+    "syntheticOnly": true,
+    "ownerId": "11111111-1111-4111-8111-111111111111",
+    "sessionId": "54844a68-9ed0-497e-82fa-7acd21926e2e",
+    "basisId": "22ce7098-344f-429d-b3a6-3dc78127e70a",
+    "clientIntentId": "6ef35546-671e-4f6b-8028-73c3a9a422ef",
+    "idempotencyKey": "52cf357a-07f8-4859-8207-b58d5086b828",
+    "payloadHmac": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+    "planHmac": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+    "keyVersion": 1,
+    "permissionRevision": 1,
+    "contentHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "contentPolicyRevision": 1,
+    "policyHash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "context": []
+  },
+  "editions": [
+    "be6d63c4-97aa-4d9e-b1c2-8984213a2fe7",
+    "18a2c7d7-dda9-4cb8-8c82-0ab2df59b9a3",
+    "77b22615-1847-447f-b9e5-1b6aa2e117b5"
+  ],
+  "migration": "-- Quiesced migration: deploy matching writers after successful completion.\n-- Preserve cascading revisit rows and exact encrypted bytes before rebuilding parents.\nPRAGMA defer_foreign_keys=ON;\nDROP TRIGGER storage_accounts_insert;\nDROP TRIGGER storage_basis_snapshots_insert;\nDROP TRIGGER storage_basis_snapshots_update;\nDROP TRIGGER storage_basis_snapshots_delete;\nDROP TRIGGER storage_reading_editions_insert;\nDROP TRIGGER storage_reading_editions_update;\nDROP TRIGGER storage_reading_editions_delete;\nDROP TRIGGER storage_revisits_insert;\nDROP TRIGGER storage_revisits_update;\nDROP TRIGGER storage_revisits_delete;\nDROP TRIGGER storage_revisit_revisions_insert;\nDROP TRIGGER storage_revisit_revisions_update;\nDROP TRIGGER storage_revisit_revisions_delete;\nDROP TRIGGER storage_deletion_jobs_insert;\nDROP TRIGGER storage_deletion_jobs_update;\nDROP TRIGGER storage_deletion_jobs_delete;\nCREATE TABLE astrology_revisits_backup AS SELECT * FROM revisits;\nCREATE TABLE astrology_revisit_revisions_backup AS SELECT * FROM revisit_revisions;\nCREATE TABLE pattern_content_releases (\n hash TEXT PRIMARY KEY NOT NULL, state TEXT NOT NULL CHECK(state IN('active','withdrawn')),\n release_json TEXT NOT NULL, created_at INTEGER NOT NULL, withdrawn_at INTEGER,\n CHECK((state='withdrawn')=(withdrawn_at IS NOT NULL))\n);\nCREATE TABLE pattern_state (\n id INTEGER PRIMARY KEY NOT NULL CHECK(id=1), content_hash TEXT NOT NULL REFERENCES pattern_content_releases(hash),\n revision INTEGER NOT NULL CHECK(revision>0), enabled INTEGER NOT NULL CHECK(enabled IN(0,1)),\n calculation_hash TEXT NOT NULL, updated_at INTEGER NOT NULL\n);\nALTER TABLE reading_sessions ADD COLUMN method TEXT NOT NULL DEFAULT 'tarot' CHECK(method IN('tarot','astrology','imported'));\nUPDATE reading_sessions SET method='imported' WHERE EXISTS(SELECT 1 FROM reading_editions e WHERE e.owner_id=reading_sessions.owner_id AND e.session_id=reading_sessions.id AND e.mode='legacy') AND NOT EXISTS(SELECT 1 FROM reading_editions e WHERE e.owner_id=reading_sessions.owner_id AND e.session_id=reading_sessions.id AND e.mode IN('model','template'));\nCREATE UNIQUE INDEX reading_session_method_identity ON reading_sessions(owner_id,id,method);\nCREATE INDEX reading_sessions_method_history ON reading_sessions(owner_id,status,method,created_at DESC,id DESC);\nCREATE TABLE birth_profiles (\n owner_id TEXT PRIMARY KEY NOT NULL REFERENCES accounts(id) ON DELETE CASCADE,\n id TEXT NOT NULL UNIQUE, revision INTEGER NOT NULL CHECK(revision>0), body_enc TEXT,\n key_version INTEGER, created_at INTEGER NOT NULL, updated_at INTEGER NOT NULL, deleted_at INTEGER,\n UNIQUE(owner_id,id), FOREIGN KEY(owner_id,key_version) REFERENCES account_keys(owner_id,version),\n CHECK((body_enc IS NULL)=(deleted_at IS NOT NULL)), CHECK((body_enc IS NULL)=(key_version IS NULL))\n);\nCREATE TABLE astrology_admissions (\n owner_id TEXT NOT NULL REFERENCES accounts(id) ON DELETE CASCADE,\n quota_day TEXT NOT NULL, input_hmac TEXT NOT NULL, key_version INTEGER NOT NULL,\n created_at INTEGER NOT NULL, expires_at INTEGER NOT NULL,\n PRIMARY KEY(owner_id,quota_day,input_hmac), FOREIGN KEY(owner_id,key_version) REFERENCES account_keys(owner_id,version),\n CHECK(expires_at>created_at)\n);\nCREATE INDEX astrology_admission_expiry ON astrology_admissions(expires_at);\nCREATE TABLE pattern_saved_sources (\n owner_id TEXT NOT NULL REFERENCES accounts(id) ON DELETE CASCADE, source_hmac TEXT NOT NULL,\n session_id TEXT NOT NULL, edition_id TEXT NOT NULL, key_version INTEGER NOT NULL, created_at INTEGER NOT NULL,\n edition_mode TEXT GENERATED ALWAYS AS ('pattern') VIRTUAL,\n PRIMARY KEY(owner_id,source_hmac), UNIQUE(owner_id,session_id), UNIQUE(owner_id,edition_id),\n FOREIGN KEY(owner_id,session_id) REFERENCES reading_sessions(owner_id,id) ON DELETE CASCADE,\n FOREIGN KEY(owner_id,edition_id,session_id,edition_mode) REFERENCES reading_editions(owner_id,id,session_id,mode),\n FOREIGN KEY(owner_id,key_version) REFERENCES account_keys(owner_id,version)\n);\nCREATE TABLE basis_snapshots_next (\n  session_method TEXT GENERATED ALWAYS AS (CASE WHEN kind='astrology.natal.v2' THEN 'astrology' ELSE NULL END) VIRTUAL,\n  id TEXT PRIMARY KEY NOT NULL, owner_id TEXT NOT NULL, session_id TEXT NOT NULL,\n  kind TEXT NOT NULL CHECK(kind IN('tarot.v1','astrology.natal.v2')), schema_version INTEGER NOT NULL CHECK((kind='tarot.v1' AND schema_version=1) OR (kind='astrology.natal.v2' AND schema_version=2)),\n  body_enc TEXT, key_version INTEGER NOT NULL, created_at INTEGER NOT NULL,\n  UNIQUE(owner_id,id), UNIQUE(owner_id,id,session_id), UNIQUE(owner_id,session_id),\n  FOREIGN KEY(owner_id,session_id) REFERENCES reading_sessions(owner_id,id) ON DELETE CASCADE,\n  FOREIGN KEY(owner_id,key_version) REFERENCES account_keys(owner_id,version),\n  FOREIGN KEY(owner_id,session_id,session_method) REFERENCES reading_sessions(owner_id,id,method)\n);\nINSERT INTO basis_snapshots_next SELECT * FROM basis_snapshots;\nDROP TABLE basis_snapshots;\nALTER TABLE basis_snapshots_next RENAME TO basis_snapshots;\nCREATE UNIQUE INDEX basis_method_identity ON basis_snapshots(owner_id,id,session_id,kind);\nCREATE TABLE reading_editions_next (\n  basis_kind TEXT GENERATED ALWAYS AS (CASE WHEN mode='pattern' THEN 'astrology.natal.v2' WHEN mode IN('model','template') THEN 'tarot.v1' ELSE NULL END) VIRTUAL,\n  session_method TEXT GENERATED ALWAYS AS (CASE WHEN mode='pattern' THEN 'astrology' WHEN mode IN('model','template') THEN 'tarot' ELSE NULL END) VIRTUAL,\n  id TEXT PRIMARY KEY NOT NULL, owner_id TEXT NOT NULL, session_id TEXT NOT NULL, edition_number INTEGER NOT NULL CHECK(edition_number>0),\n  request_id TEXT UNIQUE, basis_id TEXT, parent_edition_id TEXT,\n  status TEXT NOT NULL CHECK(status IN('accepted','imported','withdrawn','deleted')),\n  mode TEXT NOT NULL CHECK(mode IN('model','template','legacy','pattern')),\n  body_enc TEXT, key_version INTEGER NOT NULL, content_hash TEXT REFERENCES content_editions(hash),\n  pattern_content_hash TEXT REFERENCES pattern_content_releases(hash),\n  accepted_at INTEGER NOT NULL, invalidated_at INTEGER,\n  UNIQUE(owner_id,id), UNIQUE(owner_id,session_id,edition_number),\n  FOREIGN KEY(owner_id,session_id) REFERENCES reading_sessions(owner_id,id) ON DELETE CASCADE,\n  FOREIGN KEY(owner_id,request_id) REFERENCES generation_requests(owner_id,id),\n  FOREIGN KEY(owner_id,basis_id,session_id) REFERENCES basis_snapshots(owner_id,id,session_id),\n  FOREIGN KEY(owner_id,parent_edition_id) REFERENCES reading_editions(owner_id,id),\n  FOREIGN KEY(owner_id,key_version) REFERENCES account_keys(owner_id,version),\n  CHECK(status IN('withdrawn','deleted') OR body_enc IS NOT NULL),\n  CHECK((status IN('withdrawn','deleted'))=(invalidated_at IS NOT NULL)),\n  CHECK((mode='legacy' AND request_id IS NULL AND pattern_content_hash IS NULL) OR (mode IN('model','template') AND request_id IS NOT NULL AND basis_id IS NOT NULL AND content_hash IS NOT NULL AND pattern_content_hash IS NULL) OR (mode='pattern' AND request_id IS NULL AND basis_id IS NOT NULL AND pattern_content_hash IS NOT NULL AND content_hash IS NULL AND parent_edition_id IS NULL AND status!='imported')),\n  FOREIGN KEY(owner_id,basis_id,session_id,basis_kind) REFERENCES basis_snapshots(owner_id,id,session_id,kind),\n  FOREIGN KEY(owner_id,session_id,session_method) REFERENCES reading_sessions(owner_id,id,method)\n);\nINSERT INTO reading_editions_next(id,owner_id,session_id,edition_number,request_id,basis_id,parent_edition_id,status,mode,body_enc,key_version,content_hash,accepted_at,invalidated_at) SELECT id,owner_id,session_id,edition_number,request_id,basis_id,parent_edition_id,status,mode,body_enc,key_version,content_hash,accepted_at,invalidated_at FROM reading_editions;\nDROP TABLE reading_editions;\nALTER TABLE reading_editions_next RENAME TO reading_editions;\nCREATE INDEX editions_session ON reading_editions(owner_id,session_id,edition_number);\nCREATE UNIQUE INDEX reading_edition_session_identity ON reading_editions(owner_id,id,session_id);\nCREATE UNIQUE INDEX reading_edition_method_identity ON reading_editions(owner_id,id,session_id,mode);\nINSERT INTO revisits SELECT * FROM astrology_revisits_backup;\nINSERT INTO revisit_revisions SELECT * FROM astrology_revisit_revisions_backup;\nDROP TABLE astrology_revisits_backup;\nDROP TABLE astrology_revisit_revisions_backup;\nCREATE TABLE deletion_jobs_next (\n  id TEXT PRIMARY KEY NOT NULL, owner_id TEXT REFERENCES accounts(id) ON DELETE SET NULL,\n  scope TEXT NOT NULL CHECK(scope IN('account','session','reflection_revision','context_copy','revisit','birth_profile')),\n  target_hmac TEXT NOT NULL, target_enc TEXT, receipt_token_hash TEXT UNIQUE,\n  state TEXT NOT NULL CHECK(state IN('fencing','ledger_pending','erasing','complete')),\n  ledger_key TEXT NOT NULL UNIQUE, attempts INTEGER NOT NULL DEFAULT 0 CHECK(attempts>=0),\n  next_run_at INTEGER NOT NULL, created_at INTEGER NOT NULL, completed_at INTEGER, backup_expires_by INTEGER\n);\nINSERT INTO deletion_jobs_next SELECT * FROM deletion_jobs;\nDROP TABLE deletion_jobs;\nALTER TABLE deletion_jobs_next RENAME TO deletion_jobs;\nCREATE INDEX deletion_due ON deletion_jobs(state,next_run_at);\nCREATE TRIGGER basis_kind_immutable BEFORE UPDATE OF kind,schema_version,owner_id,session_id ON basis_snapshots WHEN NEW.kind!=OLD.kind OR NEW.schema_version!=OLD.schema_version OR NEW.owner_id!=OLD.owner_id OR NEW.session_id!=OLD.session_id BEGIN\n SELECT RAISE(ABORT,'Basis identity is immutable');\nEND;\nCREATE TRIGGER session_method_immutable BEFORE UPDATE OF method ON reading_sessions WHEN NEW.method!=OLD.method AND EXISTS(SELECT 1 FROM basis_snapshots b WHERE b.owner_id=OLD.owner_id AND b.session_id=OLD.id) BEGIN\n SELECT RAISE(ABORT,'Session method with a basis is immutable');\nEND;\nCREATE TRIGGER generation_tarot_method_insert BEFORE INSERT ON generation_requests WHEN EXISTS(SELECT 1 FROM reading_sessions s WHERE s.owner_id=NEW.owner_id AND s.id=NEW.session_id AND s.method='astrology') OR EXISTS(SELECT 1 FROM basis_snapshots b WHERE b.owner_id=NEW.owner_id AND b.id=NEW.basis_id AND b.kind!='tarot.v1') OR EXISTS(SELECT 1 FROM reading_editions e WHERE e.owner_id=NEW.owner_id AND e.id=NEW.parent_edition_id AND e.mode='pattern') BEGIN SELECT RAISE(ABORT,'Generation requires a tarot family'); END;\nCREATE TRIGGER generation_tarot_method_update BEFORE UPDATE ON generation_requests WHEN EXISTS(SELECT 1 FROM reading_sessions s WHERE s.owner_id=NEW.owner_id AND s.id=NEW.session_id AND s.method='astrology') OR EXISTS(SELECT 1 FROM basis_snapshots b WHERE b.owner_id=NEW.owner_id AND b.id=NEW.basis_id AND b.kind!='tarot.v1') OR EXISTS(SELECT 1 FROM reading_editions e WHERE e.owner_id=NEW.owner_id AND e.id=NEW.parent_edition_id AND e.mode='pattern') BEGIN SELECT RAISE(ABORT,'Generation requires a tarot family'); END;\nCREATE TRIGGER storage_basis_snapshots_insert AFTER INSERT ON \"basis_snapshots\" BEGIN\n  UPDATE accounts SET storage_bytes=storage_bytes+(1024+coalesce(length(CAST(NEW.\"body_enc\" AS BLOB)),0)) WHERE id=NEW.owner_id;\nEND;\nCREATE TRIGGER storage_basis_snapshots_update AFTER UPDATE OF \"owner_id\",\"body_enc\" ON \"basis_snapshots\" BEGIN\n  UPDATE accounts SET storage_bytes=storage_bytes-(1024+coalesce(length(CAST(OLD.\"body_enc\" AS BLOB)),0)) WHERE id=OLD.owner_id;\n  UPDATE accounts SET storage_bytes=storage_bytes+(1024+coalesce(length(CAST(NEW.\"body_enc\" AS BLOB)),0)) WHERE id=NEW.owner_id;\nEND;\nCREATE TRIGGER storage_basis_snapshots_delete AFTER DELETE ON \"basis_snapshots\" BEGIN\n  UPDATE accounts SET storage_bytes=storage_bytes-(1024+coalesce(length(CAST(OLD.\"body_enc\" AS BLOB)),0)) WHERE id=OLD.owner_id;\nEND;\nCREATE TRIGGER storage_reading_editions_insert AFTER INSERT ON \"reading_editions\" BEGIN\n  UPDATE accounts SET storage_bytes=storage_bytes+(1024+coalesce(length(CAST(NEW.\"body_enc\" AS BLOB)),0)) WHERE id=NEW.owner_id;\nEND;\nCREATE TRIGGER storage_reading_editions_update AFTER UPDATE OF \"owner_id\",\"body_enc\" ON \"reading_editions\" BEGIN\n  UPDATE accounts SET storage_bytes=storage_bytes-(1024+coalesce(length(CAST(OLD.\"body_enc\" AS BLOB)),0)) WHERE id=OLD.owner_id;\n  UPDATE accounts SET storage_bytes=storage_bytes+(1024+coalesce(length(CAST(NEW.\"body_enc\" AS BLOB)),0)) WHERE id=NEW.owner_id;\nEND;\nCREATE TRIGGER storage_reading_editions_delete AFTER DELETE ON \"reading_editions\" BEGIN\n  UPDATE accounts SET storage_bytes=storage_bytes-(1024+coalesce(length(CAST(OLD.\"body_enc\" AS BLOB)),0)) WHERE id=OLD.owner_id;\nEND;\nCREATE TRIGGER storage_revisits_insert AFTER INSERT ON \"revisits\" BEGIN\n UPDATE accounts SET storage_bytes=storage_bytes+(1024+coalesce(length(CAST(NEW.\"note_enc\" AS BLOB)),0)) WHERE id=NEW.owner_id;\nEND;\nCREATE TRIGGER storage_revisits_update AFTER UPDATE ON \"revisits\" BEGIN\n UPDATE accounts SET storage_bytes=storage_bytes-(1024+coalesce(length(CAST(OLD.\"note_enc\" AS BLOB)),0)) WHERE id=OLD.owner_id;\n UPDATE accounts SET storage_bytes=storage_bytes+(1024+coalesce(length(CAST(NEW.\"note_enc\" AS BLOB)),0)) WHERE id=NEW.owner_id;\nEND;\nCREATE TRIGGER storage_revisits_delete AFTER DELETE ON \"revisits\" BEGIN\n UPDATE accounts SET storage_bytes=storage_bytes-(1024+coalesce(length(CAST(OLD.\"note_enc\" AS BLOB)),0)) WHERE id=OLD.owner_id;\nEND;\nCREATE TRIGGER storage_revisit_revisions_insert AFTER INSERT ON \"revisit_revisions\" BEGIN\n UPDATE accounts SET storage_bytes=storage_bytes+(1024+coalesce(length(CAST(NEW.\"body_enc\" AS BLOB)),0)) WHERE id=NEW.owner_id;\nEND;\nCREATE TRIGGER storage_revisit_revisions_update AFTER UPDATE ON \"revisit_revisions\" BEGIN\n UPDATE accounts SET storage_bytes=storage_bytes-(1024+coalesce(length(CAST(OLD.\"body_enc\" AS BLOB)),0)) WHERE id=OLD.owner_id;\n UPDATE accounts SET storage_bytes=storage_bytes+(1024+coalesce(length(CAST(NEW.\"body_enc\" AS BLOB)),0)) WHERE id=NEW.owner_id;\nEND;\nCREATE TRIGGER storage_revisit_revisions_delete AFTER DELETE ON \"revisit_revisions\" BEGIN\n UPDATE accounts SET storage_bytes=storage_bytes-(1024+coalesce(length(CAST(OLD.\"body_enc\" AS BLOB)),0)) WHERE id=OLD.owner_id;\nEND;\nCREATE TRIGGER storage_deletion_jobs_insert AFTER INSERT ON \"deletion_jobs\" BEGIN\n UPDATE accounts SET storage_bytes=storage_bytes+(1024+coalesce(length(CAST(NEW.\"target_enc\" AS BLOB)),0)) WHERE id=NEW.owner_id;\nEND;\nCREATE TRIGGER storage_deletion_jobs_update AFTER UPDATE ON \"deletion_jobs\" BEGIN\n UPDATE accounts SET storage_bytes=storage_bytes-(1024+coalesce(length(CAST(OLD.\"target_enc\" AS BLOB)),0)) WHERE id=OLD.owner_id;\n UPDATE accounts SET storage_bytes=storage_bytes+(1024+coalesce(length(CAST(NEW.\"target_enc\" AS BLOB)),0)) WHERE id=NEW.owner_id;\nEND;\nCREATE TRIGGER storage_deletion_jobs_delete AFTER DELETE ON \"deletion_jobs\" BEGIN\n UPDATE accounts SET storage_bytes=storage_bytes-(1024+coalesce(length(CAST(OLD.\"target_enc\" AS BLOB)),0)) WHERE id=OLD.owner_id;\nEND;\nCREATE TRIGGER storage_birth_profiles_insert AFTER INSERT ON birth_profiles BEGIN\n UPDATE accounts SET storage_bytes=storage_bytes+(1024+coalesce(length(CAST(NEW.\"body_enc\" AS BLOB)),0)) WHERE id=NEW.owner_id;\nEND;\nCREATE TRIGGER storage_birth_profiles_delete AFTER DELETE ON birth_profiles BEGIN\n UPDATE accounts SET storage_bytes=storage_bytes-(1024+coalesce(length(CAST(OLD.\"body_enc\" AS BLOB)),0)) WHERE id=OLD.owner_id;\nEND;\nCREATE TRIGGER storage_birth_profiles_update AFTER UPDATE ON birth_profiles BEGIN\n UPDATE accounts SET storage_bytes=storage_bytes-(1024+coalesce(length(CAST(OLD.\"body_enc\" AS BLOB)),0)) WHERE id=OLD.owner_id;\n UPDATE accounts SET storage_bytes=storage_bytes+(1024+coalesce(length(CAST(NEW.\"body_enc\" AS BLOB)),0)) WHERE id=NEW.owner_id;\nEND;\nCREATE TRIGGER storage_astrology_admissions_insert AFTER INSERT ON astrology_admissions BEGIN\n UPDATE accounts SET storage_bytes=storage_bytes+(1024) WHERE id=NEW.owner_id;\nEND;\nCREATE TRIGGER storage_astrology_admissions_delete AFTER DELETE ON astrology_admissions BEGIN\n UPDATE accounts SET storage_bytes=storage_bytes-(1024) WHERE id=OLD.owner_id;\nEND;\nCREATE TRIGGER storage_astrology_admissions_update AFTER UPDATE ON astrology_admissions BEGIN\n UPDATE accounts SET storage_bytes=storage_bytes-(1024) WHERE id=OLD.owner_id;\n UPDATE accounts SET storage_bytes=storage_bytes+(1024) WHERE id=NEW.owner_id;\nEND;\nCREATE TRIGGER storage_pattern_saved_sources_insert AFTER INSERT ON pattern_saved_sources BEGIN\n UPDATE accounts SET storage_bytes=storage_bytes+(1024) WHERE id=NEW.owner_id;\nEND;\nCREATE TRIGGER storage_pattern_saved_sources_delete AFTER DELETE ON pattern_saved_sources BEGIN\n UPDATE accounts SET storage_bytes=storage_bytes-(1024) WHERE id=OLD.owner_id;\nEND;\nCREATE TRIGGER storage_pattern_saved_sources_update AFTER UPDATE ON pattern_saved_sources BEGIN\n UPDATE accounts SET storage_bytes=storage_bytes-(1024) WHERE id=OLD.owner_id;\n UPDATE accounts SET storage_bytes=storage_bytes+(1024) WHERE id=NEW.owner_id;\nEND;\nCREATE TRIGGER storage_accounts_insert AFTER INSERT ON accounts BEGIN\n UPDATE accounts SET storage_bytes=1024+\n coalesce((SELECT sum(1024+coalesce(length(CAST(birth_profiles.\"body_enc\" AS BLOB)),0)) FROM \"birth_profiles\" WHERE owner_id=NEW.id),0)+\n coalesce((SELECT sum(1024) FROM \"astrology_admissions\" WHERE owner_id=NEW.id),0)+\n coalesce((SELECT sum(1024) FROM \"pattern_saved_sources\" WHERE owner_id=NEW.id),0)+\n\n coalesce((SELECT sum(1024+coalesce(length(CAST(account_keys.\"wrapped_key_enc\" AS BLOB)),0)+coalesce(length(CAST(account_keys.\"wrapped_index_key_enc\" AS BLOB)),0)) FROM \"account_keys\" WHERE owner_id=NEW.id),0)+\n coalesce((SELECT sum(1024) FROM \"account_rekey_entries\" WHERE owner_id=NEW.id),0)+\n coalesce((SELECT sum(1024) FROM \"account_rekey_jobs\" WHERE owner_id=NEW.id),0)+\n coalesce((SELECT sum(1024) FROM \"auth_challenges\" WHERE owner_id=NEW.id),0)+\n coalesce((SELECT sum(1024) FROM \"auth_sessions\" WHERE owner_id=NEW.id),0)+\n coalesce((SELECT sum(1024+coalesce(length(CAST(basis_snapshots.\"body_enc\" AS BLOB)),0)) FROM \"basis_snapshots\" WHERE owner_id=NEW.id),0)+\n coalesce((SELECT sum(1024) FROM \"context_grants\" WHERE owner_id=NEW.id),0)+\n coalesce((SELECT sum(1024) FROM \"cost_reservations\" WHERE owner_id=NEW.id),0)+\n coalesce((SELECT sum(1024) FROM \"credentials\" WHERE owner_id=NEW.id),0)+\n coalesce((SELECT sum(1024+coalesce(length(CAST(deletion_jobs.\"target_enc\" AS BLOB)),0)) FROM \"deletion_jobs\" WHERE owner_id=NEW.id),0)+\n coalesce((SELECT sum(1024) FROM \"export_tickets\" WHERE owner_id=NEW.id),0)+\n coalesce((SELECT sum(1024) FROM \"generation_attempts\" WHERE owner_id=NEW.id),0)+\n coalesce((SELECT sum(1024+coalesce(length(CAST(generation_context.\"fragment_enc\" AS BLOB)),0)) FROM \"generation_context\" WHERE owner_id=NEW.id),0)+\n coalesce((SELECT sum(1024+coalesce(length(CAST(generation_requests.\"input_enc\" AS BLOB)),0)+coalesce(length(CAST(generation_requests.\"plan_enc\" AS BLOB)),0)) FROM \"generation_requests\" WHERE owner_id=NEW.id),0)+\n coalesce((SELECT sum(1024) FROM \"idempotency_keys\" WHERE owner_id=NEW.id),0)+\n coalesce((SELECT sum(1024) FROM \"import_batches\" WHERE owner_id=NEW.id),0)+\n coalesce((SELECT sum(1024+coalesce(length(CAST(import_identities.\"source_record_enc\" AS BLOB)),0)) FROM \"import_identities\" WHERE owner_id=NEW.id),0)+\n coalesce((SELECT sum(1024+coalesce(length(CAST(import_items.\"body_enc\" AS BLOB)),0)+coalesce(length(CAST(import_items.\"result_enc\" AS BLOB)),0)) FROM \"import_items\" WHERE owner_id=NEW.id),0)+\n coalesce((SELECT sum(1024) FROM \"key_retirement_operations\" WHERE owner_id=NEW.id),0)+\n coalesce((SELECT sum(1024) FROM \"permission_revisions\" WHERE owner_id=NEW.id),0)+\n coalesce((SELECT sum(1024+coalesce(length(CAST(provider_dispatches.\"provider_response_id_enc\" AS BLOB)),0)+coalesce(length(CAST(provider_dispatches.\"transmission_enc\" AS BLOB)),0)+coalesce(length(CAST(provider_dispatches.\"candidate_enc\" AS BLOB)),0)) FROM \"provider_dispatches\" WHERE owner_id=NEW.id),0)+\n coalesce((SELECT sum(1024) FROM \"quota_buckets\" WHERE owner_id=NEW.id),0)+\n coalesce((SELECT sum(1024) FROM \"quota_events\" WHERE owner_id=NEW.id),0)+\n coalesce((SELECT sum(1024) FROM \"quota_reservations\" WHERE owner_id=NEW.id),0)+\n coalesce((SELECT sum(1024+coalesce(length(CAST(reading_editions.\"body_enc\" AS BLOB)),0)) FROM \"reading_editions\" WHERE owner_id=NEW.id),0)+\n coalesce((SELECT sum(1024+coalesce(length(CAST(reading_sessions.\"question_enc\" AS BLOB)),0)) FROM \"reading_sessions\" WHERE owner_id=NEW.id),0)+\n coalesce((SELECT sum(1024) FROM \"recovery_codes\" WHERE owner_id=NEW.id),0)+\n coalesce((SELECT sum(1024+coalesce(length(CAST(reflection_revisions.\"body_enc\" AS BLOB)),0)) FROM \"reflection_revisions\" WHERE owner_id=NEW.id),0)+\n coalesce((SELECT sum(1024) FROM \"reflections\" WHERE owner_id=NEW.id),0)+\n coalesce((SELECT sum(1024) FROM \"request_events\" WHERE owner_id=NEW.id),0)+\n coalesce((SELECT sum(1024+coalesce(length(CAST(revisit_revisions.\"body_enc\" AS BLOB)),0)) FROM \"revisit_revisions\" WHERE owner_id=NEW.id),0)+\n coalesce((SELECT sum(1024+coalesce(length(CAST(revisits.\"note_enc\" AS BLOB)),0)) FROM \"revisits\" WHERE owner_id=NEW.id),0)+\n coalesce((SELECT sum(1024+coalesce(length(CAST(security_operations.\"snapshot_enc\" AS BLOB)),0)) FROM \"security_operations\" WHERE owner_id=NEW.id),0)+\n coalesce((SELECT sum(1024) FROM \"import_groups\" WHERE owner_id=NEW.id),0)+\n coalesce((SELECT sum(1024+coalesce(length(CAST(import_staging.\"field_enc\" AS BLOB)),0)) FROM \"import_staging\" WHERE owner_id=NEW.id),0)+\n coalesce((SELECT sum(1024) FROM \"import_copy_sources\" WHERE owner_id=NEW.id),0)+\n 1024*(SELECT count(*) FROM cost_adjustments a JOIN cost_reservations c ON c.id=a.cost_id WHERE c.owner_id=NEW.id) WHERE id=NEW.id;\nEND;\nCREATE TABLE astrology_migration_integrity(violations INTEGER NOT NULL CHECK(violations=0));\nINSERT INTO astrology_migration_integrity SELECT count(*) FROM pragma_foreign_key_check;\nDROP TABLE astrology_migration_integrity;\nPRAGMA defer_foreign_keys=OFF;\n"
+}

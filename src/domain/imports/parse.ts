@@ -6,6 +6,7 @@ import {
   ImportRecovery,
   LegacyRecord,
   ExportPage,
+  PortableRecordV2,
   apiSchemas,
 } from '../../contracts/index.ts';
 import { IMPORT_LIMITS } from '../../contracts/import-policy.ts';
@@ -40,7 +41,8 @@ export async function parseImportFile(input: FileInput): Promise<NormalizedImpor
   const result: NormalizedImport = { source, recovery, units: [], errors: [] };
   if (input.format === 'pixel-json') throw new Error('IMPORT_INVALID: format not yet supported');
   try {
-    if (input.format === 'reflection-export.v1') await normalizePortable(input.document, result);
+    if (input.format === 'reflection-export.v1' || input.format === 'reflection-export.v2')
+      await normalizePortable(input.document, result);
     else {
       const root = readJson(input.document);
       if (input.format === 'reflection-portable-chunk.v1') {
@@ -339,9 +341,21 @@ async function normalizePortable(document: string, result: NormalizedImport) {
       );
   }
   for (const { node, line, pointer } of records) {
-    const record = ExportPage.shape.records.element.parse(node.value),
-      id = record.identity;
-    if (record.kind !== id.kind) throw new Error('IMPORT_INVALID');
+    const record = PortableRecordV2.parse(node.value);
+    if (record.kind !== record.identity.kind) throw new Error('IMPORT_INVALID');
+    if (record.kind === 'birth_profile') {
+      const id = record.identity;
+      if (
+        record.value.id !== record.originalId ||
+        id.recordId !== record.originalId ||
+        id.recordRevision !== record.value.revision
+      )
+        throw new Error('IMPORT_INVALID');
+      result.profileCandidates ??= [];
+      result.profileCandidates.push(record.value);
+      continue;
+    }
+    const id = record.identity;
     const value = record.value as {
       sessionId?: string;
       editionId?: string;

@@ -32,8 +32,10 @@ for (const width of [320, 390, 768, 1280]) {
       await page.emulateMedia({ colorScheme: theme, reducedMotion: 'reduce' });
       const capture = async (state: string) => {
         if (['saved-empty', 'saved-populated', 'new-empty'].includes(state)) {
-          const destination = state === 'new-empty' ? 'New reading' : 'Saved readings';
-          const current = page.getByRole('button', { name: destination, exact: true });
+          const destination = state === 'new-empty' ? 'Tarot' : 'Journal';
+          const current = page
+            .getByRole('navigation', { name: 'Reading actions' })
+            .getByRole('button', { name: destination, exact: true });
           await expect(current).toHaveAttribute('aria-current', 'page');
           await current.hover();
           const contrast = await themeContrast(
@@ -60,16 +62,22 @@ for (const width of [320, 390, 768, 1280]) {
         await expect
           .poll(() =>
             page.evaluate(() =>
-              [...document.images].every((image) => {
-                const box = image.getBoundingClientRect();
-                if (!box.width || !box.height) return true;
-                if (image.loading === 'lazy' && (box.top > innerHeight || box.bottom < 0))
-                  return true;
-                return image.complete && image.naturalWidth > 0;
-              }),
+              [...document.images]
+                .filter((image) => {
+                  const box = image.getBoundingClientRect();
+                  if (!box.width || !box.height) return false;
+                  if (image.loading === 'lazy' && (box.top > innerHeight || box.bottom < 0))
+                    return false;
+                  return !image.complete || image.naturalWidth === 0;
+                })
+                .map((image) => ({
+                  source: image.currentSrc || image.src,
+                  complete: image.complete,
+                  naturalWidth: image.naturalWidth,
+                })),
             ),
           )
-          .toBe(true);
+          .toEqual([]);
         const layout = await page.evaluate(() => ({
           viewport: innerWidth,
           content: document.documentElement.scrollWidth,
@@ -126,7 +134,10 @@ for (const width of [320, 390, 768, 1280]) {
       await capture('account');
       await page.getByRole('button', { name: 'Enable AI readings', exact: true }).click();
       await page.getByRole('link', { name: 'Back to readings', exact: true }).click();
-      await page.getByRole('button', { name: 'New reading', exact: true }).click();
+      await page
+        .getByRole('navigation', { name: 'Reading actions' })
+        .getByRole('button', { name: 'Tarot', exact: true })
+        .click();
       await page.getByLabel('Your question', { exact: true }).fill(longQuestion);
       await page.getByLabel('Use English for this reading').check();
       await capture('new-empty');
@@ -178,8 +189,7 @@ for (const width of [320, 390, 768, 1280]) {
       if (reading.kind !== 'tarot.accepted.v2')
         throw new Error('Expected the synthetic v2 fixture');
       for (const [index, unit] of reading.units.entries()) {
-        const position = accepted.locator('.position-card').nth(index);
-        await expect(position.getByText(unit.basisText, { exact: true })).toBeVisible();
+        const position = accepted.locator('.return-position').nth(index);
         await expect(position.getByText(unit.interpretation, { exact: true })).toBeVisible();
       }
       await expect(accepted.getByText(reading.synthesis.text, { exact: true })).toBeVisible();
@@ -188,6 +198,9 @@ for (const width of [320, 390, 768, 1280]) {
       await page.keyboard.press('Enter');
       for (const [index, source] of reading.sources.entries()) {
         const block = accepted.locator('.source').nth(index);
+        await expect(
+          block.getByText(reading.units[index]!.basisText, { exact: true }),
+        ).toBeVisible();
         await expect(block.getByText(source.meaning.core, { exact: true })).toBeVisible();
         await expect(block.getByText(source.rights.attribution, { exact: true })).toBeVisible();
       }
@@ -212,10 +225,8 @@ for (const width of [320, 390, 768, 1280]) {
       await expect(savedReflection.locator('.saved-reflection')).toContainText('Unsure');
       await capture('reflection');
       await noteJourneyStates(page, capture);
-      await page.getByRole('button', { name: 'Saved readings', exact: true }).click();
-      await expect(
-        page.getByRole('heading', { name: 'Saved readings', exact: true }),
-      ).toBeVisible();
+      await page.getByRole('button', { name: 'Journal', exact: true }).click();
+      await expect(page.getByRole('heading', { name: 'Your journal', exact: true })).toBeVisible();
       await capture('saved-populated');
       await page.getByRole('button', { name: longQuestion, exact: true }).click();
       await expect(acceptedContent).toHaveText(original);
@@ -255,7 +266,10 @@ for (const width of [320, 390, 768, 1280]) {
       await page.setViewportSize({ width, height: 1000 });
       await importReviewState(page, capture);
       await page.getByRole('link', { name: 'Back to readings', exact: true }).click();
-      await page.getByRole('button', { name: 'New reading', exact: true }).click();
+      await page
+        .getByRole('navigation', { name: 'Reading actions' })
+        .getByRole('button', { name: 'Tarot', exact: true })
+        .click();
       await page.getByLabel('Your question', { exact: true }).fill('Synthetic drawn-card layout');
       await page.getByLabel('Use English for this reading').check();
       await page.getByRole('button', { name: 'Start reading', exact: true }).click();
@@ -318,7 +332,10 @@ test('2x mobile illustration delivery uses transparent variants, not full-size o
     }
     await page.getByRole('button', { name: 'Enable AI readings', exact: true }).click();
     await page.getByRole('link', { name: 'Back to readings', exact: true }).click();
-    await page.getByRole('button', { name: 'New reading', exact: true }).click();
+    await page
+      .getByRole('navigation', { name: 'Reading actions' })
+      .getByRole('button', { name: 'Tarot', exact: true })
+      .click();
     const cards = page.locator('.spread-intro-art');
     await page.getByText('Use my own spread', { exact: true }).click();
     await expect

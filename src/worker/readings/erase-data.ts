@@ -20,6 +20,34 @@ export class EraseData {
     ]);
   }
   async records(jobId: string, target: Exclude<Target, { scope: 'account' }>) {
+    if (target.scope === 'birth_profile') {
+      await this.base.db.batch([
+        assertion(
+          this.base.db,
+          "EXISTS(SELECT 1 FROM deletion_jobs WHERE id=? AND state!='complete' AND target_enc IS NOT NULL)",
+          jobId,
+        ),
+        // The monotonic revision protects a later, explicitly recreated profile during replay.
+        q(
+          this.base.db,
+          `UPDATE birth_profiles SET body_enc=NULL,key_version=NULL,deleted_at=coalesce(deleted_at,${DB_NOW}),updated_at=${DB_NOW} WHERE owner_id=? AND id=? AND revision<=?`,
+          target.subjectId,
+          target.profileId,
+          target.revision,
+        ),
+        q(
+          this.base.db,
+          'UPDATE accounts SET data_revision=data_revision+1 WHERE id=?',
+          target.subjectId,
+        ),
+        q(
+          this.base.db,
+          `UPDATE deletion_jobs SET state='erasing',completed_at=coalesce(completed_at,${DB_NOW}) WHERE id=?`,
+          jobId,
+        ),
+      ]);
+      return;
+    }
     const db = this.base.db,
       owner = target.subjectId,
       imports = await ImportCopies.find(this.base, target),
@@ -70,6 +98,7 @@ export class EraseData {
     } else if (target.scope === 'session') {
       const id = target.sessionId;
       statements.push(
+        q(db, 'DELETE FROM pattern_saved_sources WHERE owner_id=? AND session_id=?', owner, id),
         assertion(
           db,
           "NOT EXISTS(SELECT 1 FROM reading_sessions WHERE owner_id=? AND id=? AND status!='deleted')",

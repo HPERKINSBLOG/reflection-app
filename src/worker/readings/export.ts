@@ -9,7 +9,10 @@ import {
   ImportUnit,
   Hash,
   type ImportRecordIdentity,
-  type PortableRecord,
+  PortableRecord,
+  PortableRecordV2,
+  BirthProfileV1,
+  type ExportPageV2,
 } from '../../contracts/index.ts';
 import { statement as q, DB_NOW } from '../db/core.ts';
 import { assertion } from '../identity/checkpoint.ts';
@@ -19,6 +22,11 @@ import { decodeRevisit } from './revisit-codec.ts';
 import { Reflections } from './reflections.ts';
 import { Question, ReadingRecords, recentRequestSummary } from './records.ts';
 import { grantFromRow, type GrantRow } from './context-grant.ts';
+import {
+  nativeImportGuard,
+  nativeImportSource,
+  unavailableNativeImport,
+} from './import-availability.ts';
 
 const Point = z.strictObject({
   kind: z.enum([
@@ -30,6 +38,7 @@ const Point = z.strictObject({
     'revisit',
     'grant',
     'import_alias',
+    'birth_profile',
   ]),
   id: Id.or(Hash),
   revision: z.number().int().positive(),
@@ -144,7 +153,9 @@ export class ReadingExports {
     const filter = identity
       ? position
       : position +
-        ` AND NOT EXISTS(SELECT 1 FROM import_identities i WHERE i.owner_id=? AND i.erased_at IS NULL AND
+        ` AND NOT EXISTS(SELECT 1 FROM import_identities i
+        JOIN reading_sessions imported ON imported.owner_id=i.owner_id AND imported.id=i.session_id AND imported.method='imported'
+        WHERE i.owner_id=? AND i.erased_at IS NULL AND
       CASE n.kind WHEN 'session' THEN i.entity_kind='session' AND i.session_id=n.id
         WHEN 'reading' THEN i.edition_id=n.id
         WHEN 'reflection' THEN i.reflection_id=n.id AND i.reflection_revision=n.revision
@@ -168,18 +179,21 @@ export class ReadingExports {
       SELECT 'grant',g.id,g.revision,NULL,NULL,1,json_object('id',g.id,'revision',g.revision,'state',g.state,'edition_id',g.edition_id,
         'reflection_id',g.reflection_id,'reflection_revision',g.reflection_revision,'revisit_id',g.revisit_id,'revisit_revision',g.revisit_revision)
       FROM context_grants g WHERE g.owner_id=?
+      UNION ALL
+      SELECT 'birth_profile',p.id,p.revision,NULL,p.body_enc,p.key_version,'{}'
+      FROM birth_profiles p WHERE p.owner_id=? AND p.deleted_at IS NULL AND p.body_enc IS NOT NULL
 
     ) AS n WHERE ${filter} ORDER BY kind,id,revision LIMIT 101) SELECT * FROM (
       SELECT 'session' AS kind,s.id,s.revision,s.id AS session_id,s.question_enc AS value_enc,1 AS key_version,
-        json_object('status',s.status,'savedAt',s.saved_at,'createdAt',s.created_at,
+        json_object('status',s.status,'method',s.method,'savedAt',s.saved_at,'createdAt',s.created_at,
           'editionIds',(SELECT json_group_array(id) FROM reading_editions WHERE owner_id=s.owner_id AND session_id=s.id),
           'reflectionIds',(SELECT json_group_array(id) FROM reflections WHERE owner_id=s.owner_id AND session_id=s.id AND deleted_at IS NULL),
           'requests',(SELECT json_group_array(json_object('requestId',requestId,'state',state)) FROM (${recentRequestSummary('s.owner_id', 's.id')}))) AS metadata
       FROM reading_sessions s WHERE s.owner_id=? AND ${availableSession}
       UNION ALL
       SELECT 'reading',e.id,e.edition_number,e.session_id,e.body_enc,e.key_version,
-        json_object('status',e.status,'contentState',c.state,'parentEditionId',e.parent_edition_id,'unavailableAt',coalesce(e.invalidated_at,c.withdrawn_at,e.accepted_at))
-      FROM reading_editions e JOIN reading_sessions s ON s.id=e.session_id AND s.owner_id=e.owner_id LEFT JOIN content_editions c ON c.hash=e.content_hash WHERE e.owner_id=? AND ${availableSession}
+        json_object('status',e.status,'contentState',coalesce(pc.state,c.state),'parentEditionId',e.parent_edition_id,'unavailableAt',coalesce(e.invalidated_at,pc.withdrawn_at,c.withdrawn_at,e.accepted_at))
+      FROM reading_editions e JOIN reading_sessions s ON s.id=e.session_id AND s.owner_id=e.owner_id LEFT JOIN content_editions c ON c.hash=e.content_hash LEFT JOIN pattern_content_releases pc ON pc.hash=e.pattern_content_hash WHERE e.owner_id=? AND ${availableSession}
       UNION ALL
       SELECT * FROM authored
       UNION ALL
@@ -193,7 +207,7 @@ export class ReadingExports {
     return q(
       this.base.db,
       sql,
-      ...Array<string>(4).fill(owner),
+      ...Array<string>(5).fill(owner),
       ...extra,
       ...Array<string>(4).fill(owner),
       ...extra,
@@ -218,12 +232,13 @@ export class ReadingExports {
     if (!native) {
       const companion = await this.exported(session, row);
       if (
+        !companion ||
         companion.identity.source.namespaceId !== identity.source.namespaceId ||
         companion.identity.source.revision !== identity.source.revision
       )
         return null;
     }
-    const record = apiSchemas.ExportPage.shape.records.element.parse({
+    const record = PortableRecord.parse({
       kind: row.kind,
       identity,
       originalId: row.id,
@@ -232,7 +247,10 @@ export class ReadingExports {
     await this.base.checked(session, account.data_revision);
     return record;
   }
-  private async exported(session: Session, row: Row): Promise<z.infer<typeof PortableRecord>> {
+  private async exported(
+    session: Session,
+    row: Row,
+  ): Promise<z.infer<typeof PortableRecordV2> | null> {
     const owner = session.subjectId,
       meta = JSON.parse(row.metadata);
     if (row.kind === 'import_alias') {
@@ -247,7 +265,21 @@ export class ReadingExports {
         row.value_enc!,
         ImportUnit,
       );
-      if (unit.kind === 'portable') return unit.record;
+      if (unit.kind === 'portable') {
+        // Compatibility aliases point at authoritative native rows. Export those
+        // rows once under native-v1, including current session envelopes and new
+        // children. Materialized imports keep their exact historical identities.
+        if (
+          unit.identity.source.namespaceId === owner &&
+          /^(native-v1|snapshot-[0-9]+)$/.test(unit.identity.source.revision) &&
+          (meta.nativeFamily || row.session_id === null)
+        )
+          return null;
+        const unavailable = await unavailableNativeImport(this.base, owner, unit.record);
+        return unavailable
+          ? PortableRecordV2.parse({ ...unit.record, value: unavailable })
+          : unit.record;
+      }
       let value: unknown;
       if (unit.kind === 'legacy-reading') {
         value = await new ReadingRecords(this.base).reading(session, meta.editionId);
@@ -258,7 +290,7 @@ export class ReadingExports {
           meta.reflectionRevision,
         );
       }
-      return apiSchemas.ExportPage.shape.records.element.parse({
+      return PortableRecordV2.parse({
         kind: unit.identity.kind,
         identity: unit.identity,
         originalId: unit.identity.recordId,
@@ -270,7 +302,7 @@ export class ReadingExports {
     let source = { namespaceId: owner, revision: 'native-v1' };
     // An adapter reading carries its own dataset namespace. Its generated
     // session envelope uses the same source, so exported dependencies resolve.
-    if (row.kind === 'session') {
+    if (row.kind === 'session' && meta.method === 'imported') {
       const id = await q(
         this.base.db,
         "SELECT source_key_hmac,source_record_enc FROM import_identities WHERE owner_id=? AND session_id=? AND entity_kind='edition' AND erased_at IS NULL ORDER BY rowid LIMIT 1",
@@ -292,7 +324,7 @@ export class ReadingExports {
         source = unit.identity.source;
       }
     }
-    return apiSchemas.ExportPage.shape.records.element.parse({
+    return PortableRecordV2.parse({
       kind: row.kind,
       identity: {
         source,
@@ -304,7 +336,15 @@ export class ReadingExports {
       value,
     });
   }
-  async page(session: Session, id: string, cursor: string | null) {
+  async page(
+    session: Session,
+    id: string,
+    cursor: string | null,
+  ): Promise<
+    Omit<z.infer<typeof ExportPageV2>, 'format'> & {
+      format: 'reflection-export.v1' | 'reflection-export.v2';
+    }
+  > {
     const ticket = await this.ticket(session, id),
       scope = ['export', id, ticket.snapshot_revision];
     const point = cursor ? await this.base.parseCursor(session, scope, cursor, Point) : null;
@@ -316,7 +356,8 @@ export class ReadingExports {
       q(
         this.base.db,
         `SELECT 'import_alias' AS kind,i.source_key_hmac AS id,1 AS revision,i.session_id,i.source_record_enc AS value_enc,i.key_version,
-        json_object('editionId',i.edition_id,'reflectionId',i.reflection_id,'reflectionRevision',i.reflection_revision) AS metadata
+        json_object('editionId',i.edition_id,'reflectionId',i.reflection_id,'reflectionRevision',i.reflection_revision,
+          'nativeFamily',EXISTS(SELECT 1 FROM reading_sessions s WHERE s.owner_id=i.owner_id AND s.id=i.session_id AND s.method!='imported')) AS metadata
         FROM import_identities i WHERE i.owner_id=? AND i.erased_at IS NULL AND i.source_record_enc IS NOT NULL
         ${after} ORDER BY i.source_key_hmac LIMIT 101`,
         session.subjectId,
@@ -334,19 +375,28 @@ export class ReadingExports {
               : 1
             : a.revision - b.revision,
       ),
-      records: z.infer<typeof PortableRecord>[] = [];
+      records: z.infer<typeof PortableRecordV2>[] = [],
+      recordRows: Row[] = [];
     let length = 0,
+      processed = 0,
       last: Row | undefined;
     for (const row of rows.slice(0, 100)) {
       const record = await this.exported(session, row);
+      if (!record) {
+        last = row;
+        processed++;
+        continue;
+      }
       const size = utf8.encode(JSON.stringify(record)).length;
       if (length + size > 950_000) {
         if (!records.length) throw new RecordError(413, 'INPUT_TOO_LARGE');
         break;
       }
-      records.push(record as z.infer<typeof PortableRecord>);
+      records.push(record);
+      recordRows.push(row);
       length += size;
       last = row;
+      processed++;
     }
     let account = null;
     if (!cursor) {
@@ -371,15 +421,21 @@ export class ReadingExports {
       };
     }
     const nextCursor =
-      records.length < rows.length && last
+      processed < rows.length && last
         ? await this.base.cursor(session, scope, {
             kind: last.kind,
             id: last.id,
             revision: last.revision,
           })
         : null;
+    const v2 = await q(
+      this.base.db,
+      "SELECT 1 FROM birth_profiles WHERE owner_id=? AND body_enc IS NOT NULL UNION ALL SELECT 1 FROM reading_editions WHERE owner_id=? AND mode IN('pattern','legacy') LIMIT 1",
+      session.subjectId,
+      session.subjectId,
+    ).first();
     const result = apiSchemas.ExportPage.parse({
-      format: 'reflection-export.v1',
+      format: v2 ? 'reflection-export.v2' : 'reflection-export.v1',
       exportId: id,
       snapshotRevision: ticket.snapshot_revision,
       records,
@@ -390,16 +446,36 @@ export class ReadingExports {
     // Validate again after decryption/serialization; never release a mixed or revoked snapshot.
     await this.ticket(session, id);
     const sessions = [
-      ...new Set(
-        rows
-          .slice(0, records.length)
-          .map((row) => row.session_id)
-          .filter((id): id is string => id !== null),
-      ),
+      ...new Set(recordRows.map((row) => row.session_id).filter((id): id is string => id !== null)),
     ];
+    const patternEditions = records.flatMap((record, index) =>
+      recordRows[index]?.kind === 'reading' &&
+      record.kind === 'reading' &&
+      record.value.kind === 'astrology.pattern.accepted.v1'
+        ? [record.originalId]
+        : [],
+    );
+    const nativeEditions = records.flatMap((record) => {
+      const source = nativeImportSource(session.subjectId, record);
+      return source ? [source.editionId] : [];
+    });
     await this.guardedBatch(session, ticket, [
       this.base.identity.sessions.guard(session, false, false),
       this.guard(session, ticket),
+      ...(nativeEditions.length
+        ? [nativeImportGuard(this.base, session.subjectId, nativeEditions)]
+        : []),
+      ...(patternEditions.length
+        ? [
+            assertion(
+              this.base.db,
+              "(SELECT count(*) FROM reading_editions e JOIN pattern_content_releases p ON p.hash=e.pattern_content_hash WHERE e.owner_id=? AND e.id IN (SELECT value FROM json_each(?)) AND e.status='accepted' AND e.mode='pattern' AND p.state='active' AND e.body_enc IS NOT NULL)=?",
+              session.subjectId,
+              JSON.stringify(patternEditions),
+              patternEditions.length,
+            ),
+          ]
+        : []),
       ...(sessions.length
         ? [
             assertion(
@@ -417,6 +493,18 @@ export class ReadingExports {
   private async value(session: Session, row: Row): Promise<unknown> {
     const metadata = JSON.parse(row.metadata) as Record<string, unknown>;
     const owner = session.subjectId;
+    if (row.kind === 'birth_profile')
+      return this.base.opened(
+        {
+          ownerId: owner,
+          table: 'birth_profiles',
+          column: 'body_enc',
+          recordId: row.id,
+          aadRevision: row.revision,
+        },
+        row.value_enc!,
+        BirthProfileV1,
+      );
     if (row.kind === 'grant') return grantFromRow(metadata as unknown as GrantRow);
     if (row.kind === 'permission')
       return {
