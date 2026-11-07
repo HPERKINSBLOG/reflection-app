@@ -1348,10 +1348,8 @@ export function IdentityApp() {
                       Sign in with a passkey
                     </Button>
                   </div>
-                  <div
+                  <fieldset
                     className="signup-options"
-                    role="group"
-                    aria-labelledby="signup-title"
                     tabIndex={-1}
                     ref={(group) => {
                       if (!group || !signupFocus.current) return;
@@ -1359,7 +1357,9 @@ export function IdentityApp() {
                       group.focus();
                     }}
                   >
-                    <h2 id="signup-title">New to Reflection?</h2>
+                    <legend>
+                      <h2>New to Reflection?</h2>
+                    </legend>
                     <Button
                       variant="text-button"
                       disabled={busy}
@@ -1385,7 +1385,7 @@ export function IdentityApp() {
                     <p className="field-hint">
                       A passkey lets you join without an email address or password.
                     </p>
-                  </div>
+                  </fieldset>
                   <TextLink href="/recover">Recover with your saved kit</TextLink>
                 </section>
               )}
