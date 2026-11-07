@@ -22,6 +22,8 @@ Verification on Windows with Node 26.12.1, at `6ef0aef`:
 - `npm run test:browser`: 205 passed and 1 skipped. The skipped test is the screens capture, which runs only when `REFLECTION_SCREENS` is set; it passed in its own run.
 - `npm run test:journey`: 41 passed, 17 in Chromium, 13 in Firefox and 11 in WebKit, with none skipped or flaky. This is the run the November 6 pass stopped before it finished.
 
+`e2430d3` went to the development preview on November 7 as version `673ac8fb`. Health, direct loads of `/` and `/sign-in`, and all 35 public assets checked out, and the rose, plates and leaf band load at 390 and 1280 px in light and dark. [Deployment receipt](artifacts/preview-deploy/deployment.json).
+
 Not covered: physical devices and screen readers; signed-in flows on the hosted preview.
 
 ## November 6 — Following the boards: invitation, sign-in, depth and bleed
