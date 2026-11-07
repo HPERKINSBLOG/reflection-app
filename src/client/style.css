@@ -1265,6 +1265,8 @@ main {
 .account-settings .page-title {
   position: relative;
   align-items: flex-start;
+  /* The sprig's 100 px box stays inside the title row, clear of the AI panel's button. */
+  min-height: 100px;
   margin-bottom: 24px;
 }
 .account-settings .title-copy {
@@ -2512,6 +2514,7 @@ div.reading-closing {
   }
   .account-settings .page-title {
     gap: 0;
+    min-height: 0;
     margin-bottom: 12px;
   }
   .account-content {
