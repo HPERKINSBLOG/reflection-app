@@ -83,10 +83,10 @@
 }
 /* The account shell becomes a focused import screen only while this tool is open. */
 .account-settings:has(.import-tools.is-open) {
-  max-width: 1440px;
+  max-width: 1368px;
 }
 .account-shell:has(.import-tools.is-open) .site-header .shell-width {
-  max-width: 1440px;
+  max-width: 1368px;
 }
 .account-settings:has(.import-tools.is-open) .page-title,
 .account-content:has(.import-tools.is-open) > :not(:has(.import-tools)),

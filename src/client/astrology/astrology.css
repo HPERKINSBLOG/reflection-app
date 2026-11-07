@@ -180,9 +180,10 @@
   font-size: 20px;
   line-height: 1.5;
 }
+/* 1328 px of content inside 20 px of padding: the side-panel grid's 848 + 48 + 432 px. */
 @media (min-width: 1100px) {
   .readings-page:has(.journal, .reading-detail-pattern, .pattern-workspace) {
-    max-width: 1440px;
+    max-width: 1368px;
   }
 }
 @media (max-width: 760px) {
@@ -219,7 +220,7 @@
   gap: 8px;
 }
 .site-header .shell-width:has(#workspace-navigation) {
-  max-width: 1440px;
+  max-width: 1368px;
   gap: 24px;
 }
 .readings-page .workspace-title {
