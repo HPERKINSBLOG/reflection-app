@@ -1084,9 +1084,11 @@ main {
   font-weight: 500;
   line-height: 18px;
 }
+/* A chip keeps its own width, even as a grid or column item that would otherwise stretch. */
 .topic-chip {
   display: inline-flex;
   align-items: center;
+  width: fit-content;
   max-width: 100%;
   padding: 8px 12px;
   color: var(--reflection-ink);
