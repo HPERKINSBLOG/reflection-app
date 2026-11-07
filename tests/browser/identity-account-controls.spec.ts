@@ -5,6 +5,7 @@ import {
   backToReadings,
   enableAi,
   openAccount,
+  openSignIn,
   reading,
 } from '../fixtures/browser-reading.ts';
 
@@ -55,8 +56,9 @@ test('a signed-in person adds a passkey, removes the old one, and signs out ever
   await expect(page.getByRole('status').filter({ hasText: 'Passkey added.' })).toBeVisible();
   expect(addChallengeSeen).toBe(true);
   expect((await elsewhere.request.get('http://localhost:8787/api/v1/me')).status()).toBe(401);
+  // The other tab was on /account, so it offers sign-in in place.
   await expect(
-    anotherTab.getByRole('heading', { name: 'A little space to reflect.' }),
+    anotherTab.getByRole('heading', { name: 'Sign in or create an account' }),
   ).toBeVisible();
   await expect(
     anotherTab
@@ -83,6 +85,7 @@ test('a signed-in person adds a passkey, removes the old one, and signs out ever
   await expect
     .poll(() => page.evaluate(async () => Boolean(await caches.match('/api/v1/me'))))
     .toBe(false);
+  await openSignIn(page);
   await page.getByRole('button', { name: 'Sign in with a passkey' }).click();
   await expect(page.getByRole('region', { name: 'Your readings', exact: true })).toBeVisible();
   await openAccount(page);

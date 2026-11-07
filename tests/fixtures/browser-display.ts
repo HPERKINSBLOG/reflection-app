@@ -3,6 +3,7 @@ import { fileURLToPath } from 'node:url';
 import { chromium, expect, type Page } from '@playwright/test';
 import { READING_PRODUCT_COPY } from '../../src/contracts/product-copy.ts';
 import {
+  artUnderContent,
   longFilename,
   longQuestion,
   noteJourneyStates,
@@ -13,7 +14,7 @@ import {
 } from './browser-journey.ts';
 import { enableAi } from './browser-reading.ts';
 
-export async function nativeZoomContext(baseURL: string, theme: 'light' | 'dark') {
+export async function nativeZoomContext(baseURL: string, theme: 'light' | 'dark', factor = 2) {
   const origin = new URL(baseURL);
   if (!['localhost', '127.0.0.1'].includes(origin.hostname))
     throw new Error('Browser zoom qualification is synthetic loopback only');
@@ -36,38 +37,44 @@ export async function nativeZoomContext(baseURL: string, theme: 'light' | 'dark'
     const worker = context.serviceWorkers()[0] ?? (await context.waitForEvent('serviceworker'));
     const page = context.pages()[0]!;
     await page.goto('/');
-    const zoom = await worker.evaluate(async (url) => {
-      const { chrome } = globalThis as unknown as {
-        chrome: {
-          tabs: {
-            query: (query: object) => Promise<Array<{ id: number; url: string }>>;
-            setZoom: (id: number, factor: number) => Promise<void>;
-            getZoom: (id: number) => Promise<number>;
+    const zoom = await worker.evaluate(
+      async ([url, factor]) => {
+        const { chrome } = globalThis as unknown as {
+          chrome: {
+            tabs: {
+              query: (query: object) => Promise<Array<{ id: number; url: string }>>;
+              setZoom: (id: number, factor: number) => Promise<void>;
+              getZoom: (id: number) => Promise<number>;
+            };
           };
         };
-      };
-      const tab = (await chrome.tabs.query({})).find((tab) => tab.url === url);
-      if (!tab) throw new Error('Test tab was not found');
-      await chrome.tabs.setZoom(tab.id, 2);
-      return chrome.tabs.getZoom(tab.id);
-    }, page.url());
-    expect(zoom).toBe(2);
+        const tab = (await chrome.tabs.query({})).find((tab) => tab.url === url);
+        if (!tab) throw new Error('Test tab was not found');
+        await chrome.tabs.setZoom(tab.id, factor as number);
+        return chrome.tabs.getZoom(tab.id);
+      },
+      [page.url(), factor] as const,
+    );
+    // Chrome reports 400% as 3.9999999999999996, so compare zoom factors to six places.
+    expect(zoom).toBeCloseTo(factor, 6);
     const cdp = await context.newCDPSession(page);
     const { windowId } = await cdp.send('Browser.getWindowForTarget');
-    await expect.poll(() => page.evaluate(() => devicePixelRatio)).toBe(2);
+    await expect.poll(() => page.evaluate(() => devicePixelRatio)).toBeCloseTo(factor, 6);
     // Windows includes non-content window borders in Browser.setWindowBounds.
     // Measure that inset at real browser zoom instead of emulating a viewport.
-    const chromeWidth = await page.evaluate(() => outerWidth - innerWidth * devicePixelRatio);
+    const chromeWidth = await page.evaluate(() =>
+      Math.round(outerWidth - innerWidth * devicePixelRatio),
+    );
     expect(chromeWidth).toBeGreaterThanOrEqual(0);
     const resize = async (width: number) => {
-      const windowWidth = width * zoom + chromeWidth;
+      const windowWidth = width * factor + chromeWidth;
       await cdp.send('Browser.setWindowBounds', {
         windowId,
         bounds: { width: windowWidth, height: 1000, windowState: 'normal' },
       });
       await expect.poll(() => page.evaluate(() => innerWidth)).toBe(width);
       // These distinguish real page zoom from CSS zoom, pinch zoom and DPR emulation.
-      await expect.poll(() => page.evaluate(() => devicePixelRatio)).toBe(2);
+      await expect.poll(() => page.evaluate(() => devicePixelRatio)).toBeCloseTo(factor, 6);
       expect(await page.evaluate(() => outerWidth)).toBe(windowWidth);
       expect(await page.evaluate(() => visualViewport?.scale)).toBe(1);
       expect(await page.locator('html').evaluate((element) => getComputedStyle(element).zoom)).toBe(
@@ -76,7 +83,7 @@ export async function nativeZoomContext(baseURL: string, theme: 'light' | 'dark'
     };
     const screenshot = async (path: string) => {
       const { cssContentSize, cssVisualViewport } = await cdp.send('Page.getLayoutMetrics');
-      expect(cssVisualViewport.zoom).toBe(2);
+      expect(cssVisualViewport.zoom).toBeCloseTo(factor, 6);
       // Native page zoom uses DIP coordinates for capture, unlike Playwright's
       // viewport emulation. Unscaled CSS coordinates would crop the right half.
       const width = Math.ceil(cssContentSize.width * cssVisualViewport.zoom!);
@@ -131,6 +138,10 @@ export function displayCapture(
           metrics.content,
           `${prefix} ${state} ${width}px horizontal overflow`,
         ).toBeLessThanOrEqual(metrics.viewport);
+        expect(
+          await artUnderContent(page),
+          `${prefix} ${state} ${width}px art under content`,
+        ).toEqual([]);
         evidence.push({ state, width, ...metrics });
         await screenshot(`${output}/${prefix}-${width}-${state}.png`);
       }

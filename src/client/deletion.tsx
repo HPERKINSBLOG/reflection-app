@@ -54,6 +54,7 @@ export function DeletionReceiptPanel({
   pageHeading,
   title = 'Deletion receipt',
   summary,
+  onStatus,
   onDismiss,
 }: {
   proof: DeletionProof;
@@ -61,6 +62,8 @@ export function DeletionReceiptPanel({
   pageHeading?: Ref<HTMLHeadingElement>;
   title?: string;
   summary?: string;
+  /** Receives each checked status. A page that remounts the panel passes it back as `initial`. */
+  onStatus?: (status: DeletionStatus) => void;
   onDismiss: () => void;
 }) {
   const [status, setStatus] = useState(initial),
@@ -85,6 +88,8 @@ export function DeletionReceiptPanel({
     setMessage('');
     try {
       const current = await checkDeletionStatus(proof, AbortSignal.timeout(15_000));
+      // The page keeps the result even if it remounted the panel during the check.
+      onStatus?.(current);
       if (alive.current) setStatus(current);
     } catch (error) {
       if (alive.current)

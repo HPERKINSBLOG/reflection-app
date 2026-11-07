@@ -1,7 +1,7 @@
 import { readFile } from 'node:fs/promises';
 import { apiSchemas } from '../../src/contracts/index.ts';
 import { expect, type Page, test } from '@playwright/test';
-import { openAccount } from '../fixtures/browser-reading.ts';
+import { openAccount, openSignIn } from '../fixtures/browser-reading.ts';
 async function authenticator(page: Page) {
   const cdp = await page.context().newCDPSession(page);
   await cdp.send('WebAuthn.enable');
@@ -37,6 +37,8 @@ test('complete downloaded kit recovers the same account in a new browser without
   await expect(page.getByRole('heading', { name: 'A little space to reflect.' })).toBeVisible();
   await expect(page).toHaveTitle(/Reflection/);
   await page.screenshot({ path: '/tmp/reflection-identity-desktop.png', fullPage: true });
+  await page.getByRole('link', { name: 'Draw three cards', exact: true }).click();
+  await expect(page).toHaveURL(/\/sign-in\?start=new$/);
   await page.getByRole('button', { name: 'Create a test account' }).click();
   await expect(page.getByRole('heading', { name: 'Keep your recovery kit' })).toBeVisible();
   const downloadPromise = page.waitForEvent('download');
@@ -63,6 +65,7 @@ test('complete downloaded kit recovers the same account in a new browser without
   expect(storage).toEqual({ local: {}, session: {}, databases: [] });
   await openAccount(page);
   await page.getByRole('button', { name: 'Sign out', exact: true }).click();
+  await openSignIn(page);
   await page.getByRole('button', { name: 'Sign in with a passkey' }).click();
   await expect(page.getByRole('region', { name: 'Your readings', exact: true })).toBeVisible();
   await original.cdp.send('WebAuthn.removeVirtualAuthenticator', {
@@ -133,7 +136,7 @@ test('cross-tab invalidation prevents a delayed registration response from resto
   page,
 }) => {
   await authenticator(page);
-  await page.goto('/');
+  await page.goto('/sign-in');
   await expect(page.getByRole('button', { name: 'Create a test account' })).toBeEnabled();
   let release!: () => void, arrived!: () => void;
   const held = new Promise<void>((resolve) => {
@@ -160,14 +163,14 @@ test('cross-tab invalidation prevents a delayed registration response from resto
   await page.waitForTimeout(200);
   await expect(page.getByRole('heading', { name: 'Keep your recovery kit' })).toHaveCount(0);
   await expect(page.getByRole('button', { name: 'Download recovery kit' })).toHaveCount(0);
-  await expect(page.getByRole('heading', { name: 'A little space to reflect.' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Sign in or create an account' })).toBeVisible();
 });
 
 test('a transient session-refresh error preserves the newly issued one-time kit', async ({
   page,
 }) => {
   await authenticator(page);
-  await page.goto('/');
+  await page.goto('/sign-in');
   await expect(page.getByRole('button', { name: 'Create a test account' })).toBeEnabled();
   await page.route('**/api/v1/me', (route) =>
     route.fulfill({ status: 503, contentType: 'application/json', body: '{}' }),
@@ -189,7 +192,7 @@ test('an explicitly invalidated session clears a replacement kit after rotation'
 }) => {
   await page.context().setExtraHTTPHeaders({ 'CF-Connecting-IP': '192.0.2.44' });
   await authenticator(page);
-  await page.goto('/');
+  await page.goto('/sign-in');
   await page.getByRole('button', { name: 'Create a test account' }).click();
   await expect(page.getByRole('heading', { name: 'Keep your recovery kit' })).toBeVisible();
   const downloaded = page.waitForEvent('download');
@@ -211,6 +214,7 @@ test('an explicitly invalidated session clears a replacement kit after rotation'
       : route.continue(),
   );
   await page.getByRole('button', { name: 'Replace recovery kit' }).click();
-  await expect(page.getByRole('heading', { name: 'A little space to reflect.' })).toBeVisible();
+  // The session ended on /account, so sign-in appears in place.
+  await expect(page.getByRole('heading', { name: 'Sign in or create an account' })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Download recovery kit' })).toHaveCount(0);
 });

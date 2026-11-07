@@ -1,5 +1,32 @@
 # Reflection design QA
 
+## November 6 — Following the boards: invitation, sign-in, depth and bleed
+
+The owner chose to follow the concept boards’ composition, which the Lovable build at source-to-storybook.lovable.app had kept. Signed out, `/` now invites a first reading, and the former welcome controls moved unchanged to `/sign-in`. The rose bleeds in from the top right of the welcome page, the position plates fill its tiles, and a leaf band runs along every page. Cards lift on Paper, Newsreader titles use weight 500, button labels use 500, and the return mark follows boards 01 and 03.
+
+| Capture | Paper | Evening |
+| --- | --- | --- |
+| Welcome, before and after | [before, 1280 px](docs/design/screens/2026-11-06-mend/before-landing-1280-paper.png) · [after, 1280 px](docs/design/screens/2026-11-06-mend/landing-1280-paper.png) | [before, 390 px](docs/design/screens/2026-11-06-mend/before-landing-390-evening.png) · [after, 390 px](docs/design/screens/2026-11-06-mend/landing-390-evening.png) |
+| Beside the Lovable build | [1280 px comparison](docs/design/screens/2026-11-06-mend/compare-landing-1280-paper.png) | |
+
+Each review page has a capture at 320, 390, 768 and 1280 px in both themes under [`docs/design/screens/2026-11-06-mend/`](docs/design/screens/2026-11-06-mend/): welcome, sign-in, recovery, readings (empty and with entries), new reading and account. [`design-screens.spec.ts`](tests/browser/design-screens.spec.ts) recaptures them when `REFLECTION_SCREENS` names a folder.
+
+- **Art stays clear of words.** `artUnderContent` compares every visible decorative image box, clipped by its container, and the leaf band with every line of visible text and every control. It found no overlap on the design screens, in each state of the layout journey at 320, 390, 768 and 1280 px, in the native 200% zoom journey, or in the native 400% zoom checks. Two existing placements needed space to pass: the new-reading ribbon now ends where its heading row does, and the Account title row now holds the 100 px sprig. Review found that at CSS zoom 2 the check measured only the lower half of the leaf band. It now measures the whole band, and the CSS-zoom states pass in the 320 px Paper journey.
+- **Contrast.** [`welcome.spec.ts`](tests/browser/welcome.spec.ts) measures the header, welcome headline, tiles, closing line and sign-in card against their painted backgrounds in both themes. Every pair is at least 4.5:1. Ink on a card is 10.95:1, and the card is 1.05:1 against Paper with a 1.30:1 edge.
+- **Engines.** Chromium drops Paper’s hue in an oklch mix, so the card mixes in oklab and the edge is written as its oklch value. Both render #fbf9f3 and #d8d8c9 in Chromium, Firefox and WebKit.
+- **Routing.** The browser tests cover a direct load of `/sign-in`, `?start=new` focus, Back and Forward between `/` and `/sign-in`, “Back to sign in” on recovery, a signed-in reader at `/sign-in`, and the deletion receipt on the welcome page. Unit tests cover the single-page fallback for `/sign-in` in the hosted configurations and the preview asset server.
+
+Verification on Windows with Node 26.12.1:
+
+- `npm run typecheck` passes.
+- `npx biome check .` reports the 12 warnings the base branch already has, and no errors.
+- `npm run test:domain`: 68 files, 550 tests passed.
+- `npm run test:db`: 73 files, 682 tests passed.
+- `npm run test:browser`: 197 passed and 1 skipped. The skipped test is the screens capture, which runs only when `REFLECTION_SCREENS` is set; it passed in its own run.
+- The passkey add/remove test passes here.
+
+Not covered: the Firefox and WebKit journey suite (`npm run test:journey`), which was stopped before it finished; the hosted preview Worker itself, which needs its hosted origin and secrets; physical devices; and screen readers.
+
 ## November 3 — Entry, saved readings and account deletion
 
 Saved readings distinguishes an unavailable list from a confirmed empty one and can retry a failed page. The reading form can recheck the service while keeping the question and photo in memory. It places the required English confirmation next to the question and groups photo controls under **Use my own spread**.

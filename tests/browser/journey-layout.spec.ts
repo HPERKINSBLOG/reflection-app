@@ -12,6 +12,7 @@ import {
   longQuestion,
   spreadPhotoPath,
   themeContrast,
+  artUnderContent,
 } from '../fixtures/browser-journey.ts';
 
 for (const width of [320, 390, 768, 1280]) {
@@ -92,12 +93,16 @@ for (const width of [320, 390, 768, 1280]) {
         expect(layout.content, `${prefix} ${state} horizontal overflow`).toBeLessThanOrEqual(
           layout.viewport,
         );
+        expect(await artUnderContent(page), `${prefix} ${state} art under content`).toEqual([]);
         evidence.push({ state, ...layout });
         await page.screenshot({ path: `${output}/${prefix}-${state}.png`, fullPage: true });
       };
       await page.goto('/');
-      await expect(page.getByRole('button', { name: 'Create a test account' })).toBeEnabled();
+      await expect(page.getByRole('link', { name: 'Draw three cards', exact: true })).toBeVisible();
       await capture('landing');
+      await page.goto('/sign-in');
+      await expect(page.getByRole('button', { name: 'Create a test account' })).toBeEnabled();
+      await capture('sign-in');
       await page.goto('/recover');
       await expect(page.getByLabel('Recovery handle', { exact: true })).toBeVisible();
       await capture('recovery');
@@ -359,7 +364,27 @@ test('2x mobile illustration delivery uses transparent variants, not full-size o
       expect(sourceWidth).toBeGreaterThanOrEqual(choice.width * choice.dpr);
       choices.push(choice);
     }
-    expect(paths.filter((path) => /(?:spread-ribbon|account-sprig)/.test(path))).toEqual([]);
+    // Phone images use the mobile corner. The only ribbon a phone downloads is the leaf band,
+    // a CSS background that uses the optimized 960 px ribbon on every page by design.
+    await expect
+      .poll(() =>
+        page
+          .locator('.new-reading-art img')
+          .evaluate((image: HTMLImageElement) => image.currentSrc),
+      )
+      .toContain('mobile-corner-');
+    expect(
+      await page
+        .locator('.app-shell')
+        .evaluate((shell) => getComputedStyle(shell, '::after').backgroundImage),
+    ).toContain('spread-ribbon-960-');
+    expect(
+      paths.filter(
+        (path) =>
+          /(?:spread-ribbon|account-sprig)/.test(path) &&
+          !/\/spread-ribbon-960-[\w-]+\.webp$/.test(path),
+      ),
+    ).toEqual([]);
     expect(
       paths.filter((path) => /(?:mobile-corner|three-card-spread).*\.png$/.test(path)),
     ).toEqual([]);

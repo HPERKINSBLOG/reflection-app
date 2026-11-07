@@ -1,10 +1,11 @@
 import { expect, type Page, test } from '@playwright/test';
-import { account, keepKit, openAccount, reading } from '../fixtures/browser-reading.ts';
+import { account, keepKit, openAccount, openSignIn, reading } from '../fixtures/browser-reading.ts';
 
 const password = 'A long garden passphrase';
 async function signOut(page: Page) {
   await openAccount(page);
   await page.getByRole('button', { name: 'Sign out', exact: true }).click();
+  await openSignIn(page);
 }
 async function signIn(page: Page, identifier: string, secret = password) {
   await page.getByRole('button', { name: 'Sign in with a password', exact: true }).click();
@@ -14,7 +15,7 @@ async function signIn(page: Page, identifier: string, secret = password) {
 }
 
 test('password screen focus cannot interrupt input after the form is visible', async ({ page }) => {
-  await page.goto('/');
+  await page.goto('/sign-in');
   await page.evaluate(() => {
     const queued: FrameRequestCallback[] = [];
     const schedule = window.requestAnimationFrame.bind(window);
@@ -45,7 +46,7 @@ test('a password account returns to its saved reading by username, email and kit
   const faults: string[] = [];
   page.on('pageerror', (error) => faults.push(error.message));
   await page.context().setExtraHTTPHeaders({ 'CF-Connecting-IP': '192.0.2.211' });
-  await page.goto('/');
+  await page.goto('/sign-in');
   await page.getByRole('button', { name: 'Create a password account', exact: true }).click();
   await page.getByLabel('Username', { exact: true }).fill('RiverReader');
   await page.getByLabel('Email', { exact: true }).fill('river@example.org');
@@ -88,6 +89,7 @@ test('a passkey user adds password sign-in to their existing account', async ({ 
   await page.getByRole('button', { name: 'Save password sign-in' }).click();
   await expect(page.getByText(/Password sign-in added/)).toBeVisible();
   await page.getByRole('button', { name: 'Sign out', exact: true }).click();
+  await openSignIn(page);
   await signIn(page, 'PaperReader');
   await openAccount(page);
   await expect(page.getByRole('list', { name: 'Passkeys' }).getByRole('listitem')).toHaveCount(1);

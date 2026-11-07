@@ -20,7 +20,13 @@ const request = (path: string, init?: RequestInit) =>
 
 test('preview root and document navigation receive exact HTML without caching', async () => {
   const fetcher = createPreviewAssets(assets);
-  for (const path of ['/', '/astrology/pattern', '/readings/saved-edition']) {
+  for (const path of [
+    '/',
+    '/sign-in',
+    '/sign-in?start=new',
+    '/astrology/pattern',
+    '/readings/saved-edition',
+  ]) {
     const response = await fetcher.fetch(request(path, { headers: { Accept: 'text/html' } }));
     expect(response.status).toBe(200);
     expect(await response.text()).toBe('<main>Reflection preview</main>');
