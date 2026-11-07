@@ -759,10 +759,12 @@ main {
   letter-spacing: -0.02em;
   text-wrap: balance;
 }
+/* The lead fits on one line from 768 px; where it wraps, no word sits alone. */
 .invitation-lead {
-  max-width: 34ch;
+  max-width: 40ch;
   font-size: 20px;
   line-height: 28px;
+  text-wrap: pretty;
 }
 .invitation-actions {
   display: flex;
@@ -901,10 +903,18 @@ main {
   }
 }
 .invitation-closing {
-  max-width: 60ch;
+  max-width: 72ch;
   color: var(--muted-foreground);
   font-size: 14px;
   line-height: 20px;
+  text-wrap: pretty;
+}
+/* Engines without pretty balance the lines instead, which also keeps a last word company. */
+@supports not (text-wrap: pretty) {
+  .invitation-lead,
+  .invitation-closing {
+    text-wrap: balance;
+  }
 }
 .invitation-content > .test-notice {
   margin: 0;

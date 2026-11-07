@@ -1,4 +1,4 @@
-import { expect, type Page, test } from '@playwright/test';
+import { expect, type Locator, type Page, test } from '@playwright/test';
 import { artUnderContent, themeContrast } from '../fixtures/browser-journey.ts';
 import { account, openSignIn } from '../fixtures/browser-reading.ts';
 
@@ -10,6 +10,22 @@ const signInHeading = (page: Page) =>
   page.getByRole('heading', { name: 'Sign in or create an account', exact: true });
 const headerSignIn = (page: Page) =>
   page.getByRole('banner').getByRole('link', { name: 'Sign in', exact: true });
+
+/** The words on each rendered line of an element's text, top to bottom. */
+const wordLines = (part: Locator) =>
+  part.evaluate((element) => {
+    const lines = new Map<number, string[]>();
+    const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT);
+    for (let node = walker.nextNode(); node; node = walker.nextNode())
+      for (const word of node.textContent!.matchAll(/\S+/g)) {
+        const range = document.createRange();
+        range.setStart(node, word.index!);
+        range.setEnd(node, word.index! + word[0].length);
+        const top = Math.round(range.getBoundingClientRect().top);
+        lines.set(top, [...(lines.get(top) ?? []), word[0]]);
+      }
+    return [...lines].sort(([a], [b]) => a - b).map(([, words]) => words.join(' '));
+  });
 
 test('the welcome page invites a first reading with two actions, three positions and the runtime notice', async ({
   page,
@@ -162,6 +178,22 @@ test('art sits under a header control only where the control paints an opaque pa
       'landing-rose under text "Sign in"',
     ]),
   );
+});
+
+test('the lead and the closing line fit on one line at 768 and 1280 px and never end on a lone word', async ({
+  page,
+}) => {
+  await page.goto('/');
+  await expect(welcomeHeading(page)).toBeVisible();
+  for (const width of [320, 390, 768, 1024, 1280]) {
+    await page.setViewportSize({ width, height: 900 });
+    for (const part of [page.locator('.invitation-lead'), page.locator('.invitation-closing')]) {
+      const lines = await wordLines(part);
+      const label = `${width}px: ${lines.join(' / ')}`;
+      if (width === 768 || width === 1280) expect(lines, label).toHaveLength(1);
+      expect(lines.at(-1)!.split(' ').length, label).toBeGreaterThan(1);
+    }
+  }
 });
 
 test('signed out, the header offers Sign in on the welcome and recovery pages but not on /sign-in', async ({
