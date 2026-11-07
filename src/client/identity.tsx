@@ -305,6 +305,8 @@ export function IdentityApp() {
         if (window.location.pathname === '/account' && !leaveReadings()) return;
         if (authenticated.current && window.location.pathname === signInPath)
           history.replaceState(null, '', '/');
+        // Back or Forward to ?start=new focuses the new-account choices, as a direct load does.
+        signupFocus.current = startsNew();
         setRoute(window.location.pathname);
         setMessage(null);
       };

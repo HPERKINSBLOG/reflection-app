@@ -112,7 +112,7 @@ test('a direct load of /sign-in shows the sign-in and new-account controls', asy
   }
 });
 
-test('?start=new focuses the new-account choices, on a direct load and from the welcome page', async ({
+test('?start=new focuses the new-account choices, on a direct load, from the welcome page and on Forward', async ({
   page,
 }) => {
   const signup = page.getByRole('group', { name: 'New to Reflection?' });
@@ -121,6 +121,12 @@ test('?start=new focuses the new-account choices, on a direct load and from the 
   await page.goto('/');
   await page.getByRole('link', { name: 'Draw three cards', exact: true }).focus();
   await page.keyboard.press('Enter');
+  await expect(page).toHaveURL(/\/sign-in\?start=new$/);
+  await expect(signup).toBeFocused();
+  // Back and Forward return to the same request.
+  await page.goBack();
+  await expect(welcomeHeading(page)).toBeVisible();
+  await page.goForward();
   await expect(page).toHaveURL(/\/sign-in\?start=new$/);
   await expect(signup).toBeFocused();
   // Without ?start=new the page heading takes focus, as on every other page change.
