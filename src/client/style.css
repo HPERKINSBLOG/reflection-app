@@ -463,6 +463,16 @@ footer {
   opacity: 0.55;
   pointer-events: none;
 }
+/* On Evening the band's pale leaves and suns read brighter, so it steps back further. */
+[data-theme="evening"] .app-shell::after,
+[data-theme="dark"] .app-shell::after {
+  opacity: 0.4;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) .app-shell::after {
+    opacity: 0.4;
+  }
+}
 /* The rose bleeds off the right edge and starts under the header rule. Its page clips it. */
 .landing-rose {
   position: absolute;
