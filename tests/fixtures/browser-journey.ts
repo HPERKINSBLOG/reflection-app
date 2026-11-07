@@ -179,8 +179,27 @@ export async function themeContrast(page: Page, selector?: string) {
     if (selector) {
       const element = document.querySelector(selector);
       if (!element) throw new Error(`Contrast target missing: ${selector}`);
-      const rendered = getComputedStyle(element);
-      return { selectedText: ratio(rgba(rendered.color), rgba(rendered.backgroundColor)) };
+      // Text sits on the nearest painted fill, so composite translucent fills up to an opaque one.
+      const fills: number[][] = [];
+      for (let node: Element | null = element; node; node = node.parentElement) {
+        const fill = rgba(getComputedStyle(node).backgroundColor);
+        if (fill[3] === 0) continue;
+        fills.push(fill);
+        if (fill[3] === 255) break;
+      }
+      const backdrop = fills.reverse().reduce(
+        (under, fill) => {
+          const alpha = fill[3]! / 255;
+          return [
+            ...fill.slice(0, 3).map((value, i) => value * alpha + under[i]! * (1 - alpha)),
+            255,
+          ];
+        },
+        rgba(getComputedStyle(document.body).backgroundColor).map((value, i) =>
+          i === 3 ? 255 : value,
+        ),
+      );
+      return { selectedText: ratio(rgba(getComputedStyle(element).color), backdrop) };
     }
     // The placeholder token is a color-mix, so let the page resolve it before measuring.
     const probe = document.createElement('span');
@@ -189,6 +208,8 @@ export async function themeContrast(page: Page, selector?: string) {
     const placeholder = rgba(getComputedStyle(probe).color);
     probe.remove();
     return {
+      cardText: ratio(color('--card-foreground'), color('--card')),
+      linkOnCard: ratio(color('--reflection-link'), color('--card')),
       placeholderOnCard: ratio(placeholder, color('--card')),
       placeholderOnBackground: ratio(placeholder, color('--background')),
       inputOnCard: ratio(color('--input'), color('--card')),
@@ -201,6 +222,112 @@ export async function themeContrast(page: Page, selector?: string) {
       destructiveButton: ratio(color('--destructive-foreground'), color('--destructive-button')),
     };
   }, selector);
+}
+
+/**
+ * Decorative art must never sit under text or controls. Lists every overlap between an
+ * aria-hidden image (clipped by any overflow ancestor) or the shell's leaf band and a line of
+ * visible text or a control. The brand mark is part of its own link and is not checked.
+ */
+export async function artUnderContent(page: Page) {
+  return page.evaluate(() => {
+    type Box = { left: number; top: number; right: number; bottom: number };
+    // checkVisibility also hides content inside a closed <details>, which still reports a box.
+    const shown = (element: Element) => {
+      if (!element.checkVisibility({ visibilityProperty: true })) return false;
+      const style = getComputedStyle(element);
+      return (
+        style.display !== 'none' &&
+        style.visibility !== 'hidden' &&
+        element.getClientRects().length > 0
+      );
+    };
+    const clipped = (element: Element): Box => {
+      const own = element.getBoundingClientRect();
+      let box: Box = { left: own.left, top: own.top, right: own.right, bottom: own.bottom };
+      for (let parent = element.parentElement; parent; parent = parent.parentElement) {
+        const style = getComputedStyle(parent);
+        if (!/hidden|clip/.test(`${style.overflowX} ${style.overflowY}`)) continue;
+        const edge = parent.getBoundingClientRect();
+        box = {
+          left: Math.max(box.left, edge.left),
+          top: Math.max(box.top, edge.top),
+          right: Math.min(box.right, edge.right),
+          bottom: Math.min(box.bottom, edge.bottom),
+        };
+      }
+      return box;
+    };
+    const art: (Box & { name: string })[] = [
+      ...document.querySelectorAll('img[aria-hidden="true"], [aria-hidden="true"] img'),
+    ]
+      .filter((image) => shown(image) && !image.closest('.brand'))
+      .map((image) => ({
+        name:
+          String(image.className)
+            .replace(/\bart\b/, '')
+            .trim() || 'image',
+        ...clipped(image),
+      }));
+    const shell = document.querySelector('.app-shell');
+    const band = shell && getComputedStyle(shell, '::after');
+    if (shell && band && band.display !== 'none' && band.backgroundImage !== 'none') {
+      const edge = shell.getBoundingClientRect();
+      const height = Number.parseFloat(band.height);
+      art.push({
+        name: 'leaf band',
+        left: edge.left,
+        right: edge.right,
+        top: edge.bottom - height,
+        bottom: edge.bottom,
+      });
+    }
+    const content: (Box & { what: string })[] = [];
+    const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, {
+      acceptNode: (node) =>
+        node.textContent?.trim() &&
+        node.parentElement &&
+        shown(node.parentElement) &&
+        !node.parentElement.closest('.sr-only, [aria-hidden="true"]')
+          ? NodeFilter.FILTER_ACCEPT
+          : NodeFilter.FILTER_REJECT,
+    });
+    for (let node = walker.nextNode(); node; node = walker.nextNode()) {
+      const range = document.createRange();
+      range.selectNodeContents(node);
+      for (const line of range.getClientRects())
+        if (line.width && line.height)
+          content.push({
+            what: `text "${node.textContent!.trim().slice(0, 32)}"`,
+            left: line.left,
+            top: line.top,
+            right: line.right,
+            bottom: line.bottom,
+          });
+    }
+    for (const control of document.querySelectorAll(
+      'a, button, input, select, textarea, summary',
+    )) {
+      if (!shown(control) || control.closest('.sr-only')) continue;
+      const box = control.getBoundingClientRect();
+      if (box.width && box.height)
+        content.push({
+          what: `${control.tagName.toLowerCase()} "${(control.textContent || control.getAttribute('aria-label') || '').trim().slice(0, 32)}"`,
+          left: box.left,
+          top: box.top,
+          right: box.right,
+          bottom: box.bottom,
+        });
+    }
+    const overlaps: string[] = [];
+    for (const image of art)
+      for (const item of content) {
+        const width = Math.min(image.right, item.right) - Math.max(image.left, item.left);
+        const height = Math.min(image.bottom, item.bottom) - Math.max(image.top, item.top);
+        if (width > 0.5 && height > 0.5) overlaps.push(`${image.name} under ${item.what}`);
+      }
+    return overlaps;
+  });
 }
 
 /** Complete synthetic note responses with fixed server dates, only at the browser boundary. */

@@ -6,6 +6,7 @@ import {
   enableAi,
   keepKit,
   openAccount,
+  openSignIn,
   reading,
 } from '../fixtures/browser-reading.ts';
 
@@ -77,6 +78,10 @@ test('failed runtime discovery never describes a possible live call as simulatio
   await expect(page.getByText(/never contacts an AI provider|local simulated writer/)).toHaveCount(
     0,
   );
+  await openSignIn(page);
+  await expect(page.getByText(/never contacts an AI provider|local simulated writer/)).toHaveCount(
+    0,
+  );
   await page.getByRole('button', { name: 'Create an account with a passkey', exact: true }).click();
   await keepKit(page);
   await expect(page.getByRole('button', { name: 'Journal', exact: true })).toBeEnabled();
@@ -108,6 +113,8 @@ for (const mode of ['live-local', 'live-preview', 'production'] as const) {
       'live-preview': 'This hosted preview sends new readings to a live AI provider.',
       production: 'New readings can be sent to a live AI provider.',
     }[mode];
+    await expect(page.getByText(environment, { exact: true })).toBeVisible();
+    await openSignIn(page);
     await expect(page.getByText(environment, { exact: true })).toBeVisible();
     await page
       .getByRole('button', { name: 'Create an account with a passkey', exact: true })
@@ -172,6 +179,14 @@ test('explicit hosted synthetic readiness retains simulation disclosure', async 
     ),
   ).toBeVisible();
   await expect(page.getByText(/local build|local simulation/)).toHaveCount(0);
+  await openSignIn(page);
+  await expect(
+    page.getByText(
+      'This hosted preview simulates readings and does not contact an AI provider. Use test accounts and synthetic text only.',
+      { exact: true },
+    ),
+  ).toBeVisible();
+  await expect(page.getByText(/local build|local simulation/)).toHaveCount(0);
   await expect(
     page.getByRole('button', { name: 'Create a test account with a passkey', exact: true }),
   ).toBeVisible();
@@ -200,6 +215,8 @@ test('unavailable hosted synthetic generation retains its environment without en
   await page.goto('/');
   const environment = page.getByText(/^This hosted preview/);
   await expect(environment).toContainText('Use test accounts and synthetic text only.');
+  await expect(environment).toContainText('Saved readings remain available.');
+  await openSignIn(page);
   await expect(environment).toContainText('Saved readings remain available.');
   await page.getByRole('link', { name: 'Recover with your saved kit', exact: true }).click();
   await expect(environment).toBeVisible();

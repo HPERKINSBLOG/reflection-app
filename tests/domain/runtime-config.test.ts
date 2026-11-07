@@ -1,6 +1,17 @@
+import { readFile } from 'node:fs/promises';
 import { expect, test } from 'vitest';
 import { validateRuntimeManifest, renderHostedConfig } from '../../src/worker/runtime/config.ts';
 import { runtimeManifest } from '../fixtures/runtime.ts';
+
+test('hosted builds send client routes such as /sign-in to the single-page fallback', async () => {
+  const fallback = { run_worker_first: true, not_found_handling: 'single-page-application' };
+  for (const manifest of [runtimeManifest(), runtimeManifest('production')])
+    expect(renderHostedConfig(manifest).assets).toMatchObject(fallback);
+  const preview = JSON.parse(
+    (await readFile('wrangler.preview.jsonc', 'utf8')).replace(/^\s*\/\/.*$/gm, ''),
+  );
+  expect(preview.assets).toMatchObject(fallback);
+});
 
 test('hosted manifest binds an exact HTTPS origin, RP ID, immutable environment and isolated resources', () => {
   const manifest = runtimeManifest();

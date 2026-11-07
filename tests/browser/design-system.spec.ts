@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 import { account, enableAi } from '../fixtures/browser-reading.ts';
-import { themeContrast } from '../fixtures/browser-journey.ts';
+import { artUnderContent, themeContrast } from '../fixtures/browser-journey.ts';
 
 const palette = {
   paper: '#f7f3e8',
@@ -34,8 +34,20 @@ test('exact palette, local typography and responsive Paper and Evening landing',
   expect(colors).toEqual(palette);
   await page.evaluate(() => document.fonts.ready);
   await expect(page.locator('h1')).toHaveCSS('font-family', /Newsreader/);
+  await expect(page.locator('h1')).toHaveCSS('font-weight', '500');
   await expect(page.locator('body')).toHaveCSS('font-family', /Figtree/);
   await expect(page.locator('.brand')).toHaveCSS('font-family', /Outfit/);
+  await expect(page.getByRole('link', { name: 'Draw three cards', exact: true })).toHaveCSS(
+    'font-weight',
+    '500',
+  );
+  const rose = page.locator('img.landing-rose');
+  await expect(rose).toHaveAttribute('alt', '');
+  await expect(rose).toHaveAttribute('aria-hidden', 'true');
+  await expect(rose).toHaveAttribute('fetchpriority', 'high');
+  await expect(rose).toHaveCSS('position', 'absolute');
+  await expect(rose).toHaveCSS('pointer-events', 'none');
+  await expect(page.locator('img[src*="spiral-bloom"]')).toHaveCount(0);
   for (const theme of ['paper', 'evening']) {
     await page.getByLabel('Color theme').selectOption(theme);
     await expect(page.locator('html')).toHaveCSS(
@@ -52,10 +64,18 @@ test('exact palette, local typography and responsive Paper and Evening landing',
         true,
       );
       await expect(page.getByLabel('Color theme')).toBeVisible();
-      const art = page.locator('.landing-layout > .auth-art');
-      await expect(art).toBeVisible();
-      const box = await art.boundingBox();
-      expect(box!.width / box!.height).toBeCloseTo(347.649 / 422.238, 2);
+      // The rose keeps its proportions, bleeds off the right edge and never sits under content.
+      await expect(rose).toBeVisible();
+      const box = await rose.boundingBox();
+      expect(box!.width / box!.height).toBeCloseTo(936 / 378, 2);
+      expect(box!.x + box!.width).toBeGreaterThan(width);
+      expect(await artUnderContent(page), `${theme} ${width}px`).toEqual([]);
+      const headline = Number.parseFloat(
+        await page.locator('h1').evaluate((element) => getComputedStyle(element).fontSize),
+      );
+      if (width === 390) expect(headline).toBe(48);
+      if (width === 1280) expect(headline).toBeGreaterThanOrEqual(88);
+      expect(headline).toBeLessThanOrEqual(96);
       await page.screenshot({
         path: `artifacts/reflection-design/${width}-${theme}-landing.png`,
         fullPage: true,

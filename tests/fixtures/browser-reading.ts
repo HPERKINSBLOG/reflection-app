@@ -30,9 +30,19 @@ export async function keepKit(page: Page) {
 export async function account(page: Page, ip: string) {
   await page.context().setExtraHTTPHeaders({ 'CF-Connecting-IP': ip });
   const auth = await authenticator(page);
+  // Start where a new reader does: "Draw three cards" on the welcome page opens sign-in.
   await page.goto('/');
+  await page.getByRole('link', { name: 'Draw three cards', exact: true }).click();
   await page.getByRole('button', { name: 'Create a test account' }).click();
   return { auth, kit: await keepKit(page) };
+}
+/** The welcome page invites; its "I have an account" link opens the sign-in controls. */
+export async function openSignIn(page: Page) {
+  await page.getByRole('link', { name: 'I have an account', exact: true }).click();
+  await expect(page).toHaveURL(/\/sign-in$/);
+  await expect(
+    page.getByRole('heading', { name: 'Sign in or create an account', exact: true }),
+  ).toBeVisible();
 }
 export async function openAccount(page: Page) {
   await page.getByRole('link', { name: 'Account', exact: true }).click();
