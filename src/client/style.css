@@ -443,9 +443,64 @@ footer {
 
 /* Shell and signed-out pages. */
 .app-shell {
+  --leaf-band: clamp(5rem, 14vw, 9rem);
+  position: relative;
+  isolation: isolate;
   display: flex;
   min-height: 100vh;
   flex-direction: column;
+  /* Content never sits on the leaf band. */
+  padding-bottom: var(--leaf-band);
+}
+/* A leaf band runs along the foot of every page, behind content, in its own reserved space. */
+.app-shell::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0;
+  z-index: -1;
+  height: var(--leaf-band);
+  background: url("./design/art/optimized/spread-ribbon-960.webp") left bottom / auto 100% repeat-x;
+  opacity: 0.55;
+  pointer-events: none;
+}
+/* The rose bleeds off the right edge and starts under the header rule. Its page clips it. */
+.landing-rose {
+  position: absolute;
+  z-index: -1;
+  top: -2.5rem;
+  right: -6rem;
+  width: 34rem;
+  max-width: none;
+  height: auto;
+  opacity: 0.9;
+  pointer-events: none;
+  -webkit-mask-image: linear-gradient(to bottom, #000 60%, transparent);
+  mask-image: linear-gradient(to bottom, #000 60%, transparent);
+}
+@media (min-width: 768px) {
+  .landing-rose {
+    width: min(46rem, 60vw);
+  }
+}
+/* A position plate fills the right half of its tile, which clips it. */
+.position-plate {
+  position: absolute;
+  z-index: -1;
+  top: 0;
+  right: -8px;
+  width: 50%;
+  height: 100%;
+  object-fit: cover;
+  object-position: left;
+  opacity: 0.8;
+  pointer-events: none;
+}
+@media (forced-colors: active) {
+  .app-shell::after,
+  .landing-rose,
+  .position-plate {
+    display: none;
+  }
 }
 .shell-width {
   width: 100%;
