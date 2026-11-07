@@ -597,7 +597,7 @@ export function IdentityApp() {
           )}
           {headerSignIn && (
             <TextLink
-              className="header-link"
+              className="header-link header-sign-in"
               href={signInPath}
               onClick={(event) => openSignIn(event, false)}
             >

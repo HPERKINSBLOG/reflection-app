@@ -243,6 +243,48 @@ test('signed out, the header offers Sign in on the welcome and recovery pages bu
   }
 });
 
+for (const theme of ['paper', 'evening'] as const) {
+  test(`${theme}: at 320 px the signed-out header keeps the wordmark, theme select and Sign in on one row`, async ({
+    page,
+  }) => {
+    await page.addInitScript((value) => localStorage.setItem('reflection-theme', value), theme);
+    await page.setViewportSize({ width: 320, height: 800 });
+    for (const path of ['/', '/recover']) {
+      await page.goto(path);
+      await expect(headerSignIn(page)).toBeVisible();
+      const [header, wordmark, select, signIn] = await Promise.all(
+        [
+          page.locator('.site-header'),
+          page.locator('.site-header .brand'),
+          page.getByLabel('Color theme'),
+          headerSignIn(page),
+        ].map(async (part) => (await part.boundingBox())!),
+      );
+      const label = `${theme} ${path}`;
+      // One 68 px row plus the 1 px rule, as at 390 px.
+      expect(header!.height, `${label} header height`).toBeLessThanOrEqual(69);
+      for (const [name, box] of [
+        ['wordmark', wordmark],
+        ['theme select', select],
+        ['Sign in', signIn],
+      ] as const) {
+        expect(box!.y, `${label} ${name} top`).toBeGreaterThanOrEqual(header!.y);
+        expect(box!.y + box!.height, `${label} ${name} bottom`).toBeLessThanOrEqual(
+          header!.y + header!.height,
+        );
+      }
+      // Left to right, without touching, and Sign in keeps its 44 px target.
+      expect(wordmark!.x + wordmark!.width, label).toBeLessThan(select!.x);
+      expect(select!.x + select!.width, label).toBeLessThan(signIn!.x);
+      expect(Math.min(signIn!.width, signIn!.height), label).toBeGreaterThanOrEqual(44);
+      expect(
+        await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth),
+        `${label} horizontal overflow`,
+      ).toBe(true);
+    }
+  });
+}
+
 test('a direct load of /sign-in shows the sign-in and new-account controls', async ({ page }) => {
   const response = await page.goto('/sign-in');
   expect(response?.status()).toBe(200);

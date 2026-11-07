@@ -1092,6 +1092,22 @@ main {
     padding-inline: 8px;
   }
 }
+/* Signed out below 360 px, the wordmark, theme select and "Sign in" still share one row:
+   the select and link tighten their side padding, and the row's minimum gap halves. */
+@media (max-width: 359px) {
+  .site-header .shell-width:has(.header-sign-in) {
+    gap: 4px;
+  }
+  .site-header .shell-width:has(.header-sign-in) .theme-control select {
+    padding-inline: 8px 28px;
+  }
+  .site-header .shell-width:has(.header-sign-in) .theme-control::after {
+    right: 14px;
+  }
+  .header-link.header-sign-in {
+    padding-inline: 4px;
+  }
+}
 .recovery-form > .lead {
   margin-bottom: 20px;
 }
