@@ -260,7 +260,7 @@ Signed out, `/` is an invitation and `/sign-in` holds the sign-in controls. The 
 
 `/sign-in` puts the former welcome controls, unchanged, in a lifted card beside the inquiry study, under “Sign in or create an account”. Every other signed-out address, such as a saved reading or Account, shows sign-in in place, so the reader returns to the page they asked for. A signed-in reader who opens `/sign-in` lands on `/`. Navigation between these pages stays in the app, so Back and Forward work.
 
-At 760 px and below, the new-reading disclosures move beneath the fields and a compact botanical corner replaces the wide ribbon. At 390 px and below, the header tightens its spacing and the wordmark drops to 23 px. Keep history and dated notes in a single reading order. [Responsive layouts](src/client/style.css)
+At 760 px and below, the new-reading disclosures move beneath the fields and a compact botanical corner replaces the wide ribbon. At 390 px and below, the header tightens its spacing and the wordmark drops to 23 px. Below 360 px, a header that shows “Sign in” narrows the theme control’s and the link’s side padding, so the wordmark, theme control and link still share one row. Keep history and dated notes in a single reading order. [Responsive layouts](src/client/style.css)
 
 ## Elevation & Depth
 
