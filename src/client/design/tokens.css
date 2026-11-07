@@ -14,9 +14,11 @@
   color-scheme: light;
   --background: var(--reflection-paper);
   --foreground: var(--reflection-ink);
-  /* Cards lift off Paper: half-way to white, with a soft edge and a low shadow. */
-  --card: color-mix(in oklch, var(--reflection-paper), white 50%);
-  --card-edge: color-mix(in oklch, var(--reflection-paper), var(--reflection-ink) 14%);
+  /* Cards lift off Paper: half-way to white (#fbf9f3), a soft edge (#d8d8c9), a low shadow.
+     Chromium drops Paper's hue in an oklch mix, so the card mixes in oklab (the same color)
+     and the edge is the oklch value of color-mix(in oklch, Paper, Ink 14%). */
+  --card: color-mix(in oklab, var(--reflection-paper), white 50%);
+  --card-edge: oklch(0.8769 0.0201 106.89);
   --shadow-card: 0 10px 30px -12px color-mix(in srgb, var(--reflection-ink) 25%, transparent);
   --card-foreground: var(--reflection-ink);
   --popover: var(--reflection-paper);
