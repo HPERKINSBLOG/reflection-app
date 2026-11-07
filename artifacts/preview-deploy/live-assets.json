@@ -1,198 +1,287 @@
 {
-  "checkedAt": "2026-11-05T23:16:01.979Z",
-  "passed": 32,
+  "checkedAt": "2026-11-07T08:20:32.707Z",
+  "passed": 35,
+  "total": 35,
   "results": [
     {
       "path": "/assets/account-sprig-160-BYW84haY.webp",
       "status": 200,
+      "contentType": "image/webp",
       "sha256": "ead2354d61e2796ed8d2e77d8048156f87d1285420d31af58dffcfc02f03a772",
-      "bytes": 10960
+      "bytes": 10960,
+      "matchesBuild": true
     },
     {
       "path": "/assets/account-sprig-320-C7sWf4hU.webp",
       "status": 200,
+      "contentType": "image/webp",
       "sha256": "82f0bf5125e1d082db9494befb1a4848934b23885911e2621b20417391536605",
-      "bytes": 33300
+      "bytes": 33300,
+      "matchesBuild": true
     },
     {
       "path": "/assets/account-sprig-560-BvX-PKxo.webp",
       "status": 200,
+      "contentType": "image/webp",
       "sha256": "49d1efe161a265f76bc20cc2a9c78de08de7e18b74b5214a1e31bb7f1e231942",
-      "bytes": 86404
+      "bytes": 86404,
+      "matchesBuild": true
     },
     {
       "path": "/assets/botanical-D0fcqDyf.png",
       "status": 200,
+      "contentType": "image/png",
       "sha256": "8e46b92d0a60f864e26c22f565e87893debd171b4700e2239e477de56b5f562c",
-      "bytes": 206020
+      "bytes": 206020,
+      "matchesBuild": true
     },
     {
       "path": "/assets/figtree-latin-ext-wght-italic-Q0qr0lrZ.woff2",
       "status": 200,
+      "contentType": "font/woff2",
       "sha256": "a0cc105b3241fe952fd58ba226633f8ba733b16fd5419affbda6c8cc5c627a0b",
-      "bytes": 10376
+      "bytes": 10376,
+      "matchesBuild": true
     },
     {
       "path": "/assets/figtree-latin-ext-wght-normal-DCwSJGxG.woff2",
       "status": 200,
+      "contentType": "font/woff2",
       "sha256": "bf7828e2c258cffcfa50a048ee388a36b95bc16b452e8d36fa797635dbe15965",
-      "bytes": 10280
+      "bytes": 10280,
+      "matchesBuild": true
     },
     {
       "path": "/assets/figtree-latin-wght-italic-BEAWuiTz.woff2",
       "status": 200,
+      "contentType": "font/woff2",
       "sha256": "7242fa62d13d46172816b266f03c027999faa3755a52c2124bc2c440f6f4b983",
-      "bytes": 20928
+      "bytes": 20928,
+      "matchesBuild": true
     },
     {
       "path": "/assets/figtree-latin-wght-normal-D_ZTVpCC.woff2",
       "status": 200,
+      "contentType": "font/woff2",
       "sha256": "4ba7d3d096695818fe0686be4f1e82c6b05134e18a22260336130335027462dd",
-      "bytes": 20156
+      "bytes": 20156,
+      "matchesBuild": true
     },
     {
       "path": "/assets/header-botanical-CDuvHPfZ.png",
       "status": 200,
+      "contentType": "image/png",
       "sha256": "9613966c5a6b85d4a78ec8ec5202152739a9e76177b016b4a2f4e96e6fea4e75",
-      "bytes": 239956
+      "bytes": 239956,
+      "matchesBuild": true
     },
     {
-      "path": "/assets/index-DUmRxVmY.js",
+      "path": "/assets/hero-rose-BuyZarz4.webp",
       "status": 200,
-      "sha256": "613cac38a4ff894e34e4de1b6b39296ac620cdce38787e7c12b47b87c49d0079",
-      "bytes": 578383
+      "contentType": "image/webp",
+      "sha256": "866730f5bdcf797efeab7a227d51a1b0900fd7d82696dbf4bdf385154a6f2104",
+      "bytes": 137080,
+      "matchesBuild": true
     },
     {
-      "path": "/assets/index-DowrilNn.css",
+      "path": "/assets/index-a9uU9s1p.js",
       "status": 200,
-      "sha256": "feed99fe197a1c2c70f0d2a4b65e343389f01cb41b18800a46d7ee8fe4659055",
-      "bytes": 89560
+      "contentType": "text/javascript",
+      "sha256": "b5c61161d82ece1fffd6eb488a062df5f4ea06e33f4fa0017152187424757a3f",
+      "bytes": 583295,
+      "matchesBuild": true
+    },
+    {
+      "path": "/assets/index-DAewYpbS.css",
+      "status": 200,
+      "contentType": "text/css",
+      "sha256": "efd671690eb1591499ea0560375d5543eb00e49c89f98e3787d29dff80071093",
+      "bytes": 95498,
+      "matchesBuild": true
     },
     {
       "path": "/assets/jetbrains-mono-latin-wght-normal-B9CIFXIH.woff2",
       "status": 200,
+      "contentType": "font/woff2",
       "sha256": "18be452724bfdc236c074ca94a249a7f41a86752c7d04ab258ce9ed5651f6a7e",
-      "bytes": 40404
+      "bytes": 40404,
+      "matchesBuild": true
     },
     {
       "path": "/assets/mobile-corner-160-DxtimyD_.webp",
       "status": 200,
+      "contentType": "image/webp",
       "sha256": "2602a3a1b951a27105ba3ab0bd77216f1181bc218e023d4ba82dd6a830acfac3",
-      "bytes": 21638
+      "bytes": 21638,
+      "matchesBuild": true
     },
     {
       "path": "/assets/mobile-corner-240-DUksp57g.webp",
       "status": 200,
+      "contentType": "image/webp",
       "sha256": "951f201e1b3b2040310aea43f358a51598f374e693c9b985beb6faea5f30e97a",
-      "bytes": 42886
+      "bytes": 42886,
+      "matchesBuild": true
     },
     {
       "path": "/assets/mobile-corner-80-mXqp_oyF.webp",
       "status": 200,
+      "contentType": "image/webp",
       "sha256": "ee2681f79c4dc4e04de95dae822cd61dbefdd7ae628f902b6efdc6ae96765610",
-      "bytes": 7134
+      "bytes": 7134,
+      "matchesBuild": true
     },
     {
       "path": "/assets/newsreader-latin-ext-opsz-normal-BQn1nviT.woff2",
       "status": 200,
+      "contentType": "font/woff2",
       "sha256": "45683de03de37187604102316c0b42c0cb2d8dc9c4140a20ad471c3148cc1278",
-      "bytes": 86608
+      "bytes": 86608,
+      "matchesBuild": true
     },
     {
       "path": "/assets/newsreader-latin-opsz-normal-s-izfB6B.woff2",
       "status": 200,
+      "contentType": "font/woff2",
       "sha256": "6e4f2958c3a7c4a80acde4e5a679abe7e01bc1e30b92be3c7a8b696ef401d101",
-      "bytes": 132000
+      "bytes": 132000,
+      "matchesBuild": true
     },
     {
       "path": "/assets/outfit-latin-ext-wght-normal-DdQaqQDo.woff2",
       "status": 200,
+      "contentType": "font/woff2",
       "sha256": "0f53d1c03b3918d744a843b5039001ee31695ca1e255e3914188df81beb461e9",
-      "bytes": 14808
+      "bytes": 14808,
+      "matchesBuild": true
     },
     {
       "path": "/assets/outfit-latin-wght-normal-Bc-8i84L.woff2",
       "status": 200,
+      "contentType": "font/woff2",
       "sha256": "6c18d579fd87c3776be068b762cbc83fde3acb543d49eabd3ade842eb987e887",
-      "bytes": 32292
+      "bytes": 32292,
+      "matchesBuild": true
+    },
+    {
+      "path": "/assets/position-possibility-C5_Ydvee.png",
+      "status": 200,
+      "contentType": "image/png",
+      "sha256": "53d666a9d669d0eabb15016a8fba9c0e0517b8aedbdb1e50c81c4d2fe6aeca44",
+      "bytes": 44464,
+      "matchesBuild": true
+    },
+    {
+      "path": "/assets/position-situation-_1BZi04s.png",
+      "status": 200,
+      "contentType": "image/png",
+      "sha256": "de891ac70ee7a4ce125424374b1db59dd6d4e344ebcf9f1a170b5668a5c1db15",
+      "bytes": 47043,
+      "matchesBuild": true
+    },
+    {
+      "path": "/assets/position-tension-_ZkzId_3.png",
+      "status": 200,
+      "contentType": "image/png",
+      "sha256": "1ed57b8c42efdc57e3229e8223eac071f6bd2f05ee3a98dc5918726ca2b18f7c",
+      "bytes": 43360,
+      "matchesBuild": true
     },
     {
       "path": "/assets/spiral-bloom-DP-0uNhx.svg",
       "status": 200,
+      "contentType": "image/svg+xml",
       "sha256": "b9f64429117a5054b6aa4fa7009f9eeac6a41b5ee3763a60ef6c1657cd7692c6",
-      "bytes": 17482
+      "bytes": 17482,
+      "matchesBuild": true
     },
     {
       "path": "/assets/spread-ribbon-320-B7scGEBE.webp",
       "status": 200,
+      "contentType": "image/webp",
       "sha256": "58ad17a853718bc5fc74396541bf37754f557bba86e327d6cb8c79f027efb3f6",
-      "bytes": 27476
+      "bytes": 27476,
+      "matchesBuild": true
     },
     {
       "path": "/assets/spread-ribbon-640-KHSCiQ27.webp",
       "status": 200,
+      "contentType": "image/webp",
       "sha256": "a6d0d6049e43ec54e0b516abeb03eaf577b783c6f60de64df607af50988e0920",
-      "bytes": 85660
+      "bytes": 85660,
+      "matchesBuild": true
     },
     {
       "path": "/assets/spread-ribbon-960-iTMsAU63.webp",
       "status": 200,
+      "contentType": "image/webp",
       "sha256": "2c0b1355a1c5842bdc3a5f171373f04cc3d699f22d06bfe5bbc27681f8c76cc7",
-      "bytes": 178842
+      "bytes": 178842,
+      "matchesBuild": true
     },
     {
       "path": "/assets/study-inquiry-CqDDKxCr.jpg",
       "status": 200,
+      "contentType": "image/jpeg",
       "sha256": "27ecab66052e2b8c08217d4f7217ee43abcdb20e4b5a51e43f0e1e8f2528eebb",
-      "bytes": 83806
+      "bytes": 83806,
+      "matchesBuild": true
     },
     {
       "path": "/assets/study-perspective-DhFS8mrh.jpg",
       "status": 200,
+      "contentType": "image/jpeg",
       "sha256": "eee8f726e4a91025431170d926bb3522db78efc768203b5db8cf734f0d0f505c",
-      "bytes": 88891
+      "bytes": 88891,
+      "matchesBuild": true
     },
     {
       "path": "/assets/study-possibility-BQcKT-wb.jpg",
       "status": 200,
+      "contentType": "image/jpeg",
       "sha256": "7faf2db44a4d2cefe1498898a670f76b04e63601efa847b7111cbed654ec62b5",
-      "bytes": 75262
+      "bytes": 75262,
+      "matchesBuild": true
     },
     {
       "path": "/assets/study-return-C9F7wGev.jpg",
       "status": 200,
+      "contentType": "image/jpeg",
       "sha256": "181ddab97aa8431e32d541b8c9e947d6bebd327a29331d86bbac522b2b917657",
-      "bytes": 52317
+      "bytes": 52317,
+      "matchesBuild": true
     },
     {
       "path": "/assets/study-stillness-Ci_sHAXQ.jpg",
       "status": 200,
+      "contentType": "image/jpeg",
       "sha256": "141d74492b1440b0f6b6a7a9ae172a8ec161562e5be94939682d908186bf03dc",
-      "bytes": 58920
+      "bytes": 58920,
+      "matchesBuild": true
     },
     {
       "path": "/assets/study-tension-dp-MHMAq.jpg",
       "status": 200,
+      "contentType": "image/jpeg",
       "sha256": "43170e785ae6225ac44c4e37eb007a515ad4e566b73e1997eed5d666b37f4d7d",
-      "bytes": 73111
+      "bytes": 73111,
+      "matchesBuild": true
     },
     {
       "path": "/assets/three-card-spread-320-CsWohK6j.webp",
       "status": 200,
+      "contentType": "image/webp",
       "sha256": "cfc3c81a0eb05ff75316f8a8daba9f477f7386317deeec054a1ecc7591c35e14",
-      "bytes": 49364
+      "bytes": 49364,
+      "matchesBuild": true
     },
     {
       "path": "/assets/three-card-spread-640-D6MoPW0H.webp",
       "status": 200,
+      "contentType": "image/webp",
       "sha256": "81c3aa35555aff92fc5d4e09b784d3d1fd53c9dc731ef946795cce504241adec",
-      "bytes": 160384
-    },
-    {
-      "path": "/index.html",
-      "status": 200,
-      "sha256": "49a4c8dcb5f069e42d9d8bd9e76043bc1f4472752b71be958bd57fff7e352cef",
-      "bytes": 414
+      "bytes": 160384,
+      "matchesBuild": true
     }
   ]
 }

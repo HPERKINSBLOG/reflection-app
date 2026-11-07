@@ -228,10 +228,13 @@ export async function themeContrast(page: Page, selector?: string) {
  * Decorative art must never sit under text or controls. Lists every overlap between an
  * aria-hidden image (clipped by any overflow ancestor) or the shell's leaf band and a line of
  * visible text or a control. The brand mark is part of its own link and is not checked.
+ * One exception: art may sit under a control that paints a fully opaque fill of its own, with
+ * no translucent ancestor. That fill covers the art, so the control and its words are skipped.
  */
 export async function artUnderContent(page: Page) {
   return page.evaluate(() => {
     type Box = { left: number; top: number; right: number; bottom: number };
+    const controls = 'a, button, input, select, textarea, summary';
     // checkVisibility also hides content inside a closed <details>, which still reports a box.
     const shown = (element: Element) => {
       if (!element.checkVisibility({ visibilityProperty: true })) return false;
@@ -284,13 +287,35 @@ export async function artUnderContent(page: Page) {
         bottom: edge.bottom,
       });
     }
+    // The canvas reads the alpha of any computed color syntax; an unreadable one counts as clear.
+    const pixel = document.createElement('canvas').getContext('2d')!;
+    const opaque = (control: Element) => {
+      pixel.clearRect(0, 0, 1, 1);
+      pixel.fillStyle = 'transparent';
+      pixel.fillStyle = getComputedStyle(control).backgroundColor;
+      pixel.fillRect(0, 0, 1, 1);
+      if (pixel.getImageData(0, 0, 1, 1).data[3] !== 255) return false;
+      for (let node: Element | null = control; node; node = node.parentElement)
+        if (Number.parseFloat(getComputedStyle(node).opacity) < 1) return false;
+      return true;
+    };
+    const covering = new Set(
+      [...document.querySelectorAll(controls)].filter(
+        (control) => shown(control) && opaque(control),
+      ),
+    );
+    const covered = (element: Element) => {
+      const control = element.closest(controls);
+      return control !== null && covering.has(control);
+    };
     const content: (Box & { what: string })[] = [];
     const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, {
       acceptNode: (node) =>
         node.textContent?.trim() &&
         node.parentElement &&
         shown(node.parentElement) &&
-        !node.parentElement.closest('.sr-only, [aria-hidden="true"]')
+        !node.parentElement.closest('.sr-only, [aria-hidden="true"]') &&
+        !covered(node.parentElement)
           ? NodeFilter.FILTER_ACCEPT
           : NodeFilter.FILTER_REJECT,
     });
@@ -307,10 +332,8 @@ export async function artUnderContent(page: Page) {
             bottom: line.bottom,
           });
     }
-    for (const control of document.querySelectorAll(
-      'a, button, input, select, textarea, summary',
-    )) {
-      if (!shown(control) || control.closest('.sr-only')) continue;
+    for (const control of document.querySelectorAll(controls)) {
+      if (!shown(control) || control.closest('.sr-only') || covered(control)) continue;
       const box = control.getBoundingClientRect();
       if (box.width && box.height)
         content.push({

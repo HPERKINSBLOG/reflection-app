@@ -1,4 +1,4 @@
-import { expect, type Page, test } from '@playwright/test';
+import { expect, type Locator, type Page, test } from '@playwright/test';
 import { artUnderContent, themeContrast } from '../fixtures/browser-journey.ts';
 import { account, openSignIn } from '../fixtures/browser-reading.ts';
 
@@ -8,6 +8,24 @@ const welcomeHeading = (page: Page) =>
   page.getByRole('heading', { name: 'A little space to reflect.', exact: true });
 const signInHeading = (page: Page) =>
   page.getByRole('heading', { name: 'Sign in or create an account', exact: true });
+const headerSignIn = (page: Page) =>
+  page.getByRole('banner').getByRole('link', { name: 'Sign in', exact: true });
+
+/** The words on each rendered line of an element's text, top to bottom. */
+const wordLines = (part: Locator) =>
+  part.evaluate((element) => {
+    const lines = new Map<number, string[]>();
+    const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT);
+    for (let node = walker.nextNode(); node; node = walker.nextNode())
+      for (const word of node.textContent!.matchAll(/\S+/g)) {
+        const range = document.createRange();
+        range.setStart(node, word.index!);
+        range.setEnd(node, word.index! + word[0].length);
+        const top = Math.round(range.getBoundingClientRect().top);
+        lines.set(top, [...(lines.get(top) ?? []), word[0]]);
+      }
+    return [...lines].sort(([a], [b]) => a - b).map(([, words]) => words.join(' '));
+  });
 
 test('the welcome page invites a first reading with two actions, three positions and the runtime notice', async ({
   page,
@@ -72,6 +90,200 @@ test('the welcome page invites a first reading with two actions, three positions
   }
   expect(faults).toEqual([]);
 });
+
+test('from 768 px the rose runs behind the header to the top edge; below that it starts under the header', async ({
+  page,
+}) => {
+  await page.goto('/');
+  await expect(welcomeHeading(page)).toBeVisible();
+  const header = page.locator('.site-header');
+  const hidden = 'rgba(0, 0, 0, 0)';
+  for (const width of [320, 390, 640, 768, 1024, 1280]) {
+    await page.setViewportSize({ width, height: 900 });
+    const layout = await page.evaluate(() => {
+      const box = (selector: string) => document.querySelector(selector)!.getBoundingClientRect();
+      const [rose, welcome, wordmark] = [
+        box('.landing-rose'),
+        box('main.invitation'),
+        box('.brand'),
+      ];
+      // The welcome page clips the rose, so it paints from the lower of the two tops.
+      const top = Math.max(rose.top, welcome.top);
+      return {
+        top,
+        headerBottom: box('.site-header').bottom,
+        underWordmark:
+          rose.left < wordmark.right &&
+          rose.right > wordmark.left &&
+          top < wordmark.bottom &&
+          rose.bottom > wordmark.top,
+      };
+    });
+    expect(layout.underWordmark, `${width}px rose under the wordmark`).toBe(false);
+    if (width >= 768) {
+      expect(layout.top, `${width}px rose top`).toBeLessThanOrEqual(0);
+      await expect(header, `${width}px header rule`).toHaveCSS('border-bottom-color', hidden);
+    } else {
+      expect(layout.top, `${width}px rose top`).toBeGreaterThanOrEqual(layout.headerBottom - 0.5);
+      await expect(header, `${width}px header rule`).not.toHaveCSS('border-bottom-color', hidden);
+    }
+  }
+  // Only the welcome page drops the rule.
+  for (const path of ['/sign-in', '/recover']) {
+    await page.goto(path);
+    await expect(header, path).not.toHaveCSS('border-bottom-color', hidden);
+  }
+});
+
+test('art sits under a header control only where the control paints an opaque page fill', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await page.goto('/');
+  await expect(welcomeHeading(page)).toBeVisible();
+  const select = page.getByLabel('Color theme');
+  const signIn = headerSignIn(page);
+  for (const [theme, fill] of [
+    ['paper', 'rgb(247, 243, 232)'],
+    ['evening', 'rgb(8, 47, 51)'],
+  ] as const) {
+    await select.selectOption(theme);
+    // The theme select and the sign-in link paint the page color, Paper or Evening, fully opaque.
+    await expect(page.locator('html')).toHaveCSS('background-color', fill);
+    await expect(select, `${theme} theme select`).toHaveCSS('background-color', fill);
+    await expect(signIn, `${theme} sign-in link`).toHaveCSS('background-color', fill);
+  }
+  // The rose runs under both controls here; the art check accepts that only because they are opaque.
+  const rose = (await page.locator('img.landing-rose').boundingBox())!;
+  for (const control of [select, signIn]) {
+    const box = (await control.boundingBox())!;
+    expect(box.x + box.width > rose.x && box.y < rose.y + rose.height).toBe(true);
+  }
+  expect(await artUnderContent(page)).toEqual([]);
+  // A translucent fill, or a translucent ancestor, lets the art show through, so the check reports it.
+  await select.evaluate((element: HTMLElement) => {
+    element.style.backgroundColor = 'color-mix(in srgb, var(--background) 90%, transparent)';
+  });
+  expect(await artUnderContent(page)).toEqual([
+    expect.stringMatching(/^landing-rose under select /),
+  ]);
+  await select.evaluate((element: HTMLElement) => {
+    element.style.backgroundColor = '';
+    element.closest<HTMLElement>('.header-tools')!.style.opacity = '0.95';
+  });
+  expect(await artUnderContent(page)).toEqual(
+    expect.arrayContaining([
+      expect.stringMatching(/^landing-rose under select /),
+      'landing-rose under a "Sign in"',
+      'landing-rose under text "Sign in"',
+    ]),
+  );
+});
+
+test('the lead and the closing line fit on one line at 768 and 1280 px and never end on a lone word', async ({
+  page,
+}) => {
+  await page.goto('/');
+  await expect(welcomeHeading(page)).toBeVisible();
+  for (const width of [320, 390, 768, 1024, 1280]) {
+    await page.setViewportSize({ width, height: 900 });
+    for (const part of [page.locator('.invitation-lead'), page.locator('.invitation-closing')]) {
+      const lines = await wordLines(part);
+      const label = `${width}px: ${lines.join(' / ')}`;
+      if (width === 768 || width === 1280) expect(lines, label).toHaveLength(1);
+      expect(lines.at(-1)!.split(' ').length, label).toBeGreaterThan(1);
+    }
+  }
+});
+
+test('each position subtitle fits on one line from 390 px, beside a plate about 40% of its tile', async ({
+  page,
+}) => {
+  await page.goto('/');
+  await expect(welcomeHeading(page)).toBeVisible();
+  for (const width of [390, 640, 768, 900, 1024, 1280, 1440]) {
+    await page.setViewportSize({ width, height: 900 });
+    for (const detail of await page.locator('.position-tile-detail').all())
+      expect(await wordLines(detail), `${width}px`).toHaveLength(1);
+    for (const tile of await page.locator('.position-tile').all()) {
+      const plate = (await tile.locator('.position-plate').boundingBox())!;
+      const box = (await tile.boundingBox())!;
+      expect(plate.width / box.width, `${width}px plate share`).toBeCloseTo(0.4, 1);
+    }
+    expect(await artUnderContent(page), `${width}px art under content`).toEqual([]);
+  }
+});
+
+test('signed out, the header offers Sign in on the welcome and recovery pages but not on /sign-in', async ({
+  page,
+}) => {
+  const link = headerSignIn(page);
+  for (const path of ['/', '/recover']) {
+    await page.goto(path);
+    await expect(link, path).toHaveAttribute('href', '/sign-in');
+    for (const width of [320, 1280]) {
+      await page.setViewportSize({ width, height: 900 });
+      const target = (await link.boundingBox())!;
+      expect(Math.min(target.width, target.height), `${path} ${width}px`).toBeGreaterThanOrEqual(
+        44,
+      );
+    }
+    // The link moves within the app: a value set on this page survives, and Back returns.
+    await page.evaluate(() => {
+      (window as unknown as { kept: boolean }).kept = true;
+    });
+    await link.click();
+    await expect(page).toHaveURL('http://localhost:8787/sign-in');
+    await expect(signInHeading(page)).toBeFocused();
+    expect(await page.evaluate(() => (window as unknown as { kept?: boolean }).kept)).toBe(true);
+    await expect(link).toHaveCount(0);
+    await page.goBack();
+    await expect(page).toHaveURL(`http://localhost:8787${path}`);
+    await expect(link).toBeVisible();
+  }
+});
+
+for (const theme of ['paper', 'evening'] as const) {
+  test(`${theme}: at 320 px the signed-out header keeps the wordmark, theme select and Sign in on one row`, async ({
+    page,
+  }) => {
+    await page.addInitScript((value) => localStorage.setItem('reflection-theme', value), theme);
+    await page.setViewportSize({ width: 320, height: 800 });
+    for (const path of ['/', '/recover']) {
+      await page.goto(path);
+      await expect(headerSignIn(page)).toBeVisible();
+      const [header, wordmark, select, signIn] = await Promise.all(
+        [
+          page.locator('.site-header'),
+          page.locator('.site-header .brand'),
+          page.getByLabel('Color theme'),
+          headerSignIn(page),
+        ].map(async (part) => (await part.boundingBox())!),
+      );
+      const label = `${theme} ${path}`;
+      // One 68 px row plus the 1 px rule, as at 390 px.
+      expect(header!.height, `${label} header height`).toBeLessThanOrEqual(69);
+      for (const [name, box] of [
+        ['wordmark', wordmark],
+        ['theme select', select],
+        ['Sign in', signIn],
+      ] as const) {
+        expect(box!.y, `${label} ${name} top`).toBeGreaterThanOrEqual(header!.y);
+        expect(box!.y + box!.height, `${label} ${name} bottom`).toBeLessThanOrEqual(
+          header!.y + header!.height,
+        );
+      }
+      // Left to right, without touching, and Sign in keeps its 44 px target.
+      expect(wordmark!.x + wordmark!.width, label).toBeLessThan(select!.x);
+      expect(select!.x + select!.width, label).toBeLessThan(signIn!.x);
+      expect(Math.min(signIn!.width, signIn!.height), label).toBeGreaterThanOrEqual(44);
+      expect(
+        await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth),
+        `${label} horizontal overflow`,
+      ).toBe(true);
+    }
+  });
+}
 
 test('a direct load of /sign-in shows the sign-in and new-account controls', async ({ page }) => {
   const response = await page.goto('/sign-in');
@@ -194,6 +406,7 @@ test('a signed-in reader who opens /sign-in lands on their readings at /', async
     await expect(page).toHaveURL('http://localhost:8787/');
     await expect(page.getByRole('region', { name: 'Your readings', exact: true })).toBeVisible();
     await expect(page.getByRole('link', { name: 'Account', exact: true })).toBeVisible();
+    await expect(headerSignIn(page)).toHaveCount(0);
   }
 });
 
@@ -202,10 +415,10 @@ for (const theme of ['paper', 'evening'] as const) {
     await page.addInitScript((value) => localStorage.setItem('reflection-theme', value), theme);
     await page.goto('/');
     await expect(page.getByRole('list', { name: 'Reflection positions' })).toBeVisible();
-    // The rose starts under the header rule, so the header always sits on the page fill.
-    const header = (await page.locator('.site-header').boundingBox())!;
-    const welcome = (await page.locator('main.invitation').boundingBox())!;
-    expect(welcome.y).toBeGreaterThanOrEqual(header.y + header.height - 0.5);
+    // The sign-in link joins the header once the session check settles.
+    await expect(headerSignIn(page)).toBeVisible();
+    // At this width the rose runs behind the header. The wordmark stays clear of it, and the
+    // header controls paint the page fill, so each pair is measured on its own fill.
     await expect(page.locator('main.invitation')).toHaveCSS('overflow', 'clip');
     const ratios: Record<string, number> = {};
     const measure = async (name: string, selector: string) => {
@@ -214,6 +427,7 @@ for (const theme of ['paper', 'evening'] as const) {
     };
     await measure('header wordmark', '.brand');
     await measure('header theme control', '.theme-control select');
+    await measure('header sign-in link', '.site-header .header-link');
     await measure('welcome headline', '.invitation-title');
     await measure('positions label', '.positions-title');
     await measure('tile number', '.position-tile-number');
