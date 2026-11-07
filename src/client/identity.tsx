@@ -557,6 +557,9 @@ export function IdentityApp() {
               : 'Sign in or create an account';
   // Signed out, / is an invitation. Every other path, such as /sign-in, signs in in place.
   const invitation = !session && !kit && !grant && route === '/';
+  // Once the session check settles, the welcome and recovery pages link to sign-in.
+  const headerSignIn =
+    !session && !kit && !grant && !checking && (route === '/' || route === '/recover');
   const authPage = !kit && (Boolean(grant) || !session);
   const signInPage = authPage && !grant && route !== '/recover';
   const choosePasswordScreen = (screen: typeof passwordScreen) => {
@@ -590,6 +593,15 @@ export function IdentityApp() {
               onClick={openAccount}
             >
               Account
+            </TextLink>
+          )}
+          {headerSignIn && (
+            <TextLink
+              className="header-link"
+              href={signInPath}
+              onClick={(event) => openSignIn(event, false)}
+            >
+              Sign in
             </TextLink>
           )}
         </div>

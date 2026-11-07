@@ -8,6 +8,8 @@ const welcomeHeading = (page: Page) =>
   page.getByRole('heading', { name: 'A little space to reflect.', exact: true });
 const signInHeading = (page: Page) =>
   page.getByRole('heading', { name: 'Sign in or create an account', exact: true });
+const headerSignIn = (page: Page) =>
+  page.getByRole('banner').getByRole('link', { name: 'Sign in', exact: true });
 
 test('the welcome page invites a first reading with two actions, three positions and the runtime notice', async ({
   page,
@@ -71,6 +73,35 @@ test('the welcome page invites a first reading with two actions, three positions
     expect(await artUnderContent(page), `${width}px art under content`).toEqual([]);
   }
   expect(faults).toEqual([]);
+});
+
+test('signed out, the header offers Sign in on the welcome and recovery pages but not on /sign-in', async ({
+  page,
+}) => {
+  const link = headerSignIn(page);
+  for (const path of ['/', '/recover']) {
+    await page.goto(path);
+    await expect(link, path).toHaveAttribute('href', '/sign-in');
+    for (const width of [320, 1280]) {
+      await page.setViewportSize({ width, height: 900 });
+      const target = (await link.boundingBox())!;
+      expect(Math.min(target.width, target.height), `${path} ${width}px`).toBeGreaterThanOrEqual(
+        44,
+      );
+    }
+    // The link moves within the app: a value set on this page survives, and Back returns.
+    await page.evaluate(() => {
+      (window as unknown as { kept: boolean }).kept = true;
+    });
+    await link.click();
+    await expect(page).toHaveURL('http://localhost:8787/sign-in');
+    await expect(signInHeading(page)).toBeFocused();
+    expect(await page.evaluate(() => (window as unknown as { kept?: boolean }).kept)).toBe(true);
+    await expect(link).toHaveCount(0);
+    await page.goBack();
+    await expect(page).toHaveURL(`http://localhost:8787${path}`);
+    await expect(link).toBeVisible();
+  }
 });
 
 test('a direct load of /sign-in shows the sign-in and new-account controls', async ({ page }) => {
@@ -194,6 +225,7 @@ test('a signed-in reader who opens /sign-in lands on their readings at /', async
     await expect(page).toHaveURL('http://localhost:8787/');
     await expect(page.getByRole('region', { name: 'Your readings', exact: true })).toBeVisible();
     await expect(page.getByRole('link', { name: 'Account', exact: true })).toBeVisible();
+    await expect(headerSignIn(page)).toHaveCount(0);
   }
 });
 
@@ -202,6 +234,8 @@ for (const theme of ['paper', 'evening'] as const) {
     await page.addInitScript((value) => localStorage.setItem('reflection-theme', value), theme);
     await page.goto('/');
     await expect(page.getByRole('list', { name: 'Reflection positions' })).toBeVisible();
+    // The sign-in link joins the header once the session check settles.
+    await expect(headerSignIn(page)).toBeVisible();
     // The rose starts under the header rule, so the header always sits on the page fill.
     const header = (await page.locator('.site-header').boundingBox())!;
     const welcome = (await page.locator('main.invitation').boundingBox())!;
@@ -214,6 +248,7 @@ for (const theme of ['paper', 'evening'] as const) {
     };
     await measure('header wordmark', '.brand');
     await measure('header theme control', '.theme-control select');
+    await measure('header sign-in link', '.site-header .header-link');
     await measure('welcome headline', '.invitation-title');
     await measure('positions label', '.positions-title');
     await measure('tile number', '.position-tile-number');
