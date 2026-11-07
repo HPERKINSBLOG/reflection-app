@@ -136,6 +136,24 @@ test('?start=new focuses the new-account choices, on a direct load, from the wel
   await expect(signInHeading(page)).toBeFocused();
 });
 
+test('the art check measures the whole leaf band under CSS zoom', async ({ page }) => {
+  await page.setViewportSize({ width: 640, height: 900 });
+  await page.goto('/sign-in');
+  await expect(signInHeading(page)).toBeVisible();
+  await page.locator('html').evaluate((element) => {
+    element.style.zoom = '2';
+  });
+  // A line three quarters of the way up the band sits on it, above its lower half.
+  await page.locator('.app-shell').evaluate((shell) => {
+    const band = Number.parseFloat(getComputedStyle(shell, '::after').height);
+    const line = document.createElement('p');
+    line.textContent = 'Synthetic probe';
+    line.style.cssText = `position: absolute; left: 16px; bottom: ${band * 0.75}px; margin: 0;`;
+    shell.appendChild(line);
+  });
+  expect(await artUnderContent(page)).toContain('leaf band under text "Synthetic probe"');
+});
+
 test('Back and Forward move between the welcome page and /sign-in and close the password form', async ({
   page,
 }) => {

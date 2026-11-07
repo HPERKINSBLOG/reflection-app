@@ -269,11 +269,13 @@ export async function artUnderContent(page: Page) {
             .trim() || 'image',
         ...clipped(image),
       }));
-    const shell = document.querySelector('.app-shell');
+    const shell = document.querySelector<HTMLElement>('.app-shell');
     const band = shell && getComputedStyle(shell, '::after');
     if (shell && band && band.display !== 'none' && band.backgroundImage !== 'none') {
       const edge = shell.getBoundingClientRect();
-      const height = Number.parseFloat(band.height);
+      // Computed lengths are in the shell's own CSS pixels, but CSS zoom scales its box.
+      const scale = edge.width / shell.offsetWidth || 1;
+      const height = Number.parseFloat(band.height) * scale;
       art.push({
         name: 'leaf band',
         left: edge.left,
