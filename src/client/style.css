@@ -1379,8 +1379,10 @@ main {
 .account-tool-group h2 {
   padding-top: 8px;
 }
+/* The tools sit under the import action in the last column, never in the heading column. */
 .account-tools {
   display: grid;
+  grid-column: -2 / -1;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px;
 }
