@@ -1461,9 +1461,10 @@ main {
   padding-top: 16px;
   border-top: 1px solid var(--border);
 }
+/* The heading column fits “Password sign-in” (170 px) on one line. */
 .account-tool-group {
   display: grid;
-  grid-template-columns: 150px minmax(0, 1fr);
+  grid-template-columns: 176px minmax(0, 1fr);
   gap: 20px;
   align-items: start;
   padding: 20px;
