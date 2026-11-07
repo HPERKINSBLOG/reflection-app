@@ -599,6 +599,7 @@ export function IdentityApp() {
             <TextLink
               className="header-link header-sign-in"
               href={signInPath}
+              aria-disabled={busy || undefined}
               onClick={(event) => openSignIn(event, false)}
             >
               Sign in

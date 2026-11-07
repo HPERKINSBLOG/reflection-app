@@ -158,7 +158,8 @@ button.large {
 input:disabled,
 textarea:disabled,
 select:disabled,
-.back-link[aria-disabled="true"] {
+.back-link[aria-disabled="true"],
+.header-link[aria-disabled="true"] {
   opacity: 0.5;
   pointer-events: none;
 }
@@ -435,7 +436,8 @@ footer {
   input:disabled,
   textarea:disabled,
   select:disabled,
-  .back-link[aria-disabled="true"] {
+  .back-link[aria-disabled="true"],
+  .header-link[aria-disabled="true"] {
     color: GrayText;
     opacity: 1;
   }
