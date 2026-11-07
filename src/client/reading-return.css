@@ -365,7 +365,8 @@
   white-space: pre-wrap;
   overflow-wrap: anywhere;
 }
-.return-card-line .orientation {
+.return-card-line .orientation,
+.follow-up-basis .draw-term {
   text-transform: capitalize;
 }
 .return-unit-prompt {

@@ -97,11 +97,11 @@ export function FollowUp({ parent }: { parent: Reading }) {
       <ol>
         {parent.basis.cards.map((card, index) => (
           <li key={card.position}>
-            {card.position} ·{' '}
+            <span className="draw-term">{card.position}</span> ·{' '}
             {parent.kind === 'tarot.accepted.v2'
               ? parent.draw[index]?.name
               : (cardName(parent.basis.deckEdition, card.cardId) ?? card.cardId)}{' '}
-            · {card.orientation}
+            · <span className="draw-term">{card.orientation}</span>
           </li>
         ))}
       </ol>

@@ -1,7 +1,7 @@
 import type { Ref } from 'react';
 import type { PatternReadingV1 } from '../../contracts/astrology.ts';
 import { TopicChip } from '../design/components.tsx';
-import { timeLabel } from './chart-context.tsx';
+import { capitalize, timeLabel } from './chart-context.tsx';
 import { date } from '../date.ts';
 
 export function PatternReading({
@@ -27,7 +27,7 @@ export function PatternReading({
       </header>
       <section className="pattern-snapshot-copy" aria-label="Saved chapter">
         <p className="eyebrow">
-          {chapter.id} · {chapter.factualLabel}
+          {capitalize(chapter.id)} · {chapter.factualLabel}
         </p>
         <h3>{chapter.title}</h3>
         <p>{chapter.text}</p>
