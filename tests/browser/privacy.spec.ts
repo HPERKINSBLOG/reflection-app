@@ -118,6 +118,16 @@ for (const lost of [false, true])
     await expect(page.getByText(/Backups are kept until/)).toBeVisible();
     await expect(page.getByText(/Downloaded copies are unchanged/)).toBeVisible();
     await expect(page.getByText('Active-store')).toHaveCount(0);
+    // Sign-in mounts its own receipt panel. It shows the status already checked.
+    const complete = page
+      .getByRole('status')
+      .filter({ hasText: 'Deletion is complete for active storage.' });
+    await page.getByRole('link', { name: 'I have an account', exact: true }).click();
+    await expect(page).toHaveURL('http://localhost:8787/sign-in');
+    await expect(complete).toBeVisible();
+    await page.goBack();
+    await expect(page).toHaveURL('http://localhost:8787/');
+    await expect(complete).toBeVisible();
     const pending = page.waitForEvent('download');
     await page.getByRole('button', { name: 'Download deletion receipt', exact: true }).click();
     const receipt = JSON.parse(await readFile((await (await pending).path())!, 'utf8'));

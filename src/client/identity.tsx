@@ -188,12 +188,14 @@ export function IdentityApp() {
     history.replaceState(null, '', '/');
     setRoute('/');
   }, [session, route]);
+  // A checked status updates the receipt without moving focus, so focus follows its ID.
+  const receiptId = deletionReceipt?.proof.receiptId;
   useLayoutEffect(() => {
     // The receipt and the welcome screen replace each other's primary heading.
-    if (deletionReceipt) receiptHeading.current?.focus();
+    if (receiptId) receiptHeading.current?.focus();
     else if (hadReceipt.current) heading.current?.focus();
-    hadReceipt.current = Boolean(deletionReceipt);
-  }, [deletionReceipt]);
+    hadReceipt.current = Boolean(receiptId);
+  }, [receiptId]);
   const clear = useCallback(() => {
     version.current++;
     inFlight.current = false;
@@ -594,6 +596,23 @@ export function IdentityApp() {
       </div>
     </header>
   );
+  // The welcome page and the sign-in and recovery pages each mount their own panel.
+  // A checked status comes back here, so it survives the move between them.
+  const receiptPanel = deletionReceipt && (
+    <DeletionReceiptPanel
+      key={deletionReceipt.proof.receiptId}
+      {...deletionReceipt}
+      pageHeading={receiptHeading}
+      onStatus={(initial) =>
+        setDeletionReceipt((current) =>
+          current?.proof.receiptId === deletionReceipt.proof.receiptId
+            ? { ...current, initial }
+            : current,
+        )
+      }
+      onDismiss={() => setDeletionReceipt(null)}
+    />
+  );
   if (invitation)
     return (
       <div className="app-shell">
@@ -601,16 +620,7 @@ export function IdentityApp() {
         {header}
         <Invitation
           heading={heading}
-          receipt={
-            deletionReceipt && (
-              <DeletionReceiptPanel
-                key={deletionReceipt.proof.receiptId}
-                {...deletionReceipt}
-                pageHeading={receiptHeading}
-                onDismiss={() => setDeletionReceipt(null)}
-              />
-            )
-          }
+          receipt={receiptPanel}
           notice={<Notice message={message} />}
           checking={checking}
           environment={environmentNotice(runtimeMode, live)}
@@ -631,14 +641,7 @@ export function IdentityApp() {
       >
         {authPage && <Art name="study-inquiry" className="auth-art" />}
         <div className={authPage ? 'auth-column' : 'page-stack'}>
-          {deletionReceipt && (
-            <DeletionReceiptPanel
-              key={deletionReceipt.proof.receiptId}
-              {...deletionReceipt}
-              pageHeading={receiptHeading}
-              onDismiss={() => setDeletionReceipt(null)}
-            />
-          )}
+          {receiptPanel}
           <div
             className={
               authPage
