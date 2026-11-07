@@ -21,6 +21,16 @@ Verification on Windows with Node 24.15, since Node 26.12.1 was not installed in
 
 Not run: `npm run test:db`, since no server code changed, and `npm run test:journey`. Firefox and WebKit, physical devices and screen readers are not covered.
 
+Verification on Windows with Node 26.12.1, at `5da0483`, including `npm run test:db`, which the Node 24.15 run above skipped:
+
+- `npm run typecheck` passes.
+- `npx biome check .` reports the 12 baseline warnings and no errors.
+- `npm run test:domain`: 69 files, 552 tests passed.
+- `npm run test:db`: 73 files, 682 tests passed.
+- `npm run test:browser`: 206 passed and 1 skipped in 13.2 minutes. The skipped test is the screens capture.
+
+This run did not repeat the 36-state capture or run `npm run test:journey`.
+
 ## November 7 — Polish: the rose, line breaks, plates and a header sign-in link
 
 This follow-up to the November 6 pass fixes four things on the signed-out pages.
