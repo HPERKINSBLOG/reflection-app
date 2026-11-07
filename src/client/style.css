@@ -843,8 +843,9 @@ main {
 .positions {
   width: 100%;
 }
+/* The eyebrow type style: 12/18 Outfit capitals with 0.14em tracking. */
+.eyebrow,
 .positions-title {
-  margin-bottom: 12px;
   color: var(--muted-foreground);
   font-family: var(--font-display);
   font-size: 12px;
@@ -852,6 +853,9 @@ main {
   line-height: 18px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
+}
+.positions-title {
+  margin-bottom: 12px;
 }
 .position-tiles {
   display: grid;
