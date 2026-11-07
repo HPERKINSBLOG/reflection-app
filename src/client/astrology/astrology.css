@@ -130,9 +130,10 @@
   color: inherit;
   font-size: inherit;
 }
+/* The empty journal is a lifted card, so its words keep an inner margin. */
 .journal .empty-history {
   text-align: left;
-  padding: 32px 0;
+  padding: 32px 24px;
 }
 .journal .empty-history-art {
   max-height: 180px;
