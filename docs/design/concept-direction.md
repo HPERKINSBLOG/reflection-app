@@ -2,6 +2,8 @@
 
 Scope confirmed by the owner: **apply the visual direction to existing screens and document the proposed flows**. This is an extension of the existing Solstice system. The concept text, dates and revisions are illustrative, not actual account data or evidence that a proposed feature exists.
 
+> **2026-11-06 — follow the boards’ composition.** The owner chose to follow the boards’ composition, not only their palette and type: art bleeding off page and card edges, grain, depth, the board logo and an invitation landing. The welcome page at `/` now invites a first reading, and sign-in moved to `/sign-in`. The rose bleeds in from the top right, the position plates fill the welcome tiles, and a leaf band runs along every page. Cards lift on Paper, and the return mark matches the header logos on boards 01 and 03. The grain comes from the art itself; no separate texture layer was added. Where this note differs from the rules below, it takes precedence. Functional rules still hold: art never signals status, progress, deletion or security; saved questions carry no thumbnail; status text and live regions come first; contrast stays verified and focus stays visible.
+
 ## Reference boards
 
 The three refined boards are saved unchanged with this document:
