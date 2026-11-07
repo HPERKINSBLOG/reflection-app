@@ -24,6 +24,8 @@ Verification on Windows with Node 26.12.1, at `6ef0aef`:
 
 `e2430d3` went to the development preview on November 7 as version `673ac8fb`. Health, direct loads of `/` and `/sign-in`, and all 35 public assets checked out, and the rose, plates and leaf band load at 390 and 1280 px in light and dark. [Deployment receipt](artifacts/preview-deploy/deployment.json).
 
+After review on #14, two fixes followed the deploy. While a recovery request is pending, the header “Sign in” takes `aria-disabled`, dims and ignores the pointer, as “Back to readings” does. `artUnderContent` now skips an opaque control only where a hit test shows it painting above the image, and the leaf band gets no exception; a test raises the rose above the header and expects both controls to be reported. At `7c5d06e`: typecheck passes; Biome reports the same 12 warnings; `test:domain` 68 files, 550 tests passed; `test:db` 73 files, 682 tests passed; `test:browser` 206 passed and 1 skipped; `test:journey` 41 passed, 17 in Chromium, 13 in Firefox and 11 in WebKit. The preview still runs `e2430d3`, without these two fixes.
+
 Not covered: physical devices and screen readers; signed-in flows on the hosted preview.
 
 ## November 6 — Following the boards: invitation, sign-in, depth and bleed
