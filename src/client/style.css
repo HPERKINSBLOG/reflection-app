@@ -1622,10 +1622,11 @@ button.history-link:hover:enabled {
   font-weight: 500;
   letter-spacing: -0.025em;
 }
+/* The ribbon's box ends where the heading row does (-24 + 148 = 100 + 24), clear of the form. */
 .new-reading-art {
   position: absolute;
   width: 46%;
-  height: 156px;
+  height: 148px;
   right: -12px;
   top: -24px;
   object-fit: contain;
