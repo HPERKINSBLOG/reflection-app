@@ -496,13 +496,13 @@ footer {
     width: min(46rem, 60cqw);
   }
 }
-/* A position plate fills the right half of its tile, which clips it. */
+/* A position plate fills the right 40% of its tile, which clips it. */
 .art.position-plate {
   position: absolute;
   z-index: -1;
   top: 0;
   right: -8px;
-  width: 50%;
+  width: 40%;
   height: 100%;
   object-fit: cover;
   object-position: left;
@@ -869,13 +869,13 @@ main {
   font-weight: 600;
   line-height: 1;
 }
-/* The words end before the plate, which starts 8 px past the middle of the tile.
+/* The words end 4 px before the plate, which starts 8 px past 60% of the tile.
    A narrow tile (under 240 px inside) puts them under the badge instead. */
 .position-tile-copy {
   display: flex;
   flex-direction: column;
   min-width: 0;
-  max-width: calc(50% - 44px);
+  max-width: calc(60% - 41px);
 }
 .position-tile-name {
   font-family: var(--font-display);
@@ -900,6 +900,22 @@ main {
   }
   .art.position-plate {
     height: 56px;
+  }
+}
+/* Three across, a tile stays stacked until its longest line fits beside the plate. */
+@media (min-width: 640px) {
+  @container (width < 284px) {
+    .position-tile-body {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 8px;
+    }
+    .position-tile-copy {
+      max-width: none;
+    }
+    .art.position-plate {
+      height: 56px;
+    }
   }
 }
 .invitation-closing {

@@ -196,6 +196,24 @@ test('the lead and the closing line fit on one line at 768 and 1280 px and never
   }
 });
 
+test('each position subtitle fits on one line from 390 px, beside a plate about 40% of its tile', async ({
+  page,
+}) => {
+  await page.goto('/');
+  await expect(welcomeHeading(page)).toBeVisible();
+  for (const width of [390, 640, 768, 900, 1024, 1280, 1440]) {
+    await page.setViewportSize({ width, height: 900 });
+    for (const detail of await page.locator('.position-tile-detail').all())
+      expect(await wordLines(detail), `${width}px`).toHaveLength(1);
+    for (const tile of await page.locator('.position-tile').all()) {
+      const plate = (await tile.locator('.position-plate').boundingBox())!;
+      const box = (await tile.boundingBox())!;
+      expect(plate.width / box.width, `${width}px plate share`).toBeCloseTo(0.4, 1);
+    }
+    expect(await artUnderContent(page), `${width}px art under content`).toEqual([]);
+  }
+});
+
 test('signed out, the header offers Sign in on the welcome and recovery pages but not on /sign-in', async ({
   page,
 }) => {
