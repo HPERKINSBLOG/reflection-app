@@ -1,7 +1,14 @@
 import { createPortal } from 'react-dom';
 import { PatternWorkspace, type PatternHandle } from './astrology/pattern.tsx';
 import type { BirthDraft } from '../contracts/astrology.ts';
-import { Button, Input, ReflectionCard, ReflectionField, TextLink } from './design/components.tsx';
+import {
+  Button,
+  ConfirmationHint,
+  Input,
+  ReflectionCard,
+  ReflectionField,
+  TextLink,
+} from './design/components.tsx';
 import {
   type MouseEvent,
   type ReactNode,
@@ -970,6 +977,7 @@ export function ReadingWorkspace({
       </Button>
       <Button
         type="button"
+        variant="text-button"
         aria-current={mode === 'new' ? 'page' : undefined}
         disabled={busy || !user.permission.modelAllowed || requestPending || live === null}
         onClick={() => {
@@ -994,7 +1002,7 @@ export function ReadingWorkspace({
       </Button>
       <Button
         type="button"
-        variant="secondary"
+        variant="text-button"
         aria-current={mode === 'history' ? 'page' : undefined}
         disabled={busy}
         onClick={() => {
@@ -1912,10 +1920,12 @@ export function ReadingWorkspace({
                       type="button"
                       variant="danger"
                       disabled={busy || !eraseRevisionChecked}
+                      aria-describedby={eraseRevisionChecked ? undefined : 'erase-revision-hint'}
                       onClick={eraseRevision}
                     >
                       Erase revision {revisionNote.revision}
                     </Button>
+                    <ConfirmationHint id="erase-revision-hint" show={!eraseRevisionChecked} />
                   </div>
                 )}
               </details>

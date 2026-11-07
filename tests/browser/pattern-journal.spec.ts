@@ -9,7 +9,13 @@ test('journal filters and reopens immutable Pattern facts, writing and dated rev
   const { saved } = await savePattern(page);
   await page.reload();
   const history = page.getByRole('region', { name: 'Saved reading history', exact: true });
-  await history.getByRole('button', { name: 'Astrology', exact: true }).click();
+  await expect(
+    history.getByRole('group', { name: 'Show journal entries by source', exact: true }),
+  ).toBeVisible();
+  const astrologyFilter = history.getByRole('button', { name: 'Astrology', exact: true });
+  await expect(astrologyFilter).toHaveAttribute('aria-pressed', 'false');
+  await astrologyFilter.click();
+  await expect(astrologyFilter).toHaveAttribute('aria-pressed', 'true');
   await expect(history.getByText('Astrology · Your Pattern', { exact: true })).toBeVisible();
   await history.locator('.journal-entry').first().getByRole('button').click();
   await expect(page).toHaveURL(new RegExp(`/saved/${saved.sessionId}/${saved.editionId}$`));

@@ -1,4 +1,11 @@
-import { Button, Input, TextArea, TextLink, TopicChip } from './design/components.tsx';
+import {
+  Button,
+  ConfirmationHint,
+  Input,
+  TextArea,
+  TextLink,
+  TopicChip,
+} from './design/components.tsx';
 import {
   type Ref,
   useCallback,
@@ -808,6 +815,7 @@ export function RevisitNotes({
               type="button"
               variant="danger"
               disabled={disabled || !checked || deletionBusy || expired}
+              aria-describedby={checked ? undefined : 'note-delete-hint'}
               onClick={remove}
             >
               Confirm note deletion
@@ -825,6 +833,7 @@ export function RevisitNotes({
               Cancel note deletion
             </Button>
           </div>
+          <ConfirmationHint id="note-delete-hint" show={!checked} />
         </div>
       )}
       {receipts.map((receipt, index) => (

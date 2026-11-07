@@ -1,5 +1,58 @@
 # Reflection design QA
 
+## November 7 — Polish: the rose, line breaks, plates and a header sign-in link
+
+This follow-up to the November 6 pass fixes four things on the signed-out pages.
+
+- **The rose runs behind the header.** From 768 px the welcome page slides up behind the header, so the rose runs to the top edge as it does in the Lovable build. The header drops its rule on this page. Below 768 px the rose would sit under the wordmark, so it still starts under the header rule. The theme select and the header links paint the page color, Paper or Evening.
+- **The art check allows opaque controls only.** `artUnderContent` lets art sit under a control only when that control paints a fully opaque fill of its own, with no translucent ancestor; the control's words are skipped with it. [`welcome.spec.ts`](tests/browser/welcome.spec.ts) checks that the theme select and the sign-in link paint the page color in both themes. It also checks that a translucent fill, or a translucent ancestor, is still reported.
+- **No lone words.** The lead's column widens from 34ch to 40ch and the closing line's from 60ch to 72ch. Both fit on one line at 768 and 1280 px. Where they wrap, `text-wrap: pretty` keeps the last word company. Firefox does not support `pretty`, so it balances the lines instead. In Chromium, Firefox and WebKit, no line holds a single word at 320, 390, 768, 1024 or 1280 px.
+- **Subtitles fit beside the plates.** Plates take 40% of a tile instead of half. Three across, a tile stays stacked until it is 284 px wide inside. Every subtitle sits on one line at 390, 640, 768, 900, 1024, 1280 and 1440 px. At 320 px two of them wrap to two lines.
+- **Sign in in the header.** Signed out, the header shows “Sign in” on `/` and `/recover` once the session check settles. The link is at least 44 px in both directions at 320 and 1280 px. It opens `/sign-in` in place and focuses its heading, and Back returns. `/sign-in` and signed-in pages do not show it.
+- **One header row at 320 px.** Below 360 px, a header that shows “Sign in” narrows the theme select’s and the link’s side padding and halves the row’s minimum gap. The wordmark, theme select and “Sign in” share one 69 px row at 320, 340, 360 and 390 px on `/` and `/recover`, in Paper and Evening, in Chromium, Firefox and WebKit. A 320 px check in [`welcome.spec.ts`](tests/browser/welcome.spec.ts) covers both pages in both themes.
+
+The welcome and recovery captures at 320, 390, 768 and 1280 px in both themes replace the November 6 files in [`docs/design/screens/2026-11-06-mend/`](docs/design/screens/2026-11-06-mend/). The sign-in captures came out byte-identical. The [Lovable comparison](docs/design/screens/2026-11-06-mend/compare-landing-1280-paper.png) is rebuilt from the new 1280 px Paper capture. A fresh capture of the Lovable build matched the November 6 one pixel for pixel.
+
+Verification on Windows with Node 26.12.1, at `6ef0aef`:
+
+- `npm run typecheck` passes.
+- `npx biome check .` reports the 12 warnings the base branch already has, and no errors. None of them is in a file this follow-up changes.
+- `npm run test:domain`: 68 files, 550 tests passed.
+- `npm run test:db`: 73 files, 682 tests passed.
+- `npm run test:browser`: 205 passed and 1 skipped. The skipped test is the screens capture, which runs only when `REFLECTION_SCREENS` is set; it passed in its own run.
+- `npm run test:journey`: 41 passed, 17 in Chromium, 13 in Firefox and 11 in WebKit, with none skipped or flaky. This is the run the November 6 pass stopped before it finished.
+
+`e2430d3` went to the development preview on November 7 as version `673ac8fb`. Health, direct loads of `/` and `/sign-in`, and all 35 public assets checked out, and the rose, plates and leaf band load at 390 and 1280 px in light and dark. [Deployment receipt](artifacts/preview-deploy/deployment.json).
+
+Not covered: physical devices and screen readers; signed-in flows on the hosted preview.
+
+## November 6 — Following the boards: invitation, sign-in, depth and bleed
+
+The owner chose to follow the concept boards’ composition, which the Lovable build at source-to-storybook.lovable.app had kept. Signed out, `/` now invites a first reading, and the former welcome controls moved unchanged to `/sign-in`. The rose bleeds in from the top right of the welcome page, the position plates fill its tiles, and a leaf band runs along every page. Cards lift on Paper, Newsreader titles use weight 500, button labels use 500, and the return mark follows boards 01 and 03.
+
+| Capture | Paper | Evening |
+| --- | --- | --- |
+| Welcome, before and after | [before, 1280 px](docs/design/screens/2026-11-06-mend/before-landing-1280-paper.png) · [after, 1280 px](docs/design/screens/2026-11-06-mend/landing-1280-paper.png) | [before, 390 px](docs/design/screens/2026-11-06-mend/before-landing-390-evening.png) · [after, 390 px](docs/design/screens/2026-11-06-mend/landing-390-evening.png) |
+| Beside the Lovable build | [1280 px comparison](docs/design/screens/2026-11-06-mend/compare-landing-1280-paper.png) | |
+
+Each review page has a capture at 320, 390, 768 and 1280 px in both themes under [`docs/design/screens/2026-11-06-mend/`](docs/design/screens/2026-11-06-mend/): welcome, sign-in, recovery, readings (empty and with entries), new reading and account. [`design-screens.spec.ts`](tests/browser/design-screens.spec.ts) recaptures them when `REFLECTION_SCREENS` names a folder. The welcome and recovery captures, including the “after” captures above, and the Lovable comparison were recaptured on November 7.
+
+- **Art stays clear of words.** `artUnderContent` compares every visible decorative image box, clipped by its container, and the leaf band with every line of visible text and every control. It found no overlap on the design screens, in each state of the layout journey at 320, 390, 768 and 1280 px, in the native 200% zoom journey, or in the native 400% zoom checks. Two existing placements needed space to pass: the new-reading ribbon now ends where its heading row does, and the Account title row now holds the 100 px sprig. Review found that at CSS zoom 2 the check measured only the lower half of the leaf band. It now measures the whole band, and the CSS-zoom states pass in the 320 px Paper journey. Since November 7 the check allows one case: art under a control that paints its own fully opaque fill.
+- **Contrast.** [`welcome.spec.ts`](tests/browser/welcome.spec.ts) measures the header, welcome headline, tiles, closing line and sign-in card against their painted backgrounds in both themes. Every pair is at least 4.5:1. Ink on a card is 10.95:1, and the card is 1.05:1 against Paper with a 1.30:1 edge.
+- **Engines.** Chromium drops Paper’s hue in an oklch mix, so the card mixes in oklab and the edge is written as its oklch value. Both render #fbf9f3 and #d8d8c9 in Chromium, Firefox and WebKit.
+- **Routing.** The browser tests cover a direct load of `/sign-in`, `?start=new` focus, Back and Forward between `/` and `/sign-in`, “Back to sign in” on recovery, a signed-in reader at `/sign-in`, and the deletion receipt on the welcome page. Unit tests cover the single-page fallback for `/sign-in` in the hosted configurations and the preview asset server.
+
+Verification on Windows with Node 26.12.1:
+
+- `npm run typecheck` passes.
+- `npx biome check .` reports the 12 warnings the base branch already has, and no errors.
+- `npm run test:domain`: 68 files, 550 tests passed.
+- `npm run test:db`: 73 files, 682 tests passed.
+- `npm run test:browser`: 197 passed and 1 skipped. The skipped test is the screens capture, which runs only when `REFLECTION_SCREENS` is set; it passed in its own run.
+- The passkey add/remove test passes here.
+
+Not covered: the Firefox and WebKit journey suite (`npm run test:journey`), which was stopped before it finished and ran to completion on November 7; the hosted preview Worker itself, which needs its hosted origin and secrets; physical devices; and screen readers.
+
 ## November 3 — Entry, saved readings and account deletion
 
 Saved readings distinguishes an unavailable list from a confirmed empty one and can retry a failed page. The reading form can recheck the service while keeping the question and photo in memory. It places the required English confirmation next to the question and groups photo controls under **Use my own spread**.

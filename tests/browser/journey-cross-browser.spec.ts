@@ -7,7 +7,7 @@ import {
   spreadPhotoPath,
   patternJourneyStates,
 } from '../fixtures/browser-journey.ts';
-import { enableAi, keepKit, openAccount } from '../fixtures/browser-reading.ts';
+import { enableAi, keepKit, openAccount, openSignIn } from '../fixtures/browser-reading.ts';
 
 test('calculated Pattern with AI off survives sign out, profile changes and dated return', async ({
   page,
@@ -19,7 +19,7 @@ test('calculated Pattern with AI off survives sign out, profile changes and date
   await page.context().setExtraHTTPHeaders({ 'CF-Connecting-IP': '192.0.2.235' });
   const username = `pattern_${browserName}_${crypto.randomUUID().slice(0, 8)}`;
   const password = 'Synthetic garden passphrase 2026';
-  await page.goto('/');
+  await page.goto('/sign-in');
   await page.getByRole('button', { name: 'Create a password account', exact: true }).click();
   await page.getByLabel('Username', { exact: true }).fill(username);
   await page.getByLabel('Email', { exact: true }).fill(`${username}@example.org`);
@@ -36,6 +36,7 @@ test('calculated Pattern with AI off survives sign out, profile changes and date
   await patternJourneyStates(page, capture, async () => {
     await openAccount(page);
     await page.getByRole('button', { name: 'Sign out', exact: true }).click();
+    await openSignIn(page);
     await page.getByRole('button', { name: 'Sign in with a password', exact: true }).click();
     await page.getByLabel('Username or email').fill(username);
     await page.getByLabel('Password', { exact: true }).fill(password);

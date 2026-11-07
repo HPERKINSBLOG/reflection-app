@@ -494,7 +494,7 @@ export function BirthDetails({
                 )}
                 {resolution?.kind === 'fold' && (
                   <section className="notice">
-                    <h3>This time happened twice</h3>
+                    <h3>This time happened twice.</h3>
                     <p>
                       The clocks moved back on this date. Choose the occurrence from your birth
                       record.
@@ -547,7 +547,7 @@ export function BirthDetails({
             Cancel
           </Button>
         </div>
-        <aside className="pattern-context birth-guidance" data-theme="evening">
+        <aside className="pattern-context birth-guidance">
           <h3>{review ? 'Room for uncertainty' : 'An honest starting point'}</h3>
           <p>
             An uncertain time is useful information. We make the limits visible and leave out

@@ -10,7 +10,7 @@ import {
 } from '../../contracts/astrology.ts';
 import { apiSchemas } from '../../contracts/index.ts';
 import { api, ApiFailure } from '../api.ts';
-import { Button, ReflectionField, TopicChip } from '../design/components.tsx';
+import { Button, ConfirmationHint, ReflectionField, TopicChip } from '../design/components.tsx';
 import { Notice } from '../notice.tsx';
 import { Art } from '../art.tsx';
 import { BirthDetails, type BirthDetailsHandle } from './birth-details.tsx';
@@ -296,9 +296,15 @@ export function PatternWorkspace({
                 />
                 Remove my current birth profile.
               </label>
-              <Button variant="danger" disabled={!removeChecked || busy} onClick={remove}>
+              <Button
+                variant="danger"
+                disabled={!removeChecked || busy}
+                aria-describedby={removeChecked ? undefined : 'profile-removal-hint'}
+                onClick={remove}
+              >
                 Remove birth profile
               </Button>
+              <ConfirmationHint id="profile-removal-hint" show={!removeChecked} />
             </details>
           )}
         </>
@@ -487,7 +493,7 @@ export function PatternWorkspace({
                 </section>
               )}
             </div>
-            <aside className="pattern-context pattern-chart" data-theme="evening">
+            <aside className="pattern-context pattern-chart">
               <h3>Your chart</h3>
               <section className="pattern-facts" aria-label="Supported chapter placements">
                 {preview.chapters.map((c) => (

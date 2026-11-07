@@ -1,5 +1,11 @@
 import { expect, test, type Page } from '@playwright/test';
-import { account, openAccount, reading, savedSnapshot } from '../fixtures/browser-reading.ts';
+import {
+  account,
+  openAccount,
+  openSignIn,
+  reading,
+  savedSnapshot,
+} from '../fixtures/browser-reading.ts';
 
 async function original(page: Page, ip: string) {
   await account(page, ip);
@@ -63,6 +69,7 @@ test('follow-ups keep their exact parents, questions and saved family across rel
     page.getByRole('heading', { name: 'AI readings are off', exact: true }),
   ).toBeVisible();
   await page.getByRole('button', { name: 'Sign out', exact: true }).click();
+  await openSignIn(page);
   await page.getByRole('button', { name: 'Sign in with a passkey' }).click();
   await expect(page.getByRole('link', { name: 'Account', exact: true })).toBeVisible();
   for (const [id, title] of [

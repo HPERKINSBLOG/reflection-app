@@ -4,6 +4,7 @@ import {
   account,
   backToReadings,
   openAccount,
+  openSignIn,
   reading,
   savedSnapshot,
 } from '../fixtures/browser-reading.ts';
@@ -89,16 +90,26 @@ for (const lost of [false, true])
     await openAccount(page);
     await expect(page.getByText('Delete account', { exact: true })).toBeVisible();
     await page.getByText('Delete account', { exact: true }).click();
+    const deleteAccount = page.getByRole('button', {
+      name: 'Delete account permanently',
+      exact: true,
+    });
+    await expect(deleteAccount).toBeDisabled();
+    await expect(deleteAccount).toHaveAccessibleDescription('Check the box above to continue.');
     await page.getByLabel('Permanently delete my account, readings and reflections').check();
-    await page.getByRole('button', { name: 'Delete account permanently', exact: true }).click();
+    await expect(deleteAccount).toHaveAccessibleDescription('');
+    await deleteAccount.click();
     await expect(
       page.getByRole('heading', { name: 'Deletion receipt', exact: true }),
     ).toBeFocused();
     await expect(page.getByRole('heading').first()).toHaveText('Deletion receipt');
     await expect(page.locator('.receipt-card img')).toHaveCount(0);
+    // The receipt leads the welcome page; sign-in stays one step away.
+    await expect(page).toHaveURL('http://localhost:8787/');
     await expect(
-      page.getByRole('button', { name: 'Sign in with a passkey', exact: true }),
+      page.getByRole('heading', { name: 'A little space to reflect.', level: 2 }),
     ).toBeVisible();
+    await expect(page.getByRole('link', { name: 'I have an account', exact: true })).toBeVisible();
     await expect(page.getByTestId('accepted-reading')).toHaveCount(0);
     await page.getByRole('button', { name: 'Check deletion status', exact: true }).click();
     await expect(
@@ -107,6 +118,16 @@ for (const lost of [false, true])
     await expect(page.getByText(/Backups are kept until/)).toBeVisible();
     await expect(page.getByText(/Downloaded copies are unchanged/)).toBeVisible();
     await expect(page.getByText('Active-store')).toHaveCount(0);
+    // Sign-in mounts its own receipt panel. It shows the status already checked.
+    const complete = page
+      .getByRole('status')
+      .filter({ hasText: 'Deletion is complete for active storage.' });
+    await page.getByRole('link', { name: 'I have an account', exact: true }).click();
+    await expect(page).toHaveURL('http://localhost:8787/sign-in');
+    await expect(complete).toBeVisible();
+    await page.goBack();
+    await expect(page).toHaveURL('http://localhost:8787/');
+    await expect(complete).toBeVisible();
     const pending = page.waitForEvent('download');
     await page.getByRole('button', { name: 'Download deletion receipt', exact: true }).click();
     const receipt = JSON.parse(await readFile((await (await pending).path())!, 'utf8'));
@@ -154,5 +175,9 @@ for (const lost of [false, true])
     expect(await page.locator('body').evaluate((el) => el.scrollWidth <= innerWidth)).toBe(true);
     await page.getByRole('button', { name: 'Dismiss receipt', exact: true }).click();
     await expect(page.getByRole('heading', { name: 'A little space to reflect.' })).toBeFocused();
+    await openSignIn(page);
+    await expect(
+      page.getByRole('button', { name: 'Sign in with a passkey', exact: true }),
+    ).toBeVisible();
     await fresh.close();
   });

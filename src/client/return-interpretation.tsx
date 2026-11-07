@@ -1,6 +1,7 @@
 import type { z } from 'zod';
 import type { AnyAcceptedReading } from '../contracts/index.ts';
 import { CardFace } from './card-face.tsx';
+import { TopicChip } from './design/components.tsx';
 import { cardName } from './card-names.ts';
 
 type Reading = z.infer<typeof AnyAcceptedReading>;
@@ -25,7 +26,9 @@ export function ReturnInterpretation({
   return (
     <div className="reading-return-interpretation">
       <div className="return-section-label">
-        <h3>{interpretationLabel}</h3>
+        <h3>
+          <TopicChip tone="sage">{interpretationLabel}</TopicChip>
+        </h3>
       </div>
       {reading.units.map((unit, index) => {
         const card = reading.basis.cards.find((item) => item.position === unit.position);

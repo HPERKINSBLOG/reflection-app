@@ -41,7 +41,13 @@ test('saved history distinguishes loading, failure and a successful retry', asyn
 test('sign-in keeps one environment notice and drops repeated chrome', async ({ page }) => {
   await page.context().setExtraHTTPHeaders({ 'CF-Connecting-IP': '192.0.2.241' });
   await authenticator(page);
+  // The welcome page carries the same single notice and none of the dropped chrome.
   await page.goto('/');
+  await expect(page.getByText(localSimulation, { exact: true })).toBeVisible();
+  await expect(page.getByText('Development build')).toHaveCount(0);
+  await expect(page.getByText('A private space for reflection')).toHaveCount(0);
+  await expect(page.getByText('No email or password is collected.')).toHaveCount(0);
+  await page.goto('/sign-in');
   await expect(page.getByText(localSimulation, { exact: true })).toBeVisible();
   await expect(page.getByText(/Draw three tarot cards or bring your own spread/)).toBeVisible();
   await expect(page.getByText(/without an email address or password/)).toBeVisible();

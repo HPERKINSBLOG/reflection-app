@@ -5,6 +5,7 @@ import {
   backToReadings,
   enableAi,
   openAccount,
+  openSignIn,
   reading,
   savedSnapshot,
 } from '../fixtures/browser-reading.ts';
@@ -458,6 +459,7 @@ test('account navigation forgets its retained request after signing out', async 
   ).toBeVisible();
   await openAccount(page);
   await page.getByRole('button', { name: 'Sign out', exact: true }).click();
+  await openSignIn(page);
   await page.getByRole('button', { name: 'Sign in with a passkey', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Your journal', exact: true })).toBeVisible();
   await expect(

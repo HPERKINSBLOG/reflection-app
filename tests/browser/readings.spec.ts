@@ -15,6 +15,7 @@ import {
   enableAi,
   backToReadings,
   openAccount,
+  openSignIn,
   reading,
   savedSnapshot,
 } from '../fixtures/browser-reading.ts';
@@ -224,6 +225,7 @@ test('save, sign in, recover from the downloaded kit, and manage the same readin
   await page.screenshot({ path: '/tmp/reflection-saved-reading-desktop.png', fullPage: true });
   await openAccount(page);
   await page.getByRole('button', { name: 'Sign out', exact: true }).click();
+  await openSignIn(page);
   await page.getByRole('button', { name: 'Sign in with a passkey' }).click();
   await page.getByRole('button', { name: question, exact: true }).click();
   await expect(acceptedContent).toHaveText(acceptedText, { useInnerText: true });
@@ -459,10 +461,19 @@ test('a delayed reading response cannot repopulate private content after cross-t
     channel.postMessage('signed-out');
     channel.close();
   });
-  await expect(page.getByRole('button', { name: 'Sign in with a passkey' })).toBeVisible();
+  // The journal was on /, so the welcome page returns with the notice.
+  await expect(page.getByRole('heading', { name: 'A little space to reflect.' })).toBeVisible();
+  await expect(
+    page
+      .getByRole('status')
+      .filter({ hasText: 'Your account session changed in another tab. Please sign in again.' }),
+  ).toBeVisible();
   release();
   await page.waitForTimeout(150);
   await expect(page.getByTestId('accepted-reading')).toHaveCount(0);
+  await expect(page.getByText(question, { exact: true })).toHaveCount(0);
+  await openSignIn(page);
+  await expect(page.getByRole('button', { name: 'Sign in with a passkey' })).toBeVisible();
   await expect(page.getByText(question, { exact: true })).toHaveCount(0);
 });
 

@@ -7,6 +7,7 @@ import {
   backToReadings,
   keepKit,
   openAccount,
+  openSignIn,
   reading,
   savedSnapshot,
 } from '../fixtures/browser-reading.ts';
@@ -377,6 +378,7 @@ test('notes and saved history survive sign-in and downloaded-kit recovery with n
   );
   await page.getByRole('button', { name: 'Sign out', exact: true }).click();
   await expect(page.getByRole('region', { name: 'Revisit notes', exact: true })).toHaveCount(0);
+  await openSignIn(page);
   await page.getByRole('button', { name: 'Sign in with a passkey', exact: true }).click();
   await page.getByRole('button', { name: 'Synthetic dated return', exact: true }).click();
   await expect(page.getByText('Synthetic current saved note', { exact: true })).toBeVisible();
@@ -490,6 +492,7 @@ test('session expiry removes private drafts and sign-in restores only saved note
   await expect(page.getByLabel('Your revisit note', { exact: true })).toHaveCount(0);
   await openAccount(page);
   await page.getByRole('button', { name: 'Sign out', exact: true }).click();
+  await openSignIn(page);
   await page
     .getByRole('button', { name: 'Create a test account with a passkey', exact: true })
     .click();

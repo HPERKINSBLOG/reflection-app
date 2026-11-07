@@ -1,5 +1,5 @@
 import type { BirthDraft } from '../contracts/astrology.ts';
-import { Button, Input, TextLink } from './design/components.tsx';
+import { Button, ConfirmationHint, Input, TextLink } from './design/components.tsx';
 import { type MouseEvent, useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import type { z } from 'zod';
 import { apiSchemas, type AuthResult } from '../contracts/index.ts';
@@ -28,6 +28,7 @@ import { Icon } from './icon.tsx';
 import { Brand } from './design/components.tsx';
 import { ImportRecords } from './imports.tsx';
 import { ThemeSelect } from './design/theme.tsx';
+import { Invitation, signInPath } from './invitation.tsx';
 
 type View = z.infer<typeof apiSchemas.SessionView>;
 type Kit = z.infer<typeof apiSchemas.RecoveryCodes>;
@@ -72,6 +73,10 @@ function environmentNotice(mode: string | null, live: boolean | null) {
   if (mode === 'production') return 'New readings can be sent to a live AI provider.';
   return 'This development app sends new readings to a live AI provider.';
 }
+/** "Draw three cards" opens sign-in with the new-account choices focused. */
+const startsNew = () =>
+  window.location.pathname === signInPath &&
+  new URLSearchParams(window.location.search).get('start') === 'new';
 export function IdentityApp() {
   const [live, setLive] = useState<boolean | null>(null);
   const [runtimeMode, setRuntimeMode] = useState<string | null>(null);
@@ -164,12 +169,33 @@ export function IdentityApp() {
     previousPasswordScreen.current = passwordScreen;
     heading.current?.focus();
   }, [passwordScreen]);
+  const signupFocus = useRef(startsNew());
+  const previousRoute = useRef(route);
+  useLayoutEffect(() => {
+    if (previousRoute.current === route) return;
+    // Leaving a page closes its password form and forgets typed recovery details.
+    if (previousRoute.current === '/recover') {
+      setHandle('');
+      setCode('');
+    }
+    if (route !== signInPath) signupFocus.current = false;
+    previousRoute.current = route;
+    setPasswordScreen(null);
+  }, [route]);
+  useLayoutEffect(() => {
+    // A signed-in reader has no sign-in page. This covers any path not replaced earlier.
+    if (!session || route !== signInPath) return;
+    history.replaceState(null, '', '/');
+    setRoute('/');
+  }, [session, route]);
+  // A checked status updates the receipt without moving focus, so focus follows its ID.
+  const receiptId = deletionReceipt?.proof.receiptId;
   useLayoutEffect(() => {
     // The receipt and the welcome screen replace each other's primary heading.
-    if (deletionReceipt) receiptHeading.current?.focus();
+    if (receiptId) receiptHeading.current?.focus();
     else if (hadReceipt.current) heading.current?.focus();
-    hadReceipt.current = Boolean(deletionReceipt);
-  }, [deletionReceipt]);
+    hadReceipt.current = Boolean(receiptId);
+  }, [receiptId]);
   const clear = useCallback(() => {
     version.current++;
     inFlight.current = false;
@@ -232,7 +258,14 @@ export function IdentityApp() {
     setChecking(true);
     try {
       const current = await api('/me', apiSchemas.SessionView);
-      if (requested === version.current) setSession(current);
+      if (requested === version.current) {
+        // Replace /sign-in before the readings mount, so they never see that path.
+        if (window.location.pathname === signInPath) {
+          history.replaceState(null, '', '/');
+          setRoute('/');
+        }
+        setSession(current);
+      }
     } catch (error) {
       if (requested === version.current) {
         if (error instanceof ApiFailure && error.status === 401) {
@@ -272,6 +305,10 @@ export function IdentityApp() {
       navigation = () => {
         // The account page closes the readings, so unsaved writing there needs a choice first.
         if (window.location.pathname === '/account' && !leaveReadings()) return;
+        if (authenticated.current && window.location.pathname === signInPath)
+          history.replaceState(null, '', '/');
+        // Back or Forward to ?start=new focuses the new-account choices, as a direct load does.
+        signupFocus.current = startsNew();
         setRoute(window.location.pathname);
         setMessage(null);
       };
@@ -293,7 +330,8 @@ export function IdentityApp() {
   }, [refresh, clear, leaveReadings]);
   const navigate = (path: string) => {
     history.pushState(null, '', path);
-    setRoute(path);
+    // The route is the path alone; a query such as ?start=new stays in the address.
+    setRoute(window.location.pathname);
   };
   const run = async (operation: (isCurrent: () => boolean) => Promise<void>) => {
     if (inFlight.current) return;
@@ -350,8 +388,13 @@ export function IdentityApp() {
     setGrant(null);
     setPasswordScreen(null);
     // Saved readings are the default destination; a requested reading or the account page stays.
-    if (!requestFromPath() && !savedEditionFromPath() && window.location.pathname !== '/account')
-      navigate('/');
+    if (!requestFromPath() && !savedEditionFromPath() && window.location.pathname !== '/account') {
+      // Signing in replaces /sign-in, so Back never returns to it.
+      if (window.location.pathname === signInPath) {
+        history.replaceState(null, '', '/');
+        setRoute('/');
+      } else navigate('/');
+    }
   };
   const verifyIdentity = async (isCurrent: () => boolean, requirePasskey = false) => {
     if (!session) throw new Error('Your session has ended. Sign in again.');
@@ -399,6 +442,22 @@ export function IdentityApp() {
     navigate(path);
     setMessage(null);
     requestAnimationFrame(() => heading.current?.focus());
+  };
+  /** The welcome page's actions open sign-in in place, so Back returns to the welcome. */
+  const openSignIn = (event: MouseEvent<HTMLAnchorElement>, startNew: boolean) => {
+    if (!plainClick(event)) return;
+    event.preventDefault();
+    if (inFlight.current) return;
+    if (!startNew) return show(signInPath);
+    // The new-account group takes focus when it mounts.
+    signupFocus.current = true;
+    navigate(`${signInPath}?start=new`);
+    setMessage(null);
+  };
+  const backToSignIn = (event: MouseEvent<HTMLAnchorElement>) => {
+    if (!plainClick(event)) return;
+    event.preventDefault();
+    if (!inFlight.current) show(signInPath);
   };
   const openAccount = (event: MouseEvent<HTMLAnchorElement>) => {
     if (!plainClick(event)) return;
@@ -495,73 +554,110 @@ export function IdentityApp() {
             ? 'Sign in with a password'
             : passwordScreen === 'register'
               ? 'Create a password account'
-              : 'A little space to reflect.';
+              : 'Sign in or create an account';
+  // Signed out, / is an invitation. Every other path, such as /sign-in, signs in in place.
+  const invitation = !session && !kit && !grant && route === '/';
+  // Once the session check settles, the welcome and recovery pages link to sign-in.
+  const headerSignIn =
+    !session && !kit && !grant && !checking && (route === '/' || route === '/recover');
   const authPage = !kit && (Boolean(grant) || !session);
-  const landing = authPage && !grant && route !== '/recover';
+  const signInPage = authPage && !grant && route !== '/recover';
   const choosePasswordScreen = (screen: typeof passwordScreen) => {
     setPasswordScreen(screen);
     setMessage(null);
   };
+  const dialog = confirmingPassword && (
+    <PasswordDialog
+      allowPasskey={Boolean(credentials?.items.length)}
+      onAnswer={(answer) => {
+        passwordAnswer.current?.(answer);
+        passwordAnswer.current = null;
+        setConfirmingPassword(false);
+      }}
+    />
+  );
+  const header = (
+    <header className="site-header">
+      <div className="shell-width">
+        <Brand />
+        {session && !kit && !grant && !accountPage && (
+          <div id="workspace-navigation" inert={checking || busy} />
+        )}
+        <div className="header-tools">
+          <ThemeSelect />
+          {session && !kit && !grant && (
+            <TextLink
+              className="header-link"
+              href="/account"
+              aria-current={accountPage ? 'page' : undefined}
+              onClick={openAccount}
+            >
+              Account
+            </TextLink>
+          )}
+          {headerSignIn && (
+            <TextLink
+              className="header-link header-sign-in"
+              href={signInPath}
+              onClick={(event) => openSignIn(event, false)}
+            >
+              Sign in
+            </TextLink>
+          )}
+        </div>
+      </div>
+    </header>
+  );
+  // The welcome page and the sign-in and recovery pages each mount their own panel.
+  // A checked status comes back here, so it survives the move between them.
+  const receiptPanel = deletionReceipt && (
+    <DeletionReceiptPanel
+      key={deletionReceipt.proof.receiptId}
+      {...deletionReceipt}
+      pageHeading={receiptHeading}
+      onStatus={(initial) =>
+        setDeletionReceipt((current) =>
+          current?.proof.receiptId === deletionReceipt.proof.receiptId
+            ? { ...current, initial }
+            : current,
+        )
+      }
+      onDismiss={() => setDeletionReceipt(null)}
+    />
+  );
+  if (invitation)
+    return (
+      <div className="app-shell invitation-shell">
+        {dialog}
+        {header}
+        <Invitation
+          heading={heading}
+          receipt={receiptPanel}
+          notice={<Notice message={message} />}
+          checking={checking}
+          environment={environmentNotice(runtimeMode, live)}
+          onSignIn={openSignIn}
+        />
+      </div>
+    );
   return (
     <div className={`app-shell${accountPage ? ' account-shell' : ''}`}>
-      {confirmingPassword && (
-        <PasswordDialog
-          allowPasskey={Boolean(credentials?.items.length)}
-          onAnswer={(answer) => {
-            passwordAnswer.current?.(answer);
-            passwordAnswer.current = null;
-            setConfirmingPassword(false);
-          }}
-        />
-      )}
-      <header className="site-header">
-        <div className="shell-width">
-          <Brand />
-          {session && !kit && !grant && !accountPage && (
-            <div id="workspace-navigation" inert={checking || busy} />
-          )}
-          <div className="header-tools">
-            <ThemeSelect />
-            {session && !kit && !grant && (
-              <TextLink
-                className="header-link"
-                href="/account"
-                aria-current={accountPage ? 'page' : undefined}
-                onClick={openAccount}
-              >
-                Account
-              </TextLink>
-            )}
-          </div>
-        </div>
-      </header>
+      {dialog}
+      {header}
       <main
         className={
           authPage
-            ? `auth-layout${landing ? ' landing-layout' : ''}`
+            ? 'auth-layout'
             : `page-column ${kit ? 'kit-page' : accountPage ? 'account-page account-settings' : 'account-page readings-page'}`
         }
       >
-        {authPage && (
-          <Art
-            name={landing ? 'spiral-bloom' : 'study-inquiry'}
-            className="auth-art"
-            fetchPriority={landing ? 'high' : 'auto'}
-          />
-        )}
+        {authPage && <Art name="study-inquiry" className="auth-art" />}
         <div className={authPage ? 'auth-column' : 'page-stack'}>
-          {deletionReceipt && (
-            <DeletionReceiptPanel
-              key={deletionReceipt.proof.receiptId}
-              {...deletionReceipt}
-              pageHeading={receiptHeading}
-              onDismiss={() => setDeletionReceipt(null)}
-            />
-          )}
+          {receiptPanel}
           <div
             className={
               authPage
-                ? `card auth-card ${landing ? 'landing-card' : 'recovery-card'} ${grant ? 'replacement-card' : ''}`
+                ? `card auth-card ${signInPage ? 'sign-in-card' : 'recovery-card'} ${grant ? 'replacement-card' : ''}`
                 : 'page-panel'
             }
           >
@@ -591,7 +687,7 @@ export function IdentityApp() {
                     {title}
                   </h1>
                 )}
-                {landing && !passwordScreen && !deletionReceipt && (
+                {signInPage && !passwordScreen && !deletionReceipt && (
                   <p className="brand-promise">
                     Draw three tarot cards or bring your own spread. Save your reading and return
                     with a note.
@@ -1069,6 +1165,7 @@ export function IdentityApp() {
                       type="button"
                       variant="danger"
                       disabled={busy || !accountDeleteChecked}
+                      aria-describedby={accountDeleteChecked ? undefined : 'account-delete-hint'}
                       onClick={() =>
                         void run(async (isCurrent) => {
                           let csrf = session.csrfToken;
@@ -1109,13 +1206,14 @@ export function IdentityApp() {
                     >
                       Delete account permanently
                     </Button>
+                    <ConfirmationHint id="account-delete-hint" show={!accountDeleteChecked} />
                   </details>
                   <p className="account-storage">
                     <Icon name="lock" />
                     <span>{READING_PRODUCT_COPY.serviceStorage}</span>
                   </p>
                 </section>
-              ) : session ? (
+              ) : session && route !== signInPath ? (
                 <div inert={checking || busy}>
                   <ReadingWorkspace
                     ref={workspace}
@@ -1185,7 +1283,9 @@ export function IdentityApp() {
                     Once verified, you can replace your passkey or reset a password you previously
                     set up. If the connection is interrupted, try another unused code.
                   </p>
-                  <TextLink href="/">Back to sign in</TextLink>
+                  <TextLink href={signInPath} onClick={backToSignIn}>
+                    Back to sign in
+                  </TextLink>
                 </form>
               ) : passwordScreen ? (
                 <section className="password-entry">
@@ -1246,7 +1346,7 @@ export function IdentityApp() {
                   </div>
                 </section>
               ) : (
-                <section className="landing-content">
+                <section className="sign-in-content">
                   <div className="actions">
                     <Button disabled={busy} onClick={() => choosePasswordScreen('login')}>
                       Sign in with a password
@@ -1265,8 +1365,18 @@ export function IdentityApp() {
                       Sign in with a passkey
                     </Button>
                   </div>
-                  <div className="signup-options">
-                    <h2>New to Reflection?</h2>
+                  <fieldset
+                    className="signup-options"
+                    tabIndex={-1}
+                    ref={(group) => {
+                      if (!group || !signupFocus.current) return;
+                      signupFocus.current = false;
+                      group.focus();
+                    }}
+                  >
+                    <legend>
+                      <h2>New to Reflection?</h2>
+                    </legend>
                     <Button
                       variant="text-button"
                       disabled={busy}
@@ -1292,7 +1402,7 @@ export function IdentityApp() {
                     <p className="field-hint">
                       A passkey lets you join without an email address or password.
                     </p>
-                  </div>
+                  </fieldset>
                   <TextLink href="/recover">Recover with your saved kit</TextLink>
                 </section>
               )}

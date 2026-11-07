@@ -14,7 +14,12 @@
   color-scheme: light;
   --background: var(--reflection-paper);
   --foreground: var(--reflection-ink);
-  --card: var(--reflection-paper);
+  /* Cards lift off Paper: half-way to white (#fbf9f3), a soft edge (#d8d8c9), a low shadow.
+     Chromium drops Paper's hue in an oklch mix, so the card mixes in oklab (the same color)
+     and the edge is the oklch value of color-mix(in oklch, Paper, Ink 14%). */
+  --card: color-mix(in oklab, var(--reflection-paper), white 50%);
+  --card-edge: oklch(0.8769 0.0201 106.89);
+  --shadow-card: 0 10px 30px -12px color-mix(in srgb, var(--reflection-ink) 25%, transparent);
   --card-foreground: var(--reflection-ink);
   --popover: var(--reflection-paper);
   --popover-foreground: var(--reflection-ink);
@@ -39,8 +44,11 @@
   --destructive-foreground: var(--reflection-ink);
   --success: var(--reflection-mint);
   --success-foreground: var(--reflection-ink);
+  /* Sage is no longer a disabled fill; kept so the Figma action/disabled token has a match. */
   --action-disabled: var(--reflection-sage);
-  --action-disabled-label: var(--reflection-ink);
+  --action-disabled-label: color-mix(in srgb, var(--reflection-ink) 60%, transparent);
+  --reflection-disabled-border: color-mix(in srgb, var(--reflection-ink) 40%, transparent);
+  --reflection-placeholder: color-mix(in srgb, var(--reflection-ink) 75%, transparent);
   --border-subtle: color-mix(in srgb, var(--border) 25%, transparent);
   --chart-1: var(--primary);
   --chart-2: var(--reflection-coral);
@@ -73,7 +81,10 @@
   color-scheme: dark;
   --background: var(--reflection-evening);
   --foreground: var(--reflection-paper);
+  /* Evening keeps Ink panels with a Mint edge at 25%. */
   --card: var(--reflection-ink);
+  --card-edge: color-mix(in srgb, var(--reflection-mint) 25%, transparent);
+  --shadow-card: 0 10px 30px -12px rgb(0 0 0 / 0.45);
   --card-foreground: var(--reflection-paper);
   --popover: var(--reflection-ink);
   --popover-foreground: var(--reflection-paper);
@@ -87,6 +98,9 @@
   --ring: var(--reflection-mint);
   --reflection-link: var(--reflection-mint);
   --destructive-text: var(--reflection-coral);
+  --action-disabled-label: color-mix(in srgb, var(--reflection-paper) 60%, transparent);
+  --reflection-disabled-border: color-mix(in srgb, var(--reflection-mint) 45%, transparent);
+  --reflection-placeholder: var(--reflection-mint);
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme]) {
@@ -94,6 +108,8 @@
     --background: var(--reflection-evening);
     --foreground: var(--reflection-paper);
     --card: var(--reflection-ink);
+    --card-edge: color-mix(in srgb, var(--reflection-mint) 25%, transparent);
+    --shadow-card: 0 10px 30px -12px rgb(0 0 0 / 0.45);
     --card-foreground: var(--reflection-paper);
     --popover: var(--reflection-ink);
     --popover-foreground: var(--reflection-paper);
@@ -107,6 +123,9 @@
     --ring: var(--reflection-mint);
     --reflection-link: var(--reflection-mint);
     --destructive-text: var(--reflection-coral);
+    --action-disabled-label: color-mix(in srgb, var(--reflection-paper) 60%, transparent);
+    --reflection-disabled-border: color-mix(in srgb, var(--reflection-mint) 45%, transparent);
+    --reflection-placeholder: var(--reflection-mint);
   }
 }
 :root {
@@ -144,42 +163,42 @@
   font-family: var(--font-serif);
   font-size: 5.5rem;
   line-height: 1;
-  font-weight: 400;
+  font-weight: 500;
   letter-spacing: normal;
 }
 .heading-1 {
   font-family: var(--font-serif);
   font-size: 4rem;
   line-height: 4.125rem;
-  font-weight: 400;
+  font-weight: 500;
   letter-spacing: -0.025em;
 }
 .heading-2 {
   font-family: var(--font-serif);
   font-size: 2.5rem;
   line-height: 2.75rem;
-  font-weight: 400;
+  font-weight: 500;
   letter-spacing: -0.025em;
 }
 .heading-3 {
   font-family: var(--font-serif);
   font-size: 1.75rem;
   line-height: 2.125rem;
-  font-weight: 400;
+  font-weight: 500;
   letter-spacing: normal;
 }
 .title-page {
   font-family: var(--font-serif);
   font-size: 4rem;
   line-height: 1.03125;
-  font-weight: 400;
+  font-weight: 500;
   letter-spacing: -0.02em;
 }
 .title-section {
   font-family: var(--font-serif);
   font-size: 2.5rem;
   line-height: 1.1;
-  font-weight: 400;
+  font-weight: 500;
   letter-spacing: -0.015em;
 }
 .body-lg {

@@ -38,11 +38,7 @@ export function PatternReading({
             : ''}
         </p>
       </section>
-      <aside
-        className="pattern-snapshot-context"
-        data-theme="evening"
-        aria-label="Saved chart context"
-      >
+      <aside className="pattern-snapshot-context" aria-label="Saved chart context">
         <h3>The chart you saved</h3>
         <p>{chapter.factualLabel}</p>
         <p>

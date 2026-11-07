@@ -3,17 +3,27 @@
   "status": "deployed",
   "target": "https://reflection-preview.lfd.workers.dev/",
   "scope": "hosted-development-preview-only",
-  "verifiedAt": "2026-11-05T23:18:34.651Z",
-  "deploymentId": "76d4ca42-62ac-4089-a2af-bf73d24cba87",
-  "workerVersionId": "81aa64a3-2832-4261-be51-70c63ff85799",
+  "deployedAt": "2026-11-07T08:20:12.818Z",
+  "verifiedAt": "2026-11-07T08:20:25.721Z",
+  "deploymentId": "e3666a63-5f5b-408b-aaa1-33224ddd9ec2",
+  "workerVersionId": "673ac8fb-fa96-445a-b67d-004a508ec70d",
   "trafficPercentage": 100,
-  "hashes": {
-    "worker": "92476e8116680bdd7b7ae8dcf60352e20e2f7e4e1a1e0d4ef79956f3ebfcf19e",
-    "assetHelper": "722ba3249c12015270c170029f32fd945e4f42bdc7cfc24e92c623c277e93c15",
-    "entryWrapper": "26d20dbb1370dac1eb7c615b9c78243f0fffeccdb50a97feed2b4b409a2b412d",
-    "publicAssetsModule": "b0afcbbf3e858b7da9edcc7ee62ab52d321eb2bfd4565e538e837bf1b71274f0"
+  "message": "Deploy welcome polish and header sign-in development preview e2430d3",
+  "command": "npm run deploy:preview -- --message \"Deploy welcome polish and header sign-in development preview e2430d3\"",
+  "sourceBranch": "design/mend-polish",
+  "sourceCommitAtDeployment": "e2430d3fa0ba6ffc14acda66218a9a3cd8774113",
+  "assetDelivery": "Wrangler read 37 files from dist/client and uploaded 3 (index.html, index-DAewYpbS.css, index-a9uU9s1p.js); the other 33 were already present. The ASSETS binding serves them.",
+  "includes": [
+    "Welcome polish: the rose runs behind the header from 768 px, header controls paint the page color, the lead and closing line fit on one line from 768 px, plates take 40% of a tile, and the signed-out header links to /sign-in on / and /recover, on one row from 320 px.",
+    "97a55dd (Reconcile M3 availability and portability safeguards). It first reached the preview with 4d4f790 on 2026-11-07 at 05:47 UTC (deployment 3d486403-4976-453a-8bbf-de95a66f7462, version 20bb059a-dc22-40a7-a3f2-01b449059647). That deploy was not recorded in this receipt, which still described the 2026-11-05 deploy of d3d4c4f. No earlier recorded deploy (d75868d, 050d01f, d3d4c4f) contains it."
+  ],
+  "previousDeployment": {
+    "deploymentId": "3d486403-4976-453a-8bbf-de95a66f7462",
+    "workerVersionId": "20bb059a-dc22-40a7-a3f2-01b449059647",
+    "createdAt": "2026-11-07T05:47:03.467Z",
+    "message": "Deploy board composition and /sign-in development preview 4d4f790",
+    "recordedInReceipt": false
   },
-  "assetDelivery": "32 exact public assets embedded in modules; original application fetch receives only a replacement ASSETS Fetcher",
   "health": {
     "httpStatus": 200,
     "status": "ok",
@@ -23,89 +33,216 @@
     "patternReady": true
   },
   "migration": {
-    "name": "0021_astrology_pattern.sql",
-    "success": true,
-    "statementResults": 85,
-    "preMigrationBookmark": "0000003b-00000006-0000511a-71f2439c83bd131cdc71c68881900d0c",
-    "originalTablesCompared": 43,
-    "allOriginalProjectionsMatched": true,
-    "accountsPreserved": 5,
-    "readingEditionsPreserved": 3,
-    "foreignKeyViolations": 0
+    "pendingBeforeDeploy": [],
+    "appliedByThisDeploy": [],
+    "latestLocal": "0021_astrology_pattern.sql",
+    "note": "wrangler d1 migrations list DB --remote --config wrangler.preview.jsonc reported no migrations to apply, both when first checked and again right before the deploy."
   },
   "publication": {
     "releaseHash": "3a730caeb64a87cacc981f55df0558164bbe5ff77b00257d778d0045dae73e11",
-    "calculationHash": "21518ac44c5b14b443c662d2836f2b6c9a237d86bff43a54121d2d5758e21d2b",
-    "review": "human_approved",
-    "explicitDevelopmentRegistryInstallation": true,
-    "requestBootstrap": false
+    "patternReady": true
   },
   "verification": {
-    "domainTooling": {
-      "passed": 477,
-      "files": 64
+    "sourceCommit": "6ef0aefd5a87e8abf1a89749c2efaaa47cf07fdd",
+    "deployedCommitDiffersOnlyIn": [
+      "design-qa.md"
+    ],
+    "platform": "Windows 11, Node 26.12.1",
+    "typecheck": "passed",
+    "biome": {
+      "errors": 0,
+      "warnings": 12,
+      "note": "The 12 warnings match the base branch; none is in a file this branch changes."
     },
-    "patternAndAdjacentDatabase": {
+    "domain": {
+      "files": 68,
+      "passed": 550
+    },
+    "database": {
+      "files": 73,
+      "passed": 682
+    },
+    "browser": {
+      "passed": 205,
+      "skipped": 1,
+      "failed": 0,
+      "flaky": 0,
+      "report": "browser-tests.json",
+      "skippedTest": "design-screens.spec.ts, which runs only with REFLECTION_SCREENS set; it passed in its own run."
+    },
+    "journey": {
       "passed": 41,
-      "files": 5
-    },
-    "patternImportReturnBrowser": {
-      "passed": 34,
-      "files": 6
-    },
-    "embeddedAssetUnit": {
-      "passed": 4,
-      "files": 1
-    },
-    "strictTypes": "passed",
-    "lint": "passed",
-    "contracts": "passed",
-    "generatedSchemas": "passed",
-    "clientBuild": "passed",
-    "previewWorkerDryRun": "passed",
-    "independentAdmissionReview": "no-actionable-findings",
-    "publicAssetsMatched": 32,
-    "mobileLanding": {
-      "width": 390,
-      "scrollWidth": 390,
-      "rendered": true
-    },
-    "authenticatedHostedSmoke": {
-      "status": "blocked-by-existing-signup-rate-limit",
-      "httpStatus": 429,
-      "accountCreated": false,
-      "cleanup": "not-created",
-      "requests": 2,
-      "paidAIRequestsMade": 0
+      "skipped": 0,
+      "failed": 0,
+      "flaky": 0,
+      "byEngine": {
+        "chromium": 17,
+        "firefox": 13,
+        "webkit": 11
+      }
     }
   },
-  "preservation": {
-    "existingAccounts": 5,
-    "existingReadingEditions": 3,
-    "originalGenerationSettingsRestored": [
+  "liveChecks": {
+    "health": {
+      "httpStatus": 200,
+      "status": "ok",
+      "mode": "live-preview"
+    },
+    "directLoads": {
+      "/": {
+        "httpStatus": 200,
+        "contentType": "text/html",
+        "servesAppShell": true
+      },
+      "/sign-in": {
+        "httpStatus": 200,
+        "contentType": "text/html",
+        "servesAppShell": true
+      }
+    },
+    "publicAssetsMatched": "35 of 35",
+    "art": {
+      "rose": [
+        {
+          "path": "/assets/hero-rose-BuyZarz4.webp",
+          "status": 200,
+          "contentType": "image/webp",
+          "bytes": 137080,
+          "matchesBuild": true
+        }
+      ],
+      "plates": [
+        {
+          "path": "/assets/position-possibility-C5_Ydvee.png",
+          "status": 200,
+          "contentType": "image/png",
+          "bytes": 44464,
+          "matchesBuild": true
+        },
+        {
+          "path": "/assets/position-situation-_1BZi04s.png",
+          "status": 200,
+          "contentType": "image/png",
+          "bytes": 47043,
+          "matchesBuild": true
+        },
+        {
+          "path": "/assets/position-tension-_ZkzId_3.png",
+          "status": 200,
+          "contentType": "image/png",
+          "bytes": 43360,
+          "matchesBuild": true
+        }
+      ],
+      "ribbon": [
+        {
+          "path": "/assets/spread-ribbon-320-B7scGEBE.webp",
+          "status": 200,
+          "contentType": "image/webp",
+          "bytes": 27476,
+          "matchesBuild": true
+        },
+        {
+          "path": "/assets/spread-ribbon-640-KHSCiQ27.webp",
+          "status": 200,
+          "contentType": "image/webp",
+          "bytes": 85660,
+          "matchesBuild": true
+        },
+        {
+          "path": "/assets/spread-ribbon-960-iTMsAU63.webp",
+          "status": 200,
+          "contentType": "image/webp",
+          "bytes": 178842,
+          "matchesBuild": true
+        }
+      ]
+    },
+    "pages": [
       {
-        "revision": 7,
-        "restore_in_progress": 0,
-        "generation_enabled": 1,
-        "dispatch_mode": "model",
-        "recovery_epoch": 0
+        "width": 390,
+        "colorScheme": "light",
+        "welcome": {
+          "roseLoaded": true,
+          "roseTop": 29,
+          "headerBottom": 69,
+          "platesLoaded": 3,
+          "leafBand": "spread-ribbon-960-iTMsAU63.webp",
+          "horizontalOverflow": false
+        },
+        "signIn": {
+          "httpStatus": 200,
+          "path": "/sign-in",
+          "newAccountGroup": true,
+          "headerSignInLinks": 0
+        },
+        "pageErrors": 0
+      },
+      {
+        "width": 1280,
+        "colorScheme": "light",
+        "welcome": {
+          "roseLoaded": true,
+          "roseTop": -40,
+          "headerBottom": 69,
+          "platesLoaded": 3,
+          "leafBand": "spread-ribbon-960-iTMsAU63.webp",
+          "horizontalOverflow": false
+        },
+        "signIn": {
+          "httpStatus": 200,
+          "path": "/sign-in",
+          "newAccountGroup": true,
+          "headerSignInLinks": 0
+        },
+        "pageErrors": 0
+      },
+      {
+        "width": 390,
+        "colorScheme": "dark",
+        "welcome": {
+          "roseLoaded": true,
+          "roseTop": 29,
+          "headerBottom": 69,
+          "platesLoaded": 3,
+          "leafBand": "spread-ribbon-960-iTMsAU63.webp",
+          "horizontalOverflow": false
+        },
+        "signIn": {
+          "httpStatus": 200,
+          "path": "/sign-in",
+          "newAccountGroup": true,
+          "headerSignInLinks": 0
+        },
+        "pageErrors": 0
+      },
+      {
+        "width": 1280,
+        "colorScheme": "dark",
+        "welcome": {
+          "roseLoaded": true,
+          "roseTop": -40,
+          "headerBottom": 69,
+          "platesLoaded": 3,
+          "leafBand": "spread-ribbon-960-iTMsAU63.webp",
+          "horizontalOverflow": false
+        },
+        "signIn": {
+          "httpStatus": 200,
+          "path": "/sign-in",
+          "newAccountGroup": true,
+          "headerSignInLinks": 0
+        },
+        "pageErrors": 0
       }
     ],
-    "existingSecretBindingsRetained": 4,
-    "originalCompiledApplicationUnchanged": true
-  },
-  "cleanup": {
-    "namespace": "cf2ae63fe51c4cc39213eb0fb1978e34",
-    "deleted": true,
-    "absenceVerified": true,
-    "at": "2026-11-05T23:17:28.063Z"
+    "landingScreenshot": "landing-paper-390.png (390 x 844, Paper)"
   },
   "limits": [
-    "The authenticated hosted Pattern/import smoke did not run because registration was rate-limited before account creation.",
-    "Native Tarot Return is covered by focused local browser tests and deployed byte-verified assets, not a new hosted native reading.",
-    "Full production qualification and activation remain closed; the earlier full release gate is bound to its original source.",
-    "No live AI generation, signup-rate bypass, existing-account mutation or production deployment was performed."
-  ],
-  "sourceCommitAtDeployment": "d3d4c4f704ea2fb3ba0f27f5fd5a0ceb55aebee3",
-  "sourceDigestAtReport": "7a634e659e177b906fba37f717c33f704153797620fdc11ef75e879f8db6c1ea"
+    "No account was created and no AI reading was started. The owner runs the signed-in check.",
+    "The authenticated API smoke did not run; see smoke-result.json.",
+    "The live checks are anonymous: health, direct loads of / and /sign-in, every public asset byte for byte, and the signed-out pages in Chromium at 390 and 1280 px in light and dark.",
+    "Physical devices and screen readers were not checked.",
+    "Production deployment and qualification remain closed."
+  ]
 }

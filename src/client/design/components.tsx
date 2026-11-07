@@ -23,6 +23,19 @@ export function Button({
   );
 }
 
+/**
+ * Says why a checkbox-gated destructive button is unavailable. Render it right after the
+ * button and point the button's aria-describedby at the same id while it shows.
+ */
+export function ConfirmationHint({ id, show }: { id: string; show: boolean }) {
+  if (!show) return null;
+  return (
+    <p id={id} className="muted confirmation-hint">
+      Check the box above to continue.
+    </p>
+  );
+}
+
 export function TextLink({ className, ...props }: ComponentPropsWithRef<'a'>) {
   return <a className={classes('text-link', className)} {...props} />;
 }
