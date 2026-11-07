@@ -527,9 +527,11 @@ footer {
 .site-header {
   display: block;
   margin: 0;
-  border-bottom: 1px solid var(--border-subtle);
+  border-bottom: 1px solid var(--border);
 }
+/* One header row on every page: 1328 px inside 20 px of padding, so 56 px gutters at 1440 px. */
 .site-header .shell-width {
+  max-width: 1368px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -545,7 +547,7 @@ footer {
   text-decoration: none;
   display: inline-flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   min-height: 44px;
   line-height: 34px;
   letter-spacing: -0.025em;
@@ -592,7 +594,7 @@ footer {
   margin: 0;
   padding: 8px 32px 8px 12px;
   font-size: 14px;
-  border-color: var(--border-subtle);
+  border-color: var(--border);
   border-radius: var(--radius-full);
 }
 .header-tools {
@@ -620,6 +622,30 @@ footer {
 .header-link[aria-current="page"] {
   color: var(--muted-text);
   background: var(--muted);
+}
+/* From 768 px the header is Figma's 76 px desktop header: a 75 px row over its rule, 16 px
+   control labels, and the last link's text on the gutter line. Phones keep the compact row
+   that holds the wordmark, theme select and Sign in on one line at 320 px. */
+@media (min-width: 768px) {
+  .app-shell {
+    --header-row: 75px;
+  }
+  .theme-control select {
+    padding: 8px 38px 8px 24px;
+    font-size: 16px;
+    font-weight: 500;
+  }
+  .header-tools {
+    column-gap: 18px;
+  }
+  .header-link {
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 24px;
+  }
+  .header-tools > .header-link:last-child {
+    margin-inline-end: -14px;
+  }
 }
 main {
   max-width: 760px;
