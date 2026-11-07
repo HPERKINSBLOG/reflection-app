@@ -40,7 +40,7 @@ p + p {
 h1 {
   font-family: var(--font-serif);
   font-size: clamp(2.5rem, 1.5rem + 3vw, 4rem);
-  font-weight: 400;
+  font-weight: 500;
   line-height: 1.03125;
   letter-spacing: -0.02em;
   text-wrap: balance;
@@ -48,13 +48,13 @@ h1 {
 h2 {
   font-family: var(--font-serif);
   font-size: 28px;
-  font-weight: 400;
+  font-weight: 500;
   line-height: 1.2143;
 }
 h3 {
   font-family: var(--font-serif);
   font-size: 24px;
-  font-weight: 400;
+  font-weight: 500;
   line-height: 1.25;
 }
 h4 {
@@ -105,7 +105,7 @@ button {
   font-family: inherit;
   font-size: 16px;
   line-height: 24px;
-  font-weight: 600;
+  font-weight: 500;
   color: var(--primary-foreground);
   background: var(--primary);
   border: 1px solid transparent;
@@ -594,12 +594,13 @@ main {
   align-items: center;
   gap: 24px;
 }
+/* Cards and panels lift: a soft edge and a low shadow on Paper, an Ink panel on Evening. */
 .card {
   background: var(--card);
   color: var(--card-foreground);
-  border: 1px solid var(--border-subtle);
+  border: 1px solid var(--card-edge);
   border-radius: var(--radius-3xl);
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--shadow-card);
 }
 .auth-card,
 :where(.auth-column) > .receipt-card {
@@ -1104,7 +1105,6 @@ main {
   letter-spacing: -0.015em;
 }
 .account-settings .card {
-  box-shadow: none;
   border-radius: 10px;
 }
 .back-link {
@@ -1151,8 +1151,9 @@ main {
   gap: 16px;
   padding: 20px;
   background: var(--card);
-  border: 1px solid var(--border);
+  border: 1px solid var(--card-edge);
   border-radius: 10px;
+  box-shadow: var(--shadow-card);
 }
 .consent-summary {
   display: flex;
@@ -1287,8 +1288,9 @@ button.history-link:hover:enabled {
   margin-top: 16px;
   padding: 16px;
   background: var(--card);
-  border: 1px solid var(--border);
+  border: 1px solid var(--card-edge);
   border-radius: var(--radius-2xl);
+  box-shadow: var(--shadow-card);
 }
 .empty-history-art {
   flex: 1 1 200px;
@@ -1413,7 +1415,6 @@ button.history-link:hover:enabled {
 .new-reading {
   padding: var(--space-6);
   border-radius: var(--radius-3xl);
-  box-shadow: none;
 }
 .new-reading-heading {
   position: relative;
@@ -1429,7 +1430,7 @@ button.history-link:hover:enabled {
   font-family: var(--font-serif);
   font-size: clamp(2rem, 4vw, 2.5rem);
   line-height: 1.1;
-  font-weight: 400;
+  font-weight: 500;
   letter-spacing: -0.025em;
 }
 .new-reading-art {
@@ -1574,7 +1575,7 @@ button.history-link:hover:enabled {
   margin-bottom: 20px;
   font-family: var(--font-serif);
   font-size: 28px;
-  font-weight: 400;
+  font-weight: 500;
   line-height: 1.2143;
   letter-spacing: -0.02em;
 }
@@ -2016,7 +2017,7 @@ div.reading-closing {
 .reflection-editor > h2 {
   font-family: var(--font-serif);
   font-size: 28px;
-  font-weight: 400;
+  font-weight: 500;
   line-height: 1.2143;
   margin-bottom: 8px;
 }
