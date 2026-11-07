@@ -228,8 +228,9 @@ export async function themeContrast(page: Page, selector?: string) {
  * Decorative art must never sit under text or controls. Lists every overlap between an
  * aria-hidden image (clipped by any overflow ancestor) or the shell's leaf band and a line of
  * visible text or a control. The brand mark is part of its own link and is not checked.
- * One exception: art may sit under a control that paints a fully opaque fill of its own, with
- * no translucent ancestor. That fill covers the art, so the control and its words are skipped.
+ * One exception: an image may sit under a control that paints a fully opaque fill of its own,
+ * with no translucent ancestor, when the control paints above the image where they meet. That
+ * fill covers the art, so the control and its words are skipped. The leaf band has no exception.
  */
 export async function artUnderContent(page: Page) {
   return page.evaluate(() => {
@@ -261,8 +262,10 @@ export async function artUnderContent(page: Page) {
       }
       return box;
     };
-    const art: (Box & { name: string })[] = [
-      ...document.querySelectorAll('img[aria-hidden="true"], [aria-hidden="true"] img'),
+    const art: (Box & { name: string; element: HTMLElement | null })[] = [
+      ...document.querySelectorAll<HTMLElement>(
+        'img[aria-hidden="true"], [aria-hidden="true"] img',
+      ),
     ]
       .filter((image) => shown(image) && !image.closest('.brand'))
       .map((image) => ({
@@ -270,6 +273,7 @@ export async function artUnderContent(page: Page) {
           String(image.className)
             .replace(/\bart\b/, '')
             .trim() || 'image',
+        element: image,
         ...clipped(image),
       }));
     const shell = document.querySelector<HTMLElement>('.app-shell');
@@ -281,6 +285,7 @@ export async function artUnderContent(page: Page) {
       const height = Number.parseFloat(band.height) * scale;
       art.push({
         name: 'leaf band',
+        element: null,
         left: edge.left,
         right: edge.right,
         top: edge.bottom - height,
@@ -304,18 +309,27 @@ export async function artUnderContent(page: Page) {
         (control) => shown(control) && opaque(control),
       ),
     );
-    const covered = (element: Element) => {
-      const control = element.closest(controls);
-      return control !== null && covering.has(control);
+    // The control must also paint above the image where they meet. Hit-test the middle of the
+    // overlap with the image briefly hit-testable: the control has to come first. A point
+    // outside the viewport cannot be hit-tested, so there the control does not count as above.
+    const paintsOver = (control: Element, image: HTMLElement, x: number, y: number) => {
+      if (x < 0 || y < 0 || x >= innerWidth || y >= innerHeight) return false;
+      const value = image.style.getPropertyValue('pointer-events');
+      const priority = image.style.getPropertyPriority('pointer-events');
+      image.style.setProperty('pointer-events', 'auto', 'important');
+      const stack = document.elementsFromPoint(x, y);
+      image.style.setProperty('pointer-events', value, priority);
+      const above = stack.findIndex((element) => control.contains(element));
+      const below = stack.indexOf(image);
+      return above !== -1 && below !== -1 && above < below;
     };
-    const content: (Box & { what: string })[] = [];
+    const content: (Box & { what: string; owner: Element | null })[] = [];
     const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, {
       acceptNode: (node) =>
         node.textContent?.trim() &&
         node.parentElement &&
         shown(node.parentElement) &&
-        !node.parentElement.closest('.sr-only, [aria-hidden="true"]') &&
-        !covered(node.parentElement)
+        !node.parentElement.closest('.sr-only, [aria-hidden="true"]')
           ? NodeFilter.FILTER_ACCEPT
           : NodeFilter.FILTER_REJECT,
     });
@@ -326,6 +340,7 @@ export async function artUnderContent(page: Page) {
         if (line.width && line.height)
           content.push({
             what: `text "${node.textContent!.trim().slice(0, 32)}"`,
+            owner: node.parentElement!.closest(controls),
             left: line.left,
             top: line.top,
             right: line.right,
@@ -333,11 +348,12 @@ export async function artUnderContent(page: Page) {
           });
     }
     for (const control of document.querySelectorAll(controls)) {
-      if (!shown(control) || control.closest('.sr-only') || covered(control)) continue;
+      if (!shown(control) || control.closest('.sr-only')) continue;
       const box = control.getBoundingClientRect();
       if (box.width && box.height)
         content.push({
           what: `${control.tagName.toLowerCase()} "${(control.textContent || control.getAttribute('aria-label') || '').trim().slice(0, 32)}"`,
+          owner: control,
           left: box.left,
           top: box.top,
           right: box.right,
@@ -347,9 +363,18 @@ export async function artUnderContent(page: Page) {
     const overlaps: string[] = [];
     for (const image of art)
       for (const item of content) {
-        const width = Math.min(image.right, item.right) - Math.max(image.left, item.left);
-        const height = Math.min(image.bottom, item.bottom) - Math.max(image.top, item.top);
-        if (width > 0.5 && height > 0.5) overlaps.push(`${image.name} under ${item.what}`);
+        const [left, right] = [Math.max(image.left, item.left), Math.min(image.right, item.right)];
+        const [top, bottom] = [Math.max(image.top, item.top), Math.min(image.bottom, item.bottom)];
+        if (right - left <= 0.5 || bottom - top <= 0.5) continue;
+        // An opaque control covers an image it paints above, along with its own words.
+        if (
+          image.element &&
+          item.owner &&
+          covering.has(item.owner) &&
+          paintsOver(item.owner, image.element, (left + right) / 2, (top + bottom) / 2)
+        )
+          continue;
+        overlaps.push(`${image.name} under ${item.what}`);
       }
     return overlaps;
   });

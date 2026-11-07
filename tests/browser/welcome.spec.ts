@@ -178,6 +178,22 @@ test('art sits under a header control only where the control paints an opaque pa
       'landing-rose under text "Sign in"',
     ]),
   );
+  // An opaque fill helps only if the control paints above the art. Raised above the header,
+  // the rose would cover both controls while clicks still reach them, and the check reports it.
+  await page.locator('.header-tools').evaluate((tools: HTMLElement) => {
+    tools.style.opacity = '';
+  });
+  expect(await artUnderContent(page)).toEqual([]);
+  await page.locator('img.landing-rose').evaluate((rose: HTMLElement) => {
+    rose.style.zIndex = '2';
+  });
+  expect(await artUnderContent(page)).toEqual(
+    expect.arrayContaining([
+      expect.stringMatching(/^landing-rose under select /),
+      'landing-rose under a "Sign in"',
+      'landing-rose under text "Sign in"',
+    ]),
+  );
 });
 
 test('while recovery is pending, the header Sign in link shows that it is unavailable', async ({
