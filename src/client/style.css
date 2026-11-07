@@ -444,6 +444,8 @@ footer {
 /* Shell and signed-out pages. */
 .app-shell {
   --leaf-band: clamp(5rem, 14vw, 9rem);
+  /* The header row; the header's 1 px rule sits below it. */
+  --header-row: 68px;
   position: relative;
   isolation: isolate;
   display: flex;
@@ -473,7 +475,8 @@ footer {
     opacity: 0.4;
   }
 }
-/* The rose bleeds off the right edge and starts under the header rule. Its page clips it. */
+/* The rose bleeds off the right edge, and its page clips it. On phones it starts under the
+   header rule; from 768 px it runs behind the header to the top edge. */
 .landing-rose {
   position: absolute;
   z-index: -1;
@@ -529,7 +532,7 @@ footer {
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  min-height: 68px;
+  min-height: var(--header-row);
   padding-block: 12px;
 }
 .brand {
@@ -578,7 +581,9 @@ footer {
 .theme-control {
   position: relative;
 }
+/* Header controls keep a solid page fill, so they stay readable where the rose runs behind. */
 .theme-control select {
+  background-color: var(--background);
   background-image: none;
   width: auto;
   min-height: 44px;
@@ -602,6 +607,7 @@ footer {
   align-items: center;
   min-height: 44px;
   padding: 10px 14px;
+  background-color: var(--background);
   border-radius: var(--radius-full);
   font-size: 14px;
   font-weight: 500;
@@ -715,7 +721,7 @@ main {
   padding: 10px 8px;
   text-align: center;
 }
-/* The welcome page is an invitation. The rose sits behind it, clipped at the header rule. */
+/* The welcome page is an invitation. The rose sits behind it, clipped at the page's edges. */
 .invitation {
   position: relative;
   container-type: inline-size;
@@ -903,7 +909,17 @@ main {
 .invitation-content > .test-notice {
   margin: 0;
 }
+/* From 768 px the rose clears the wordmark, so the welcome page slides up behind the header
+   and the rose runs to the top edge. The header stays on top, and its rule turns clear. */
 @media (min-width: 768px) {
+  .invitation-shell > .site-header {
+    position: relative;
+    z-index: 1;
+    border-bottom-color: transparent;
+  }
+  .invitation-shell > .invitation {
+    margin-top: calc(-1 * (var(--header-row) + 1px));
+  }
   .invitation-content {
     padding-top: calc(min(46rem, 60cqw) * 378 / 936 - 1rem);
   }
@@ -911,7 +927,8 @@ main {
 @media (min-width: 1024px) {
   .invitation-content {
     gap: 48px;
-    padding-top: 72px;
+    /* The headline starts 72 px below the header. */
+    padding-top: calc(var(--header-row) + 1px + 72px);
   }
   /* The intro ends before the rose, whose left edge sits 6rem past min(46rem, 60cqw). */
   .invitation-intro {

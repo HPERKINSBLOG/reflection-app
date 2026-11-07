@@ -627,7 +627,7 @@ export function IdentityApp() {
   );
   if (invitation)
     return (
-      <div className="app-shell">
+      <div className="app-shell invitation-shell">
         {dialog}
         {header}
         <Invitation

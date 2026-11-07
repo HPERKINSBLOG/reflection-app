@@ -75,6 +75,95 @@ test('the welcome page invites a first reading with two actions, three positions
   expect(faults).toEqual([]);
 });
 
+test('from 768 px the rose runs behind the header to the top edge; below that it starts under the header', async ({
+  page,
+}) => {
+  await page.goto('/');
+  await expect(welcomeHeading(page)).toBeVisible();
+  const header = page.locator('.site-header');
+  const hidden = 'rgba(0, 0, 0, 0)';
+  for (const width of [320, 390, 640, 768, 1024, 1280]) {
+    await page.setViewportSize({ width, height: 900 });
+    const layout = await page.evaluate(() => {
+      const box = (selector: string) => document.querySelector(selector)!.getBoundingClientRect();
+      const [rose, welcome, wordmark] = [
+        box('.landing-rose'),
+        box('main.invitation'),
+        box('.brand'),
+      ];
+      // The welcome page clips the rose, so it paints from the lower of the two tops.
+      const top = Math.max(rose.top, welcome.top);
+      return {
+        top,
+        headerBottom: box('.site-header').bottom,
+        underWordmark:
+          rose.left < wordmark.right &&
+          rose.right > wordmark.left &&
+          top < wordmark.bottom &&
+          rose.bottom > wordmark.top,
+      };
+    });
+    expect(layout.underWordmark, `${width}px rose under the wordmark`).toBe(false);
+    if (width >= 768) {
+      expect(layout.top, `${width}px rose top`).toBeLessThanOrEqual(0);
+      await expect(header, `${width}px header rule`).toHaveCSS('border-bottom-color', hidden);
+    } else {
+      expect(layout.top, `${width}px rose top`).toBeGreaterThanOrEqual(layout.headerBottom - 0.5);
+      await expect(header, `${width}px header rule`).not.toHaveCSS('border-bottom-color', hidden);
+    }
+  }
+  // Only the welcome page drops the rule.
+  for (const path of ['/sign-in', '/recover']) {
+    await page.goto(path);
+    await expect(header, path).not.toHaveCSS('border-bottom-color', hidden);
+  }
+});
+
+test('art sits under a header control only where the control paints an opaque page fill', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await page.goto('/');
+  await expect(welcomeHeading(page)).toBeVisible();
+  const select = page.getByLabel('Color theme');
+  const signIn = headerSignIn(page);
+  for (const [theme, fill] of [
+    ['paper', 'rgb(247, 243, 232)'],
+    ['evening', 'rgb(8, 47, 51)'],
+  ] as const) {
+    await select.selectOption(theme);
+    // The theme select and the sign-in link paint the page color, Paper or Evening, fully opaque.
+    await expect(page.locator('html')).toHaveCSS('background-color', fill);
+    await expect(select, `${theme} theme select`).toHaveCSS('background-color', fill);
+    await expect(signIn, `${theme} sign-in link`).toHaveCSS('background-color', fill);
+  }
+  // The rose runs under both controls here; the art check accepts that only because they are opaque.
+  const rose = (await page.locator('img.landing-rose').boundingBox())!;
+  for (const control of [select, signIn]) {
+    const box = (await control.boundingBox())!;
+    expect(box.x + box.width > rose.x && box.y < rose.y + rose.height).toBe(true);
+  }
+  expect(await artUnderContent(page)).toEqual([]);
+  // A translucent fill, or a translucent ancestor, lets the art show through, so the check reports it.
+  await select.evaluate((element: HTMLElement) => {
+    element.style.backgroundColor = 'color-mix(in srgb, var(--background) 90%, transparent)';
+  });
+  expect(await artUnderContent(page)).toEqual([
+    expect.stringMatching(/^landing-rose under select /),
+  ]);
+  await select.evaluate((element: HTMLElement) => {
+    element.style.backgroundColor = '';
+    element.closest<HTMLElement>('.header-tools')!.style.opacity = '0.95';
+  });
+  expect(await artUnderContent(page)).toEqual(
+    expect.arrayContaining([
+      expect.stringMatching(/^landing-rose under select /),
+      'landing-rose under a "Sign in"',
+      'landing-rose under text "Sign in"',
+    ]),
+  );
+});
+
 test('signed out, the header offers Sign in on the welcome and recovery pages but not on /sign-in', async ({
   page,
 }) => {
@@ -236,10 +325,8 @@ for (const theme of ['paper', 'evening'] as const) {
     await expect(page.getByRole('list', { name: 'Reflection positions' })).toBeVisible();
     // The sign-in link joins the header once the session check settles.
     await expect(headerSignIn(page)).toBeVisible();
-    // The rose starts under the header rule, so the header always sits on the page fill.
-    const header = (await page.locator('.site-header').boundingBox())!;
-    const welcome = (await page.locator('main.invitation').boundingBox())!;
-    expect(welcome.y).toBeGreaterThanOrEqual(header.y + header.height - 0.5);
+    // At this width the rose runs behind the header. The wordmark stays clear of it, and the
+    // header controls paint the page fill, so each pair is measured on its own fill.
     await expect(page.locator('main.invitation')).toHaveCSS('overflow', 'clip');
     const ratios: Record<string, number> = {};
     const measure = async (name: string, selector: string) => {
