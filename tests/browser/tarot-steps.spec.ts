@@ -3,7 +3,9 @@ import { apiSchemas } from '../../src/contracts/index.ts';
 import { READING_PRODUCT_COPY } from '../../src/contracts/product-copy.ts';
 import {
   account,
+  backToReadings,
   enableAi,
+  openAccount,
   openTarot,
   readInterpretation,
   reading,
@@ -619,6 +621,66 @@ test('returning to a reading still in progress shows the cards', async ({ page }
   await page.getByRole('button', { name: 'Resume reading request', exact: true }).click();
   await expect(cardsHeading(page)).toBeFocused();
   await readInterpretation(page);
+});
+
+test('coming back from Account to a reading still in progress shows the cards', async ({
+  page,
+}) => {
+  await account(page, '198.51.100.26');
+  await enableAi(page);
+  await openTarot(page);
+  await toReview(page, 'What is still on its way?');
+  const hold = await holdRequest(page);
+  await startFromReview(page);
+  await hold.arrived;
+  await openAccount(page);
+  await backToReadings(page);
+  await expect(page.getByRole('region', { name: 'Reading request' })).toBeVisible();
+  hold.release();
+  await expect(cardsHeading(page)).toBeFocused();
+  await readInterpretation(page);
+});
+
+test('cards already shown do not return after a trip to Account', async ({ page }) => {
+  await account(page, '198.51.100.27');
+  await enableAi(page);
+  await openTarot(page);
+  await toReview(page, 'What have I already seen?');
+  await startFromReview(page);
+  await expect(cardsHeading(page)).toBeFocused();
+  await openAccount(page);
+  await backToReadings(page);
+  await expect(page.getByTestId('accepted-reading')).toBeVisible();
+  await expect(cardsHeading(page)).toHaveCount(0);
+});
+
+test('a photo that finishes after an app-draw Start leaves the started question alone', async ({
+  page,
+}) => {
+  await holdSlowPhotoReads(page);
+  await account(page, '198.51.100.25');
+  await enableAi(page);
+  const dialogs: string[] = [];
+  page.on('dialog', (dialog) => {
+    dialogs.push(dialog.message());
+    void dialog.dismiss();
+  });
+  await toPhotoStep(page, 'What will I keep from this week?');
+  await page
+    .getByLabel('Photo of your spread', { exact: true })
+    .setInputFiles({ name: 'slow-spread.png', mimeType: 'image/png', buffer: image });
+  await expect(page.getByRole('paragraph').filter({ hasText: /^Preparing photo…$/ })).toBeVisible();
+  await page.getByRole('button', { name: 'Use an app draw instead', exact: true }).click();
+  const hold = await holdRequest(page);
+  await startFromReview(page);
+  await hold.arrived;
+  // The photo finishes preparing while the reading is still in progress.
+  await page.evaluate(() =>
+    (window as unknown as { releasePhotoReads: () => Promise<void> }).releasePhotoReads(),
+  );
+  await page.evaluate(() => new Promise((resolve) => requestAnimationFrame(resolve)));
+  await openAccount(page);
+  expect(dialogs).toEqual([]);
 });
 
 test('history navigation to an earlier reading never shows its cards', async ({ page }) => {

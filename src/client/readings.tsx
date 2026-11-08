@@ -1422,6 +1422,12 @@ export function ReadingWorkspace({
             };
             const intent = actionKey('start', values);
             const target = { kind: 'intent' as const, id: draftIntent };
+            // An app draw starts without the photo still preparing; drop it so its late result
+            // cannot reopen the started question or post a photo error over the request.
+            if (mode === 'new' && !sendsPhoto && photoPreparing.current) {
+              clearPhoto();
+              setPhotoAnnouncement('');
+            }
             resumeTarget.current = target;
             // Whoever starts a new reading here is waiting for its cards.
             awaitingCards.current = mode === 'new' ? draftIntent : null;
