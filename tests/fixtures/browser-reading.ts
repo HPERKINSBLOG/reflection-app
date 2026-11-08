@@ -91,13 +91,21 @@ export async function startFromReview(page: Page) {
   await page.getByLabel('Use English for this reading').check();
   await page.getByRole('button', { name: 'Start reading', exact: true }).click();
 }
+/** On the Cards step after a new reading, moves on to the interpretation. */
+export async function readInterpretation(page: Page) {
+  await expect(
+    page.getByRole('heading', { name: 'Take a moment with the spread.', exact: true }),
+  ).toBeVisible();
+  await page.getByRole('button', { name: 'Read the interpretation', exact: true }).click();
+  await expect(page.getByTestId('accepted-reading')).toBeVisible();
+}
 export async function reading(page: Page, question: string) {
   await enableAi(page);
   await openTarot(page);
   await toReview(page, question);
   await expect(page.getByText(/Start temporarily stores/)).toBeVisible();
   await startFromReview(page);
-  await expect(page.getByTestId('accepted-reading')).toBeVisible();
+  await readInterpretation(page);
 }
 export async function savedSnapshot(page: Page) {
   const result = await page.evaluate(async () => {

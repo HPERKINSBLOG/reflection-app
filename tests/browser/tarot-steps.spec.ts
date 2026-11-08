@@ -1,11 +1,14 @@
 import { expect, test, type Locator, type Page } from '@playwright/test';
+import { apiSchemas } from '../../src/contracts/index.ts';
 import { READING_PRODUCT_COPY } from '../../src/contracts/product-copy.ts';
 import {
   account,
   enableAi,
   openTarot,
+  readInterpretation,
   reading,
   savedSnapshot,
+  startFromReview,
   toReview,
 } from '../fixtures/browser-reading.ts';
 
@@ -104,7 +107,7 @@ test('a new reading moves from question to spread to review, and only review can
   await page.getByLabel('Use English for this reading').check();
   await expect(start).toBeEnabled();
   await start.dblclick();
-  await expect(page.getByTestId('accepted-reading')).toBeVisible();
+  await expect(heading(page, 'Take a moment with the spread.')).toBeVisible();
   expect(starts).toHaveLength(1);
   expect(starts[0]).toMatchObject({ question: 'Where can I begin?', reversals: false });
   expect(starts[0]).not.toHaveProperty('spreadPhoto');
@@ -226,7 +229,14 @@ test('the steps can be completed by keyboard alone, with named and described con
   await page.keyboard.press('Space');
   await tabTo(page, start);
   await page.keyboard.press('Enter');
-  await expect(page.getByTestId('accepted-reading')).toBeVisible();
+  await expect(heading(page, 'Take a moment with the spread.')).toBeFocused();
+  await tabTo(page, page.getByRole('button', { name: 'Read the interpretation', exact: true }));
+  await page.keyboard.press('Enter');
+  await expect(
+    page
+      .getByTestId('accepted-reading')
+      .getByRole('heading', { name: 'What can I let be simple?' }),
+  ).toBeFocused();
   expect(starts).toHaveLength(1);
 });
 
@@ -265,7 +275,7 @@ test('a physical spread needs a ready photo before review', async ({ page }) => 
   );
   await page.getByLabel('Use English for this reading').check();
   await page.getByRole('button', { name: 'Start reading', exact: true }).click();
-  await expect(page.getByTestId('accepted-reading')).toBeVisible();
+  await readInterpretation(page);
   expect(starts).toHaveLength(1);
   expect(starts[0]!.spreadPhoto).toBe(dataUrl);
 });
@@ -290,7 +300,7 @@ test('an app draw instead never sends the chosen photo', async ({ page }) => {
   );
   await page.getByLabel('Use English for this reading').check();
   await page.getByRole('button', { name: 'Start reading', exact: true }).click();
-  await expect(page.getByTestId('accepted-reading')).toBeVisible();
+  await readInterpretation(page);
   expect(starts).toHaveLength(1);
   expect(starts[0]).not.toHaveProperty('spreadPhoto');
 });
@@ -319,7 +329,7 @@ test('a photo still preparing then an app draw sends nothing', async ({ page }) 
   );
   await expect(page.getByRole('img', { name: 'Your attached spread' })).toHaveCount(0);
   await start.click();
-  await expect(page.getByTestId('accepted-reading')).toBeVisible();
+  await readInterpretation(page);
   expect(starts).toHaveLength(1);
   expect(starts[0]).not.toHaveProperty('spreadPhoto');
 });
@@ -428,4 +438,182 @@ test('editing the question after confirming excerpts needs a new confirmation', 
   await page.getByRole('button', { name: 'Let Reflection draw', exact: true }).click();
   await expect(page.locator('.review-question')).toHaveText('Which change feels workable today?');
   await expect(selectedContext(page).locator('blockquote')).toHaveText('😀é');
+});
+
+const cardsHeading = (page: Page) => heading(page, 'Take a moment with the spread.');
+
+/**
+ * Keeps the next started request in progress until release(). Local synthetic readings
+ * publish at once, so its start response is reported as still dispatching and only its own
+ * status polls are held; other readings' polls pass through.
+ */
+async function holdRequest(page: Page) {
+  let release!: () => void;
+  let arrive!: () => void;
+  let requestId: string | null = null;
+  const held = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  const arrived = new Promise<void>((resolve) => {
+    arrive = resolve;
+  });
+  await page.route('**/api/v1/requests', async (route) => {
+    if (route.request().method() !== 'POST') return route.continue();
+    const response = await route.fetch();
+    const started = apiSchemas.StartResponse.parse(await response.json());
+    requestId = started.status.requestId;
+    await route.fulfill({
+      response,
+      json: {
+        ...started,
+        status: {
+          ...started.status,
+          state: 'dispatching',
+          revision: 2,
+          editionId: null,
+          events: [],
+          nextSequence: 2,
+        },
+      },
+    });
+  });
+  await page.route(/\/api\/v1\/requests\/[0-9a-f-]+\?after=/, async (route) => {
+    if (!requestId || !route.request().url().includes(requestId)) return route.continue();
+    const response = await route.fetch();
+    arrive();
+    await held;
+    await route.fulfill({ response }).catch(() => undefined);
+  });
+  return { arrived, release: () => release() };
+}
+
+test('a new reading shows its three cards before the interpretation', async ({ page }) => {
+  await account(page, '198.51.100.22');
+  await enableAi(page);
+  await openTarot(page);
+  await toReview(page, 'What is ready to begin?');
+  await startFromReview(page);
+  await expect(cardsHeading(page)).toBeFocused();
+  await expect(step(page, 'Cards')).toHaveAttribute('aria-current', 'step');
+  await expect(page).toHaveURL(/\/requests\//);
+  await expect(page.getByTestId('accepted-reading')).toHaveCount(0);
+  await expect(page.getByText('What is ready to begin?', { exact: true })).toBeVisible();
+  const figures = page.getByRole('figure');
+  await expect(figures).toHaveCount(3);
+  const captions = await figures.locator('figcaption').allInnerTexts();
+  expect(captions.map((caption) => caption.split(':')[0])).toEqual([
+    'Situation',
+    'Tension',
+    'Possibility',
+  ]);
+  for (const caption of captions)
+    expect(caption).toMatch(/^(Situation|Tension|Possibility): .+, (upright|reversed)$/);
+  await expect(page.getByRole('figure', { name: captions[0]! })).toBeVisible();
+
+  await page.getByRole('button', { name: 'Read the interpretation', exact: true }).click();
+  const accepted = page.getByTestId('accepted-reading');
+  await expect(accepted.getByRole('heading', { name: 'What is ready to begin?' })).toBeFocused();
+  await expect(cardsHeading(page)).toHaveCount(0);
+  await expect(page.getByRole('list', { name: 'Reading steps' })).toHaveCount(0);
+  await accepted.getByText('Cards, sources and shared context', { exact: true }).click();
+  const sources = await accepted.locator('.return-source h3').allInnerTexts();
+  for (const caption of captions) {
+    const name = caption.slice(caption.indexOf(': ') + 2, caption.lastIndexOf(', '));
+    expect(
+      sources.some((source) => source.includes(name)),
+      name,
+    ).toBe(true);
+  }
+});
+
+test('reloading or reopening a reading goes straight to the interpretation', async ({ page }) => {
+  await account(page, '198.51.100.23');
+  await reading(page, 'What will I come back to?');
+  await page.reload();
+  await expect(page.getByTestId('accepted-reading')).toBeVisible();
+  await expect(cardsHeading(page)).toHaveCount(0);
+  await page.getByRole('button', { name: 'Save reading', exact: true }).click();
+  await expect(page.getByText('Saved until you delete it.', { exact: true })).toBeVisible();
+  await page
+    .getByRole('navigation', { name: 'Reading actions' })
+    .getByRole('button', { name: 'Journal', exact: true })
+    .click();
+  await page.getByRole('button', { name: 'What will I come back to?' }).click();
+  await expect(page.getByTestId('accepted-reading')).toBeVisible();
+  await expect(cardsHeading(page)).toHaveCount(0);
+});
+
+test('a follow-up shows neither the steps nor the cards', async ({ page }) => {
+  await account(page, '203.0.113.10');
+  await reading(page, 'How might I protect a little time for practice?');
+  await page.getByRole('button', { name: 'Save reading', exact: true }).click();
+  await expect(page.getByText('Saved until you delete it.', { exact: true })).toBeVisible();
+  await page.getByRole('link', { name: 'Ask a follow-up', exact: true }).click();
+  await page
+    .getByLabel('Your follow-up question', { exact: true })
+    .fill('What changed after a week?');
+  await page.getByLabel('Use English for this reading').check();
+  await page.getByRole('button', { name: 'Review follow-up', exact: true }).click();
+  const hold = await holdRequest(page);
+  await page.getByRole('button', { name: 'Start follow-up', exact: true }).click();
+  await hold.arrived;
+  await expect(page.getByRole('region', { name: 'Reading request' })).toBeVisible();
+  await expect(page.getByRole('list', { name: 'Reading steps' })).toHaveCount(0);
+  hold.release();
+  await expect(
+    page
+      .getByTestId('accepted-reading')
+      .getByRole('heading', { name: 'What changed after a week?' }),
+  ).toBeVisible();
+  await expect(cardsHeading(page)).toHaveCount(0);
+});
+
+test('returning to a reading still in progress shows the cards', async ({ page }) => {
+  await account(page, '203.0.113.11');
+  await enableAi(page);
+  await openTarot(page);
+  await toReview(page, 'What is still taking shape?');
+  const hold = await holdRequest(page);
+  await startFromReview(page);
+  await hold.arrived;
+  await expect(page.getByRole('region', { name: 'Reading request' })).toBeVisible();
+  await expect(step(page, 'Cards')).toHaveAttribute('aria-current', 'step');
+  await page
+    .getByRole('navigation', { name: 'Reading actions' })
+    .getByRole('button', { name: 'Journal', exact: true })
+    .click();
+  hold.release();
+  await expect(heading(page, 'Your journal')).toBeVisible();
+  await page.getByRole('button', { name: 'Resume reading request', exact: true }).click();
+  await expect(cardsHeading(page)).toBeFocused();
+  await readInterpretation(page);
+});
+
+test('history navigation to an earlier reading never shows its cards', async ({ page }) => {
+  await account(page, '203.0.113.12');
+  await reading(page, 'The first saved question');
+  await page.getByRole('button', { name: 'Save reading', exact: true }).click();
+  await expect(page.getByText('Saved until you delete it.', { exact: true })).toBeVisible();
+  await page
+    .getByRole('navigation', { name: 'Reading actions' })
+    .getByRole('button', { name: 'Journal', exact: true })
+    .click();
+  // Opening from the journal adds a history entry for the first reading.
+  await page.getByRole('button', { name: 'The first saved question' }).click();
+  const first = page
+    .getByTestId('accepted-reading')
+    .getByRole('heading', { name: 'The first saved question' });
+  await expect(first).toBeVisible();
+  await page.goBack();
+  await expect(heading(page, 'Your journal')).toBeVisible();
+  // A second reading is still drawing in this tab when history moves forward to the first.
+  await openTarot(page);
+  await toReview(page, 'A second question, still drawing');
+  const hold = await holdRequest(page);
+  await startFromReview(page);
+  await hold.arrived;
+  await page.goForward();
+  await expect(first).toBeVisible();
+  await expect(cardsHeading(page)).toHaveCount(0);
+  hold.release();
 });

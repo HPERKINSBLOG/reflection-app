@@ -63,6 +63,8 @@ import {
   editionPath,
 } from './follow-up.tsx';
 import { FollowUpReview, SelectedContextSummary } from './submission-review.tsx';
+import { drawnCards } from './drawn-cards.ts';
+import { CardsStep } from './tarot-cards.tsx';
 import {
   PhotoStep,
   QuestionStep,
@@ -246,6 +248,24 @@ export function ReadingWorkspace({
   const [imported, setImported] = useState<z.infer<typeof ImportedReading> | null>(null);
   const [reading, setReading] = useState<z.infer<typeof AnyAcceptedReading> | null>(null);
   const [pattern, setPattern] = useState<PatternReadingV1 | null>(null);
+  // A new reading shows its cards first only to someone who was waiting for it in this tab:
+  // they started it here, or came back to its request while it was still in progress. Any
+  // arrival at a reading's address goes through the request screen's acceptance, so the
+  // mark names the request it belongs to and lives in memory only.
+  const awaitingCards = useRef<string | null>(
+    resume?.request?.pending ? resume.request.target.id : null,
+  );
+  const [cardsFor, setCardsFor] = useState<string | null>(null);
+  const cardsHeading = useRef<HTMLHeadingElement>(null);
+  const showCards =
+    mode === 'reading' &&
+    reading !== null &&
+    !reading.parentEditionId &&
+    cardsFor !== null &&
+    cardsFor === selectedEditionId;
+  useLayoutEffect(() => {
+    if (showCards && !document.hidden) cardsHeading.current?.focus();
+  }, [showCards]);
   useLayoutEffect(() => {
     const jumpToNotes = window.location.hash === '#revisit-notes';
     if (mode === 'reading' && selectedEditionId && (focusResultOnCommit.current || jumpToNotes)) {
@@ -476,6 +496,7 @@ export function ReadingWorkspace({
   }));
   const clearReading = () => {
     focusResultOnCommit.current = false;
+    setCardsFor(null);
     setRecord(null);
     setSelectedEditionId(null);
     selectedTarget.current = null;
@@ -1264,6 +1285,10 @@ export function ReadingWorkspace({
           variant="secondary"
           onClick={() => {
             const target = resumeTarget.current ?? request.target;
+            // Coming back while it is still in progress counts as waiting for it.
+            // A mark already naming this request means its reading has not been seen yet.
+            awaitingCards.current =
+              requestPending || awaitingCards.current === target.id ? target.id : null;
             setRequest({ target, focus: false });
             replacePath(requestPath(target));
             setMode('request');
@@ -1271,6 +1296,9 @@ export function ReadingWorkspace({
         >
           Resume reading request
         </Button>
+      )}
+      {mode === 'request' && request?.start && !request.start.input.parentEditionId && (
+        <ReadingSteps current="cards" />
       )}
       {mode === 'request' && request && (
         <RequestProgress
@@ -1280,6 +1308,12 @@ export function ReadingWorkspace({
           onSession={onSession}
           onExpired={onExpired}
           onTarget={(target) => {
+            // The waiting mark follows its request from start intent to request id.
+            if (
+              awaitingCards.current !== null &&
+              awaitingCards.current === resumeTarget.current?.id
+            )
+              awaitingCards.current = target.id;
             resumeTarget.current = target;
             replacePath(requestPath(target));
           }}
@@ -1319,7 +1353,18 @@ export function ReadingWorkspace({
           }}
           onAccepted={(id, focus, target) =>
             void run(async (current) => {
-              await open(id, current, false, false, focus, target);
+              const waited =
+                awaitingCards.current !== null && awaitingCards.current === target.requestId;
+              // Set before open() commits, so the reading's first render already shows the cards.
+              setCardsFor(waited ? target.editionId : null);
+              try {
+                await open(id, current, false, false, focus, target);
+              } catch (error) {
+                setCardsFor(null);
+                throw error;
+              }
+              // The mark clears only once the reading has opened; a skipped acceptance keeps it.
+              if (waited && current()) awaitingCards.current = null;
               if (current()) {
                 intents.current.delete('start');
                 resetContext();
@@ -1378,6 +1423,8 @@ export function ReadingWorkspace({
             const intent = actionKey('start', values);
             const target = { kind: 'intent' as const, id: draftIntent };
             resumeTarget.current = target;
+            // Whoever starts a new reading here is waiting for its cards.
+            awaitingCards.current = mode === 'new' ? draftIntent : null;
             replacePath(requestPath(target));
             setRequest({
               target,
@@ -1640,7 +1687,18 @@ export function ReadingWorkspace({
           Retry opening reading
         </Button>
       )}
-      {mode === 'reading' && record && selectedEditionId && (
+      {showCards && reading && (
+        <CardsStep
+          headingRef={cardsHeading}
+          question={reading.question}
+          cards={drawnCards(reading)}
+          onRead={() => {
+            setCardsFor(null);
+            requestAnimationFrame(() => resultHeading.current?.focus());
+          }}
+        />
+      )}
+      {mode === 'reading' && record && selectedEditionId && !showCards && (
         <section
           className={`reading-detail${reading ? ' reading-detail-native reading-return' : pattern ? ' reading-detail-pattern' : ''}`}
           aria-label="Reading detail"
