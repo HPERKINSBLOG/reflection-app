@@ -331,6 +331,13 @@ export function ReadingWorkspace({
     focusStep.current = next;
     setStep(next);
   };
+  /** Focuses the Question step's heading once it shows, or at once when it already does. */
+  const focusQuestion = () => {
+    if (mode === 'new' && step === 'question') {
+      focusStep.current = null;
+      questionHeading.current?.focus();
+    } else focusStep.current = 'question';
+  };
   useLayoutEffect(() => {
     if (mode !== 'new' || focusStep.current !== step) return;
     focusStep.current = null;
@@ -1010,6 +1017,10 @@ export function ReadingWorkspace({
   const confirmed =
     context.confirmation?.binding === contextBinding(binding) ? context.confirmation : null;
   const contextReady = context.count === 0 || (Boolean(user.continuityReady) && Boolean(confirmed));
+  // Once the excerpts are confirmed or removed, the message asking for that goes too.
+  useEffect(() => {
+    if (contextReady) setContinueError(null);
+  }, [contextReady]);
   const reviewing =
     mode === 'followup' && reviewedBinding === contextBinding(binding) && contextReady;
   const loadingFirstPage = mode === 'history' && !history && !historyRetry;
@@ -1096,7 +1107,7 @@ export function ReadingWorkspace({
           intents.current.delete('start');
           resetContext();
           resetSteps();
-          focusStep.current = 'question';
+          focusQuestion();
           clearReading();
           setMode('new');
           setRequest(null);
@@ -1210,7 +1221,7 @@ export function ReadingWorkspace({
           onTarot={(prompt) => {
             resetContext();
             resetSteps();
-            focusStep.current = 'question';
+            focusQuestion();
             clearReading();
             setQuestion(prompt);
             setEnglish(false);
@@ -1340,6 +1351,7 @@ export function ReadingWorkspace({
             intents.current.delete('start');
             resetContext();
             resetSteps();
+            if (!start.parentEditionId) focusQuestion();
             setMode(start.parentEditionId ? 'followup' : 'new');
             replacePath(
               start.parentEditionId && record

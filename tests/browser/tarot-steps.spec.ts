@@ -242,6 +242,18 @@ test('the steps can be completed by keyboard alone, with named and described con
   expect(starts).toHaveLength(1);
 });
 
+test('activating Tarot again on the question step moves focus to its heading', async ({ page }) => {
+  await account(page, '198.51.100.28');
+  await enableAi(page);
+  await openTarot(page);
+  const tarot = page
+    .getByRole('navigation', { name: 'Reading actions' })
+    .getByRole('button', { name: 'Tarot', exact: true });
+  await tarot.focus();
+  await page.keyboard.press('Enter');
+  await expect(heading(page, 'What is on your mind?')).toBeFocused();
+});
+
 test('a physical spread needs a ready photo before review', async ({ page }) => {
   await account(page, '198.51.100.16');
   await enableAi(page);
@@ -398,6 +410,55 @@ test('unconfirmed excerpts block the spread step', async ({ page }) => {
   await expect(heading(page, 'One question. Three perspectives.')).toBeFocused();
 });
 
+test('confirming the excerpts clears the message that asked for it', async ({ page }) => {
+  const saved = await savedNote(page, '198.51.100.30');
+  await openTarot(page);
+  await page.getByLabel('Your question', { exact: true }).fill('What would make this lighter?');
+  await addExcerpt(page, saved.session.id);
+  await page.getByRole('button', { name: 'Choose your spread', exact: true }).click();
+  const message = page.getByText('Review and confirm your selected excerpts to continue.', {
+    exact: true,
+  });
+  await expect(message).toBeVisible();
+  await confirmExcerpts(page);
+  await expect(message).toHaveCount(0);
+});
+
+test('a start refused for its excerpts returns to the question with focus on its heading', async ({
+  page,
+}) => {
+  const saved = await savedNote(page, '198.51.100.29');
+  await openTarot(page);
+  const question = page.getByLabel('Your question', { exact: true });
+  await question.fill('What is changing underneath?');
+  await addExcerpt(page, saved.session.id);
+  await confirmExcerpts(page);
+  await page.getByRole('button', { name: 'Choose your spread', exact: true }).click();
+  await page.getByRole('button', { name: 'Let Reflection draw', exact: true }).click();
+  await expect(heading(page, 'Ready when you are.')).toBeFocused();
+  await page.route('**/api/v1/requests', (route) =>
+    route.request().method() === 'POST'
+      ? route.fulfill({
+          status: 409,
+          json: apiSchemas.ErrorEnvelope.parse({
+            error: {
+              code: 'CONTEXT_CHANGED',
+              message: 'A selected source changed.',
+              correlationId: '00000000-0000-4000-8000-000000000216',
+              retry: 'never',
+              retryAfterSeconds: null,
+              currentRevision: null,
+            },
+          }),
+        })
+      : route.continue(),
+  );
+  await startFromReview(page);
+  await expect(page.getByText(/Your question is still here\./)).toBeVisible();
+  await expect(heading(page, 'What is on your mind?')).toBeFocused();
+  await expect(question).toHaveValue('What is changing underneath?');
+});
+
 test('review lists exactly the confirmed excerpts', async ({ page }) => {
   const saved = await savedNote(page, '198.51.100.20');
   await openTarot(page);
@@ -511,6 +572,9 @@ test('a new reading shows its three cards before the interpretation', async ({ p
   for (const caption of captions)
     expect(caption).toMatch(/^(Situation|Tension|Possibility): .+, (upright|reversed)$/);
   await expect(page.getByRole('figure', { name: captions[0]! })).toBeVisible();
+  await expect(
+    page.getByRole('complementary', { name: 'Notice before interpreting.', exact: true }),
+  ).toBeVisible();
 
   await page.getByRole('button', { name: 'Read the interpretation', exact: true }).click();
   const accepted = page.getByTestId('accepted-reading');
@@ -558,6 +622,21 @@ test('the three cards keep one row from left to right on phones, and stack below
     stack.map((box) => box.x),
     'one column at 320 px',
   ).toEqual([stack[0]!.x, stack[0]!.x, stack[0]!.x]);
+});
+
+test('a long unbroken question stays inside the column on review and cards', async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 720 });
+  await account(page, '198.51.100.31');
+  await enableAi(page);
+  await openTarot(page);
+  await toReview(page, 'x'.repeat(160));
+  // Overflowing text makes an element wider inside than its own box.
+  const fits = (selector: string) =>
+    page.locator(selector).evaluate((node) => node.scrollWidth <= node.clientWidth);
+  expect(await fits('.review-question'), 'the question on Review').toBe(true);
+  await startFromReview(page);
+  await expect(cardsHeading(page)).toBeFocused();
+  expect(await fits('.tarot-cards-question'), 'the question on Cards').toBe(true);
 });
 
 test('reloading or reopening a reading goes straight to the interpretation', async ({ page }) => {
@@ -652,6 +731,24 @@ test('cards already shown do not return after a trip to Account', async ({ page 
   await backToReadings(page);
   await expect(page.getByTestId('accepted-reading')).toBeVisible();
   await expect(cardsHeading(page)).toHaveCount(0);
+});
+
+// A ruling, not the design's first wording: the reader has not seen these cards yet.
+test('a reading that finishes while Account is open still shows its cards on return', async ({
+  page,
+}) => {
+  await account(page, '198.51.100.32');
+  await enableAi(page);
+  await openTarot(page);
+  await toReview(page, 'What finished while I was away?');
+  const hold = await holdRequest(page);
+  await startFromReview(page);
+  await hold.arrived;
+  await openAccount(page);
+  hold.release();
+  await backToReadings(page);
+  await expect(cardsHeading(page)).toBeFocused();
+  await readInterpretation(page);
 });
 
 test('a photo that finishes after an app-draw Start leaves the started question alone', async ({

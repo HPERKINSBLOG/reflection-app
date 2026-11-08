@@ -2,7 +2,6 @@ import type { z } from 'zod';
 import type { AnyAcceptedReading } from '../contracts/index.ts';
 import { CardFace } from './card-face.tsx';
 import { TopicChip } from './design/components.tsx';
-import { cardName } from './card-names.ts';
 import { drawnCards } from './drawn-cards.ts';
 
 type Reading = z.infer<typeof AnyAcceptedReading>;
@@ -106,10 +105,7 @@ export function ReturnInterpretation({
           your own reflection. These meanings are unapproved development material.
         </p>
         {reading.basis.cards.map((card, index) => {
-          const name =
-            reading.kind === 'tarot.accepted.v2'
-              ? reading.draw[index]!.name
-              : cardName(reading.basis.deckEdition, card.cardId);
+          const name = drawn.find((item) => item.position === card.position)?.name;
           const unit = reading.units.find((value) => value.position === card.position);
           const position = card.position[0]!.toUpperCase() + card.position.slice(1);
           return (
