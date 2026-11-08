@@ -1,5 +1,13 @@
 import { expect, test, type Page, type Request } from '@playwright/test';
-import { account, openAccount, reading, savedSnapshot } from '../fixtures/browser-reading.ts';
+import {
+  account,
+  openAccount,
+  readInterpretation,
+  reading,
+  savedSnapshot,
+  startFromReview,
+  toReview,
+} from '../fixtures/browser-reading.ts';
 
 async function savedReading(page: Page, question: string) {
   await reading(page, question);
@@ -115,10 +123,9 @@ test('an offline request checks its receipt before resending and preserves an un
     .getByRole('navigation', { name: 'Reading actions' })
     .getByRole('button', { name: 'Tarot', exact: true })
     .click();
-  await page.getByLabel('Your question', { exact: true }).fill('Delete only this reading.');
-  await page.getByLabel('Use English for this reading').check();
-  await page.getByRole('button', { name: 'Start reading', exact: true }).click();
-  await expect(page.getByTestId('accepted-reading')).toBeVisible();
+  await toReview(page, 'Delete only this reading.');
+  await startFromReview(page);
+  await readInterpretation(page);
   await page.getByRole('button', { name: 'Save reading', exact: true }).click();
   await expect(page.getByText('Saved until you delete it.', { exact: true })).toBeVisible();
   const saved = await savedSnapshot(page);

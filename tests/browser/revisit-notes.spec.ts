@@ -8,8 +8,11 @@ import {
   keepKit,
   openAccount,
   openSignIn,
+  readInterpretation,
   reading,
   savedSnapshot,
+  startFromReview,
+  toReview,
 } from '../fixtures/browser-reading.ts';
 import { datedNotesFixture } from '../fixtures/browser-journey.ts';
 
@@ -559,10 +562,9 @@ test('late note responses cannot repopulate Account or a different reading', asy
     .getByRole('navigation', { name: 'Reading actions' })
     .getByRole('button', { name: 'Tarot', exact: true })
     .click();
-  await page.getByLabel('Your question', { exact: true }).fill('Synthetic different edition');
-  await page.getByLabel('Use English for this reading').check();
-  await page.getByRole('button', { name: 'Start reading', exact: true }).click();
-  await expect(page.getByTestId('accepted-reading')).toBeVisible();
+  await toReview(page, 'Synthetic different edition');
+  await startFromReview(page);
+  await readInterpretation(page);
   releaseEdition();
   await editionFinished;
   await expect(page.getByText('Synthetic old private note', { exact: true })).toHaveCount(0);

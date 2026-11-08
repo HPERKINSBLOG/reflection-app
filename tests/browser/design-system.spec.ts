@@ -139,7 +139,7 @@ test('changing themes preserves the in-memory reading draft and field descriptio
   for (const theme of ['evening', 'paper']) {
     await page.getByLabel('Color theme').selectOption(theme);
     await expect(question).toHaveValue('What would make room for another perspective?');
-    await expect(question).toHaveAccessibleDescription(/Include what you are considering/);
+    await expect(question).toHaveAccessibleDescription(/Start with what you are considering/);
     await question.focus();
     await expect(question).toHaveCSS('outline-width', '2px');
     await page.screenshot({

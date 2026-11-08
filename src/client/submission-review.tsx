@@ -5,6 +5,33 @@ import type { ContextSubmission } from './context-selection.tsx';
 import { Button } from './design/components.tsx';
 import { date } from './date.ts';
 
+/** The excerpts a reading will send, exactly as the person reviewed them. */
+export function SelectedContextSummary({ context }: { context: ContextSubmission }) {
+  return (
+    <div className="submission-review-section">
+      <h3>Selected context</h3>
+      {!context.count ? (
+        <p>No excerpts selected. No earlier writing will be sent.</p>
+      ) : (
+        context.reviewedExcerpts?.map((excerpt) => (
+          <div key={excerpt.id} className="review-excerpt">
+            <p>
+              {excerpt.authorship === 'user'
+                ? 'Your words'
+                : excerpt.authorship === 'generated'
+                  ? 'Generated text'
+                  : 'Unknown authorship'}{' '}
+              · {excerpt.title}
+            </p>
+            <p className="muted">{date(excerpt.at)}</p>
+            <blockquote>{excerpt.text}</blockquote>
+          </div>
+        ))
+      )}
+    </div>
+  );
+}
+
 export function FollowUpReview({
   parent,
   question,
@@ -44,27 +71,7 @@ export function FollowUpReview({
         <h3>Your question</h3>
         <p className="review-question">{question}</p>
       </div>
-      <div className="submission-review-section">
-        <h3>Selected context</h3>
-        {!context.count ? (
-          <p>No excerpts selected. No earlier writing will be sent.</p>
-        ) : (
-          context.reviewedExcerpts?.map((excerpt) => (
-            <div key={excerpt.id} className="review-excerpt">
-              <p>
-                {excerpt.authorship === 'user'
-                  ? 'Your words'
-                  : excerpt.authorship === 'generated'
-                    ? 'Generated text'
-                    : 'Unknown authorship'}{' '}
-                · {excerpt.title}
-              </p>
-              <p className="muted">{date(excerpt.at)}</p>
-              <blockquote>{excerpt.text}</blockquote>
-            </div>
-          ))
-        )}
-      </div>
+      <SelectedContextSummary context={context} />
       {notice && <p>{notice}</p>}
       <p>
         This follow-up stays with the original saved reading until deletion. Deleting the reading

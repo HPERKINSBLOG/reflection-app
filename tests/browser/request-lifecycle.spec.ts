@@ -6,17 +6,17 @@ import {
   enableAi,
   openAccount,
   openSignIn,
+  openTarot,
+  readInterpretation,
   reading,
   savedSnapshot,
+  toReview,
 } from '../fixtures/browser-reading.ts';
 
 async function form(page: Page, question = 'Synthetic request interruption') {
   await enableAi(page);
-  await page
-    .getByRole('navigation', { name: 'Reading actions' })
-    .getByRole('button', { name: 'Tarot', exact: true })
-    .click();
-  await page.getByLabel('Your question').fill(question);
+  await openTarot(page);
+  await toReview(page, question);
   await page.getByLabel('Use English for this reading').check();
 }
 async function emptyStorage(page: Page) {
@@ -149,12 +149,11 @@ test('accepted completion refreshes displayed allowance even when progress unmou
   });
   try {
     await page.getByRole('button', { name: 'Start reading', exact: true }).click();
-    await expect(page.getByTestId('accepted-reading')).toBeVisible();
+    await readInterpretation(page);
     release();
-    await page
-      .getByRole('navigation', { name: 'Reading actions' })
-      .getByRole('button', { name: 'Tarot', exact: true })
-      .click();
+    // The allowance shows on Review, where Start is.
+    await openTarot(page);
+    await toReview(page, 'Synthetic allowance check');
     await expect(page.getByText('Readings left: 2 today · 29 this month.')).toBeVisible();
   } finally {
     release();
@@ -180,7 +179,7 @@ test('explicit Start retry preserves its body and key and joins the original rea
   });
   await page.getByRole('button', { name: 'Start reading', exact: true }).click();
   await page.getByRole('button', { name: 'Retry this request' }).click();
-  await expect(page.getByTestId('accepted-reading')).toBeVisible();
+  await readInterpretation(page);
   expect(attempts).toHaveLength(2);
   expect(attempts[1]).toEqual(attempts[0]);
   expect((await page.request.get('/api/v1/me').then((r) => r.json())).remainingDay).toBe(2);
@@ -233,8 +232,9 @@ test('a delayed status cannot reopen a view after leaving progress; explicit res
   release();
   await expect(page.getByRole('heading', { name: 'Your journal', exact: true })).toBeVisible();
   await expect(page.getByTestId('accepted-reading')).toHaveCount(0);
+  // Resumed while still in progress, so its cards come first.
   await page.getByRole('button', { name: 'Resume reading request' }).click();
-  await expect(page.getByTestId('accepted-reading')).toBeVisible();
+  await readInterpretation(page);
 });
 
 test('reading inspection has semantic labels, keyboard source expansion and completion focus', async ({
@@ -245,6 +245,11 @@ test('reading inspection has semantic labels, keyboard source expansion and comp
   await account(page, '198.51.100.83');
   await form(page, 'Synthetic source inspection');
   await page.getByRole('button', { name: 'Start reading', exact: true }).focus();
+  await page.keyboard.press('Enter');
+  await expect(
+    page.getByRole('heading', { name: 'Take a moment with the spread.', exact: true }),
+  ).toBeFocused();
+  await page.getByRole('button', { name: 'Read the interpretation', exact: true }).focus();
   await page.keyboard.press('Enter');
   const accepted = page.getByTestId('accepted-reading');
   await expect(
@@ -424,13 +429,11 @@ test('account navigation by browser Back retains the canonical progress address'
   page,
 }) => {
   await account(page, '198.51.100.207');
-  await form(page);
-  await page.getByLabel('Your question', { exact: true }).fill('');
+  await enableAi(page);
+  await openTarot(page);
   await openAccount(page);
   await backToReadings(page);
-  await page
-    .getByLabel('Your question', { exact: true })
-    .fill('Synthetic progress return destination');
+  await toReview(page, 'Synthetic progress return destination');
   await page.getByLabel('Use English for this reading').check();
   await pendingFixture(page);
   await page.getByRole('button', { name: 'Start reading', exact: true }).click();
@@ -592,6 +595,9 @@ test('explicit New reading after a stopped request uses a fresh identity for the
     .getByRole('navigation', { name: 'Reading actions' })
     .getByRole('button', { name: 'Tarot', exact: true })
     .click();
+  // The question is kept; a deliberate new reading walks the steps again.
+  await page.getByRole('button', { name: 'Choose your spread', exact: true }).click();
+  await page.getByRole('button', { name: 'Let Reflection draw', exact: true }).click();
   await page.getByRole('button', { name: 'Start reading', exact: true }).click();
   await expect.poll(() => submitted.length).toBe(2);
   expect(submitted[1]!.intent).not.toBe(submitted[0]!.intent);
@@ -640,8 +646,9 @@ for (const boundary of ['status', 'reading'] as const) {
       await finished;
       await expect(page).toHaveURL('http://localhost:8787/');
       await expect(page.getByTestId('accepted-reading')).toHaveCount(0);
+      // Returning to a request still unseen in this tab shows its cards first.
       await page.goForward();
-      await expect(page.getByTestId('accepted-reading')).toBeVisible();
+      await readInterpretation(page);
     } finally {
       release();
     }

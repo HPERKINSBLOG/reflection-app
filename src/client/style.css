@@ -1904,6 +1904,170 @@ button.history-link:hover:enabled {
   font-size: 14px;
   line-height: 20px;
 }
+
+/* Tarot steps: one decision per screen before a new reading starts. */
+/* The question step stays mounted while hidden; its grid display must not override that. */
+.tarot-step[hidden] {
+  display: none;
+}
+.reading-steps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  margin: 0 0 24px;
+  padding: 0;
+  list-style: none;
+  color: var(--muted-foreground);
+  font-family: var(--font-display);
+  font-size: 12px;
+  line-height: 18px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.reading-steps li + li::before {
+  content: "/" / "";
+  margin-right: 12px;
+}
+.reading-steps li[aria-current="step"] {
+  color: var(--foreground);
+  font-weight: 600;
+}
+.tarot-step-heading {
+  position: relative;
+  margin-bottom: 24px;
+}
+.tarot-step-heading .eyebrow {
+  margin: 0 0 8px;
+}
+.tarot-step-heading h2 {
+  font-family: var(--font-serif);
+  font-size: clamp(2rem, 4vw, 2.5rem);
+  line-height: 1.1;
+  font-weight: 500;
+  letter-spacing: -0.025em;
+}
+.tarot-step-lead {
+  margin: 12px 0 0;
+  font-size: 16px;
+  line-height: 24px;
+}
+/* The question step keeps the spread ribbon beside its heading. */
+.tarot-step-question .tarot-step-heading > :not(.new-reading-art) {
+  position: relative;
+  z-index: 1;
+  max-width: 52%;
+}
+.tarot-step-error {
+  margin-top: 12px;
+}
+.question-suggestions {
+  min-width: 0;
+  margin: 20px 0 0;
+  padding: 0;
+  border: 0;
+}
+.question-suggestions legend {
+  margin-bottom: 8px;
+  padding: 0;
+  font-size: 14px;
+  line-height: 21px;
+}
+.question-suggestion-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.question-suggestion {
+  min-height: 44px;
+  padding: 9px 16px;
+  font-size: 14px;
+  line-height: 21px;
+  text-align: left;
+}
+.tarot-step-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 28px;
+}
+.spread-options {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 20px;
+}
+button.spread-option {
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 8px;
+  min-height: 0;
+  padding: 20px;
+  border-radius: var(--radius-2xl);
+  font-weight: 400;
+  text-align: left;
+}
+.spread-option-title {
+  font-family: var(--font-serif);
+  font-size: 24px;
+  line-height: 1.2;
+  font-weight: 500;
+}
+.spread-option-caption {
+  font-family: var(--font-display);
+  font-size: 12px;
+  line-height: 18px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.reading-preflight .check {
+  margin-top: 20px;
+}
+.review-spread-photo {
+  display: block;
+  max-width: 100%;
+  max-height: 240px;
+  margin-top: 8px;
+  border-radius: var(--radius-lg);
+  object-fit: contain;
+}
+.tarot-cards-question {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: 20px;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+/* One row, left to right, as the spread is laid out. From 360 px each face is
+   at least the 88 px the reading uses on phones; below that they stack. */
+.tarot-cards {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin: 24px 0 12px;
+}
+@media (max-width: 359px) {
+  .tarot-cards {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+.tarot-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  margin: 0;
+}
+.tarot-card figcaption {
+  font-size: 14px;
+  line-height: 21px;
+  text-align: center;
+}
+.tarot-cards-note {
+  margin: 0;
+  font-size: 12px;
+  line-height: 18px;
+}
 .spread-photo-card {
   margin: 0;
   display: flex;
@@ -2097,6 +2261,13 @@ button.history-link:hover:enabled {
   padding: 6px;
   border-radius: var(--radius-xl);
   background: var(--muted);
+}
+/* The thumbnail card face, enlarged for the moment with the spread. */
+.tarot-card .card-face {
+  flex: none;
+  width: min(100%, 168px);
+  height: auto;
+  aspect-ratio: 96 / 168;
 }
 .card-face-inner {
   display: flex;
@@ -2503,6 +2674,28 @@ div.reading-closing {
     height: 64px;
     object-fit: contain;
     object-position: right;
+  }
+  .tarot-step-heading {
+    margin-bottom: 16px;
+  }
+  .tarot-step-heading h2 {
+    font-size: clamp(1.875rem, 5vw, 2.25rem);
+  }
+  .tarot-step-question .tarot-step-heading {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 64px;
+    column-gap: 12px;
+  }
+  .tarot-step-question .tarot-step-heading > :not(.new-reading-art) {
+    grid-column: 1;
+    max-width: none;
+  }
+  .tarot-step-question .tarot-step-heading .new-reading-art {
+    grid-column: 2;
+    grid-row: 1 / span 3;
+  }
+  .spread-options {
+    grid-template-columns: minmax(0, 1fr);
   }
   .new-reading-layout {
     grid-template-columns: minmax(0, 1fr);

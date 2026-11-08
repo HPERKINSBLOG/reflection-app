@@ -144,9 +144,11 @@ for (const width of [320, 390, 768, 1280]) {
         .getByRole('button', { name: 'Tarot', exact: true })
         .click();
       await page.getByLabel('Your question', { exact: true }).fill(longQuestion);
-      await page.getByLabel('Use English for this reading').check();
+      if (width <= 390) await expectNoArtOverlap(page);
       await capture('new-empty');
-      await page.getByText('Use my own spread', { exact: true }).click();
+      await page.getByRole('button', { name: 'Choose your spread', exact: true }).click();
+      await capture('new-spread');
+      await page.getByRole('button', { name: 'Use my physical spread', exact: true }).click();
       const illustration = await page.locator('.spread-intro-art').boundingBox();
       expect(illustration).not.toBeNull();
       expect(illustration!.height / illustration!.width).toBeCloseTo(793 / 1983, 2);
@@ -155,13 +157,15 @@ for (const width of [320, 390, 768, 1280]) {
         emptyAttachment!.height,
         'Optional-photo illustration must not stretch its frame',
       ).toBeLessThan(240);
-      if (width <= 390) await expectNoArtOverlap(page);
-      await page.getByLabel('Photo of your spread (optional)').setInputFiles({
+      await page.getByLabel('Photo of your spread', { exact: true }).setInputFiles({
         name: longFilename,
         mimeType: 'image/jpeg',
         buffer: await readFile(spreadPhotoPath),
       });
       await expect(page.getByTestId('spread-photo-preview')).toContainText(longFilename);
+      await capture('new-photo');
+      await page.getByRole('button', { name: 'Review your reading', exact: true }).click();
+      await page.getByLabel('Use English for this reading').check();
       await expect(page.getByRole('button', { name: 'Start reading', exact: true })).toBeEnabled();
       await expect(
         page.getByText(READING_PRODUCT_COPY.startProcessing, { exact: true }),
@@ -171,6 +175,11 @@ for (const width of [320, 390, 768, 1280]) {
       ).toBeVisible();
       await capture('new-attached');
       await page.getByRole('button', { name: 'Start reading', exact: true }).click();
+      await expect(
+        page.getByRole('heading', { name: 'Take a moment with the spread.', exact: true }),
+      ).toBeVisible();
+      await capture('cards');
+      await page.getByRole('button', { name: 'Read the interpretation', exact: true }).click();
       const accepted = page.getByTestId('accepted-reading');
       await expect(accepted).toBeVisible();
       await expect(
@@ -276,8 +285,11 @@ for (const width of [320, 390, 768, 1280]) {
         .getByRole('button', { name: 'Tarot', exact: true })
         .click();
       await page.getByLabel('Your question', { exact: true }).fill('Synthetic drawn-card layout');
+      await page.getByRole('button', { name: 'Choose your spread', exact: true }).click();
+      await page.getByRole('button', { name: 'Let Reflection draw', exact: true }).click();
       await page.getByLabel('Use English for this reading').check();
       await page.getByRole('button', { name: 'Start reading', exact: true }).click();
+      await page.getByRole('button', { name: 'Read the interpretation', exact: true }).click();
       await expect(accepted).toBeVisible();
       await capture('reading-drawn');
       expect(faults).toEqual([]);
@@ -290,8 +302,9 @@ for (const width of [320, 390, 768, 1280]) {
 }
 
 async function expectNoArtOverlap(page: Page) {
-  const heading = await page.locator('.new-reading-heading h2').boundingBox();
-  const art = await page.locator('.new-reading-art').boundingBox();
+  const question = page.locator('.tarot-step-question');
+  const heading = await question.locator('.tarot-step-heading h2').boundingBox();
+  const art = await question.locator('.new-reading-art').boundingBox();
   expect(heading).not.toBeNull();
   expect(art).not.toBeNull();
   const overlap =
@@ -342,7 +355,9 @@ test('2x mobile illustration delivery uses transparent variants, not full-size o
       .getByRole('button', { name: 'Tarot', exact: true })
       .click();
     const cards = page.locator('.spread-intro-art');
-    await page.getByText('Use my own spread', { exact: true }).click();
+    await page.getByLabel('Your question', { exact: true }).fill('Synthetic form art');
+    await page.getByRole('button', { name: 'Choose your spread', exact: true }).click();
+    await page.getByRole('button', { name: 'Use my physical spread', exact: true }).click();
     await expect
       .poll(() => cards.evaluate((image: HTMLImageElement) => image.currentSrc))
       .toContain('three-card-spread-640-');

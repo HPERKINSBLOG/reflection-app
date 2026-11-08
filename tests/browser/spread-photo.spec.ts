@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
-import { account } from '../fixtures/browser-reading.ts';
+import { account, readInterpretation } from '../fixtures/browser-reading.ts';
 
 const image = Buffer.from(
   'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR4nGP4z8DwHwAFAAH/iZk9HQAAAABJRU5ErkJggg==',
@@ -37,17 +37,19 @@ async function form(page: Page, ip: string) {
     .getByRole('button', { name: 'Tarot', exact: true })
     .click();
   await page.getByLabel('Your question').fill('How can I compare my options?');
-  await page.getByLabel('Use English for this reading').check();
-  await page.getByText('Use my own spread', { exact: true }).click();
+  await page.getByRole('button', { name: 'Choose your spread', exact: true }).click();
+  await page.getByRole('button', { name: 'Use my physical spread', exact: true }).click();
 }
 
-test('starting while image preparation is pending keeps the chosen photo', async ({ page }) => {
+test('a photo still preparing cannot be reviewed or sent, and is kept once ready', async ({
+  page,
+}) => {
   await form(page, '192.0.2.221');
   await page
-    .getByLabel('Photo of your spread (optional)')
+    .getByLabel('Photo of your spread', { exact: true })
     .setInputFiles({ name: 'slow-photo.png', mimeType: 'image/png', buffer: image });
-  const submit = page.getByRole('button', { name: 'Start reading', exact: true });
-  await expect(submit).toBeDisabled();
+  const proceed = page.getByRole('button', { name: 'Review your reading', exact: true });
+  await expect(proceed).toBeDisabled();
   let submissions = 0;
   page.on('request', (request) => {
     if (request.method() === 'POST' && request.url().endsWith('/api/v1/requests')) submissions++;
@@ -61,13 +63,15 @@ test('starting while image preparation is pending keeps the chosen photo', async
   await page.evaluate(() =>
     (window as unknown as { releasePhotoReads: () => Promise<void> }).releasePhotoReads(),
   );
-  await expect(submit).toBeEnabled();
+  await expect(proceed).toBeEnabled();
+  await proceed.click();
+  await page.getByLabel('Use English for this reading').check();
   const posted = page.waitForRequest(
     (request) => request.url().endsWith('/api/v1/requests') && request.method() === 'POST',
   );
   await page.getByRole('button', { name: 'Start reading', exact: true }).click();
   const input = (await posted).postDataJSON();
-  await expect(page.getByTestId('accepted-reading')).toBeVisible();
+  await readInterpretation(page);
   expect(input.spreadPhoto).toBe(`data:image/png;base64,${image.toString('base64')}`);
   await page.getByText('Cards, sources and shared context', { exact: true }).click();
   await expect(page.getByTestId('spread-photo-card')).toBeVisible();
@@ -110,7 +114,9 @@ test('the photo picker can replace and remove an attachment on mobile without st
     await page.getByRole('button', { name: 'Choose photo', exact: true }).click();
     await (await chooser).setFiles({ name, mimeType: 'image/png', buffer: image });
     await expect(page.getByTestId('spread-photo-preview')).toContainText(name);
-    await expect(page.getByRole('button', { name: 'Start reading', exact: true })).toBeEnabled();
+    await expect(
+      page.getByRole('button', { name: 'Review your reading', exact: true }),
+    ).toBeEnabled();
   }
   await page.getByRole('button', { name: 'Remove photo', exact: true }).click();
   await expect(page.getByTestId('spread-photo-preview')).toHaveCount(0);
@@ -122,7 +128,7 @@ test('the photo picker can replace and remove an attachment on mobile without st
 
 test('the latest photo selection survives a slower previous read', async ({ page }) => {
   await form(page, '192.0.2.222');
-  const upload = page.getByLabel('Photo of your spread (optional)');
+  const upload = page.getByLabel('Photo of your spread', { exact: true });
   await upload.setInputFiles({ name: 'slow-first.png', mimeType: 'image/png', buffer: image });
   await upload.setInputFiles({ name: 'latest-photo.png', mimeType: 'image/png', buffer: image });
   await expect(page.getByTestId('spread-photo-preview')).toContainText('latest-photo.png');
@@ -137,7 +143,7 @@ test('the latest photo selection survives a slower previous read', async ({ page
 
 test('removing a photo invalidates an in-flight replacement', async ({ page }) => {
   await form(page, '192.0.2.223');
-  const upload = page.getByLabel('Photo of your spread (optional)');
+  const upload = page.getByLabel('Photo of your spread', { exact: true });
   await upload.setInputFiles({ name: 'original-photo.png', mimeType: 'image/png', buffer: image });
   await expect(page.getByTestId('spread-photo-preview')).toBeVisible();
   await upload.setInputFiles({

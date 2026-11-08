@@ -62,17 +62,50 @@ export async function enableAi(page: Page) {
   await page.goBack();
   await expect(page.getByRole('region', { name: 'Your readings', exact: true })).toBeVisible();
 }
-export async function reading(page: Page, question: string) {
-  await enableAi(page);
+/** Opens a new tarot reading from the header; it starts on the Question step. */
+export async function openTarot(page: Page) {
   await page
     .getByRole('navigation', { name: 'Reading actions' })
     .getByRole('button', { name: 'Tarot', exact: true })
     .click();
-  await page.getByLabel('Your question').fill(question);
+  await expect(
+    page.getByRole('heading', { name: 'What is on your mind?', exact: true }),
+  ).toBeVisible();
+}
+/** From the Question step, enters the question and chooses an app draw; ends on Review. */
+export async function toReview(
+  page: Page,
+  question: string,
+  options: { reversals?: boolean } = {},
+) {
+  await page.getByLabel('Your question', { exact: true }).fill(question);
+  await page.getByRole('button', { name: 'Choose your spread', exact: true }).click();
+  if (options.reversals) await page.getByLabel('Include reversed cards').check();
+  await page.getByRole('button', { name: 'Let Reflection draw', exact: true }).click();
+  await expect(
+    page.getByRole('heading', { name: 'Ready when you are.', exact: true }),
+  ).toBeVisible();
+}
+/** On Review, confirms English and starts the reading. */
+export async function startFromReview(page: Page) {
   await page.getByLabel('Use English for this reading').check();
-  await expect(page.getByText(/Start temporarily stores/)).toBeVisible();
   await page.getByRole('button', { name: 'Start reading', exact: true }).click();
+}
+/** On the Cards step after a new reading, moves on to the interpretation. */
+export async function readInterpretation(page: Page) {
+  await expect(
+    page.getByRole('heading', { name: 'Take a moment with the spread.', exact: true }),
+  ).toBeVisible();
+  await page.getByRole('button', { name: 'Read the interpretation', exact: true }).click();
   await expect(page.getByTestId('accepted-reading')).toBeVisible();
+}
+export async function reading(page: Page, question: string) {
+  await enableAi(page);
+  await openTarot(page);
+  await toReview(page, question);
+  await expect(page.getByText(/Start temporarily stores/)).toBeVisible();
+  await startFromReview(page);
+  await readInterpretation(page);
 }
 export async function savedSnapshot(page: Page) {
   const result = await page.evaluate(async () => {

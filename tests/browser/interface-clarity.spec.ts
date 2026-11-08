@@ -56,7 +56,7 @@ test('sign-in keeps one environment notice and drops repeated chrome', async ({ 
   await expect(page.getByText('No email or password is collected.')).toHaveCount(0);
 });
 
-test('the new-reading form keeps transmission limits without build jargon', async ({ page }) => {
+test('the new-reading steps keep transmission limits without build jargon', async ({ page }) => {
   await account(page, '192.0.2.242');
   await expect(page.getByText(localSimulation, { exact: true })).toHaveCount(0);
   await enableAi(page);
@@ -64,31 +64,31 @@ test('the new-reading form keeps transmission limits without build jargon', asyn
     .getByRole('navigation', { name: 'Reading actions' })
     .getByRole('button', { name: 'Tarot', exact: true })
     .click();
-  const english = page.getByLabel('Use English for this reading');
-  await expect(english).toHaveAttribute('required', '');
-  const spread = page.locator('summary', { hasText: 'Use my own spread' });
   await expect(page.getByRole('button', { name: 'Choose photo', exact: true })).toHaveCount(0);
-  expect((await english.boundingBox())!.y).toBeLessThan((await spread.boundingBox())!.y);
   await page.getByLabel('Your question', { exact: true }).fill('Where can I begin?');
-  await expect(
-    page.getByRole('button', { name: 'Start reading', exact: true }),
-  ).toHaveAccessibleDescription(/confirm.*English/i);
-  await spread.press('Enter');
+  await page.getByRole('button', { name: 'Choose your spread', exact: true }).click();
+  await page.getByRole('button', { name: 'Use my physical spread', exact: true }).click();
   await expect(page.getByText('Illustration only', { exact: true })).toBeVisible();
   await expect(page.getByText('Bring your own spread')).toHaveCount(0);
   const illustration = page.locator('.spread-intro-art');
   await expect(illustration).toHaveAttribute('alt', '');
   await expect(illustration).toHaveAttribute('aria-hidden', 'true');
-  await expect(page.getByLabel('Photo of your spread (optional)')).toBeAttached();
+  await expect(page.getByLabel('Photo of your spread', { exact: true })).toBeAttached();
   await expect(page.getByText('Offline spread photo')).toHaveCount(0);
   await expect(page.getByText(/This simulation does not recognize real cards/)).toBeVisible();
+  await expect(
+    page.getByRole('button', { name: 'Choose photo', exact: true }),
+  ).toHaveAccessibleDescription(/does not recognize real cards/);
+  await page.getByRole('button', { name: 'Use an app draw instead', exact: true }).click();
+  const english = page.getByLabel('Use English for this reading');
+  await expect(english).toHaveAttribute('required', '');
+  await expect(
+    page.getByRole('button', { name: 'Start reading', exact: true }),
+  ).toHaveAccessibleDescription(/confirm.*English/i);
   await expect(page.getByText(/This simulation does not contact an AI provider/)).toBeVisible();
   await expect(page.getByText(/local simulated writer|Local allowance/)).toHaveCount(0);
   await expect(page.getByText(/Readings left: \d+ today/)).toBeVisible();
   await expect(page.getByText(/Start temporarily stores your question/)).toBeVisible();
-  await expect(
-    page.getByRole('button', { name: 'Choose photo', exact: true }),
-  ).toHaveAccessibleDescription(/does not recognize real cards/);
 });
 
 test('saved readings are listed by date and question without a decorative thumbnail', async ({

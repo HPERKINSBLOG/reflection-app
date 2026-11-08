@@ -2,7 +2,7 @@
   "kind": "reflection.preview-api-smoke.v1",
   "target": "https://reflection-preview.lfd.workers.dev",
   "status": "not-run",
-  "reason": "The owner asked for no account creation and no AI readings on this deploy.",
+  "reason": "An authenticated smoke needs an account and AI readings on the hosted preview; the owner runs the signed-in check.",
   "requests": 0,
   "paidAIRequestsMade": 0,
   "cleanup": "not-created",
