@@ -1,5 +1,43 @@
 # Reflection design QA
 
+## November 8 — Tarot steps
+
+The owner chose “Steps before Start”. A new tarot reading now moves through short steps, as in Figma's tarot frames (`73:3512`–`73:3531`), instead of one long form. The reading workspace that follows is unchanged; it already matched Figma's Return and continue frame. The [design](docs/superpowers/specs/2026-11-07-tarot-steps-design.md) records the decisions and which of them were mine.
+
+- **Question.** “What is on your mind?” holds the question, its 500-character hint and, while the field is empty, two suggested questions. Journal excerpts are chosen here. “Choose your spread” stays blocked, with a message, until there is a question and any chosen excerpts are confirmed.
+- **Spread.** Two outlined choices: “Let Reflection draw” (Situation · Tension · Possibility) or “Use my physical spread”. Reversed cards are opted into here.
+- **Photo.** Only for your own cards. “Bring the cards you drew.” holds the photo picker and its notices. “Review your reading” waits until the photo is ready, and “Use an app draw instead” switches without sending the photo.
+- **Review.** “Ready when you are.” sums up the question and the spread, each with a way back to change it, then any selected excerpts. “Before you start” holds the disclosures, the English confirmation, Start reading and the readings left. Start exists only here.
+- **Cards.** After Start the step row moves to “03 Cards” while the cards are drawn. “Take a moment with the spread.” then shows the three faces in one row, left to right, up to 168 px wide, each captioned with its position, name and orientation, before “Read the interpretation”. Below 360 px they stack. Cards appear only for a new reading this tab was waiting for, not after a reload, for a follow-up, or on Back or Forward to an earlier reading.
+- **Step row and focus.** “01 Question / 02 Spread / 03 Cards / 04 Reading” marks the current step with `aria-current="step"` and wraps on phones. Each step's heading takes focus when the step opens.
+
+Not changed: the follow-up compose and review screens, the reading workspace, the request lifecycle and the API. No server code changed.
+
+Captures of each step at 1440 and 390 px in Paper and Evening are in [`docs/design/screens/2026-11-08-tarot-steps/`](docs/design/screens/2026-11-08-tarot-steps/). [`design-screens.spec.ts`](tests/browser/design-screens.spec.ts) recaptures them when `REFLECTION_SCREENS` names a folder. The first captures showed the cards wrapping two over one at 390 px, so they now keep one row from 360 px.
+
+| Step | 1440 px | 390 px |
+| --- | --- | --- |
+| Question | [Paper](docs/design/screens/2026-11-08-tarot-steps/tarot-question-1440-paper.png) · [Evening](docs/design/screens/2026-11-08-tarot-steps/tarot-question-1440-evening.png) | [Paper](docs/design/screens/2026-11-08-tarot-steps/tarot-question-390-paper.png) · [Evening](docs/design/screens/2026-11-08-tarot-steps/tarot-question-390-evening.png) |
+| Spread | [Paper](docs/design/screens/2026-11-08-tarot-steps/tarot-spread-1440-paper.png) · [Evening](docs/design/screens/2026-11-08-tarot-steps/tarot-spread-1440-evening.png) | [Paper](docs/design/screens/2026-11-08-tarot-steps/tarot-spread-390-paper.png) · [Evening](docs/design/screens/2026-11-08-tarot-steps/tarot-spread-390-evening.png) |
+| Photo | [Paper](docs/design/screens/2026-11-08-tarot-steps/tarot-photo-1440-paper.png) · [Evening](docs/design/screens/2026-11-08-tarot-steps/tarot-photo-1440-evening.png) | [Paper](docs/design/screens/2026-11-08-tarot-steps/tarot-photo-390-paper.png) · [Evening](docs/design/screens/2026-11-08-tarot-steps/tarot-photo-390-evening.png) |
+| Review | [Paper](docs/design/screens/2026-11-08-tarot-steps/tarot-review-1440-paper.png) · [Evening](docs/design/screens/2026-11-08-tarot-steps/tarot-review-1440-evening.png) | [Paper](docs/design/screens/2026-11-08-tarot-steps/tarot-review-390-paper.png) · [Evening](docs/design/screens/2026-11-08-tarot-steps/tarot-review-390-evening.png) |
+| Cards | [Paper](docs/design/screens/2026-11-08-tarot-steps/tarot-cards-1440-paper.png) · [Evening](docs/design/screens/2026-11-08-tarot-steps/tarot-cards-1440-evening.png) | [Paper](docs/design/screens/2026-11-08-tarot-steps/tarot-cards-390-paper.png) · [Evening](docs/design/screens/2026-11-08-tarot-steps/tarot-cards-390-evening.png) |
+
+Verification on Windows with Node 26.12.1, at `efad083`:
+
+- `npm run typecheck` passes.
+- `npx biome check .` reports the 12 warnings the base branch already has, and no errors. One of them is in `your-pattern.spec.ts`, on a line this branch does not change.
+- `npm run test:domain`: 70 files, 554 tests passed, including the two drawn-card tests.
+- `npm run test:db`: 73 files, 682 tests passed, at `735fed2`. No worker or database code changed.
+- `npm run test:browser`: 227 passed and 2 skipped in 14.5 minutes, none flaky. The skipped tests are the screen captures, which run only when `REFLECTION_SCREENS` is set; the tarot-steps capture passed in its own run.
+- `npm run check:schemas`, `npm run check:contracts` and `npm run check:openapi` pass.
+
+A whole-branch review found no critical issues and two important ones, both fixed with tests. A photo still preparing when an app draw started could finish while the reading was being written and mark the started question unsaved, so leaving for Account asked to discard it; Start now drops that photo. The Cards rule's return from Account had no test; two now cover it. Six smaller points wait for later, among them the excerpt message that stays up after the excerpts are confirmed, and “Review draft” not moving focus to the question.
+
+`efad083` went to the development preview on November 8 as version `d314e873`. Health, direct loads of `/`, `/sign-in` and a reading address, the bundle and all 35 public assets checked out, and the signed-out pages load at 390 and 1280 px in light and dark. Earlier the same day `940f919` went up at the owner's request, before the phone cards fix and the review fixes. [Deployment receipt](artifacts/preview-deploy/deployment.json).
+
+Not covered: `npm run test:journey` (Firefox and WebKit), physical devices and screen readers, and the signed-in steps on the hosted preview.
+
 ## November 7 — Journal rows and Account's header
 
 - **Journal rows.** Each entry now follows Figma's journal (`51:1608`): its kind in eyebrow capitals, the question as an Ink serif title that underlines only on hover and focus, an excerpt of the reader's current reflection on the original reading, and a short history such as “Started Nov 7 · Added to Nov 9 · 1 follow-up · 2 revisit notes”. The list API gained `reflectionPreview`, `reflectionTruncated`, `followUps`, `revisits` and `lastActivityAt` ([`journal-rows.test.ts`](tests/db/journal-rows.test.ts); the follow-up test also counts a follow-up to a follow-up). The excerpt is cut like the question, within 280 UTF-16 units, and stays empty while an imported question is pending. The question's button is described by its label, excerpt and history for screen readers.
