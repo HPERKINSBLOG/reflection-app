@@ -38,6 +38,23 @@ A whole-branch review found no critical issues and two important ones, both fixe
 
 Not covered: `npm run test:journey` (Firefox and WebKit), physical devices and screen readers, and the signed-in steps on the hosted preview.
 
+After CodeRabbit's review of PR #16, the branch was rebased onto PR #15's journal rows and Account header (`0133ac6`). Commit ids above are from before the rebase. The review led to four fixes, each with a test; the first two were among the smaller points above.
+
+- **Focus.** Activating Tarot while the Question step shows, or a start refused for its excerpts, moves focus to the Question heading.
+- **Excerpt message.** “Review and confirm your selected excerpts to continue.” clears once the excerpts are confirmed or removed.
+- **Long words.** The question on Cards wraps a long unbroken word, as Review already did.
+- **Source names.** Source headings name each card by position, like Cards and the interpretation.
+
+Two review points stand as they are. A reading started in this tab that finishes while the person is on Account still shows its Cards on return, because they have not seen the spread. The design said otherwise, so this is now a recorded ruling with its own test. Axe was not added, since the project has no axe dependency; the Cards test now checks the aside's accessible name.
+
+Verification on Windows with Node 26.12.1, at `c33446d`, after the rebase:
+
+- `npm run typecheck`, `check:schemas`, `check:contracts` and `check:openapi` pass.
+- `npx biome check .` reports 10 warnings and no errors, the count PR #15 now has.
+- `npm run test:domain`: 71 files, 555 tests passed.
+- `npm run test:browser`: 232 passed and 2 skipped in 15.1 minutes. The skipped tests are the screen captures, which were not retaken.
+- `npm run test:db` was not rerun. This branch changes no file it loads, and PR #15's run at `f8f533a` covers the same code: 74 files, 683 tests passed.
+
 ## November 7 — Journal rows and Account's header
 
 - **Journal rows.** Each entry now follows Figma's journal (`51:1608`): its kind in eyebrow capitals, the question as an Ink serif title that underlines only on hover and focus, an excerpt of the reader's current reflection on the original reading, and a short history such as “Started Nov 7 · Added to Nov 9 · 1 follow-up · 2 revisit notes”. The list API gained `reflectionPreview`, `reflectionTruncated`, `followUps`, `revisits` and `lastActivityAt` ([`journal-rows.test.ts`](tests/db/journal-rows.test.ts); the follow-up test also counts a follow-up to a follow-up). The excerpt is cut like the question, within 280 UTF-16 units, and stays empty while an imported question is pending. The question's button is described by its label, excerpt and history for screen readers.
