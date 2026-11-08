@@ -3,6 +3,7 @@ import type { AnyAcceptedReading } from '../contracts/index.ts';
 import { CardFace } from './card-face.tsx';
 import { TopicChip } from './design/components.tsx';
 import { cardName } from './card-names.ts';
+import { drawnCards } from './drawn-cards.ts';
 
 type Reading = z.infer<typeof AnyAcceptedReading>;
 
@@ -15,6 +16,7 @@ export function ReturnInterpretation({
   runtimeMode: string | null;
   localRuntime: boolean;
 }) {
+  const drawn = drawnCards(reading);
   const interpretationLabel =
     reading.mode === 'template'
       ? 'Prepared reflection template'
@@ -32,10 +34,7 @@ export function ReturnInterpretation({
       </div>
       {reading.units.map((unit, index) => {
         const card = reading.basis.cards.find((item) => item.position === unit.position);
-        const name =
-          reading.kind === 'tarot.accepted.v2'
-            ? reading.draw.find((item) => item.position === unit.position)?.name
-            : card && cardName(reading.basis.deckEdition, card.cardId);
+        const name = drawn.find((item) => item.position === unit.position)?.name;
         return (
           <section key={unit.position} className="return-position">
             <span className="position-number" aria-hidden="true">
