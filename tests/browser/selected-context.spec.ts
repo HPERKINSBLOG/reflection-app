@@ -42,7 +42,6 @@ test('only the explicitly reviewed range is confirmed and an edit invalidates th
     .getByRole('button', { name: 'Tarot', exact: true })
     .click();
   await page.getByLabel('Your question', { exact: true }).fill('Which change feels workable?');
-  await page.getByLabel('Use English for this reading').check();
   const previews: unknown[] = [];
   page.on('request', (request) => {
     if (request.url().endsWith('/api/v1/context-preview')) previews.push(request.postDataJSON());
@@ -57,7 +56,10 @@ test('only the explicitly reviewed range is confirmed and an edit invalidates th
   await page.getByLabel('First character', { exact: true }).fill('1301');
   await page.getByLabel('Last character', { exact: true }).fill('1303');
   await page.getByRole('button', { name: 'Add excerpt', exact: true }).click();
-  await expect(page.getByRole('button', { name: 'Start reading', exact: true })).toBeDisabled();
+  await page.getByRole('button', { name: 'Choose your spread', exact: true }).click();
+  await expect(
+    page.getByText('Review and confirm your selected excerpts to continue.', { exact: true }),
+  ).toBeVisible();
   await page.getByRole('button', { name: 'Review selected excerpts' }).click();
   const review = page.getByRole('region', { name: 'Review selected excerpts' });
   await expect(review.locator('blockquote')).toHaveText('😀e\u0301');
@@ -66,11 +68,18 @@ test('only the explicitly reviewed range is confirmed and an edit invalidates th
   expect(JSON.stringify(previews)).not.toContain(note.note);
   const acknowledge = page.getByLabel('I agree to use these exact excerpts for this reading.');
   await acknowledge.check();
-  await expect(page.getByRole('button', { name: 'Start reading', exact: true })).toBeEnabled();
+  await page.getByRole('button', { name: 'Choose your spread', exact: true }).click();
+  await expect(
+    page.getByRole('heading', { name: 'One question. Three perspectives.', exact: true }),
+  ).toBeVisible();
+  await page.getByRole('button', { name: 'Back to your question', exact: true }).click();
   await page
     .getByLabel('Your question', { exact: true })
     .fill('Which change feels workable today?');
-  await expect(page.getByRole('button', { name: 'Start reading', exact: true })).toBeDisabled();
+  await page.getByRole('button', { name: 'Choose your spread', exact: true }).click();
+  await expect(
+    page.getByText('Review and confirm your selected excerpts to continue.', { exact: true }),
+  ).toBeVisible();
   await page.getByRole('button', { name: 'Review selected excerpts' }).click();
   await expect(acknowledge).not.toBeChecked();
   await acknowledge.check();
@@ -97,6 +106,9 @@ test('only the explicitly reviewed range is confirmed and an edit invalidates th
     await route.abort('connectionreset');
     admitted();
   });
+  await page.getByRole('button', { name: 'Choose your spread', exact: true }).click();
+  await page.getByRole('button', { name: 'Let Reflection draw', exact: true }).click();
+  await page.getByLabel('Use English for this reading').check();
   await page.getByRole('button', { name: 'Start reading', exact: true }).click();
   await accepted;
   await page.reload();
@@ -206,7 +218,6 @@ test('whole-passage selection stays exact and a changed source cannot reuse its 
     .getByRole('button', { name: 'Tarot', exact: true })
     .click();
   await page.getByLabel('Your question', { exact: true }).fill('What can remain simple?');
-  await page.getByLabel('Use English for this reading').check();
   await chooseNote(page, saved.session.id);
   await page.getByRole('button', { name: 'Allow this source', exact: true }).click();
   await expect(page.getByLabel('First character', { exact: true })).toHaveCount(0);
@@ -229,7 +240,10 @@ test('whole-passage selection stays exact and a changed source cannot reuse its 
   expect(changed.ok()).toBe(true);
   await review.getByRole('button', { name: 'Change selected excerpts', exact: true }).click();
   await expect(acknowledge).toHaveCount(0);
-  await expect(page.getByRole('button', { name: 'Start reading', exact: true })).toBeDisabled();
+  await page.getByRole('button', { name: 'Choose your spread', exact: true }).click();
+  await expect(
+    page.getByText('Review and confirm your selected excerpts to continue.', { exact: true }),
+  ).toBeVisible();
   await page.getByRole('button', { name: 'Review selected excerpts', exact: true }).click();
   await expect(
     page.getByText(

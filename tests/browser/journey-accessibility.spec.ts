@@ -16,7 +16,9 @@ test('keyboard photo attachment and removal announce their outcomes without subm
     .getByRole('navigation', { name: 'Reading actions' })
     .getByRole('button', { name: 'Tarot', exact: true })
     .click();
-  await page.locator('summary', { hasText: 'Use my own spread' }).press('Enter');
+  await page.getByLabel('Your question', { exact: true }).fill('Where do my own cards begin?');
+  await page.getByRole('button', { name: 'Choose your spread', exact: true }).click();
+  await page.getByRole('button', { name: 'Use my physical spread', exact: true }).click();
   const choose = page.getByRole('button', { name: 'Choose photo', exact: true });
   await expect(choose).toHaveAccessibleDescription(/does not recognize real cards/);
   let starts = 0;

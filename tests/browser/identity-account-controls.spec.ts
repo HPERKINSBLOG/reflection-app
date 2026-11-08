@@ -6,7 +6,10 @@ import {
   enableAi,
   openAccount,
   openSignIn,
+  readInterpretation,
   reading,
+  startFromReview,
+  toReview,
 } from '../fixtures/browser-reading.ts';
 
 test('a signed-in person adds a passkey, removes the old one, and signs out every session', async ({
@@ -225,7 +228,9 @@ test('an unsaved question asks before the account page and Back to readings retu
   await openAccount(page);
   await backToReadings(page);
   await expect(page).toHaveURL('http://localhost:8787/new');
-  await expect(page.getByRole('heading', { name: 'A new reading', exact: true })).toBeVisible();
+  await expect(
+    page.getByRole('heading', { name: 'What is on your mind?', exact: true }),
+  ).toBeVisible();
   await expect(question).toHaveValue('');
   await openAccount(page);
   expect(messages).toHaveLength(2);
@@ -246,8 +251,11 @@ for (const preparation of ['ready', 'preparing'] as const) {
       .getByRole('navigation', { name: 'Reading actions' })
       .getByRole('button', { name: 'Tarot', exact: true })
       .click();
-    await page.getByText('Use my own spread', { exact: true }).click();
-    await page.getByLabel('Photo of your spread (optional)').setInputFiles({
+    const question = page.getByLabel('Your question', { exact: true });
+    await question.fill('Synthetic question that is cleared later');
+    await page.getByRole('button', { name: 'Choose your spread', exact: true }).click();
+    await page.getByRole('button', { name: 'Use my physical spread', exact: true }).click();
+    await page.getByLabel('Photo of your spread', { exact: true }).setInputFiles({
       name: 'spread.png',
       mimeType: 'image/png',
       buffer: Buffer.from(
@@ -258,7 +266,11 @@ for (const preparation of ['ready', 'preparing'] as const) {
     const preview = page.getByTestId('spread-photo-preview');
     if (preparation === 'ready') await expect(preview.getByRole('img')).toBeVisible();
     else await expect(preview.getByRole('status')).toHaveText('Preparing photo…');
-    await expect(page.getByLabel('Your question', { exact: true })).toHaveValue('');
+    // Leave the photo as the only unsaved entry: back to the question, then clear it.
+    await page.getByRole('button', { name: 'Back to spread choices', exact: true }).click();
+    await page.getByRole('button', { name: 'Back to your question', exact: true }).click();
+    await question.fill('');
+    await expect(question).toHaveValue('');
     const messages: string[] = [];
     let discard = false;
     page.on('dialog', async (dialog) => {
@@ -270,11 +282,18 @@ for (const preparation of ['ready', 'preparing'] as const) {
       .poll(() => messages)
       .toEqual(['Discard your unsaved spread photo? Choose Cancel to stay and keep editing.']);
     await expect(page).toHaveURL('http://localhost:8787/new');
+    const toPhoto = async () => {
+      await question.fill('Synthetic question that is cleared later');
+      await page.getByRole('button', { name: 'Choose your spread', exact: true }).click();
+      await page.getByRole('button', { name: 'Use my physical spread', exact: true }).click();
+    };
+    await toPhoto();
     await expect(preview).toContainText('spread.png');
     discard = true;
     await openAccount(page);
     await backToReadings(page);
     await expect(page).toHaveURL('http://localhost:8787/new');
+    await toPhoto();
     await expect(preview).toHaveCount(0);
     expect(messages).toHaveLength(2);
   });
@@ -358,12 +377,9 @@ for (const navigation of ['Back', 'Forward'] as const) {
           starts++;
       });
       if (destination === 'reading') {
-        await page
-          .getByLabel('Your question', { exact: true })
-          .fill('Synthetic current return destination');
-        await page.getByLabel('Use English for this reading').check();
-        await page.getByRole('button', { name: 'Start reading', exact: true }).click();
-        await expect(page.getByTestId('accepted-reading')).toBeVisible();
+        await toReview(page, 'Synthetic current return destination');
+        await startFromReview(page);
+        await readInterpretation(page);
       }
       const url = page.url();
       if (navigation === 'Back') await page.goBack();

@@ -16,6 +16,7 @@ import {
   backToReadings,
   openAccount,
   openSignIn,
+  readInterpretation,
   reading,
   savedSnapshot,
 } from '../fixtures/browser-reading.ts';
@@ -644,9 +645,13 @@ for (const destination of ['Journal', 'Tarot']) {
       .getByRole('button', { name: destination, exact: true })
       .click();
     if (destination === 'Tarot') {
-      await expect(page.getByRole('heading', { name: 'A new reading', exact: true })).toBeVisible();
+      await expect(
+        page.getByRole('heading', { name: 'What is on your mind?', exact: true }),
+      ).toBeVisible();
       await page.evaluate(() => window.dispatchEvent(new Event('focus')));
-      await expect(page.getByRole('heading', { name: 'A new reading', exact: true })).toBeVisible();
+      await expect(
+        page.getByRole('heading', { name: 'What is on your mind?', exact: true }),
+      ).toBeVisible();
       await page.getByRole('button', { name: 'Journal', exact: true }).click();
     }
     await page.getByRole('button', { name: question, exact: true }).click();
@@ -739,20 +744,23 @@ test('uploading an offline spread photo recognizes the 3 cards in one step and s
     .getByRole('button', { name: 'Tarot', exact: true })
     .click();
   await page.getByLabel('Your question').fill('What does my offline dealt spread suggest?');
-  await page.getByLabel('Use English for this reading').check();
+  await page.getByRole('button', { name: 'Choose your spread', exact: true }).click();
+  await page.getByRole('button', { name: 'Use my physical spread', exact: true }).click();
   const pngBytes = Buffer.from(
     'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR4nGP4z8DwHwAFAAH/iZk9HQAAAABJRU5ErkJggg==',
     'base64',
   );
-  await page.getByText('Use my own spread', { exact: true }).click();
-  await page.getByLabel('Photo of your spread (optional)').setInputFiles({
+  await page.getByLabel('Photo of your spread', { exact: true }).setInputFiles({
     name: 'dealt-spread.png',
     mimeType: 'image/png',
     buffer: pngBytes,
   });
   await expect(page.getByTestId('spread-photo-preview')).toBeVisible();
   await expect(page.getByText('dealt-spread.png', { exact: true })).toBeVisible();
+  await page.getByRole('button', { name: 'Review your reading', exact: true }).click();
+  await page.getByLabel('Use English for this reading').check();
   await page.getByRole('button', { name: 'Start reading', exact: true }).click();
+  await readInterpretation(page);
   const accepted = page.getByTestId('accepted-reading');
   await expect(accepted).toBeVisible();
   const photoCard = accepted.getByTestId('spread-photo-card');

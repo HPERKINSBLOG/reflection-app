@@ -219,8 +219,11 @@ test('unsaved writing blocks navigation and tarot receives only the selected que
     if (req.method() === 'POST' && req.url().endsWith('/requests'))
       requests.push(req.postDataJSON());
   });
+  await page.getByRole('button', { name: 'Choose your spread', exact: true }).click();
+  await page.getByRole('button', { name: 'Let Reflection draw', exact: true }).click();
   await page.getByLabel('Use English for this reading').check();
   await page.getByRole('button', { name: 'Start reading', exact: true }).click();
+  await page.getByRole('button', { name: 'Read the interpretation', exact: true }).click();
   await expect(page.getByTestId('accepted-reading')).toBeVisible();
   expect(requests).toHaveLength(1);
   const wire = JSON.stringify(requests);

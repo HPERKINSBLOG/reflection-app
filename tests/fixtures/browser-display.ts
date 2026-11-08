@@ -166,15 +166,9 @@ export async function displayJourney(page: Page, capture: (state: string) => Pro
     .getByRole('button', { name: 'Tarot', exact: true })
     .click();
   await page.getByLabel('Your question', { exact: true }).fill(longQuestion);
-  const english = page.getByLabel('Use English for this reading');
-  await english.focus();
-  await page.keyboard.press('Space');
-  await expect(english).toBeChecked();
-  await page.keyboard.press('Space');
-  await expect(english).not.toBeChecked();
-  await page.keyboard.press('Space');
-  const photo = page.getByLabel('Photo of your spread (optional)');
-  await page.locator('summary', { hasText: 'Use my own spread' }).press('Enter');
+  await page.getByRole('button', { name: 'Choose your spread', exact: true }).click();
+  await page.getByRole('button', { name: 'Use my physical spread', exact: true }).click();
+  const photo = page.getByLabel('Photo of your spread', { exact: true });
   await photo.setInputFiles({
     name: longFilename,
     mimeType: 'image/jpeg',
@@ -192,6 +186,14 @@ export async function displayJourney(page: Page, capture: (state: string) => Pro
     buffer: await readFile(spreadPhotoPath),
   });
   await expect(page.getByRole('status').filter({ hasText: 'Photo attached:' })).toBeVisible();
+  await page.getByRole('button', { name: 'Review your reading', exact: true }).click();
+  const english = page.getByLabel('Use English for this reading');
+  await english.focus();
+  await page.keyboard.press('Space');
+  await expect(english).toBeChecked();
+  await page.keyboard.press('Space');
+  await expect(english).not.toBeChecked();
+  await page.keyboard.press('Space');
   await english.focus();
   await capture('new-attached');
   await expect(page.getByText(READING_PRODUCT_COPY.startProcessing, { exact: true })).toBeVisible();
@@ -201,6 +203,12 @@ export async function displayJourney(page: Page, capture: (state: string) => Pro
       starts++;
   });
   await page.getByRole('button', { name: 'Start reading', exact: true }).focus();
+  await page.keyboard.press('Enter');
+  await expect(
+    page.getByRole('heading', { name: 'Take a moment with the spread.', exact: true }),
+  ).toBeFocused();
+  await capture('cards');
+  await page.getByRole('button', { name: 'Read the interpretation', exact: true }).focus();
   await page.keyboard.press('Enter');
   const accepted = page.getByTestId('accepted-reading');
   await expect(accepted.getByRole('heading', { name: longQuestion, exact: true })).toBeFocused();

@@ -76,8 +76,8 @@ test('keyboard upload, processing, save, reflection, Account and exact return jo
     .click();
   const question = 'Synthetic return to the exact saved reading';
   await page.getByLabel('Your question', { exact: true }).fill(question);
-  await page.getByLabel('Use English for this reading').check();
-  await page.locator('summary', { hasText: 'Use my own spread' }).press('Enter');
+  await page.getByRole('button', { name: 'Choose your spread', exact: true }).click();
+  await page.getByRole('button', { name: 'Use my physical spread', exact: true }).click();
   const choose = page.getByRole('button', { name: 'Choose photo', exact: true });
   await expect(choose).toHaveAccessibleDescription(
     /sends your attached photo to Meta.*zero retention/,
@@ -85,7 +85,6 @@ test('keyboard upload, processing, save, reflection, Account and exact return jo
   await expect(
     page.getByText(SPREAD_PHOTO_COPY.spreadPhotoProcessing, { exact: true }),
   ).toBeVisible();
-  await expect(page.getByText(READING_PRODUCT_COPY.startProcessing, { exact: true })).toBeVisible();
   const picker = page.waitForEvent('filechooser');
   await choose.focus();
   await page.keyboard.press('Enter');
@@ -95,7 +94,9 @@ test('keyboard upload, processing, save, reflection, Account and exact return jo
     buffer: await readFile(spreadPhotoPath),
   });
   await expect(page.getByRole('status').filter({ hasText: 'Preparing photo…' })).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Start reading', exact: true })).toBeDisabled();
+  await expect(
+    page.getByRole('button', { name: 'Review your reading', exact: true }),
+  ).toBeDisabled();
   await page.evaluate(() =>
     (window as unknown as { releaseJourneyPhoto: () => void }).releaseJourneyPhoto(),
   );
@@ -106,8 +107,11 @@ test('keyboard upload, processing, save, reflection, Account and exact return jo
   await page.keyboard.press('Enter');
   await expect(choose).toBeFocused();
   await expect(page.getByRole('status').filter({ hasText: 'Photo removed.' })).toBeVisible();
-  await page.getByLabel('Photo of your spread (optional)').setInputFiles(spreadPhotoPath);
+  await page.getByLabel('Photo of your spread', { exact: true }).setInputFiles(spreadPhotoPath);
   await expect(page.getByRole('status').filter({ hasText: 'Photo attached:' })).toBeVisible();
+  await page.getByRole('button', { name: 'Review your reading', exact: true }).click();
+  await page.getByLabel('Use English for this reading').check();
+  await expect(page.getByText(READING_PRODUCT_COPY.startProcessing, { exact: true })).toBeVisible();
 
   let starts = 0;
   let ready = false;
@@ -139,6 +143,11 @@ test('keyboard upload, processing, save, reflection, Account and exact return jo
   await page.emulateMedia({ colorScheme: 'light' });
   ready = true;
   await page.evaluate(() => window.dispatchEvent(new Event('online')));
+  await expect(
+    page.getByRole('heading', { name: 'Take a moment with the spread.', exact: true }),
+  ).toBeFocused();
+  await page.getByRole('button', { name: 'Read the interpretation', exact: true }).focus();
+  await page.keyboard.press('Enter');
   const accepted = page.getByTestId('accepted-reading');
   await expect(accepted.getByRole('heading', { name: question, exact: true })).toBeFocused();
   // Header actions change when the reading is saved; its interpretation remains fixed.

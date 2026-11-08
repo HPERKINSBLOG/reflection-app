@@ -48,14 +48,17 @@ test('retrying the reading connection keeps the question and photo in the open f
   await page.goto('/new');
   const question = page.getByLabel('Your question', { exact: true });
   await question.fill('How could I make time for a walk?');
-  await page.getByLabel('Use English for this reading').check();
-  await page.getByText('Use my own spread', { exact: true }).click();
+  await page.getByRole('button', { name: 'Choose your spread', exact: true }).click();
+  await page.getByRole('button', { name: 'Use my physical spread', exact: true }).click();
   await page
-    .getByLabel('Photo of your spread (optional)')
+    .getByLabel('Photo of your spread', { exact: true })
     .setInputFiles('tests/fixtures/spread-photo.jpg');
-  const photo = page.getByRole('img', { name: 'Uploaded tarot spread preview' });
-  await expect(photo).toBeVisible();
-  const source = await photo.getAttribute('src');
+  const preview = page.getByRole('img', { name: 'Uploaded tarot spread preview' });
+  await expect(preview).toBeVisible();
+  const source = await preview.getAttribute('src');
+  await page.getByRole('button', { name: 'Review your reading', exact: true }).click();
+  await page.getByLabel('Use English for this reading').check();
+  const photo = page.getByRole('img', { name: 'Your attached spread' });
   const start = page.getByRole('button', { name: 'Start reading', exact: true });
   const retry = page.getByRole('button', { name: 'Check connection again', exact: true });
   await expect(start).toBeDisabled();
@@ -140,17 +143,17 @@ for (const mode of ['live-local', 'live-preview', 'production'] as const) {
       .getByRole('navigation', { name: 'Reading actions' })
       .getByRole('button', { name: 'Tarot', exact: true })
       .click();
-    await expect(page.getByText(/Starting a reading sends this question to OpenAI/)).toBeVisible();
-    const preflight = page.getByRole('complementary', { name: 'Before you start' });
-    await expect(preflight).toContainText('sends your attached photo to Meta');
-    await expect(preflight).toContainText('zero retention is not guaranteed');
-    await page.getByText('Use my own spread', { exact: true }).click();
+    await page.getByLabel('Your question', { exact: true }).fill('Where could I begin?');
+    await page.getByRole('button', { name: 'Choose your spread', exact: true }).click();
+    await page.getByRole('button', { name: 'Use my physical spread', exact: true }).click();
+    await expect(page.getByText(/sends your attached photo to Meta/)).toBeVisible();
+    await expect(page.getByText(/zero retention is not guaranteed/)).toBeVisible();
     await expect(
       page.getByRole('button', { name: 'Choose photo', exact: true }),
     ).toHaveAccessibleDescription(
       /sends your attached photo to Meta.*zero retention is not guaranteed/,
     );
-    await page.getByLabel('Photo of your spread (optional)').setInputFiles({
+    await page.getByLabel('Photo of your spread', { exact: true }).setInputFiles({
       name: 'spread.png',
       mimeType: 'image/png',
       buffer: Buffer.from(
@@ -158,6 +161,11 @@ for (const mode of ['live-local', 'live-preview', 'production'] as const) {
         'base64',
       ),
     });
+    await page.getByRole('button', { name: 'Review your reading', exact: true }).click();
+    const preflight = page.getByRole('complementary', { name: 'Before you start' });
+    await expect(preflight).toContainText('Starting a reading sends this question to OpenAI');
+    await expect(preflight).toContainText('sends your attached photo to Meta');
+    await expect(preflight).toContainText('zero retention is not guaranteed');
     await expect(
       page.getByText(/Your attached photo is sent to Meta to recognize the cards/),
     ).toHaveCount(0);
@@ -199,6 +207,9 @@ test('explicit hosted synthetic readiness retains simulation disclosure', async 
     .getByRole('navigation', { name: 'Reading actions' })
     .getByRole('button', { name: 'Tarot', exact: true })
     .click();
+  await page.getByLabel('Your question', { exact: true }).fill('Where could I begin?');
+  await page.getByRole('button', { name: 'Choose your spread', exact: true }).click();
+  await page.getByRole('button', { name: 'Let Reflection draw', exact: true }).click();
   const preflight = page.getByRole('complementary', { name: 'Before you start' });
   await expect(preflight).toContainText('Use synthetic text only.');
   await expect(preflight).toContainText('does not contact an AI provider');
