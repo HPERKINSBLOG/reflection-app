@@ -1,5 +1,30 @@
 # Reflection design QA
 
+## November 7 — Journal rows and Account's header
+
+- **Journal rows.** Each entry now follows Figma's journal (`51:1608`): its kind in eyebrow capitals, the question as an Ink serif title that underlines only on hover and focus, an excerpt of the reader's current reflection on the original reading, and a short history such as “Started Nov 7 · Added to Nov 9 · 1 follow-up · 2 revisit notes”. The list API gained `reflectionPreview`, `reflectionTruncated`, `followUps`, `revisits` and `lastActivityAt` ([`journal-rows.test.ts`](tests/db/journal-rows.test.ts); the follow-up test also counts a follow-up to a follow-up). The excerpt is cut like the question, within 280 UTF-16 units, and stays empty while an imported question is pending. The question's button is described by its label, excerpt and history for screen readers.
+- **Account header.** Account now shows Astrology, Tarot and Journal in the shared 1328 px header, so the wordmark no longer moves from x 56 to x 270 when it opens. None of the three is current there, and Tarot stays unavailable while AI readings are off. The settings keep their 940 px column.
+
+Not changed: journal search, standalone notes and date controls, which need product work; and the phone navigation row, which stays visible by choice (Figma's phone header should be updated to match it).
+
+Verification on Windows with Node 24.15:
+
+- `npm run typecheck` passes. After `npm run schemas`, `check:schemas`, `check:contracts`, `check:openapi` and the import reference checks pass.
+- `npx biome check .` reports 10 warnings and no errors. The baseline was 12; two belonged to the journal row rules this change replaced.
+- `npm run test:domain`: 69 files, 552 tests passed.
+- `npm run test:db`: 74 files, 683 tests passed, including the new journal-row test.
+- `npm run test:browser` (Chromium): 206 passed and 1 skipped in 13.4 minutes. The skipped test is the design-screens capture, which runs only when `REFLECTION_SCREENS` is set. The run rewrites `artifacts/browser-tests.json` and three `artifacts/your-pattern` captures; those were put back.
+
+Verification on Windows with Node 26.12.1, on November 8 at `f8f533a`, before this work was committed to PR #15:
+
+- `npm run typecheck`, `check:schemas`, `check:contracts` (which runs the import reference checks) and `check:openapi` pass.
+- `npx biome check .` reports the same 10 warnings and no errors. Run from the main checkout it stops on the nested `.claude/worktrees/tarot-steps/biome.json`, so it ran on a clean copy of `f8f533a`.
+- `npm run test:domain`: 69 files, 552 tests passed.
+- `npm run test:db`: 74 files, 683 tests passed.
+- `npm run test:browser`: 206 passed and 1 skipped in 13.2 minutes. The skipped test is the screens capture.
+
+This run did not run `npm run test:journey`.
+
 ## November 7 — Figma's shared details
 
 A [screen-by-screen comparison with Figma](https://claude.ai/artifact/71KHMG7qS8XaufxWmW9q8y) found the same small differences on most screens, while the design tokens already matched. This pass closes those shared differences. The structural ones remain.
