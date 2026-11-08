@@ -63,6 +63,13 @@ import {
   editionPath,
 } from './follow-up.tsx';
 import { FollowUpReview } from './submission-review.tsx';
+import {
+  QuestionStep,
+  ReadingSteps,
+  ReviewStep,
+  SpreadStep,
+  type ComposerStep,
+} from './tarot-steps.tsx';
 import './reading-return.css';
 import { ImportedReadingDetail } from './imported-reading.tsx';
 import { ContextSelection, contextBinding, type ContextSubmission } from './context-selection.tsx';
@@ -285,6 +292,28 @@ export function ReadingWorkspace({
   useLayoutEffect(() => {
     if (reviewedBinding) submissionHeading.current?.focus();
   }, [reviewedBinding]);
+  // A new reading moves through one decision per screen; only Review can start it.
+  const [step, setStep] = useState<ComposerStep>('question'),
+    [questionError, setQuestionError] = useState<string | null>(null),
+    [continueError, setContinueError] = useState<string | null>(null);
+  const stepHeading = useRef<HTMLHeadingElement>(null),
+    questionField = useRef<HTMLTextAreaElement>(null),
+    // The step whose heading takes focus once it renders.
+    focusStep = useRef<ComposerStep | null>(null);
+  const goToStep = (next: ComposerStep) => {
+    focusStep.current = next;
+    setStep(next);
+  };
+  useLayoutEffect(() => {
+    if (mode !== 'new' || focusStep.current !== step) return;
+    focusStep.current = null;
+    stepHeading.current?.focus();
+  }, [step, mode]);
+  function resetSteps() {
+    setStep('question');
+    setQuestionError(null);
+    setContinueError(null);
+  }
   const [context, setContext] = useState<ContextSubmission>({ count: 0 });
   const updateContext = useCallback((next: ContextSubmission) => {
     setContext(next);
@@ -697,6 +726,7 @@ export function ReadingWorkspace({
       }
       intents.current.delete('start');
       resetContext();
+      resetSteps();
       setQuestionSubmitted(false);
     }
     if (
@@ -959,6 +989,22 @@ export function ReadingWorkspace({
         Ask a follow-up
       </TextLink>
     ) : null;
+  const openJournal = () => {
+    if (!canLeave()) return;
+    void run(async (current) => {
+      setJournalNavigationPending(true);
+      try {
+        await loadHistory(current);
+        if (current()) {
+          setMode('history');
+          replacePath('/');
+          clearReading();
+        }
+      } finally {
+        if (current()) setJournalNavigationPending(false);
+      }
+    });
+  };
   const workspaceNavigation = (
     <nav className="reading-navigation" aria-label="Reading actions" hidden={!!deletionTarget}>
       <Button
@@ -985,6 +1031,8 @@ export function ReadingWorkspace({
           // A deliberate new reading is a new intent, even if the question is unchanged.
           intents.current.delete('start');
           resetContext();
+          resetSteps();
+          focusStep.current = 'question';
           clearReading();
           setMode('new');
           setRequest(null);
@@ -1005,22 +1053,7 @@ export function ReadingWorkspace({
         variant="text-button"
         aria-current={mode === 'history' ? 'page' : undefined}
         disabled={busy}
-        onClick={() => {
-          if (!canLeave()) return;
-          void run(async (current) => {
-            setJournalNavigationPending(true);
-            try {
-              await loadHistory(current);
-              if (current()) {
-                setMode('history');
-                replacePath('/');
-                clearReading();
-              }
-            } finally {
-              if (current()) setJournalNavigationPending(false);
-            }
-          });
-        }}
+        onClick={openJournal}
       >
         Journal
       </Button>
@@ -1112,6 +1145,8 @@ export function ReadingWorkspace({
           }}
           onTarot={(prompt) => {
             resetContext();
+            resetSteps();
+            focusStep.current = 'question';
             clearReading();
             setQuestion(prompt);
             setEnglish(false);
@@ -1227,6 +1262,7 @@ export function ReadingWorkspace({
             setQuestionSubmitted(false);
             intents.current.delete('start');
             resetContext();
+            resetSteps();
             setMode(start.parentEditionId ? 'followup' : 'new');
             replacePath(
               start.parentEditionId && record
@@ -1244,6 +1280,7 @@ export function ReadingWorkspace({
               if (current()) {
                 intents.current.delete('start');
                 resetContext();
+                resetSteps();
                 setQuestion('');
                 clearPhoto();
                 setQuestionSubmitted(false);
@@ -1263,6 +1300,8 @@ export function ReadingWorkspace({
           className="card new-reading"
           onSubmit={(event) => {
             event.preventDefault();
+            // Only Review can start a new reading; earlier steps never submit.
+            if (mode === 'new' && step !== 'review') return;
             if (
               inFlight.current ||
               requestPending ||
@@ -1308,250 +1347,321 @@ export function ReadingWorkspace({
             setMessage(null);
           }}
         >
-          <div className="new-reading-heading" hidden={reviewing}>
-            <h2 ref={composerHeading} tabIndex={-1} className="title-section">
-              {mode === 'followup' ? 'Ask a follow-up' : 'A new reading'}
-            </h2>
-            <Art name="spread-ribbon" mobileName="mobile-corner" className="new-reading-art" />
-          </div>
-          <div className="new-reading-layout" hidden={reviewing}>
-            <div className="new-reading-content">
-              {mode === 'followup' && reading && <FollowUp parent={reading} />}
-              <ReflectionField
-                id="reading-question"
-                label={mode === 'followup' ? 'Your follow-up question' : 'Your question'}
-                hint="Include what you are considering, what already works, and anything you want the reading to take into account."
-                rows={3}
-                maxLength={500}
-                required
-                value={question}
-                onChange={(event) => {
-                  setQuestion(event.target.value);
-                  setQuestionSubmitted(false);
-                }}
-                disabled={busy}
-              />
-              <label className="check" htmlFor="check-english">
-                <Input
-                  id="check-english"
-                  type="checkbox"
-                  required
-                  checked={english}
-                  onChange={(event) => setEnglish(event.target.checked)}
-                  disabled={busy}
+          {mode === 'new' && (
+            <>
+              <ReadingSteps current={step === 'question' ? 'question' : 'spread'} />
+              {step === 'question' && (
+                <QuestionStep
+                  headingRef={stepHeading}
+                  fieldRef={questionField}
+                  question={question}
+                  error={questionError}
+                  continueError={continueError}
+                  busy={busy}
+                  context={null}
+                  onQuestion={(value) => {
+                    setQuestion(value);
+                    setQuestionSubmitted(false);
+                    setQuestionError(null);
+                  }}
+                  onContinue={() => {
+                    if (!question.trim()) {
+                      setQuestionError('Enter your question to continue.');
+                      questionField.current?.focus();
+                      return;
+                    }
+                    setQuestionError(null);
+                    setContinueError(null);
+                    goToStep('spread');
+                  }}
+                  onJournal={openJournal}
                 />
-                Use English for this reading (required)
-              </label>
-              {mode === 'new' && (
-                <>
-                  <label className="check" htmlFor="check-reversals">
-                    <Input
-                      id="check-reversals"
-                      type="checkbox"
-                      checked={reversals}
-                      onChange={(event) => setReversals(event.target.checked)}
-                      disabled={busy}
-                    />
-                    Include reversed cards
-                  </label>
-                  <details className="spread-upload-field">
-                    <summary>
-                      <span>Use my own spread</span>
-                      {spreadPhoto && <span className="caption">Photo attached</span>}
-                    </summary>
-                    <label htmlFor="reading-spread-photo">Photo of your spread (optional)</label>
-                    <p id="reading-spread-photo-help" className="muted">
-                      Situation, tension, possibility — from left to right. Use a photo of three
-                      cards you have already drawn to recognize your cards and orientations instead
-                      of drawing new ones.
+              )}
+              {step === 'spread' && (
+                <SpreadStep
+                  headingRef={stepHeading}
+                  reversals={reversals}
+                  busy={busy}
+                  onReversals={setReversals}
+                  onDraw={() => goToStep('review')}
+                  onPhysical={() => goToStep('photo')}
+                  onBack={() => goToStep('question')}
+                />
+              )}
+              {step === 'photo' && (
+                <div className="new-reading-layout tarot-step tarot-step-photo">
+                  <div className="new-reading-content">
+                    <h2 ref={stepHeading} tabIndex={-1}>
+                      Bring the cards you drew.
+                    </h2>
+                    <p id="reading-photo-processing" aria-live="polite">
+                      {photoNotice}
                     </p>
-                    <Input
-                      ref={spreadInputRef}
-                      id="reading-spread-photo"
-                      aria-describedby="reading-spread-photo-help reading-photo-processing"
-                      className="photo-file-input"
-                      tabIndex={-1}
-                      type="file"
-                      accept="image/jpeg,image/png,image/webp"
-                      disabled={busy}
-                      onChange={(event) => {
-                        const file = event.target.files?.[0];
-                        if (!file) return;
-                        const selection = ++photoSelection.current;
-                        photoPreparing.current = true;
-                        setPreparingPhoto(true);
-                        setPhotoAnnouncement('Preparing photo…');
-                        setSpreadPhoto(null);
-                        setSpreadPhotoName(file.name);
-                        setQuestionSubmitted(false);
-                        const current = () => alive.current && photoSelection.current === selection;
-                        void prepareSpreadPhoto(file)
-                          .then((dataUrl) => {
-                            if (!current()) return;
-                            setSpreadPhoto(dataUrl);
-                            setSpreadPhotoName(file.name);
-                            setPhotoAnnouncement(`Photo attached: ${file.name}.`);
-                            setQuestionSubmitted(false);
-                            setMessage(null);
-                          })
-                          .catch((error) => {
-                            if (!current()) return;
-                            setSpreadPhoto(null);
-                            setSpreadPhotoName(null);
-                            setPhotoAnnouncement('');
-                            if (spreadInputRef.current) spreadInputRef.current.value = '';
-                            setMessage({
-                              tone: 'error',
-                              text:
-                                error instanceof Error
-                                  ? error.message
-                                  : 'Could not load the spread photo.',
-                            });
-                          })
-                          .finally(() => {
-                            if (!current()) return;
-                            photoPreparing.current = false;
-                            setPreparingPhoto(false);
-                          });
-                      }}
-                    />
-                    <div
-                      className={`spread-attachment ${spreadPhoto || preparingPhoto ? 'has-photo' : ''}`}
-                      data-testid={
-                        spreadPhoto || preparingPhoto ? 'spread-photo-preview' : undefined
-                      }
-                    >
-                      <p role="status" aria-live="polite" aria-atomic="true" className="sr-only">
-                        {photoAnnouncement}
+                    <details className="spread-upload-field">
+                      <summary>
+                        <span>Use my own spread</span>
+                        {spreadPhoto && <span className="caption">Photo attached</span>}
+                      </summary>
+                      <label htmlFor="reading-spread-photo">Photo of your spread (optional)</label>
+                      <p id="reading-spread-photo-help" className="muted">
+                        Situation, tension, possibility — from left to right. Use a photo of three
+                        cards you have already drawn to recognize your cards and orientations
+                        instead of drawing new ones.
                       </p>
-                      {spreadPhoto || preparingPhoto ? (
-                        <div className="spread-photo-preview">
-                          {spreadPhoto && (
-                            <img src={spreadPhoto} alt="Uploaded tarot spread preview" />
-                          )}
-                          {preparingPhoto && <p className="photo-preparing">Preparing photo…</p>}
-                        </div>
-                      ) : (
-                        <div className="spread-photo-empty">
-                          <Art name="three-card-spread" className="spread-intro-art" />
-                          <p>Illustration only</p>
-                        </div>
-                      )}
-                      <div className="spread-photo-meta">
-                        <div className="spread-file-description">
-                          {(spreadPhoto || preparingPhoto) && (
-                            <p>{spreadPhotoName ?? 'Spread photo attached'}</p>
-                          )}
-                          <p className="muted">JPEG, PNG or WebP · up to 10 MB</p>
-                        </div>
-                        <div className="spread-photo-actions">
-                          <Button
-                            ref={choosePhotoRef}
-                            type="button"
-                            className="secondary choose-photo"
-                            aria-describedby="reading-spread-photo-help reading-photo-processing"
-                            disabled={busy}
-                            onClick={() => spreadInputRef.current?.click()}
-                          >
-                            Choose photo
-                          </Button>
-                          {(spreadPhoto || preparingPhoto) && (
+                      <Input
+                        ref={spreadInputRef}
+                        id="reading-spread-photo"
+                        aria-describedby="reading-spread-photo-help reading-photo-processing"
+                        className="photo-file-input"
+                        tabIndex={-1}
+                        type="file"
+                        accept="image/jpeg,image/png,image/webp"
+                        disabled={busy}
+                        onChange={(event) => {
+                          const file = event.target.files?.[0];
+                          if (!file) return;
+                          const selection = ++photoSelection.current;
+                          photoPreparing.current = true;
+                          setPreparingPhoto(true);
+                          setPhotoAnnouncement('Preparing photo…');
+                          setSpreadPhoto(null);
+                          setSpreadPhotoName(file.name);
+                          setQuestionSubmitted(false);
+                          const current = () =>
+                            alive.current && photoSelection.current === selection;
+                          void prepareSpreadPhoto(file)
+                            .then((dataUrl) => {
+                              if (!current()) return;
+                              setSpreadPhoto(dataUrl);
+                              setSpreadPhotoName(file.name);
+                              setPhotoAnnouncement(`Photo attached: ${file.name}.`);
+                              setQuestionSubmitted(false);
+                              setMessage(null);
+                            })
+                            .catch((error) => {
+                              if (!current()) return;
+                              setSpreadPhoto(null);
+                              setSpreadPhotoName(null);
+                              setPhotoAnnouncement('');
+                              if (spreadInputRef.current) spreadInputRef.current.value = '';
+                              setMessage({
+                                tone: 'error',
+                                text:
+                                  error instanceof Error
+                                    ? error.message
+                                    : 'Could not load the spread photo.',
+                              });
+                            })
+                            .finally(() => {
+                              if (!current()) return;
+                              photoPreparing.current = false;
+                              setPreparingPhoto(false);
+                            });
+                        }}
+                      />
+                      <div
+                        className={`spread-attachment ${spreadPhoto || preparingPhoto ? 'has-photo' : ''}`}
+                        data-testid={
+                          spreadPhoto || preparingPhoto ? 'spread-photo-preview' : undefined
+                        }
+                      >
+                        <p role="status" aria-live="polite" aria-atomic="true" className="sr-only">
+                          {photoAnnouncement}
+                        </p>
+                        {spreadPhoto || preparingPhoto ? (
+                          <div className="spread-photo-preview">
+                            {spreadPhoto && (
+                              <img src={spreadPhoto} alt="Uploaded tarot spread preview" />
+                            )}
+                            {preparingPhoto && <p className="photo-preparing">Preparing photo…</p>}
+                          </div>
+                        ) : (
+                          <div className="spread-photo-empty">
+                            <Art name="three-card-spread" className="spread-intro-art" />
+                            <p>Illustration only</p>
+                          </div>
+                        )}
+                        <div className="spread-photo-meta">
+                          <div className="spread-file-description">
+                            {(spreadPhoto || preparingPhoto) && (
+                              <p>{spreadPhotoName ?? 'Spread photo attached'}</p>
+                            )}
+                            <p className="muted">JPEG, PNG or WebP · up to 10 MB</p>
+                          </div>
+                          <div className="spread-photo-actions">
                             <Button
+                              ref={choosePhotoRef}
                               type="button"
-                              variant="secondary"
+                              className="secondary choose-photo"
+                              aria-describedby="reading-spread-photo-help reading-photo-processing"
                               disabled={busy}
-                              onClick={() => {
-                                clearPhoto();
-                                setQuestionSubmitted(false);
-                                choosePhotoRef.current?.focus();
-                              }}
+                              onClick={() => spreadInputRef.current?.click()}
                             >
-                              Remove photo
+                              Choose photo
                             </Button>
-                          )}
+                            {(spreadPhoto || preparingPhoto) && (
+                              <Button
+                                type="button"
+                                variant="secondary"
+                                disabled={busy}
+                                onClick={() => {
+                                  clearPhoto();
+                                  setQuestionSubmitted(false);
+                                  choosePhotoRef.current?.focus();
+                                }}
+                              >
+                                Remove photo
+                              </Button>
+                            )}
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  </details>
-                </>
+                    </details>
+                  </div>
+                </div>
               )}
-              {user.continuityReady && (
-                <ContextSelection
-                  key={draftIntent}
-                  mode="choose"
-                  {...(mode === 'followup' && record && reading
-                    ? { initialSource: { family: record, editionId: reading.editionId } }
-                    : {})}
-                  binding={binding}
-                  csrfToken={user.csrfToken}
-                  onExpired={onExpired}
-                  onChange={updateContext}
-                />
-              )}
-            </div>
-            <aside className="reading-preflight" aria-labelledby="reading-preflight-title">
-              <h3 id="reading-preflight-title">Before you start</h3>
-              {mode === 'new' && (
-                <p id="reading-photo-processing" aria-live="polite">
-                  {photoNotice}
-                </p>
-              )}
-              {connectionRetry}
-              {submitNotice && <p>{submitNotice}</p>}
-              <p>
-                {mode === 'new'
-                  ? READING_PRODUCT_COPY.startProcessing
-                  : 'Starting a follow-up stores its question and result with this saved reading until deletion.'}
-              </p>
-              <div className="new-reading-footer">
-                <Button
-                  type="submit"
-                  className="large"
-                  aria-describedby={startHint ? 'reading-start-help' : undefined}
-                  disabled={
+              {step === 'review' && (
+                <ReviewStep
+                  headingRef={stepHeading}
+                  question={question}
+                  spread={{ kind: 'draw', reversals }}
+                  context={null}
+                  notices={
+                    <>
+                      {connectionRetry}
+                      {submitNotice && <p>{submitNotice}</p>}
+                      <p>{READING_PRODUCT_COPY.startProcessing}</p>
+                    </>
+                  }
+                  english={english}
+                  busy={busy}
+                  startDisabled={
                     busy ||
                     preparingPhoto ||
                     !english ||
                     !question.trim() ||
                     !contextReady ||
-                    (mode === 'followup' && !user.continuityReady) ||
                     !user.permission.modelAllowed ||
                     live === null
                   }
-                >
-                  {mode === 'followup' ? 'Review follow-up' : 'Start reading'}
-                  <Icon name="chevron" />
-                </Button>
-                {startHint && (
-                  <p id="reading-start-help" className="muted">
-                    {startHint}
-                  </p>
-                )}
-                <p className="muted">
-                  Readings left: {user.remainingDay} today · {user.remainingMonth} this month.
-                </p>
+                  startHint={startHint}
+                  remaining={{ day: user.remainingDay, month: user.remainingMonth }}
+                  onEnglish={setEnglish}
+                  onEditQuestion={() => goToStep('question')}
+                  onChangeSpread={() => goToStep('spread')}
+                />
+              )}
+            </>
+          )}
+          {mode === 'followup' && (
+            <>
+              <div className="new-reading-heading" hidden={reviewing}>
+                <h2 ref={composerHeading} tabIndex={-1} className="title-section">
+                  Ask a follow-up
+                </h2>
+                <Art name="spread-ribbon" mobileName="mobile-corner" className="new-reading-art" />
               </div>
-            </aside>
-          </div>
-          {reviewing && reading && (
-            <FollowUpReview
-              parent={reading}
-              question={question}
-              context={context}
-              notice={submitNotice}
-              heading={submissionHeading}
-              disabled={
-                busy ||
-                !contextReady ||
-                !user.permission.modelAllowed ||
-                !user.continuityReady ||
-                live === null
-              }
-              onBack={() => {
-                setReviewedBinding(null);
-                requestAnimationFrame(() => composerHeading.current?.focus());
-              }}
-            />
+              <div className="new-reading-layout" hidden={reviewing}>
+                <div className="new-reading-content">
+                  {reading && <FollowUp parent={reading} />}
+                  <ReflectionField
+                    id="reading-question"
+                    label="Your follow-up question"
+                    hint="Include what you are considering, what already works, and anything you want the reading to take into account."
+                    rows={3}
+                    maxLength={500}
+                    required
+                    value={question}
+                    onChange={(event) => {
+                      setQuestion(event.target.value);
+                      setQuestionSubmitted(false);
+                    }}
+                    disabled={busy}
+                  />
+                  <label className="check" htmlFor="check-english">
+                    <Input
+                      id="check-english"
+                      type="checkbox"
+                      required
+                      checked={english}
+                      onChange={(event) => setEnglish(event.target.checked)}
+                      disabled={busy}
+                    />
+                    Use English for this reading (required)
+                  </label>
+                  {user.continuityReady && (
+                    <ContextSelection
+                      key={draftIntent}
+                      mode="choose"
+                      {...(mode === 'followup' && record && reading
+                        ? { initialSource: { family: record, editionId: reading.editionId } }
+                        : {})}
+                      binding={binding}
+                      csrfToken={user.csrfToken}
+                      onExpired={onExpired}
+                      onChange={updateContext}
+                    />
+                  )}
+                </div>
+                <aside className="reading-preflight" aria-labelledby="reading-preflight-title">
+                  <h3 id="reading-preflight-title">Before you start</h3>
+                  {connectionRetry}
+                  {submitNotice && <p>{submitNotice}</p>}
+                  <p>
+                    Starting a follow-up stores its question and result with this saved reading
+                    until deletion.
+                  </p>
+                  <div className="new-reading-footer">
+                    <Button
+                      type="submit"
+                      className="large"
+                      aria-describedby={startHint ? 'reading-start-help' : undefined}
+                      disabled={
+                        busy ||
+                        preparingPhoto ||
+                        !english ||
+                        !question.trim() ||
+                        !contextReady ||
+                        (mode === 'followup' && !user.continuityReady) ||
+                        !user.permission.modelAllowed ||
+                        live === null
+                      }
+                    >
+                      Review follow-up
+                      <Icon name="chevron" />
+                    </Button>
+                    {startHint && (
+                      <p id="reading-start-help" className="muted">
+                        {startHint}
+                      </p>
+                    )}
+                    <p className="muted">
+                      Readings left: {user.remainingDay} today · {user.remainingMonth} this month.
+                    </p>
+                  </div>
+                </aside>
+              </div>
+              {reviewing && reading && (
+                <FollowUpReview
+                  parent={reading}
+                  question={question}
+                  context={context}
+                  notice={submitNotice}
+                  heading={submissionHeading}
+                  disabled={
+                    busy ||
+                    !contextReady ||
+                    !user.permission.modelAllowed ||
+                    !user.continuityReady ||
+                    live === null
+                  }
+                  onBack={() => {
+                    setReviewedBinding(null);
+                    requestAnimationFrame(() => composerHeading.current?.focus());
+                  }}
+                />
+              )}
+            </>
           )}
         </form>
       )}
