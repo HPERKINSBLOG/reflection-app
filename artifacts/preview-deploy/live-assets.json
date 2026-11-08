@@ -1,5 +1,5 @@
 {
-  "checkedAt": "2026-11-07T08:20:32.707Z",
+  "checkedAt": "2026-11-08T10:05:57.311Z",
   "passed": 35,
   "total": 35,
   "results": [
@@ -84,19 +84,19 @@
       "matchesBuild": true
     },
     {
-      "path": "/assets/index-a9uU9s1p.js",
+      "path": "/assets/index-BALVeXyL.js",
       "status": 200,
       "contentType": "text/javascript",
-      "sha256": "b5c61161d82ece1fffd6eb488a062df5f4ea06e33f4fa0017152187424757a3f",
-      "bytes": 583295,
+      "sha256": "644da9886ea105e874c8babdc208c5c646e9b9f90d51df64182a79fcb931f1ef",
+      "bytes": 596396,
       "matchesBuild": true
     },
     {
-      "path": "/assets/index-DAewYpbS.css",
+      "path": "/assets/index-RWp61OY1.css",
       "status": 200,
       "contentType": "text/css",
-      "sha256": "efd671690eb1591499ea0560375d5543eb00e49c89f98e3787d29dff80071093",
-      "bytes": 95498,
+      "sha256": "103539860174b3f02c80da32e5d891551adb4c063b997e9c2f7d5c34f7928de9",
+      "bytes": 98771,
       "matchesBuild": true
     },
     {

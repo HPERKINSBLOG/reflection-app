@@ -3,26 +3,26 @@
   "status": "deployed",
   "target": "https://reflection-preview.lfd.workers.dev/",
   "scope": "hosted-development-preview-only",
-  "deployedAt": "2026-11-07T08:20:12.818Z",
-  "verifiedAt": "2026-11-07T08:20:25.721Z",
-  "deploymentId": "e3666a63-5f5b-408b-aaa1-33224ddd9ec2",
-  "workerVersionId": "673ac8fb-fa96-445a-b67d-004a508ec70d",
+  "deployedAt": "2026-11-08T10:04:15.936Z",
+  "verifiedAt": "2026-11-08T10:05:57.311Z",
+  "deploymentId": "ab929317-6d71-44a5-9525-f7b1d7f526c1",
+  "workerVersionId": "019af081-ed3b-4a1c-be30-75a4222d7150",
   "trafficPercentage": 100,
-  "message": "Deploy welcome polish and header sign-in development preview e2430d3",
-  "command": "npm run deploy:preview -- --message \"Deploy welcome polish and header sign-in development preview e2430d3\"",
-  "sourceBranch": "design/mend-polish",
-  "sourceCommitAtDeployment": "e2430d3fa0ba6ffc14acda66218a9a3cd8774113",
-  "assetDelivery": "Wrangler read 37 files from dist/client and uploaded 3 (index.html, index-DAewYpbS.css, index-a9uU9s1p.js); the other 33 were already present. The ASSETS binding serves them.",
+  "message": "Deploy tarot steps development preview 940f919",
+  "command": "npm run deploy:preview -- --message \"Deploy tarot steps development preview 940f919\"",
+  "sourceBranch": "design/tarot-steps",
+  "sourceCommitAtDeployment": "940f919fb82922ee7aa5d4ce5ddfa619f325516e",
+  "assetDelivery": "Wrangler read 37 files from dist/client and uploaded 3 (index.html, index-RWp61OY1.css, index-BALVeXyL.js); the other 33 were already present. The ASSETS binding serves them.",
   "includes": [
-    "Welcome polish: the rose runs behind the header from 768 px, header controls paint the page color, the lead and closing line fit on one line from 768 px, plates take 40% of a tile, and the signed-out header links to /sign-in on / and /recover, on one row from 320 px.",
-    "97a55dd (Reconcile M3 availability and portability safeguards). It first reached the preview with 4d4f790 on 2026-11-07 at 05:47 UTC (deployment 3d486403-4976-453a-8bbf-de95a66f7462, version 20bb059a-dc22-40a7-a3f2-01b449059647). That deploy was not recorded in this receipt, which still described the 2026-11-05 deploy of d3d4c4f. No earlier recorded deploy (d75868d, 050d01f, d3d4c4f) contains it."
+    "Tarot steps before Start (dc3a385..940f919): Question, Spread, an optional Photo step for a physical spread, and Review come before Start; the three drawn cards, named by position, come before the interpretation.",
+    "From design/mend-polish after e2430d3: Sign in shows as unavailable while a request is pending (88c7593); the 1328 px header row, full rule and 16 px controls (6cb9c5b) and page width (d75f464); Outfit capitals for .eyebrow (d9bf195); topic chips at their own width (fea6f4f); the capitalized chapter label and follow-up draw list (02b2369); birth dates and times written the usual way (5c08ac5); a note response only when the reader chose one (14bd88b); \"Password sign-in\" on one line (7a3887a)."
   ],
   "previousDeployment": {
-    "deploymentId": "3d486403-4976-453a-8bbf-de95a66f7462",
-    "workerVersionId": "20bb059a-dc22-40a7-a3f2-01b449059647",
-    "createdAt": "2026-11-07T05:47:03.467Z",
-    "message": "Deploy board composition and /sign-in development preview 4d4f790",
-    "recordedInReceipt": false
+    "deploymentId": "e3666a63-5f5b-408b-aaa1-33224ddd9ec2",
+    "workerVersionId": "673ac8fb-fa96-445a-b67d-004a508ec70d",
+    "createdAt": "2026-11-07T08:20:12.818Z",
+    "message": "Deploy welcome polish and header sign-in development preview e2430d3",
+    "recordedInReceipt": true
   },
   "health": {
     "httpStatus": 200,
@@ -36,51 +36,15 @@
     "pendingBeforeDeploy": [],
     "appliedByThisDeploy": [],
     "latestLocal": "0021_astrology_pattern.sql",
-    "note": "wrangler d1 migrations list DB --remote --config wrangler.preview.jsonc reported no migrations to apply, both when first checked and again right before the deploy."
+    "note": "wrangler d1 migrations list DB --remote --config wrangler.preview.jsonc reported no migrations to apply before the deploy. Nothing since e2430d3 changes a worker or migration file."
   },
   "publication": {
     "releaseHash": "3a730caeb64a87cacc981f55df0558164bbe5ff77b00257d778d0045dae73e11",
     "patternReady": true
   },
   "verification": {
-    "sourceCommit": "6ef0aefd5a87e8abf1a89749c2efaaa47cf07fdd",
-    "deployedCommitDiffersOnlyIn": [
-      "design-qa.md"
-    ],
-    "platform": "Windows 11, Node 26.12.1",
-    "typecheck": "passed",
-    "biome": {
-      "errors": 0,
-      "warnings": 12,
-      "note": "The 12 warnings match the base branch; none is in a file this branch changes."
-    },
-    "domain": {
-      "files": 68,
-      "passed": 550
-    },
-    "database": {
-      "files": 73,
-      "passed": 682
-    },
-    "browser": {
-      "passed": 205,
-      "skipped": 1,
-      "failed": 0,
-      "flaky": 0,
-      "report": "browser-tests.json",
-      "skippedTest": "design-screens.spec.ts, which runs only with REFLECTION_SCREENS set; it passed in its own run."
-    },
-    "journey": {
-      "passed": 41,
-      "skipped": 0,
-      "failed": 0,
-      "flaky": 0,
-      "byEngine": {
-        "chromium": 17,
-        "firefox": 13,
-        "webkit": 11
-      }
-    }
+    "status": "pending",
+    "note": "The deployed app code is 940f919. The full checks run on design/tarot-steps after this deploy and are recorded here when they finish."
   },
   "liveChecks": {
     "health": {
@@ -98,83 +62,40 @@
         "httpStatus": 200,
         "contentType": "text/html",
         "servesAppShell": true
+      },
+      "/requests/example": {
+        "httpStatus": 200,
+        "contentType": "text/html",
+        "servesAppShell": true
       }
     },
-    "publicAssetsMatched": "35 of 35",
-    "art": {
-      "rose": [
-        {
-          "path": "/assets/hero-rose-BuyZarz4.webp",
-          "status": 200,
-          "contentType": "image/webp",
-          "bytes": 137080,
-          "matchesBuild": true
-        }
-      ],
-      "plates": [
-        {
-          "path": "/assets/position-possibility-C5_Ydvee.png",
-          "status": 200,
-          "contentType": "image/png",
-          "bytes": 44464,
-          "matchesBuild": true
-        },
-        {
-          "path": "/assets/position-situation-_1BZi04s.png",
-          "status": 200,
-          "contentType": "image/png",
-          "bytes": 47043,
-          "matchesBuild": true
-        },
-        {
-          "path": "/assets/position-tension-_ZkzId_3.png",
-          "status": 200,
-          "contentType": "image/png",
-          "bytes": 43360,
-          "matchesBuild": true
-        }
-      ],
-      "ribbon": [
-        {
-          "path": "/assets/spread-ribbon-320-B7scGEBE.webp",
-          "status": 200,
-          "contentType": "image/webp",
-          "bytes": 27476,
-          "matchesBuild": true
-        },
-        {
-          "path": "/assets/spread-ribbon-640-KHSCiQ27.webp",
-          "status": 200,
-          "contentType": "image/webp",
-          "bytes": 85660,
-          "matchesBuild": true
-        },
-        {
-          "path": "/assets/spread-ribbon-960-iTMsAU63.webp",
-          "status": 200,
-          "contentType": "image/webp",
-          "bytes": 178842,
-          "matchesBuild": true
-        }
+    "bundle": {
+      "js": "/assets/index-BALVeXyL.js",
+      "css": "/assets/index-RWp61OY1.css",
+      "matchesBuild": true,
+      "containsStepCopy": [
+        "Choose your spread",
+        "Use my physical spread",
+        "Review your reading",
+        "Take a moment with the spread.",
+        "Read the interpretation"
       ]
     },
+    "publicAssetsMatched": "35 of 35",
     "pages": [
       {
         "width": 390,
         "colorScheme": "light",
         "welcome": {
+          "httpStatus": 200,
           "roseLoaded": true,
-          "roseTop": 29,
-          "headerBottom": 69,
           "platesLoaded": 3,
-          "leafBand": "spread-ribbon-960-iTMsAU63.webp",
           "horizontalOverflow": false
         },
         "signIn": {
           "httpStatus": 200,
           "path": "/sign-in",
-          "newAccountGroup": true,
-          "headerSignInLinks": 0
+          "horizontalOverflow": false
         },
         "pageErrors": 0
       },
@@ -182,18 +103,15 @@
         "width": 1280,
         "colorScheme": "light",
         "welcome": {
+          "httpStatus": 200,
           "roseLoaded": true,
-          "roseTop": -40,
-          "headerBottom": 69,
           "platesLoaded": 3,
-          "leafBand": "spread-ribbon-960-iTMsAU63.webp",
           "horizontalOverflow": false
         },
         "signIn": {
           "httpStatus": 200,
           "path": "/sign-in",
-          "newAccountGroup": true,
-          "headerSignInLinks": 0
+          "horizontalOverflow": false
         },
         "pageErrors": 0
       },
@@ -201,18 +119,15 @@
         "width": 390,
         "colorScheme": "dark",
         "welcome": {
+          "httpStatus": 200,
           "roseLoaded": true,
-          "roseTop": 29,
-          "headerBottom": 69,
           "platesLoaded": 3,
-          "leafBand": "spread-ribbon-960-iTMsAU63.webp",
           "horizontalOverflow": false
         },
         "signIn": {
           "httpStatus": 200,
           "path": "/sign-in",
-          "newAccountGroup": true,
-          "headerSignInLinks": 0
+          "horizontalOverflow": false
         },
         "pageErrors": 0
       },
@@ -220,18 +135,15 @@
         "width": 1280,
         "colorScheme": "dark",
         "welcome": {
+          "httpStatus": 200,
           "roseLoaded": true,
-          "roseTop": -40,
-          "headerBottom": 69,
           "platesLoaded": 3,
-          "leafBand": "spread-ribbon-960-iTMsAU63.webp",
           "horizontalOverflow": false
         },
         "signIn": {
           "httpStatus": 200,
           "path": "/sign-in",
-          "newAccountGroup": true,
-          "headerSignInLinks": 0
+          "horizontalOverflow": false
         },
         "pageErrors": 0
       }
@@ -239,9 +151,9 @@
     "landingScreenshot": "landing-paper-390.png (390 x 844, Paper)"
   },
   "limits": [
-    "No account was created and no AI reading was started. The owner runs the signed-in check.",
+    "No account was created and no AI reading was started. The tarot steps sit behind sign-in with AI readings enabled; the owner runs that check.",
     "The authenticated API smoke did not run; see smoke-result.json.",
-    "The live checks are anonymous: health, direct loads of / and /sign-in, every public asset byte for byte, and the signed-out pages in Chromium at 390 and 1280 px in light and dark.",
+    "The live checks are anonymous: health, direct loads of /, /sign-in and a reading address, the bundle and every public asset byte for byte, and the signed-out pages in Chromium at 390 and 1280 px in light and dark.",
     "Physical devices and screen readers were not checked.",
     "Production deployment and qualification remain closed."
   ]
