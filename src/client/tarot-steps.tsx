@@ -272,6 +272,129 @@ export function SpreadStep({
   );
 }
 
+export function PhotoStep({
+  headingRef,
+  inputRef,
+  chooseRef,
+  photo,
+  notice,
+  busy,
+  onFile,
+  onRemove,
+  onContinue,
+  onAppDraw,
+  onBack,
+}: {
+  headingRef: Ref<HTMLHeadingElement>;
+  inputRef: RefObject<HTMLInputElement | null>;
+  chooseRef: Ref<HTMLButtonElement>;
+  photo: { dataUrl: string | null; name: string | null; preparing: boolean; announcement: string };
+  notice: string;
+  busy: boolean;
+  onFile: (file: File) => void;
+  onRemove: () => void;
+  onContinue: () => void;
+  onAppDraw: () => void;
+  onBack: () => void;
+}) {
+  const attached = Boolean(photo.dataUrl || photo.preparing);
+  return (
+    <div className="new-reading-layout tarot-step tarot-step-photo">
+      <div className="new-reading-content">
+        <StepHeading
+          eyebrow="A new tarot reading"
+          title="Bring the cards you drew."
+          lead="Place three cards in order, with their whole faces visible."
+          headingRef={headingRef}
+        />
+        <div className="spread-upload-field">
+          <label htmlFor="reading-spread-photo">Photo of your spread</label>
+          <p id="reading-spread-photo-help" className="muted">
+            Situation, tension, possibility — from left to right. Use a photo of three cards you
+            have already drawn to recognize your cards and orientations instead of drawing new ones.
+          </p>
+          <p id="reading-photo-processing" aria-live="polite">
+            {notice}
+          </p>
+          <Input
+            ref={inputRef}
+            id="reading-spread-photo"
+            aria-describedby="reading-spread-photo-help reading-photo-processing"
+            className="photo-file-input"
+            tabIndex={-1}
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            disabled={busy}
+            onChange={(event) => {
+              const file = event.target.files?.[0];
+              if (file) onFile(file);
+            }}
+          />
+          <div
+            className={`spread-attachment ${attached ? 'has-photo' : ''}`}
+            data-testid={attached ? 'spread-photo-preview' : undefined}
+          >
+            <p role="status" aria-live="polite" aria-atomic="true" className="sr-only">
+              {photo.announcement}
+            </p>
+            {attached ? (
+              <div className="spread-photo-preview">
+                {photo.dataUrl && <img src={photo.dataUrl} alt="Uploaded tarot spread preview" />}
+                {photo.preparing && <p className="photo-preparing">Preparing photo…</p>}
+              </div>
+            ) : (
+              <div className="spread-photo-empty">
+                <Art name="three-card-spread" className="spread-intro-art" />
+                <p>Illustration only</p>
+              </div>
+            )}
+            <div className="spread-photo-meta">
+              <div className="spread-file-description">
+                {attached && <p>{photo.name ?? 'Spread photo attached'}</p>}
+                <p className="muted">JPEG, PNG or WebP · up to 10 MB</p>
+              </div>
+              <div className="spread-photo-actions">
+                <Button
+                  ref={chooseRef}
+                  className="secondary choose-photo"
+                  aria-describedby="reading-spread-photo-help reading-photo-processing"
+                  disabled={busy}
+                  onClick={() => inputRef.current?.click()}
+                >
+                  Choose photo
+                </Button>
+                {attached && (
+                  <Button variant="secondary" disabled={busy} onClick={onRemove}>
+                    Remove photo
+                  </Button>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="actions tarot-step-actions">
+          <Button disabled={busy || !photo.dataUrl || photo.preparing} onClick={onContinue}>
+            Review your reading
+            <Icon name="chevron" />
+          </Button>
+          <Button variant="secondary" disabled={busy} onClick={onAppDraw}>
+            Use an app draw instead
+          </Button>
+          <Button variant="secondary" disabled={busy} onClick={onBack}>
+            Back to spread choices
+          </Button>
+        </div>
+      </div>
+      <StepAside id="photo-step-aside" title="Keep the order visible.">
+        <p>
+          Left: Situation. Middle: Tension. Right: Possibility. Keep reversed cards as you drew
+          them.
+        </p>
+      </StepAside>
+    </div>
+  );
+}
+
 export type ReviewSpread =
   | { kind: 'draw'; reversals: boolean }
   | { kind: 'photo'; name: string; dataUrl: string };

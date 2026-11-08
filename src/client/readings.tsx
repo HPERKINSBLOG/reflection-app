@@ -64,11 +64,13 @@ import {
 } from './follow-up.tsx';
 import { FollowUpReview } from './submission-review.tsx';
 import {
+  PhotoStep,
   QuestionStep,
   ReadingSteps,
   ReviewStep,
   SpreadStep,
   type ComposerStep,
+  type SpreadChoice,
 } from './tarot-steps.tsx';
 import './reading-return.css';
 import { ImportedReadingDetail } from './imported-reading.tsx';
@@ -294,8 +296,11 @@ export function ReadingWorkspace({
   }, [reviewedBinding]);
   // A new reading moves through one decision per screen; only Review can start it.
   const [step, setStep] = useState<ComposerStep>('question'),
+    // A chosen photo is sent only when the person continued from the Photo step with it.
+    [spreadChoice, setSpreadChoice] = useState<SpreadChoice>('draw'),
     [questionError, setQuestionError] = useState<string | null>(null),
     [continueError, setContinueError] = useState<string | null>(null);
+  const sendsPhoto = mode === 'new' && spreadChoice === 'photo';
   const stepHeading = useRef<HTMLHeadingElement>(null),
     questionField = useRef<HTMLTextAreaElement>(null),
     // The step whose heading takes focus once it renders.
@@ -311,6 +316,7 @@ export function ReadingWorkspace({
   }, [step, mode]);
   function resetSteps() {
     setStep('question');
+    setSpreadChoice('draw');
     setQuestionError(null);
     setContinueError(null);
   }
@@ -334,6 +340,41 @@ export function ReadingWorkspace({
     setSpreadPhotoName(null);
     setPhotoAnnouncement('Photo removed.');
     if (spreadInputRef.current) spreadInputRef.current.value = '';
+  };
+  const choosePhoto = (file: File) => {
+    const selection = ++photoSelection.current;
+    photoPreparing.current = true;
+    setPreparingPhoto(true);
+    setPhotoAnnouncement('Preparing photo…');
+    setSpreadPhoto(null);
+    setSpreadPhotoName(file.name);
+    setQuestionSubmitted(false);
+    const current = () => alive.current && photoSelection.current === selection;
+    void prepareSpreadPhoto(file)
+      .then((dataUrl) => {
+        if (!current()) return;
+        setSpreadPhoto(dataUrl);
+        setSpreadPhotoName(file.name);
+        setPhotoAnnouncement(`Photo attached: ${file.name}.`);
+        setQuestionSubmitted(false);
+        setMessage(null);
+      })
+      .catch((error) => {
+        if (!current()) return;
+        setSpreadPhoto(null);
+        setSpreadPhotoName(null);
+        setPhotoAnnouncement('');
+        if (spreadInputRef.current) spreadInputRef.current.value = '';
+        setMessage({
+          tone: 'error',
+          text: error instanceof Error ? error.message : 'Could not load the spread photo.',
+        });
+      })
+      .finally(() => {
+        if (!current()) return;
+        photoPreparing.current = false;
+        setPreparingPhoto(false);
+      });
   };
   const [busy, setBusy] = useState(false),
     [message, setMessage] = useState<NoticeMessage | null>(null),
@@ -1305,7 +1346,7 @@ export function ReadingWorkspace({
             if (
               inFlight.current ||
               requestPending ||
-              photoPreparing.current ||
+              (sendsPhoto && photoPreparing.current) ||
               !contextReady ||
               !english ||
               (mode === 'followup' &&
@@ -1330,7 +1371,7 @@ export function ReadingWorkspace({
               parentEditionId: binding.parentEditionId,
               selection: confirmed?.selection ?? [],
               ...(confirmed ? { contextAcknowledgement: confirmed.acknowledgement } : {}),
-              ...(mode === 'new' && spreadPhoto ? { spreadPhoto } : {}),
+              ...(mode === 'new' && sendsPhoto && spreadPhoto ? { spreadPhoto } : {}),
             };
             const intent = actionKey('start', values);
             const target = { kind: 'intent' as const, id: draftIntent };
@@ -1383,151 +1424,61 @@ export function ReadingWorkspace({
                   reversals={reversals}
                   busy={busy}
                   onReversals={setReversals}
-                  onDraw={() => goToStep('review')}
+                  onDraw={() => {
+                    setSpreadChoice('draw');
+                    goToStep('review');
+                  }}
                   onPhysical={() => goToStep('photo')}
                   onBack={() => goToStep('question')}
                 />
               )}
               {step === 'photo' && (
-                <div className="new-reading-layout tarot-step tarot-step-photo">
-                  <div className="new-reading-content">
-                    <h2 ref={stepHeading} tabIndex={-1}>
-                      Bring the cards you drew.
-                    </h2>
-                    <p id="reading-photo-processing" aria-live="polite">
-                      {photoNotice}
-                    </p>
-                    <details className="spread-upload-field">
-                      <summary>
-                        <span>Use my own spread</span>
-                        {spreadPhoto && <span className="caption">Photo attached</span>}
-                      </summary>
-                      <label htmlFor="reading-spread-photo">Photo of your spread (optional)</label>
-                      <p id="reading-spread-photo-help" className="muted">
-                        Situation, tension, possibility — from left to right. Use a photo of three
-                        cards you have already drawn to recognize your cards and orientations
-                        instead of drawing new ones.
-                      </p>
-                      <Input
-                        ref={spreadInputRef}
-                        id="reading-spread-photo"
-                        aria-describedby="reading-spread-photo-help reading-photo-processing"
-                        className="photo-file-input"
-                        tabIndex={-1}
-                        type="file"
-                        accept="image/jpeg,image/png,image/webp"
-                        disabled={busy}
-                        onChange={(event) => {
-                          const file = event.target.files?.[0];
-                          if (!file) return;
-                          const selection = ++photoSelection.current;
-                          photoPreparing.current = true;
-                          setPreparingPhoto(true);
-                          setPhotoAnnouncement('Preparing photo…');
-                          setSpreadPhoto(null);
-                          setSpreadPhotoName(file.name);
-                          setQuestionSubmitted(false);
-                          const current = () =>
-                            alive.current && photoSelection.current === selection;
-                          void prepareSpreadPhoto(file)
-                            .then((dataUrl) => {
-                              if (!current()) return;
-                              setSpreadPhoto(dataUrl);
-                              setSpreadPhotoName(file.name);
-                              setPhotoAnnouncement(`Photo attached: ${file.name}.`);
-                              setQuestionSubmitted(false);
-                              setMessage(null);
-                            })
-                            .catch((error) => {
-                              if (!current()) return;
-                              setSpreadPhoto(null);
-                              setSpreadPhotoName(null);
-                              setPhotoAnnouncement('');
-                              if (spreadInputRef.current) spreadInputRef.current.value = '';
-                              setMessage({
-                                tone: 'error',
-                                text:
-                                  error instanceof Error
-                                    ? error.message
-                                    : 'Could not load the spread photo.',
-                              });
-                            })
-                            .finally(() => {
-                              if (!current()) return;
-                              photoPreparing.current = false;
-                              setPreparingPhoto(false);
-                            });
-                        }}
-                      />
-                      <div
-                        className={`spread-attachment ${spreadPhoto || preparingPhoto ? 'has-photo' : ''}`}
-                        data-testid={
-                          spreadPhoto || preparingPhoto ? 'spread-photo-preview' : undefined
-                        }
-                      >
-                        <p role="status" aria-live="polite" aria-atomic="true" className="sr-only">
-                          {photoAnnouncement}
-                        </p>
-                        {spreadPhoto || preparingPhoto ? (
-                          <div className="spread-photo-preview">
-                            {spreadPhoto && (
-                              <img src={spreadPhoto} alt="Uploaded tarot spread preview" />
-                            )}
-                            {preparingPhoto && <p className="photo-preparing">Preparing photo…</p>}
-                          </div>
-                        ) : (
-                          <div className="spread-photo-empty">
-                            <Art name="three-card-spread" className="spread-intro-art" />
-                            <p>Illustration only</p>
-                          </div>
-                        )}
-                        <div className="spread-photo-meta">
-                          <div className="spread-file-description">
-                            {(spreadPhoto || preparingPhoto) && (
-                              <p>{spreadPhotoName ?? 'Spread photo attached'}</p>
-                            )}
-                            <p className="muted">JPEG, PNG or WebP · up to 10 MB</p>
-                          </div>
-                          <div className="spread-photo-actions">
-                            <Button
-                              ref={choosePhotoRef}
-                              type="button"
-                              className="secondary choose-photo"
-                              aria-describedby="reading-spread-photo-help reading-photo-processing"
-                              disabled={busy}
-                              onClick={() => spreadInputRef.current?.click()}
-                            >
-                              Choose photo
-                            </Button>
-                            {(spreadPhoto || preparingPhoto) && (
-                              <Button
-                                type="button"
-                                variant="secondary"
-                                disabled={busy}
-                                onClick={() => {
-                                  clearPhoto();
-                                  setQuestionSubmitted(false);
-                                  choosePhotoRef.current?.focus();
-                                }}
-                              >
-                                Remove photo
-                              </Button>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    </details>
-                  </div>
-                </div>
+                <PhotoStep
+                  headingRef={stepHeading}
+                  inputRef={spreadInputRef}
+                  chooseRef={choosePhotoRef}
+                  photo={{
+                    dataUrl: spreadPhoto,
+                    name: spreadPhotoName,
+                    preparing: preparingPhoto,
+                    announcement: photoAnnouncement,
+                  }}
+                  notice={photoNotice}
+                  busy={busy}
+                  onFile={choosePhoto}
+                  onRemove={() => {
+                    clearPhoto();
+                    setQuestionSubmitted(false);
+                    choosePhotoRef.current?.focus();
+                  }}
+                  onContinue={() => {
+                    setSpreadChoice('photo');
+                    goToStep('review');
+                  }}
+                  onAppDraw={() => {
+                    setSpreadChoice('draw');
+                    goToStep('review');
+                  }}
+                  onBack={() => goToStep('spread')}
+                />
               )}
               {step === 'review' && (
                 <ReviewStep
                   headingRef={stepHeading}
                   question={question}
-                  spread={{ kind: 'draw', reversals }}
+                  spread={
+                    sendsPhoto && spreadPhoto
+                      ? {
+                          kind: 'photo',
+                          name: spreadPhotoName ?? 'Spread photo attached',
+                          dataUrl: spreadPhoto,
+                        }
+                      : { kind: 'draw', reversals }
+                  }
                   context={null}
                   notices={
                     <>
+                      {sendsPhoto && <p>{photoNotice}</p>}
                       {connectionRetry}
                       {submitNotice && <p>{submitNotice}</p>}
                       <p>{READING_PRODUCT_COPY.startProcessing}</p>
@@ -1537,7 +1488,7 @@ export function ReadingWorkspace({
                   busy={busy}
                   startDisabled={
                     busy ||
-                    preparingPhoto ||
+                    (sendsPhoto && preparingPhoto) ||
                     !english ||
                     !question.trim() ||
                     !contextReady ||

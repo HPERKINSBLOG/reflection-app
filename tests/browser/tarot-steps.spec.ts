@@ -26,6 +26,42 @@ async function tabTo(page: Page, target: Locator) {
   throw new Error('Keyboard focus never reached the control');
 }
 
+const image = Buffer.from(
+  'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR4nGP4z8DwHwAFAAH/iZk9HQAAAABJRU5ErkJggg==',
+  'base64',
+);
+const dataUrl = `data:image/png;base64,${image.toString('base64')}`;
+
+/** Holds reads of files named slow* until the test calls window.releasePhotoReads(). */
+async function holdSlowPhotoReads(page: Page) {
+  await page.addInitScript(() => {
+    const original = FileReader.prototype.readAsDataURL;
+    const pending: Array<() => Promise<void>> = [];
+    FileReader.prototype.readAsDataURL = function (blob) {
+      if (blob instanceof File && blob.name.startsWith('slow')) {
+        pending.push(
+          () =>
+            new Promise<void>((resolve) => {
+              this.addEventListener('loadend', () => resolve(), { once: true });
+              original.call(this, blob);
+            }),
+        );
+      } else original.call(this, blob);
+    };
+    Object.assign(window, {
+      releasePhotoReads: () => Promise.all(pending.splice(0).map((release) => release())),
+    });
+  });
+}
+
+async function toPhotoStep(page: Page, question: string) {
+  await openTarot(page);
+  await page.getByLabel('Your question', { exact: true }).fill(question);
+  await page.getByRole('button', { name: 'Choose your spread', exact: true }).click();
+  await page.getByRole('button', { name: 'Use my physical spread', exact: true }).click();
+  await expect(heading(page, 'Bring the cards you drew.')).toBeFocused();
+}
+
 test('a new reading moves from question to spread to review, and only review can start', async ({
   page,
 }) => {
@@ -185,4 +221,98 @@ test('the steps can be completed by keyboard alone, with named and described con
   await page.keyboard.press('Enter');
   await expect(page.getByTestId('accepted-reading')).toBeVisible();
   expect(starts).toHaveLength(1);
+});
+
+test('a physical spread needs a ready photo before review', async ({ page }) => {
+  await account(page, '198.51.100.16');
+  await enableAi(page);
+  const starts = countStarts(page);
+  await toPhotoStep(page, 'What do my own cards say?');
+  await expect(step(page, 'Spread')).toHaveAttribute('aria-current', 'step');
+  const proceed = page.getByRole('button', { name: 'Review your reading', exact: true });
+  await expect(proceed).toBeDisabled();
+  await expect(
+    page.getByRole('button', { name: 'Choose photo', exact: true }),
+  ).toHaveAccessibleDescription(/does not recognize real cards/);
+  await expect(
+    page.getByRole('button', { name: 'Back to spread choices', exact: true }),
+  ).toBeVisible();
+
+  await page
+    .getByLabel('Photo of your spread', { exact: true })
+    .setInputFiles({ name: 'my-spread.png', mimeType: 'image/png', buffer: image });
+  await expect(proceed).toBeEnabled();
+  await expect(
+    page.getByRole('status').filter({ hasText: 'Photo attached: my-spread.png.' }),
+  ).toBeAttached();
+  await expect(page.getByRole('img', { name: 'Uploaded tarot spread preview' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Remove photo', exact: true })).toBeVisible();
+
+  await proceed.click();
+  await expect(heading(page, 'Ready when you are.')).toBeFocused();
+  await expect(page.getByText('Your spread photo', { exact: true })).toBeVisible();
+  await expect(page.getByText('my-spread.png', { exact: true })).toBeVisible();
+  await expect(page.getByRole('img', { name: 'Your attached spread' })).toBeVisible();
+  await expect(page.getByRole('complementary', { name: 'Before you start' })).toContainText(
+    'This simulation does not recognize real cards.',
+  );
+  await page.getByLabel('Use English for this reading').check();
+  await page.getByRole('button', { name: 'Start reading', exact: true }).click();
+  await expect(page.getByTestId('accepted-reading')).toBeVisible();
+  expect(starts).toHaveLength(1);
+  expect(starts[0]!.spreadPhoto).toBe(dataUrl);
+});
+
+test('an app draw instead never sends the chosen photo', async ({ page }) => {
+  await account(page, '198.51.100.17');
+  await enableAi(page);
+  const starts = countStarts(page);
+  await toPhotoStep(page, 'Should I keep my own draw?');
+  await page
+    .getByLabel('Photo of your spread', { exact: true })
+    .setInputFiles({ name: 'my-spread.png', mimeType: 'image/png', buffer: image });
+  await expect(
+    page.getByRole('button', { name: 'Review your reading', exact: true }),
+  ).toBeEnabled();
+  await page.getByRole('button', { name: 'Use an app draw instead', exact: true }).click();
+  await expect(heading(page, 'Ready when you are.')).toBeFocused();
+  await expect(page.getByText('App draw · Reversed cards: Off', { exact: true })).toBeVisible();
+  await expect(page.getByRole('img', { name: 'Your attached spread' })).toHaveCount(0);
+  await expect(page.getByRole('complementary', { name: 'Before you start' })).not.toContainText(
+    'does not recognize real cards',
+  );
+  await page.getByLabel('Use English for this reading').check();
+  await page.getByRole('button', { name: 'Start reading', exact: true }).click();
+  await expect(page.getByTestId('accepted-reading')).toBeVisible();
+  expect(starts).toHaveLength(1);
+  expect(starts[0]).not.toHaveProperty('spreadPhoto');
+});
+
+test('a photo still preparing then an app draw sends nothing', async ({ page }) => {
+  await holdSlowPhotoReads(page);
+  await account(page, '198.51.100.18');
+  await enableAi(page);
+  const starts = countStarts(page);
+  await toPhotoStep(page, 'What if I change my mind?');
+  await page
+    .getByLabel('Photo of your spread', { exact: true })
+    .setInputFiles({ name: 'slow-spread.png', mimeType: 'image/png', buffer: image });
+  await expect(page.getByRole('paragraph').filter({ hasText: /^Preparing photo…$/ })).toBeVisible();
+  await expect(
+    page.getByRole('button', { name: 'Review your reading', exact: true }),
+  ).toBeDisabled();
+  await page.getByRole('button', { name: 'Use an app draw instead', exact: true }).click();
+  await expect(page.getByText('App draw · Reversed cards: Off', { exact: true })).toBeVisible();
+  // An app draw does not wait for a photo it will never send.
+  await page.getByLabel('Use English for this reading').check();
+  const start = page.getByRole('button', { name: 'Start reading', exact: true });
+  await expect(start).toBeEnabled();
+  await page.evaluate(() =>
+    (window as unknown as { releasePhotoReads: () => Promise<void> }).releasePhotoReads(),
+  );
+  await expect(page.getByRole('img', { name: 'Your attached spread' })).toHaveCount(0);
+  await start.click();
+  await expect(page.getByTestId('accepted-reading')).toBeVisible();
+  expect(starts).toHaveLength(1);
+  expect(starts[0]).not.toHaveProperty('spreadPhoto');
 });
