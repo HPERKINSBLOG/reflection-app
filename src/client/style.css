@@ -1906,6 +1906,10 @@ button.history-link:hover:enabled {
 }
 
 /* Tarot steps: one decision per screen before a new reading starts. */
+/* The question step stays mounted while hidden; its grid display must not override that. */
+.tarot-step[hidden] {
+  display: none;
+}
 .reading-steps {
   display: flex;
   flex-wrap: wrap;

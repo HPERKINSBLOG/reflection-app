@@ -67,6 +67,7 @@ function StepAside({ id, title, children }: { id: string; title: string; childre
 }
 
 export function QuestionStep({
+  hidden = false,
   headingRef,
   fieldRef,
   question,
@@ -78,6 +79,7 @@ export function QuestionStep({
   onContinue,
   onJournal,
 }: {
+  hidden?: boolean;
   headingRef: Ref<HTMLHeadingElement>;
   fieldRef: RefObject<HTMLTextAreaElement | null>;
   question: string;
@@ -90,7 +92,7 @@ export function QuestionStep({
   onJournal: () => void;
 }) {
   return (
-    <div className="new-reading-layout tarot-step tarot-step-question">
+    <div className="new-reading-layout tarot-step tarot-step-question" hidden={hidden}>
       <div className="new-reading-content">
         <StepHeading
           eyebrow="A new tarot reading"

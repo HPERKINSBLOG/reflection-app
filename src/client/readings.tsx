@@ -62,7 +62,7 @@ import {
   editionNavigation,
   editionPath,
 } from './follow-up.tsx';
-import { FollowUpReview } from './submission-review.tsx';
+import { FollowUpReview, SelectedContextSummary } from './submission-review.tsx';
 import {
   PhotoStep,
   QuestionStep,
@@ -301,7 +301,9 @@ export function ReadingWorkspace({
     [questionError, setQuestionError] = useState<string | null>(null),
     [continueError, setContinueError] = useState<string | null>(null);
   const sendsPhoto = mode === 'new' && spreadChoice === 'photo';
-  const stepHeading = useRef<HTMLHeadingElement>(null),
+  // The Question step stays mounted, so its heading has its own ref.
+  const questionHeading = useRef<HTMLHeadingElement>(null),
+    stepHeading = useRef<HTMLHeadingElement>(null),
     questionField = useRef<HTMLTextAreaElement>(null),
     // The step whose heading takes focus once it renders.
     focusStep = useRef<ComposerStep | null>(null);
@@ -312,7 +314,7 @@ export function ReadingWorkspace({
   useLayoutEffect(() => {
     if (mode !== 'new' || focusStep.current !== step) return;
     focusStep.current = null;
-    stepHeading.current?.focus();
+    (step === 'question' ? questionHeading : stepHeading).current?.focus();
   }, [step, mode]);
   function resetSteps() {
     setStep('question');
@@ -1391,33 +1393,48 @@ export function ReadingWorkspace({
           {mode === 'new' && (
             <>
               <ReadingSteps current={step === 'question' ? 'question' : 'spread'} />
-              {step === 'question' && (
-                <QuestionStep
-                  headingRef={stepHeading}
-                  fieldRef={questionField}
-                  question={question}
-                  error={questionError}
-                  continueError={continueError}
-                  busy={busy}
-                  context={null}
-                  onQuestion={(value) => {
-                    setQuestion(value);
-                    setQuestionSubmitted(false);
-                    setQuestionError(null);
-                  }}
-                  onContinue={() => {
-                    if (!question.trim()) {
-                      setQuestionError('Enter your question to continue.');
-                      questionField.current?.focus();
-                      return;
-                    }
-                    setQuestionError(null);
-                    setContinueError(null);
-                    goToStep('spread');
-                  }}
-                  onJournal={openJournal}
-                />
-              )}
+              {/* Stays mounted while composing: the excerpt picker keeps its picks and confirmation. */}
+              <QuestionStep
+                hidden={step !== 'question'}
+                headingRef={questionHeading}
+                fieldRef={questionField}
+                question={question}
+                error={questionError}
+                continueError={continueError}
+                busy={busy}
+                context={
+                  user.continuityReady ? (
+                    <ContextSelection
+                      key={draftIntent}
+                      mode="choose"
+                      binding={binding}
+                      csrfToken={user.csrfToken}
+                      onExpired={onExpired}
+                      onChange={updateContext}
+                    />
+                  ) : null
+                }
+                onQuestion={(value) => {
+                  setQuestion(value);
+                  setQuestionSubmitted(false);
+                  setQuestionError(null);
+                }}
+                onContinue={() => {
+                  if (!question.trim()) {
+                    setQuestionError('Enter your question to continue.');
+                    questionField.current?.focus();
+                    return;
+                  }
+                  setQuestionError(null);
+                  if (!contextReady) {
+                    setContinueError('Review and confirm your selected excerpts to continue.');
+                    return;
+                  }
+                  setContinueError(null);
+                  goToStep('spread');
+                }}
+                onJournal={openJournal}
+              />
               {step === 'spread' && (
                 <SpreadStep
                   headingRef={stepHeading}
@@ -1475,7 +1492,9 @@ export function ReadingWorkspace({
                         }
                       : { kind: 'draw', reversals }
                   }
-                  context={null}
+                  context={
+                    user.continuityReady ? <SelectedContextSummary context={context} /> : null
+                  }
                   notices={
                     <>
                       {sendsPhoto && <p>{photoNotice}</p>}

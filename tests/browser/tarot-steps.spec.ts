@@ -1,6 +1,13 @@
 import { expect, test, type Locator, type Page } from '@playwright/test';
 import { READING_PRODUCT_COPY } from '../../src/contracts/product-copy.ts';
-import { account, enableAi, openTarot, toReview } from '../fixtures/browser-reading.ts';
+import {
+  account,
+  enableAi,
+  openTarot,
+  reading,
+  savedSnapshot,
+  toReview,
+} from '../fixtures/browser-reading.ts';
 
 const heading = (page: Page, name: string) => page.getByRole('heading', { name, exact: true });
 const step = (page: Page, label: string) =>
@@ -86,7 +93,7 @@ test('a new reading moves from question to spread to review, and only review can
   await page.getByRole('button', { name: 'Let Reflection draw', exact: true }).click();
   await expect(heading(page, 'Ready when you are.')).toBeFocused();
   await expect(step(page, 'Spread')).toHaveAttribute('aria-current', 'step');
-  await expect(page.getByText('Where can I begin?', { exact: true })).toBeVisible();
+  await expect(page.locator('.review-question')).toHaveText('Where can I begin?');
   await expect(page.getByText('App draw · Reversed cards: Off', { exact: true })).toBeVisible();
   await expect(page.getByRole('complementary', { name: 'Before you start' })).toContainText(
     READING_PRODUCT_COPY.startProcessing,
@@ -315,4 +322,110 @@ test('a photo still preparing then an app draw sends nothing', async ({ page }) 
   await expect(page.getByTestId('accepted-reading')).toBeVisible();
   expect(starts).toHaveLength(1);
   expect(starts[0]).not.toHaveProperty('spreadPhoto');
+});
+
+/** Saves a reading with a dated revisit note whose text can be quoted as an excerpt. */
+async function savedNote(page: Page, ip: string) {
+  await account(page, ip);
+  await reading(page, 'Synthetic source for a deliberate excerpt');
+  await page.getByRole('button', { name: 'Save reading', exact: true }).click();
+  await expect(page.getByText('Saved until you delete it.', { exact: true })).toBeVisible();
+  const saved = await savedSnapshot(page);
+  const result = await page.request.post('/api/v1/revisits', {
+    headers: {
+      Origin: new URL(page.url()).origin,
+      'X-CSRF-Token': saved.me.csrfToken,
+      'Idempotency-Key': crypto.randomUUID(),
+    },
+    data: {
+      editionId: saved.reading.editionId,
+      note: `${'x'.repeat(1300)}😀é PRIVATE TAIL`,
+      stance: 'disagree',
+    },
+  });
+  expect(result.ok()).toBe(true);
+  return saved;
+}
+
+/** On the Question step, quotes characters 1301–1303 of the revisit note. */
+async function addExcerpt(page: Page, family: string) {
+  await page.getByRole('button', { name: 'Choose excerpts', exact: true }).click();
+  await page.getByLabel('Saved reading', { exact: true }).selectOption(family);
+  await page.getByRole('radio', { name: /Your revisit note/ }).check();
+  await page.getByRole('button', { name: 'Allow this source', exact: true }).click();
+  await page.getByRole('button', { name: 'Choose part of passage', exact: true }).click();
+  await page.getByText('Set first and last characters', { exact: true }).click();
+  await page.getByLabel('First character', { exact: true }).fill('1301');
+  await page.getByLabel('Last character', { exact: true }).fill('1303');
+  await page.getByRole('button', { name: 'Add excerpt', exact: true }).click();
+}
+
+async function confirmExcerpts(page: Page) {
+  await page.getByRole('button', { name: 'Review selected excerpts' }).click();
+  await page.getByLabel('I agree to use these exact excerpts for this reading.').check();
+}
+
+const selectedContext = (page: Page) =>
+  page
+    .locator('.submission-review-section')
+    .filter({ has: page.getByRole('heading', { name: 'Selected context', exact: true }) });
+
+test('unconfirmed excerpts block the spread step', async ({ page }) => {
+  const saved = await savedNote(page, '198.51.100.19');
+  await openTarot(page);
+  await page.getByLabel('Your question', { exact: true }).fill('Which change feels workable?');
+  await addExcerpt(page, saved.session.id);
+  const proceed = page.getByRole('button', { name: 'Choose your spread', exact: true });
+  await proceed.click();
+  await expect(
+    page.getByText('Review and confirm your selected excerpts to continue.', { exact: true }),
+  ).toBeVisible();
+  await expect(heading(page, 'What is on your mind?')).toBeVisible();
+  await confirmExcerpts(page);
+  await proceed.click();
+  await expect(heading(page, 'One question. Three perspectives.')).toBeFocused();
+});
+
+test('review lists exactly the confirmed excerpts', async ({ page }) => {
+  const saved = await savedNote(page, '198.51.100.20');
+  await openTarot(page);
+  await toReview(page, 'What can stay simple?');
+  await expect(selectedContext(page)).toContainText(
+    'No excerpts selected. No earlier writing will be sent.',
+  );
+  await page.getByRole('button', { name: 'Edit your question', exact: true }).click();
+  await addExcerpt(page, saved.session.id);
+  await confirmExcerpts(page);
+  await page.getByRole('button', { name: 'Choose your spread', exact: true }).click();
+  await page.getByRole('button', { name: 'Let Reflection draw', exact: true }).click();
+  await expect(selectedContext(page).locator('blockquote')).toHaveText('😀é');
+  await expect(selectedContext(page)).toContainText('Your words');
+  await expect(selectedContext(page)).not.toContainText('PRIVATE TAIL');
+});
+
+test('editing the question after confirming excerpts needs a new confirmation', async ({
+  page,
+}) => {
+  const saved = await savedNote(page, '198.51.100.21');
+  await openTarot(page);
+  const question = page.getByLabel('Your question', { exact: true });
+  await question.fill('Which change feels workable?');
+  await addExcerpt(page, saved.session.id);
+  await confirmExcerpts(page);
+  await page.getByRole('button', { name: 'Choose your spread', exact: true }).click();
+  await page.getByRole('button', { name: 'Let Reflection draw', exact: true }).click();
+  await expect(selectedContext(page).locator('blockquote')).toHaveText('😀é');
+
+  await page.getByRole('button', { name: 'Edit your question', exact: true }).click();
+  await question.fill('Which change feels workable today?');
+  const proceed = page.getByRole('button', { name: 'Choose your spread', exact: true });
+  await proceed.click();
+  await expect(
+    page.getByText('Review and confirm your selected excerpts to continue.', { exact: true }),
+  ).toBeVisible();
+  await confirmExcerpts(page);
+  await proceed.click();
+  await page.getByRole('button', { name: 'Let Reflection draw', exact: true }).click();
+  await expect(page.locator('.review-question')).toHaveText('Which change feels workable today?');
+  await expect(selectedContext(page).locator('blockquote')).toHaveText('😀é');
 });
