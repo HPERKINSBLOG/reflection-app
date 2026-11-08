@@ -3,25 +3,25 @@
   "status": "deployed",
   "target": "https://reflection-preview.lfd.workers.dev/",
   "scope": "hosted-development-preview-only",
-  "deployedAt": "2026-11-08T10:04:15.936Z",
-  "verifiedAt": "2026-11-08T10:05:57.311Z",
-  "deploymentId": "ab929317-6d71-44a5-9525-f7b1d7f526c1",
-  "workerVersionId": "019af081-ed3b-4a1c-be30-75a4222d7150",
+  "deployedAt": "2026-11-08T11:16:58.024Z",
+  "verifiedAt": "2026-11-08T11:17:21.729Z",
+  "deploymentId": "e6bf88ac-bb11-4a93-b112-0be867807d61",
+  "workerVersionId": "d314e873-9f77-429a-bc86-d41dbb40efd6",
   "trafficPercentage": 100,
-  "message": "Deploy tarot steps development preview 940f919",
-  "command": "npm run deploy:preview -- --message \"Deploy tarot steps development preview 940f919\"",
+  "message": "Deploy tarot steps development preview efad083",
+  "command": "npm run deploy:preview -- --message \"Deploy tarot steps development preview efad083\"",
   "sourceBranch": "design/tarot-steps",
-  "sourceCommitAtDeployment": "940f919fb82922ee7aa5d4ce5ddfa619f325516e",
-  "assetDelivery": "Wrangler read 37 files from dist/client and uploaded 3 (index.html, index-RWp61OY1.css, index-BALVeXyL.js); the other 33 were already present. The ASSETS binding serves them.",
+  "sourceCommitAtDeployment": "efad0834310cc12f3f1ee6c48ea0af85432563c4",
+  "assetDelivery": "Wrangler read 37 files from dist/client and uploaded 3 (index.html, index-DKI2ObcT.css, index-CL-qMIyQ.js); the other 33 were already present. The ASSETS binding serves them.",
   "includes": [
-    "Tarot steps before Start (dc3a385..940f919): Question, Spread, an optional Photo step for a physical spread, and Review come before Start; the three drawn cards, named by position, come before the interpretation.",
-    "From design/mend-polish after e2430d3: Sign in shows as unavailable while a request is pending (88c7593); the 1328 px header row, full rule and 16 px controls (6cb9c5b) and page width (d75f464); Outfit capitals for .eyebrow (d9bf195); topic chips at their own width (fea6f4f); the capitalized chapter label and follow-up draw list (02b2369); birth dates and times written the usual way (5c08ac5); a note response only when the reader chose one (14bd88b); \"Password sign-in\" on one line (7a3887a)."
+    "Since the 940f919 deploy: the three cards keep one row, left to right, from 360 px (735fed2), and an app-draw Start drops a photo still preparing, so its late result cannot mark the started question unsaved (efad083).",
+    "Carried over from 940f919: the tarot steps before Start and the cards before the interpretation (dc3a385..940f919), and design/mend-polish after e2430d3."
   ],
   "previousDeployment": {
-    "deploymentId": "e3666a63-5f5b-408b-aaa1-33224ddd9ec2",
-    "workerVersionId": "673ac8fb-fa96-445a-b67d-004a508ec70d",
-    "createdAt": "2026-11-07T08:20:12.818Z",
-    "message": "Deploy welcome polish and header sign-in development preview e2430d3",
+    "deploymentId": "ab929317-6d71-44a5-9525-f7b1d7f526c1",
+    "workerVersionId": "019af081-ed3b-4a1c-be30-75a4222d7150",
+    "createdAt": "2026-11-08T10:04:15.936Z",
+    "message": "Deploy tarot steps development preview 940f919",
     "recordedInReceipt": true
   },
   "health": {
@@ -36,15 +36,46 @@
     "pendingBeforeDeploy": [],
     "appliedByThisDeploy": [],
     "latestLocal": "0021_astrology_pattern.sql",
-    "note": "wrangler d1 migrations list DB --remote --config wrangler.preview.jsonc reported no migrations to apply before the deploy. Nothing since e2430d3 changes a worker or migration file."
+    "note": "wrangler d1 migrations list DB --remote --config wrangler.preview.jsonc reported no migrations to apply before the deploy. Nothing on this branch changes a worker or migration file."
   },
   "publication": {
     "releaseHash": "3a730caeb64a87cacc981f55df0558164bbe5ff77b00257d778d0045dae73e11",
     "patternReady": true
   },
   "verification": {
-    "status": "pending",
-    "note": "The deployed app code is 940f919. The full checks run on design/tarot-steps after this deploy and are recorded here when they finish."
+    "status": "passed",
+    "sourceCommit": "efad0834310cc12f3f1ee6c48ea0af85432563c4",
+    "platform": "Windows 11, Node 26.12.1",
+    "typecheck": "passed",
+    "biome": {
+      "errors": 0,
+      "warnings": 12,
+      "note": "The 12 warnings match the base branch. One is in your-pattern.spec.ts, on a line this branch does not change."
+    },
+    "domain": {
+      "files": 70,
+      "passed": 554
+    },
+    "database": {
+      "files": 73,
+      "passed": 682,
+      "note": "Run at 735fed2; this branch changes no worker or database code."
+    },
+    "browser": {
+      "passed": 227,
+      "skipped": 2,
+      "failed": 0,
+      "flaky": 0,
+      "report": "browser-tests.json",
+      "skippedTests": "design-screens.spec.ts, whose two capture tests run only with REFLECTION_SCREENS set; the tarot-steps capture passed in its own run."
+    },
+    "checks": {
+      "schemas": "passed",
+      "contracts": "passed",
+      "openapi": "passed"
+    },
+    "journey": "not run",
+    "review": "A whole-branch review found no Critical issues; its two Important findings were fixed with tests before this deploy."
   },
   "liveChecks": {
     "health": {
@@ -70,8 +101,8 @@
       }
     },
     "bundle": {
-      "js": "/assets/index-BALVeXyL.js",
-      "css": "/assets/index-RWp61OY1.css",
+      "js": "/assets/index-CL-qMIyQ.js",
+      "css": "/assets/index-DKI2ObcT.css",
       "matchesBuild": true,
       "containsStepCopy": [
         "Choose your spread",
