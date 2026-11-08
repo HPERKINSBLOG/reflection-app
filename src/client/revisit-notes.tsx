@@ -552,7 +552,8 @@ export function RevisitNotes({
                     <span className="sr-only">{fullDate(note.createdAt)}</span>
                   </time>
                 </h3>
-                {compact && (
+                {/* A note shows its response only when the reader chose one. */}
+                {compact && note.stance !== 'unspecified' && (
                   <TopicChip
                     className={`revisit-stance revisit-stance--${note.stance}`}
                     tone={

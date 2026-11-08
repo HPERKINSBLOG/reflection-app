@@ -75,8 +75,7 @@
   line-height: 1.25rem;
 }
 
-.revisit-notes--return .revisit-stance--unsure,
-.revisit-notes--return .revisit-stance--unspecified {
+.revisit-notes--return .revisit-stance--unsure {
   background: color-mix(in srgb, var(--reflection-sage) 26%, var(--reflection-paper));
 }
 

@@ -5,7 +5,7 @@ import { Button } from './design/components.tsx';
 import { Art } from './art.tsx';
 import { Icon } from './icon.tsx';
 import { Notice } from './notice.tsx';
-import { date } from './date.ts';
+import { sameDay, shortDate } from './date.ts';
 import './astrology/astrology.css';
 export type JournalMethod = 'all' | 'tarot' | 'astrology' | 'imported';
 type History = z.infer<typeof apiSchemas.HistoryPage>;
@@ -109,33 +109,49 @@ export function Journal({
           )}
           {history && history.items.length > 0 && (
             <ol className="reading-history journal-entries">
-              {history.items.map((item) => (
-                <li key={item.id} className="journal-entry">
-                  <p className="eyebrow">{labels[item.method]}</p>
-                  <Button
-                    type="button"
-                    variant="text-button"
-                    className="history-link"
-                    id={`saved-reading-${item.id}`}
-                    disabled={busy}
-                    onClick={() => onOpen(item.id)}
-                  >
-                    <span>
-                      {item.questionPreview ?? 'Saved reading'}
-                      {item.imported && <small> · Imported reading</small>}
-                    </span>
-                  </Button>
-                  <p className="field-hint">
-                    Started <time dateTime={item.createdAt}>{date(item.createdAt)}</time>
-                    {item.savedAt && (
-                      <>
-                        {' '}
-                        · Saved <time dateTime={item.savedAt}>{date(item.savedAt)}</time>
-                      </>
+              {history.items.map((item) => {
+                const id = `saved-reading-${item.id}`;
+                return (
+                  <li key={item.id} className="journal-entry">
+                    <p className="eyebrow" id={`${id}-kind`}>
+                      {labels[item.method]}
+                    </p>
+                    <Button
+                      type="button"
+                      variant="text-button"
+                      className="history-link"
+                      id={id}
+                      aria-describedby={`${id}-kind${item.reflectionPreview ? ` ${id}-words` : ''} ${id}-history`}
+                      disabled={busy}
+                      onClick={() => onOpen(item.id)}
+                    >
+                      <span>{item.questionPreview ?? 'Saved reading'}</span>
+                    </Button>
+                    {item.reflectionPreview && (
+                      <p className="journal-excerpt" id={`${id}-words`}>
+                        {item.reflectionPreview}
+                        {item.reflectionTruncated && '…'}
+                      </p>
                     )}
-                  </p>
-                </li>
-              ))}
+                    <p className="journal-history" id={`${id}-history`}>
+                      Started <time dateTime={item.createdAt}>{shortDate(item.createdAt)}</time>
+                      {!sameDay(item.createdAt, item.lastActivityAt) && (
+                        <>
+                          {' '}
+                          · Added to{' '}
+                          <time dateTime={item.lastActivityAt}>
+                            {shortDate(item.lastActivityAt)}
+                          </time>
+                        </>
+                      )}
+                      {item.followUps > 0 &&
+                        ` · ${item.followUps} follow-up${item.followUps === 1 ? '' : 's'}`}
+                      {item.revisits > 0 &&
+                        ` · ${item.revisits} revisit note${item.revisits === 1 ? '' : 's'}`}
+                    </p>
+                  </li>
+                );
+              })}
             </ol>
           )}
           {history?.nextCursor && !failed && (

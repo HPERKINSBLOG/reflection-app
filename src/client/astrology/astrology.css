@@ -105,27 +105,47 @@
 .journal-entry .eyebrow {
   color: var(--reflection-link);
 }
+/* The question is the entry's title: Ink serif, underlined only while pointed at or focused. */
 .journal-entry .history-link {
   justify-content: flex-start;
   padding: 0;
+  color: var(--foreground);
   font-family: var(--font-serif);
   font-size: 28px;
   font-weight: 500;
   line-height: 1.22;
   border: 0;
   background: none;
-  text-decoration: underline;
+  text-decoration: none;
   text-decoration-thickness: 1px;
   text-underline-offset: 5px;
   text-align: left;
   white-space: normal;
   overflow-wrap: anywhere;
 }
-.journal-entry .history-link small {
-  font: 14px / 1.4 var(--font-sans);
+.journal-entry .history-link:hover:enabled,
+.journal-entry .history-link:active:enabled,
+.journal-entry .history-link:focus-visible {
+  color: var(--foreground);
+  background: none;
+  text-decoration: underline;
 }
-/* Keep "Started … · Saved …" on one line; the older history rows stack their date. */
-.journal-entry .field-hint time {
+.journal-entry .history-link:disabled {
+  color: var(--action-disabled-label);
+}
+/* The reader's own words, then the entry's short history. */
+.journal-entry .journal-excerpt {
+  margin: 0;
+  font-size: 16px;
+  line-height: 24px;
+  overflow-wrap: anywhere;
+}
+.journal-entry .journal-history {
+  margin: 0;
+  font-size: 12px;
+  line-height: 18px;
+}
+.journal-entry .journal-history time {
   display: inline;
   color: inherit;
   font-size: inherit;
@@ -180,9 +200,10 @@
   font-size: 20px;
   line-height: 1.5;
 }
+/* 1328 px of content inside 20 px of padding: the side-panel grid's 848 + 48 + 432 px. */
 @media (min-width: 1100px) {
   .readings-page:has(.journal, .reading-detail-pattern, .pattern-workspace) {
-    max-width: 1440px;
+    max-width: 1368px;
   }
 }
 @media (max-width: 760px) {
@@ -219,7 +240,7 @@
   gap: 8px;
 }
 .site-header .shell-width:has(#workspace-navigation) {
-  max-width: 1440px;
+  max-width: 1368px;
   gap: 24px;
 }
 .readings-page .workspace-title {

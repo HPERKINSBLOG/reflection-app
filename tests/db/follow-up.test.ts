@@ -131,6 +131,12 @@ test('an original and two generations share one save and one erase, preserving u
   expect(second.status.state).toBe('published');
   const ids = [id, first.status.editionId!, second.status.editionId!];
   expect(new Set([f.started.sessionId, first.sessionId, second.sessionId]).size).toBe(1);
+  // The journal row counts both follow-ups, including the follow-up to a follow-up.
+  expect(
+    (await new ReadingRecords(f.base).history(f.session)).items.find(
+      (item) => item.id === f.started.sessionId,
+    ),
+  ).toMatchObject({ followUps: 2, revisits: 0 });
   expect(
     await env.DB.prepare('SELECT count(*) n FROM basis_snapshots WHERE session_id=?')
       .bind(f.started.sessionId)

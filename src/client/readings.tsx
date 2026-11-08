@@ -1710,7 +1710,8 @@ export function ReadingWorkspace({
                         ? 'On this follow-up ·'
                         : 'On this reading ·'
                       : 'Saved'}{' '}
-                    {date(reflection.updatedAt)} · {stanceLabels[reflection.stance]}
+                    {date(reflection.updatedAt)}
+                    {reflection.stance !== 'unspecified' && ` · ${stanceLabels[reflection.stance]}`}
                   </p>
                   <p className="saved-reflection-text">{reflection.text}</p>
                 </div>

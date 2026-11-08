@@ -178,6 +178,52 @@ test('art sits under a header control only where the control paints an opaque pa
       'landing-rose under text "Sign in"',
     ]),
   );
+  // An opaque fill helps only if the control paints above the art. Raised above the header,
+  // the rose would cover both controls while clicks still reach them, and the check reports it.
+  await page.locator('.header-tools').evaluate((tools: HTMLElement) => {
+    tools.style.opacity = '';
+  });
+  expect(await artUnderContent(page)).toEqual([]);
+  await page.locator('img.landing-rose').evaluate((rose: HTMLElement) => {
+    rose.style.zIndex = '2';
+  });
+  expect(await artUnderContent(page)).toEqual(
+    expect.arrayContaining([
+      expect.stringMatching(/^landing-rose under select /),
+      'landing-rose under a "Sign in"',
+      'landing-rose under text "Sign in"',
+    ]),
+  );
+});
+
+test('while recovery is pending, the header Sign in link shows that it is unavailable', async ({
+  page,
+}) => {
+  let release!: () => void;
+  const held = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  await page.route('**/api/v1/auth/recover', async (route) => {
+    await held;
+    await route.abort('failed');
+  });
+  await page.goto('/recover');
+  const link = headerSignIn(page);
+  await expect(link).toBeVisible();
+  await expect(link).not.toHaveAttribute('aria-disabled');
+  await page.getByLabel('Recovery handle').fill('synthetic-handle');
+  await page.getByLabel('Unused recovery code').fill('synthetic-code');
+  await page.getByRole('button', { name: 'Verify recovery kit', exact: true }).click();
+  // The request is pending: the link says so, looks dimmed and takes no pointer.
+  await expect(link).toHaveAttribute('aria-disabled', 'true');
+  await expect(link).toHaveCSS('opacity', '0.5');
+  await expect(link).toHaveCSS('pointer-events', 'none');
+  // Once the request settles, the link works again.
+  release();
+  await expect(link).not.toHaveAttribute('aria-disabled');
+  await link.click();
+  await expect(page).toHaveURL('http://localhost:8787/sign-in');
+  await expect(signInHeading(page)).toBeFocused();
 });
 
 test('the lead and the closing line fit on one line at 768 and 1280 px and never end on a lone word', async ({

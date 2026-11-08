@@ -1,5 +1,12 @@
 import { z } from 'zod';
-import { apiSchemas, Reading, Id, ImportUnit, UnavailableReading } from '../../contracts/index.ts';
+import {
+  apiSchemas,
+  Reading,
+  Reflection,
+  Id,
+  ImportUnit,
+  UnavailableReading,
+} from '../../contracts/index.ts';
 import type { Session } from '../identity/types.ts';
 import { assertion } from '../identity/checkpoint.ts';
 import { statement as q, DB_NOW } from '../db/core.ts';
@@ -12,6 +19,22 @@ import {
   unavailableNativeImport,
 } from './import-availability.ts';
 export const Question = z.strictObject({ v: z.literal(1), text: z.string().max(10000).nullable() });
+/** The longest whole-code-point prefix of `text` within `units` UTF-16 units. */
+function prefix(text: string, units: number) {
+  let preview = '';
+  for (const char of text) {
+    if (preview.length + char.length > units) break;
+    preview += char;
+  }
+  return { preview, truncated: text.length > preview.length };
+}
+type WritingRow = {
+  id: string;
+  session_id: string;
+  edition_id: string;
+  revision: number;
+  body_enc: string;
+};
 // Include the newest bounded request summaries in chronological display order.
 // Each request has its own independently paginated export receipt.
 export function recentRequestSummary(owner: string, family: string) {
@@ -32,6 +55,28 @@ export class ReadingRecords {
       row.question_enc,
       Question,
     );
+    return value.text;
+  }
+  /** The text of one current reflection revision, checked against the row that holds it. */
+  async writing(owner: string, row: WritingRow) {
+    const value = await this.base.opened<z.infer<typeof Reflection>>(
+      {
+        ownerId: owner,
+        table: 'reflection_revisions',
+        column: 'body_enc',
+        recordId: `${row.id}:${row.revision}`,
+        aadRevision: row.revision,
+      },
+      row.body_enc,
+      Reflection,
+    );
+    if (
+      value.id !== row.id ||
+      value.revision !== row.revision ||
+      value.editionId !== row.edition_id ||
+      value.sessionId !== row.session_id
+    )
+      throw new RecordError(503, 'KEY_UNAVAILABLE');
     return value.text;
   }
   async session(session: Session, id: string) {
@@ -234,7 +279,7 @@ export class ReadingRecords {
       : null;
     const rows = await q(
       this.base.db,
-      `SELECT s.*, EXISTS(SELECT 1 FROM reading_editions e WHERE e.owner_id=s.owner_id AND e.session_id=s.id AND e.mode='legacy') AS imported, (SELECT id FROM reading_editions WHERE owner_id=s.owner_id AND session_id=s.id AND status!='deleted' ORDER BY edition_number DESC LIMIT 1) AS edition_id, (SELECT id FROM generation_requests WHERE owner_id=s.owner_id AND session_id=s.id ORDER BY created_at DESC,id DESC LIMIT 1) AS request_id FROM reading_sessions s WHERE s.owner_id=? AND s.status=? AND ${availableSession}${method === 'all' ? '' : ' AND s.method=?'}${point ? ' AND (s.created_at<? OR (s.created_at=? AND s.id<?))' : ''} ORDER BY s.created_at DESC,s.id DESC LIMIT ?`,
+      `SELECT s.*, EXISTS(SELECT 1 FROM reading_editions e WHERE e.owner_id=s.owner_id AND e.session_id=s.id AND e.mode='legacy') AS imported, (SELECT id FROM reading_editions WHERE owner_id=s.owner_id AND session_id=s.id AND status!='deleted' ORDER BY edition_number DESC LIMIT 1) AS edition_id, (SELECT id FROM generation_requests WHERE owner_id=s.owner_id AND session_id=s.id ORDER BY created_at DESC,id DESC LIMIT 1) AS request_id, (SELECT count(*) FROM reading_editions f WHERE f.owner_id=s.owner_id AND f.session_id=s.id AND f.parent_edition_id IS NOT NULL AND f.status IN ('accepted','imported')) AS follow_ups, (SELECT count(*) FROM revisits n WHERE n.owner_id=s.owner_id AND n.session_id=s.id AND n.deleted_at IS NULL) AS revisit_count, max(s.created_at, coalesce((SELECT max(e.accepted_at) FROM reading_editions e WHERE e.owner_id=s.owner_id AND e.session_id=s.id AND e.status IN ('accepted','imported')),0), coalesce((SELECT max(v.created_at) FROM reflections r JOIN reflection_revisions v ON v.owner_id=r.owner_id AND v.reflection_id=r.id AND v.revision=r.current_revision WHERE r.owner_id=s.owner_id AND r.session_id=s.id AND r.deleted_at IS NULL),0), coalesce((SELECT max(n.updated_at) FROM revisits n WHERE n.owner_id=s.owner_id AND n.session_id=s.id AND n.deleted_at IS NULL),0)) AS last_activity FROM reading_sessions s WHERE s.owner_id=? AND s.status=? AND ${availableSession}${method === 'all' ? '' : ' AND s.method=?'}${point ? ' AND (s.created_at<? OR (s.created_at=? AND s.id<?))' : ''} ORDER BY s.created_at DESC,s.id DESC LIMIT ?`,
       session.subjectId,
       status,
       ...(method === 'all' ? [] : [method]),
@@ -246,27 +291,49 @@ export class ReadingRecords {
         edition_id: string | null;
         request_id: string | null;
         imported: number;
+        follow_ups: number;
+        revisit_count: number;
+        last_activity: number;
       }
     >();
+    const page = rows.results.slice(0, limit);
+    // The reader's own words on each original edition: its current, unerased reflection.
+    const writings = new Map<string, WritingRow>();
+    if (page.length) {
+      const found = await q(
+        this.base.db,
+        `SELECT r.id,r.session_id,r.edition_id,v.revision,v.body_enc FROM reflections r JOIN reading_editions e ON e.owner_id=r.owner_id AND e.id=r.edition_id AND e.session_id=r.session_id AND e.edition_number=1 JOIN reflection_revisions v ON v.owner_id=r.owner_id AND v.reflection_id=r.id AND v.revision=r.current_revision WHERE r.owner_id=? AND r.session_id IN (${page.map(() => '?').join(',')}) AND r.deleted_at IS NULL AND v.erased_at IS NULL AND v.body_enc IS NOT NULL ORDER BY v.created_at DESC,r.id`,
+        session.subjectId,
+        ...page.map((row) => row.id),
+      ).all<WritingRow>();
+      for (const writing of found.results)
+        if (!writings.has(writing.session_id)) writings.set(writing.session_id, writing);
+    }
     const items = [];
-    for (const row of rows.results.slice(0, limit)) {
+    for (const row of page) {
       const question = await this.question(session.subjectId, row);
-      let preview = '';
-      for (const char of question ?? '') {
-        if (preview.length + char.length > 500) break;
-        preview += char;
-      }
+      const asked = prefix(question ?? '', 500);
+      // A pending import keeps its question back, so it keeps the reflection back too.
+      const writing = writings.get(row.id);
+      const text =
+        question !== null && writing ? await this.writing(session.subjectId, writing) : '';
+      const excerpt = text.trim() ? prefix(text, 280) : null;
       items.push({
         id: row.id,
         method: row.method,
         revision: row.revision,
-        questionPreview: question === null ? null : preview,
-        questionTruncated: question !== null && question.length > preview.length,
+        questionPreview: question === null ? null : asked.preview,
+        questionTruncated: question !== null && asked.truncated,
         createdAt: iso(row.created_at),
         savedAt: row.saved_at === null ? null : iso(row.saved_at),
         latestEditionId: row.edition_id,
         requestId: row.request_id,
         imported: !!row.imported,
+        reflectionPreview: excerpt?.preview ?? null,
+        reflectionTruncated: excerpt?.truncated ?? false,
+        followUps: row.follow_ups,
+        revisits: row.revisit_count,
+        lastActivityAt: iso(row.last_activity),
       });
     }
     const last = rows.results[limit - 1];

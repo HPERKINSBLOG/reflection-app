@@ -904,6 +904,13 @@ export const HistoryItem = z.strictObject({
   latestEditionId: Id.nullable(),
   requestId: Id.nullable(),
   imported: z.boolean(),
+  /** The reader's current reflection on the original edition, cut like the question. */
+  reflectionPreview: z.string().max(280).nullable(),
+  reflectionTruncated: z.boolean(),
+  followUps: z.number().int().min(0),
+  revisits: z.number().int().min(0),
+  /** The newest of the start, an edition, a reflection revision or a revisit note. */
+  lastActivityAt: Instant,
 });
 export const HistoryPage = z.strictObject({
   items: z.array(HistoryItem).max(50),

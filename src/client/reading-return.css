@@ -122,7 +122,7 @@
 }
 @media (min-width: 1100px) {
   .readings-page:has(.reading-detail-native) {
-    max-width: 1344px;
+    max-width: 1368px;
   }
   .reading-detail.reading-detail-native {
     display: grid;
@@ -150,10 +150,10 @@
 
 /* The return layout is scoped to native tarot editions. */
 .readings-page:has(.reading-return) {
-  max-width: 1440px;
+  max-width: 1368px;
 }
 .app-shell:has(.reading-return) .site-header .shell-width {
-  max-width: 1440px;
+  max-width: 1368px;
 }
 .reading-detail.reading-return {
   display: grid;
@@ -365,7 +365,8 @@
   white-space: pre-wrap;
   overflow-wrap: anywhere;
 }
-.return-card-line .orientation {
+.return-card-line .orientation,
+.follow-up-basis .draw-term {
   text-transform: capitalize;
 }
 .return-unit-prompt {

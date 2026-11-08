@@ -13,7 +13,7 @@ import { Button, Input } from '../design/components.tsx';
 import { Art } from '../art.tsx';
 import { Notice } from '../notice.tsx';
 import { useAstrologyAction } from './use-action.ts';
-import { timeLabel } from './chart-context.tsx';
+import { civilDateLabel, timeLabel } from './chart-context.tsx';
 export interface BirthDetailsHandle {
   hasUnsavedChanges(): boolean;
   isBusy(): boolean;
@@ -188,7 +188,7 @@ export function BirthDetails({
                 <>
                   <p>
                     {changed.profile
-                      ? `${changed.profile.birth.date} · ${changed.profile.birth.place.label} · ${timeLabel(changed.profile.birth)}`
+                      ? `${civilDateLabel(changed.profile.birth.date)} · ${changed.profile.birth.place.label} · ${timeLabel(changed.profile.birth)}`
                       : 'The current profile was removed.'}
                   </p>
                   <Button
@@ -228,7 +228,7 @@ export function BirthDetails({
             <div className="birth-review">
               <dl>
                 <dt>Birth date</dt>
-                <dd>{review.date}</dd>
+                <dd>{civilDateLabel(review.date)}</dd>
                 <dt>Birthplace</dt>
                 <dd>
                   {review.place.label}

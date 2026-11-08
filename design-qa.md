@@ -1,5 +1,61 @@
 # Reflection design QA
 
+## November 7 — Journal rows and Account's header
+
+- **Journal rows.** Each entry now follows Figma's journal (`51:1608`): its kind in eyebrow capitals, the question as an Ink serif title that underlines only on hover and focus, an excerpt of the reader's current reflection on the original reading, and a short history such as “Started Nov 7 · Added to Nov 9 · 1 follow-up · 2 revisit notes”. The list API gained `reflectionPreview`, `reflectionTruncated`, `followUps`, `revisits` and `lastActivityAt` ([`journal-rows.test.ts`](tests/db/journal-rows.test.ts); the follow-up test also counts a follow-up to a follow-up). The excerpt is cut like the question, within 280 UTF-16 units, and stays empty while an imported question is pending. The question's button is described by its label, excerpt and history for screen readers.
+- **Account header.** Account now shows Astrology, Tarot and Journal in the shared 1328 px header, so the wordmark no longer moves from x 56 to x 270 when it opens. None of the three is current there, and Tarot stays unavailable while AI readings are off. The settings keep their 940 px column.
+
+Not changed: journal search, standalone notes and date controls, which need product work; and the phone navigation row, which stays visible by choice (Figma's phone header should be updated to match it).
+
+Verification on Windows with Node 24.15:
+
+- `npm run typecheck` passes. After `npm run schemas`, `check:schemas`, `check:contracts`, `check:openapi` and the import reference checks pass.
+- `npx biome check .` reports 10 warnings and no errors. The baseline was 12; two belonged to the journal row rules this change replaced.
+- `npm run test:domain`: 69 files, 552 tests passed.
+- `npm run test:db`: 74 files, 683 tests passed, including the new journal-row test.
+- `npm run test:browser` (Chromium): 206 passed and 1 skipped in 13.4 minutes. The skipped test is the design-screens capture, which runs only when `REFLECTION_SCREENS` is set. The run rewrites `artifacts/browser-tests.json` and three `artifacts/your-pattern` captures; those were put back.
+
+Verification on Windows with Node 26.12.1, on November 8 at `f8f533a`, before this work was committed to PR #15:
+
+- `npm run typecheck`, `check:schemas`, `check:contracts` (which runs the import reference checks) and `check:openapi` pass.
+- `npx biome check .` reports the same 10 warnings and no errors. Run from the main checkout it stops on the nested `.claude/worktrees/tarot-steps/biome.json`, so it ran on a clean copy of `f8f533a`.
+- `npm run test:domain`: 69 files, 552 tests passed.
+- `npm run test:db`: 74 files, 683 tests passed.
+- `npm run test:browser`: 206 passed and 1 skipped in 13.2 minutes. The skipped test is the screens capture.
+
+This run did not run `npm run test:journey`.
+
+## November 7 — Figma's shared details
+
+A [screen-by-screen comparison with Figma](https://claude.ai/artifact/71KHMG7qS8XaufxWmW9q8y) found the same small differences on most screens, while the design tokens already matched. This pass closes those shared differences. The structural ones remain.
+
+- **Header.** Every page except Account now uses one header row: 1328 px inside 20 px of padding, so the wordmark and controls sit 56 px from the edges at 1440 px, as in Figma's global header (`301:6839`). From 768 px the header is 76 px tall, a 75 px row over its rule, which puts the welcome headline at y = 148 as in the November 7 frame (`333:6`). The rule is full strength, Ink on Paper and Mint on Evening, instead of Ink at 25%. The theme select takes the same outline and, from 768 px, a 16 px label at weight 500. Header links are 16 px, and the last link's text ends on the gutter line. Phones keep the 69 px header that fits one row at 320 px.
+- **Page width.** The journal, Your Pattern, birth details, saved chapters, readings and import review stop at 1328 px of content. At 1440 px the side panel now sits 48 px from the main column (x 952–1384), as in Figma, instead of about 124 px.
+- **Eyebrows.** `.eyebrow` had no style of its own. It now uses the 12/18 Outfit capitals with 0.14em tracking that “Reflection positions” already used, on the journal, birth details, Your Pattern, saved chapters, imported readings and import review.
+- **Details.** Topic chips keep their own width, so “Astrology · Your Pattern” no longer stretches into a bar. The saved chapter's label and the follow-up's draw list are capitalized. Birth details read “12 October 1992”, “8:30 AM” and “8:00–10:00 AM” ([`chart-context.test.ts`](tests/domain/chart-context.test.ts)). A revisit note or reflection shows its response only when the reader chose one. Account's heading column is 176 px wide, so “Password sign-in” fits on one line.
+
+Not changed: the phone header's menu button, Account's own 940 px header column, and the structural differences in the tarot flow and the journal list. Before and after captures are in the git-ignored `artifacts/figma-compare/` folder. The captures in [`docs/design/screens/2026-11-06-mend/`](docs/design/screens/2026-11-06-mend/) predate this pass.
+
+Verification on Windows with Node 24.15, since Node 26.12.1 was not installed in this session:
+
+- `npm run typecheck` passes.
+- `npx biome check .` reports the 12 baseline warnings and no errors.
+- `npm run test:domain`: 69 files, 552 tests passed, including the two new date and time tests.
+- `npm run test:browser`: 206 passed and 1 skipped in 14.1 minutes. The skipped test is the screens capture, which runs only when `REFLECTION_SCREENS` is set.
+- A capture of 36 states at 1440 and 390 px in Chromium confirmed the header (wordmark at x 56, a full Ink rule at y 75), the panel position and each detail fix.
+
+Not run: `npm run test:db`, since no server code changed, and `npm run test:journey`. Firefox and WebKit, physical devices and screen readers are not covered.
+
+Verification on Windows with Node 26.12.1, at `5da0483`, including `npm run test:db`, which the Node 24.15 run above skipped:
+
+- `npm run typecheck` passes.
+- `npx biome check .` reports the 12 baseline warnings and no errors.
+- `npm run test:domain`: 69 files, 552 tests passed.
+- `npm run test:db`: 73 files, 682 tests passed.
+- `npm run test:browser`: 206 passed and 1 skipped in 13.2 minutes. The skipped test is the screens capture.
+
+This run did not repeat the 36-state capture or run `npm run test:journey`.
+
 ## November 7 — Polish: the rose, line breaks, plates and a header sign-in link
 
 This follow-up to the November 6 pass fixes four things on the signed-out pages.
@@ -23,6 +79,8 @@ Verification on Windows with Node 26.12.1, at `6ef0aef`:
 - `npm run test:journey`: 41 passed, 17 in Chromium, 13 in Firefox and 11 in WebKit, with none skipped or flaky. This is the run the November 6 pass stopped before it finished.
 
 `e2430d3` went to the development preview on November 7 as version `673ac8fb`. Health, direct loads of `/` and `/sign-in`, and all 35 public assets checked out, and the rose, plates and leaf band load at 390 and 1280 px in light and dark. [Deployment receipt](artifacts/preview-deploy/deployment.json).
+
+After review on #14, two fixes followed the deploy. While a recovery request is pending, the header “Sign in” takes `aria-disabled`, dims and ignores the pointer, as “Back to readings” does. `artUnderContent` now skips an opaque control only where a hit test shows it painting above the image, and the leaf band gets no exception; a test raises the rose above the header and expects both controls to be reported. At `7c5d06e`: typecheck passes; Biome reports the same 12 warnings; `test:domain` 68 files, 550 tests passed; `test:db` 73 files, 682 tests passed; `test:browser` 206 passed and 1 skipped; `test:journey` 41 passed, 17 in Chromium, 13 in Firefox and 11 in WebKit. The preview still runs `e2430d3`, without these two fixes.
 
 Not covered: physical devices and screen readers; signed-in flows on the hosted preview.
 
