@@ -1352,9 +1352,6 @@ main {
 .account-settings {
   max-width: 940px;
 }
-.app-shell.account-shell .site-header .shell-width {
-  max-width: 940px;
-}
 .account-settings .page-title {
   position: relative;
   align-items: flex-start;

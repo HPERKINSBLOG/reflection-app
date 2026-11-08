@@ -471,6 +471,10 @@ export function IdentityApp() {
     event.preventDefault();
     if (!inFlight.current) show(readingsPath);
   };
+  /** The Account header's navigation opens the readings at one destination. */
+  const openReadingsAt = (path: string) => {
+    if (!inFlight.current) show(path);
+  };
   const permission = () =>
     void run(async (isCurrent) => {
       if (!session) return;
@@ -580,8 +584,32 @@ export function IdentityApp() {
     <header className="site-header">
       <div className="shell-width">
         <Brand />
-        {session && !kit && !grant && !accountPage && (
-          <div id="workspace-navigation" inert={checking || busy} />
+        {session && !kit && !grant && (
+          <div id="workspace-navigation" inert={checking || busy}>
+            {/* The readings portal their own navigation here. Account, which closes them,
+                shows the same three destinations so the header stays the same everywhere. */}
+            {accountPage && (
+              <nav className="reading-navigation" aria-label="Reading actions">
+                <Button
+                  variant="text-button"
+                  disabled={busy}
+                  onClick={() => openReadingsAt('/astrology/pattern')}
+                >
+                  Astrology
+                </Button>
+                <Button
+                  variant="text-button"
+                  disabled={busy || !session.permission.modelAllowed || live === null}
+                  onClick={() => openReadingsAt('/new')}
+                >
+                  Tarot
+                </Button>
+                <Button variant="text-button" disabled={busy} onClick={() => openReadingsAt('/')}>
+                  Journal
+                </Button>
+              </nav>
+            )}
+          </div>
         )}
         <div className="header-tools">
           <ThemeSelect />
