@@ -97,9 +97,9 @@ An ordered list labelled "Reading steps": **01 Question / 02 Spread / 03 Cards /
 ### 5. Cards (Figma 73:3521)
 
 - **When it appears.** **My call**, corrected after the builder check. The request screen's acceptance callback can't decide this on its own. Readings live at `/requests/{requestId}`: `open()` replaces or pushes that address, including from the journal. Any arrival at that address mounts `RequestProgress`, which calls `onAccepted` as soon as it sees `published`. Arrivals include a reload, a shared link, signing in to a link, Back and Forward, the trip back from Account, and the Journal's "Resume reading request" button, which stays visible after acceptance.
-  - Cards appears only when the person was **waiting for this reading in this tab**: they clicked Start reading, or they came back to its request screen in this tab (Resume reading request, or back from Account) while it was still in progress.
+  - Cards appears only when the person was **waiting for this reading in this tab**: they clicked Start reading, or they came back to its request screen in this tab (Resume reading request, or back from Account) while it was still in progress or after leaving it in progress.
   - The accepted reading must also be an original draw, with no parent edition.
-  - It never appears after a page load (reload, link, sign-in), when the reading had already published before the person came back, or for a follow-up.
+  - It never appears after a page load (reload, link, sign-in), for a reading that had already published when the person first came to it in this tab, or for a follow-up. **Ruling at review:** a reading that finishes while the person is elsewhere in the tab (Account, the journal, another reading) still shows its Cards when they return, because they have not seen them yet.
   - The waiting mark lives in workspace memory only. It is cleared once Cards has been shown or the reading opens without it, and it is never persisted.
 - **Address: no change.** The Cards step and the reading after it stay at the address the reading gets today on acceptance (`/requests/{requestId}`). A reload on the Cards step opens the reading directly, because it is a page load.
 - Eyebrow "Your three cards". Heading "Take a moment with the spread.". Lead "Each position offers a different way into your question."
@@ -170,6 +170,6 @@ The desktop layout follows the Figma frames: content on the left, side panel on 
 6. The photo is its own step, and "Use an app draw instead" keeps the photo unsent.
 7. Steps share `/new`. Browser Back leaves the composer as today.
 8. Locked disclosure copy and today's "Readings left" wording are kept over Figma's wording.
-9. Cards appears only when the person was waiting for the reading in this tab: they clicked Start, or came back to its request screen in this tab while it was still in progress. It never appears after a page load, for a reading that had already published, or for a follow-up.
+9. Cards appears only when the person was waiting for the reading in this tab: they clicked Start, or came back to its request screen in this tab while it was still in progress or after leaving it in progress. It never appears after a page load, for a reading that had already published when the person first came to it, or for a follow-up.
 10. The reading keeps today's address (`/requests/{requestId}`). The Cards step adds no URL.
 11. The branch is stacked on `design/mend-polish`, in its own worktree.
