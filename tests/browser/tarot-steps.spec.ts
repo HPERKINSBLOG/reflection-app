@@ -526,6 +526,38 @@ test('a new reading shows its three cards before the interpretation', async ({ p
   }
 });
 
+test('the three cards keep one row from left to right on phones, and stack below 360 px', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await account(page, '198.51.100.24');
+  await enableAi(page);
+  await openTarot(page);
+  await toReview(page, 'Where is there room to begin?');
+  await startFromReview(page);
+  await expect(cardsHeading(page)).toBeFocused();
+  const boxes = () =>
+    page.getByRole('figure').evaluateAll((figures) =>
+      figures.map((figure) => {
+        const box = figure.getBoundingClientRect();
+        return { x: Math.round(box.x), y: Math.round(box.y) };
+      }),
+    );
+  const row = await boxes();
+  expect(
+    row.map((box) => box.y),
+    'one row at 390 px',
+  ).toEqual([row[0]!.y, row[0]!.y, row[0]!.y]);
+  expect(row[0]!.x < row[1]!.x && row[1]!.x < row[2]!.x, 'position order left to right').toBe(true);
+  await page.setViewportSize({ width: 320, height: 844 });
+  const stack = await boxes();
+  expect(stack[0]!.y < stack[1]!.y && stack[1]!.y < stack[2]!.y, 'stacked at 320 px').toBe(true);
+  expect(
+    stack.map((box) => box.x),
+    'one column at 320 px',
+  ).toEqual([stack[0]!.x, stack[0]!.x, stack[0]!.x]);
+});
+
 test('reloading or reopening a reading goes straight to the interpretation', async ({ page }) => {
   await account(page, '198.51.100.23');
   await reading(page, 'What will I come back to?');

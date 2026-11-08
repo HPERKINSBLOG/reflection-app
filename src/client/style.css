@@ -2037,11 +2037,18 @@ button.spread-option {
   font-size: 20px;
   line-height: 1.3;
 }
+/* One row, left to right, as the spread is laid out. From 360 px each face is
+   at least the 88 px the reading uses on phones; below that they stack. */
 .tarot-cards {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 140px), 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 16px;
   margin: 24px 0 12px;
+}
+@media (max-width: 359px) {
+  .tarot-cards {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 .tarot-card {
   display: flex;
